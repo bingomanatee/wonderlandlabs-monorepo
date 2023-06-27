@@ -85,15 +85,6 @@ export class ResourceObj implements Resource {
     return this._resource
   }
 
-  private _promise: boolean = false;
-  get pending() {
-    if (this._promise) return true;
-    if (!this.config.deps?.length) {
-      return false;
-    }
-    return this.type === 'comp' && this.config.async && !this.computed;
-  }
-
   set resource(value: any) {
     if (this.isFinal && this.added) {
       throw new Error('cannot change resource ' + this.name);
@@ -128,6 +119,16 @@ export class ResourceObj implements Resource {
     }
   }
 
+  private _promise = false;
+  get pending() {
+    if (this._promise) return true;
+    if (!this.config.deps?.length) {
+      return false;
+    }
+    return this.type === 'comp' && this.config.async && !this.computed;
+  }
+
+
   private added?: number;
   private computed = false;
   private __value: any = undefined;
@@ -147,11 +148,11 @@ export class ResourceObj implements Resource {
     return this.config.type;
   }
 
-  private get isFinal(): boolean {
+  private get isFinal() {
     return !!this.config.final;
   }
 
-  private get isComputeOnce(): boolean {
+  private get isComputeOnce() {
     return !!this.config.computeOnce;
   }
 

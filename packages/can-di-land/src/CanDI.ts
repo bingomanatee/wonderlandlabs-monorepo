@@ -102,7 +102,7 @@ export class CanDI {
     return !this.registry.get(name)!.pending;
   }
 
-  public when(deps: ResourceKey | ResourceKey[], maxTime: number = 0) {
+  public when(deps: ResourceKey | ResourceKey[], maxTime = 0) {
     if ((typeof maxTime !== 'undefined') && maxTime >= 0) {
       return this.observe(deps)
         .pipe(

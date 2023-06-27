@@ -17,9 +17,9 @@ export declare class ResourceObj implements Resource {
     get hasDeps(): boolean;
     private _resource;
     get resource(): any;
+    set resource(value: any);
     private _promise;
     get pending(): boolean | undefined;
-    set resource(value: any);
     private added?;
     private computed;
     private __value;

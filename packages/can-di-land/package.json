@@ -13,6 +13,7 @@
   "files": [
     "lib/**/*"
   ],
+  "homepage": "https://github.com/bingomanatee/wonderlandlabs-monorepo/tree/main/packages/can-di-land",
   "scripts": {
     "build": "tsc",
     "uglify": "node ./uglify.js",

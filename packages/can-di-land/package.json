@@ -1,0 +1,30 @@
+{
+  "name": "@wonderlandlabs/can-di-land",
+  "version": "0.0.1",
+  "description": "A DI tool for managing dynamic dependencies",
+  "main": "lib/index.ts",
+  "types": "lib/index.d.ts",
+  "author": "David Edelhart",
+  "license": "MIT",
+  "private": false,
+  "dependencies": {
+    "rxjs": "^7.8.1"
+  },
+  "files": [
+    "lib/**/*"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "uglify": "node ./uglify.js",
+    "format": "prettier --write \"src/**/*.(js|ts)\"",
+    "lint": "eslint src --ext .js,.ts",
+    "lint:fix": "eslint src --fix --ext .js,.ts",
+    "test": "jest --config jest.config.js",
+    "bt": "tsc; jest --config jest.config.js",
+    "prepare": "npm run build; npm run uglify",
+    "prepublishOnly": "npm test && npm run lint",
+    "preversion": "npm run lint",
+    "version": "npm run && git add -A src",
+    "postversion": "git push && git push --tags"
+  }
+}

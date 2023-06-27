@@ -1,0 +1,1 @@
+export { CanDI } from './CanDI'

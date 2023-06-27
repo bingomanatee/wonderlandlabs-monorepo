@@ -1,4 +1,4 @@
-# Can-di-land
+# [Can-di-land](https://www.npmjs.com/package/@wonderlandlabs/can-di-land)
 
 This module creates a registry of content that used dependency injection(di) rules
 to enforce dependency rules. Its purpose is to define systems with multiple -- potential nested -- 
@@ -118,7 +118,6 @@ Functions must be javascript Functions. Their dependencies, if any, are curried 
 Computed values are defined by a function that derives a value from their dependencies.
 The resource is in fact a "Factory" for the returned value.
 The factory computes based on the dependencies, and its value is updated every time a dependency changes.
-NOTE: 'comp' types are "lazy"; they only compute when their value is requested.
 
 ## Configurations
 

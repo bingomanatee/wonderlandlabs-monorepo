@@ -141,6 +141,8 @@ Here are the possible (optional) configurations you can pass in:
   met. \
   This is important if, for instance, your factory function produces a class instance that you then use deeply in your
   application.
+* `bind`: an instruction to bind comp/func methods to the can
+* 'meta': defines rhe resource as a function that produces a function (for comp/func types)
 * `async`: has a range of implications depending on the type
 * `type` (see above)  'func'| 'comp' | 'value' (string) :: default: 'value'
 * `deps`  any[]. default []; the other entries that must be resolved for this entry to be considered resolved.
@@ -327,3 +329,72 @@ as designed. Effectively, you switched guns while it was still in the holster.
 
 To prevent this edge case, it's probably best to make your computeOnce `comp` entries final as well. 
 
+## binding and meta methods
+
+There are times when you want to bind a function that is the resource for 
+comp and func entries to the can; mainly, to let the function access methods, and generate other entries.
+
+To pull this off, a "classic" javascript function is necessary; you can't bind lambdas, and 
+depending on your compilers, you may have to use the 'meta' property: 
+
+```typescript
+
+const can = new CanDI([
+        {
+          name: 'meta',
+          value: () => (function () {
+            //@ts-ignore
+            (this as CanDI).set('foo', 'bar')
+          }),
+          config: {
+            type: 'comp',
+            bind: true,
+            meta: true,
+            computeOnce: true
+          }
+        }
+      ])
+```
+
+note - since meta is true and bind is true, internally, the function _that value outputs_
+is then bound to the can, which then, when called, sets another entry ('foo') to 'bar'. 
+
+If you want to bind your resource function to something _else_ you can set meta to true
+and omit bind; then, internally to the value meta-function, you can bind
+your factory function to whatever you want. 
+
+```typescript
+
+const point = { x: 100, y: 200 }
+
+const can = new CanDI([
+  {
+    name: 'meta',
+    value: () => (function () {
+      //@ts-ignore
+      return Math.round(Math.sqrt(this.x ** 2 + this.y ** 2))
+    }.bind(point)),
+    config: {
+      type: 'comp',
+      meta: true,
+      computeOnce: true
+    }
+  }
+]);
+
+console.log(can.value('meta');
+// 224
+```
+
+## sequence of function execution
+
+Sometimes it's very important to know _when_ a method is going to be called. 
+
+* any function that is set as a 'value' type will never get called by CanDI.
+* a 'comp' function with no dependencies will get called as soon as it is defined (with `set()`);
+* a 'comp' function with dependencies will get called as soon as its dependencies are resolved. 
+* a 'comp' function with dependencies that is not 'computeOnce' will get called as soon as its dependencies change. /
+  (once they are all resolved. )
+* a 'func' with 'meta' = true's _meta-function(value)_ will get called when it is created. /
+  However the returned function will never get directly called by can. 
+* a 'func' function that has no 'meta' flag will never get directly called by can. 

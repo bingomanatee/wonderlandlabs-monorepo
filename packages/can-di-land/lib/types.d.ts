@@ -7,6 +7,8 @@ export type ResConfig = {
     final?: boolean;
     computeOnce?: boolean;
     async?: boolean;
+    bind?: boolean;
+    meta?: boolean;
 };
 export type Resource = {
     resource: any;

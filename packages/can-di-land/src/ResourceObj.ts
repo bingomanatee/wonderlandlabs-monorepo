@@ -2,6 +2,7 @@ import { GenFunction, ResConfig, Resource, ResourceKey, ResourceType } from './t
 import { CanDI } from './CanDI'
 import { filter, first, firstValueFrom, from, Observable, of, Subscription, switchMap, Unsubscribable } from 'rxjs'
 
+type MetaFunction = () => GenFunction;
 /**
  * this is a value stored in the can's registry.
  * It is assumed that once set, this instance is never replaced --
@@ -22,7 +23,7 @@ export class ResourceObj implements Resource {
 
     this.resource = resource;
     if (this.type === 'func') {
-        this._value = this.calculator;
+      this._value = this.calculator;
     }
     if (this.type === 'comp') {
       this.listenForValue();
@@ -120,8 +121,11 @@ export class ResourceObj implements Resource {
   }
 
   private _promise = false;
+
   get pending() {
-    if (this._promise) return true;
+    if (this._promise) {
+      return true;
+    }
     if (!this.config.deps?.length) {
       return false;
     }
@@ -199,7 +203,9 @@ export class ResourceObj implements Resource {
   private get calculator(): GenFunction {
     return (...params: any[]) => {
       const allParams = [...this.deps, ...this.args, ...params];
-      return (this.resource as GenFunction)(...allParams);
+      let base : GenFunction | MetaFunction = this.config.meta ? this.resource() : this.resource;
+      const method: GenFunction = this.config.bind ? (base as MetaFunction).bind(this.can) : base;
+      return (method)(...allParams);
     }
   }
 

@@ -33,7 +33,7 @@ describe('CanDI', () => {
         return ({ x, y });
       };
 
-      function pointArray(x:number, y: number) {
+      function pointArray(x: number, y: number) {
         return [x, y];
       }
 
@@ -45,7 +45,7 @@ describe('CanDI', () => {
       const item = can.registry.get(Once2d)!;
 
       can.set('x', 100);
-      can.set('y', 200, {type: 'value'});
+      can.set('y', 200, { type: 'value' });
 
       expect(can.value('2dPoint')).toEqual({ x: 100, y: 200 });
       expect(can.value('2dPointFinal')).toEqual({ x: 100, y: 200 });
@@ -57,10 +57,10 @@ describe('CanDI', () => {
       expect(can.value('2dPointComputeOnce')).toEqual({ x: 100, y: 200 });
 
       can.set('2dPoint', pointArray);
-      expect(() => {  can.set('2dPointFinal', pointArray);}).toThrow();
-      console.log('---- setting pointArray to 2dPointComputeOnce')
+      expect(() => {
+        can.set('2dPointFinal', pointArray);
+      }).toThrow();
       can.set(Once2d, pointArray);
-      console.log('---- setting pointArray to', Once2d, can.registry.get(Once2d))
 
       can.set('y', 1000)
       expect(can.value('2dPoint')).toEqual([400, 1000]); // both the resource and the computed value change
@@ -73,6 +73,24 @@ describe('CanDI', () => {
       expect(can.value('2dPointComputeOnce')).toEqual({ x: 100, y: 200 }); // "computeOnce" is forever. The resource has changed but the value persists.
     });
 
-
+    describe('bind', () => {
+      it('binds and meta-s an entry', () => {
+        const can = new CanDI([
+          {
+            name: 'meta',
+            value: () => (function () {
+              //@ts-ignore
+              (this as CanDI).set('foo', 'bar')
+            }),
+            config: {
+              type: 'comp',
+              bind: true,
+              meta: true
+            }
+          }
+        ])
+        expect(can.value('foo')).toBe('bar')
+      });
+    });
   });
 });

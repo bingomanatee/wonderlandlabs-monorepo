@@ -142,39 +142,62 @@ describe('CanDI', () => {
   });
 
   describe('readme', () => {
-    it('first doc',  async () => {
+    it('first doc', async () => {
       const can = new CanDI();
-      can.set('foo', 100, {type: 'value'});
+      can.set('foo', 100, { type: 'value' });
       can.get('sum-of-foo-and-vey').then((value) => {
         console.log('the sum is ', value)
       });
       can.set('sum-of-foo-and-vey', (foo: number, vey: number) => {
         return foo + vey
-      }, {type: 'comp', deps: ['foo', 'vey']})
-      can.set('vey', -20, {type: 'value'});
+      }, { type: 'comp', deps: ['foo', 'vey'] })
+      can.set('vey', -20, { type: 'value' });
       can.set('vey', 300);
       setTimeout(() => {
         can.set('foo', 200);
       }, 50)
       await new Promise((done) => setTimeout(done, 100));
-        can.get('sum-of-foo-and-vey').then((value) => console.log('after 100 ms, the sum is ', value))
+      can.get('sum-of-foo-and-vey').then((value) => console.log('after 100 ms, the sum is ', value))
     });
+
+    it('meta example', () => {
+
+      const point = { x: 100, y: 200 }
+
+      const can = new CanDI([
+        {
+          name: 'meta',
+          value: () => (function () {
+            //@ts-ignore
+            return Math.round(Math.sqrt(this.x ** 2 + this.y ** 2))
+          }.bind(point)),
+          config: {
+            type: 'comp',
+            meta: true,
+            computeOnce: true
+          }
+        }
+      ]);
+
+      expect(can.value('meta')).toEqual(224)
+    })
   });
 
-  describe ('currying', () => {
-    function point3 (x: number, y: number, z: number) {
-      return ({x, y, z});
+  describe('currying', () => {
+    function point3(x: number, y: number, z: number) {
+      return ({ x, y, z });
     }
+
     it('uses the parameters when called', () => {
       const can = new CanDI();
       can.set('point', point3, 'func');
-      expect(can.value('point')!(1, 2, 3)).toEqual({x: 1, y: 2, z: 3})
+      expect(can.value('point')!(1, 2, 3)).toEqual({ x: 1, y: 2, z: 3 })
     });
 
     it('accepts an arg preset from config', () => {
       const can = new CanDI();
       can.set('pointA', point3, { type: 'func', args: [100] });
-      expect(can.value('pointA')!(1, 2, 3)).toEqual({x: 100, y: 1, z: 2})
+      expect(can.value('pointA')!(1, 2, 3)).toEqual({ x: 100, y: 1, z: 2 })
     })
 
 
@@ -182,7 +205,7 @@ describe('CanDI', () => {
       const can = new CanDI();
       can.set('pointPA', point3, { type: 'func', deps: ['x'], args: [100] });
       can.set('x', 200);
-      expect(can.value('pointPA')!(1, 2, 3)).toEqual({x: 200, y: 100, z: 1})
+      expect(can.value('pointPA')!(1, 2, 3)).toEqual({ x: 200, y: 100, z: 1 })
     })
 
   })

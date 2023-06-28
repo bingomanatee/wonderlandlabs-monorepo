@@ -10,7 +10,9 @@ export type ResConfig = {
   args?: any[],
   final?: boolean,
   computeOnce?: boolean,
-  async?: boolean
+  async?: boolean,
+  bind?: boolean,
+  meta?: boolean,
 }
 
 export type Resource = {

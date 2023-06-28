@@ -203,7 +203,7 @@ export class ResourceObj implements Resource {
   private get calculator(): GenFunction {
     return (...params: any[]) => {
       const allParams = [...this.deps, ...this.args, ...params];
-      let base : GenFunction | MetaFunction = this.config.meta ? this.resource() : this.resource;
+      const base : GenFunction | MetaFunction = this.config.meta ? this.resource() : this.resource;
       const method: GenFunction = this.config.bind ? (base as MetaFunction).bind(this.can) : base;
       return (method)(...allParams);
     }

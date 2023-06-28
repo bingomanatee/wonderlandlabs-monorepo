@@ -5,7 +5,7 @@
   "main": "index.js",
   "author": "davidedelhart",
   "license": "MIT",
-  "private": true,
+  "private": false,
   "workspaces": [
     "packages/*"
   ],

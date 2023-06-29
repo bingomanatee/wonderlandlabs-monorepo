@@ -107,15 +107,18 @@ export class CanDI {
       return this.observe(deps)
         .pipe(
           first(),
-          timeout(maxTime + 1),
+          timeout(maxTime + 1), // this is absent from clause below
           map((valueSet) => {
             return Array.isArray(deps) ? valueSet : valueSet[0]
           })
         )
     }
-    return this.observe(deps).pipe(first(), map((valueSet) => {
-      return Array.isArray(deps) ? valueSet : valueSet[0]
-    }));
+    return this.observe(deps).pipe(
+      first(),
+      map((valueSet) => {
+        return Array.isArray(deps) ? valueSet : valueSet[0]
+      })
+    );
   }
 
   observe(name: string | string[]): Observable<any[]> {

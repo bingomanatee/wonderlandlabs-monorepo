@@ -1,4 +1,4 @@
-import { filter, first, firstValueFrom, map, Observable, Subject, timeout } from 'rxjs'
+import { filter, first, firstValueFrom, map, merge, Observable, of, Subject, timeout } from 'rxjs'
 import { ResConfig, Resource, ResourceKey, ResourceType } from './types';
 import { ResourceObj } from './ResourceObj'
 
@@ -103,6 +103,9 @@ export class CanDI {
   }
 
   public when(deps: ResourceKey | ResourceKey[], maxTime = 0) {
+    if (this.has(deps)) {
+      return of(Array.isArray(deps) ? deps.map((n) => this.value(n)) : this.value(deps));
+    }
     if ((typeof maxTime !== 'undefined') && maxTime >= 0) {
       return this.observe(deps)
         .pipe(
@@ -121,9 +124,12 @@ export class CanDI {
     );
   }
 
+
   observe(name: string | string[]): Observable<any[]> {
     const nameArray = Array.isArray(name) ? name : [name];
-    return this.loadStream.pipe(
+    return merge(
+      of(nameArray[0]),
+      this.loadStream).pipe(
       filter((loadedName) => nameArray.includes(loadedName)),
       filter(() => this.has(nameArray)),
       map(() => {

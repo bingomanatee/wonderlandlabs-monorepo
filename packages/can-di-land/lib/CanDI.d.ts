@@ -1,38 +1,55 @@
-import { Observable, Subject } from 'rxjs';
-import { ResConfig, Resource, ResourceKey, ResourceType } from './types';
-type ResDef = {
-    name: ResourceKey;
-    value: any;
-    config?: ResConfig;
-    type?: ResourceType;
-};
-/**
- * tracks resources added, with defined dependencies, an optional list of registry names.
- * note - resources are added immediately on the call of "set" -- however
- * if they have undefined dependencies, they are "pending"
- * -- their value will be undefined
- * until the dependencies are resolved.
- */
+import { BehaviorSubject, Subject } from 'rxjs';
+import { Config, Key, ResDef, ResEvent, ResourceType, Value, ValueMap } from './types';
+import { PromiseQueue } from './PromiseQueue';
+import CanDIEntry from './CanDIEntry';
 export declare class CanDI {
-    registry: Map<any, Resource>;
-    loadStream: Subject<any>;
-    constructor(values?: ResDef[]);
-    set(name: ResourceKey, resource: any, config?: ResConfig | ResourceType): CanDI;
+    constructor(values?: ResDef[], maxChangeLoops?: number);
+    private maxChangeLoops;
+    values: BehaviorSubject<ValueMap>;
+    entries: Map<any, CanDIEntry>;
+    events: Subject<ResEvent>;
+    pq: PromiseQueue;
+    set(key: Key, value: Value): void;
+    add(key: Key, value: Value, config?: Config | ResourceType): void;
+    get(key: Key): Value | undefined;
+    gets(keys: Key[]): Value | undefined;
+    has(key: Key | Key[]): boolean;
+    entry(key: Key): CanDIEntry | undefined;
+    when(deps: Key | Key[], once?: boolean): import("rxjs").Observable<any>;
     /**
-     * returns the value of the resource(s); note, this is an async method.
-     * @param name
-     * @param time
+     * this is an "old school" async function that returns a promise.
+     * @param deps
      */
-    get(name: ResourceKey | ResourceKey[], time?: number): Promise<any>;
+    getAsync(deps: Key | Key[]): Promise<unknown>;
+    private _eventSubs;
+    complete(): void;
+    private _pqSub?;
+    private _initPQ;
+    private _initEvents;
+    _onAsyncError(key: Key, error: any): void;
+    _onInit(key: Key, data: ResDef): void;
+    private _onValue;
+    entriesDepOn(key: Key): CanDIEntry[];
     /**
-     * this is a synchronous retrieval function. it returns the value
-     * of the resource IF it has been set, AND its dependencies have been resolved.
+     * This changes any comp values that depend on the changed value.
+     * there may be downstream comps that depend on other comps;
+     * to prevent wear and tear on the event loop, these downstream changes
+     * are either pushed to pq or used to immediately update the map.
      *
-     * @param name
+     * This can cause a cascade loop; to prevent infinite cycling,
+     * there is a maximum number of loop iterations that can happen in this method;
+     * once that threshold is met,
+     * the while loop exits and an error message is emitted.
+     * However, the values are allowed to update to the value of the CanDI instance.
+     *
+     * This is to prevent circular loops from triggering each other
+     * in an infinite loop.
+     *
+     * In a typical arrangement, nearly all comps will be driven by values,
+     * not other comps, so you will only have one while loop --
+     * none of the entries will push anything into changedKeys,
+     * so you will just blow through all the downstream comps once and exit.
+     *
      */
-    value(name: ResourceKey | ResourceKey[]): any;
-    has(name: ResourceKey | ResourceKey[]): boolean;
-    when(deps: ResourceKey | ResourceKey[], maxTime?: number): Observable<any>;
-    observe(name: string | string[]): Observable<any[]>;
+    private _updateComps;
 }
-export {};

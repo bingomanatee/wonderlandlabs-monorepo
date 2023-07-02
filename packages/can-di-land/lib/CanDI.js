@@ -1,126 +1,251 @@
 "use strict";
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CanDI = void 0;
 const rxjs_1 = require("rxjs");
-const ResourceObj_1 = require("./ResourceObj");
-/**
- * tracks resources added, with defined dependencies, an optional list of registry names.
- * note - resources are added immediately on the call of "set" -- however
- * if they have undefined dependencies, they are "pending"
- * -- their value will be undefined
- * until the dependencies are resolved.
- */
+const types_1 = require("./types");
+const PromiseQueue_1 = require("./PromiseQueue");
+const CanDIEntry_1 = __importDefault(require("./CanDIEntry"));
+const utils_1 = require("./utils");
+const lodash_isequal_1 = __importDefault(require("lodash.isequal"));
 class CanDI {
-    constructor(values) {
-        this.registry = new Map();
-        this.loadStream = new rxjs_1.Subject();
+    constructor(values, maxChangeLoops = 30) {
+        this.values = new rxjs_1.BehaviorSubject(new Map());
+        this.entries = new Map();
+        this.events = new rxjs_1.Subject();
+        this.pq = new PromiseQueue_1.PromiseQueue();
+        // --------------- event management -------------
+        this._eventSubs = [];
+        this._initEvents();
+        this._initPQ();
         values === null || values === void 0 ? void 0 : values.forEach((val) => {
-            const resource = val.value;
-            const config = val.config || val.type;
-            if (config) {
-                this.set(val.name, resource, config);
-            }
+            this.events.next({ type: 'init', target: val.key, value: val });
+            // would it be better to initialize the can's props "en masse"?
         });
+        this.maxChangeLoops = maxChangeLoops;
     }
-    set(name, resource, config) {
-        if (this.registry.has(name)) {
-            const dep = this.registry.get(name);
-            dep.resource = resource; // will throw if config.constant === false
-            this.loadStream.next(name);
-            return this;
+    // ----------- change --------------
+    set(key, value) {
+        const entry = this.entry(key);
+        if (!entry) {
+            throw new Error(`cannot set value of entry: ${key}`);
+        }
+        entry.next(value);
+    }
+    add(key, value, config) {
+        if (this.entries.has(key)) {
+            throw new Error(`cannot redefine entry ${key}`);
         }
         if (!config) {
-            config = { type: 'value' };
+            return this.add(key, value, { type: 'value' });
         }
-        else if (typeof config === 'string') {
-            config = { type: config };
+        if (typeof config === 'string') {
+            return this.add(key, value, { type: config });
         }
-        if (!['comp', 'func', 'value'].includes(config.type)) {
-            throw new Error('unknown type  for ' + name + ': ' + config.type);
+        this.events.next({ type: 'init', target: key, value: { key, value, config } });
+    }
+    // ------- introspection/querying --------------
+    get(key) {
+        const map = this.values.value;
+        return map.has(key) ? map.get(key) : undefined;
+    }
+    gets(keys) {
+        return keys.map(key => this.get(key));
+    }
+    has(key) {
+        if (Array.isArray(key)) {
+            return key.every((subKey) => this.has(subKey));
         }
-        /**
-         * at this point two things are true:
-         1: this is the first time the resource has been defined (it's not in the registry yet)
-         2: the config is a defined ResConfig object
-         3: the config is one of the accepted resource types
-         */
-        this.registry.set(name, new ResourceObj_1.ResourceObj(this, name, resource, config));
-        this.loadStream.next(name);
-        return this;
+        return this.values.value.has(key);
+    }
+    entry(key) {
+        return this.entries.get(key);
+    }
+    when(deps, once = true) {
+        if (!deps) {
+            throw new Error('when requires non-empty criteria');
+        }
+        const fr = (0, rxjs_1.filter)((vm) => {
+            if (Array.isArray(deps)) {
+                return deps.every((key) => vm.has(key));
+            }
+            return vm.has(deps);
+        });
+        const mp = (0, rxjs_1.map)((vm) => {
+            if (Array.isArray(deps)) {
+                return deps.map((key) => vm.get(key));
+            }
+            return vm.get(deps);
+        });
+        if (once) {
+            return this.values.pipe(fr, mp, (0, rxjs_1.distinctUntilChanged)(lodash_isequal_1.default), (0, rxjs_1.first)());
+        }
+        return this.values.pipe(fr, mp, (0, rxjs_1.distinctUntilChanged)(lodash_isequal_1.default));
     }
     /**
-     * returns the value of the resource(s); note, this is an async method.
-     * @param name
-     * @param time
+     * this is an "old school" async function that returns a promise.
+     * @param deps
      */
-    get(name, time) {
-        return __awaiter(this, void 0, void 0, function* () {
-            if (this.has(name)) {
-                return this.value(name);
+    getAsync(deps) {
+        return new Promise((done, fail) => {
+            let sub = undefined;
+            sub = this.when(deps)
+                .subscribe({
+                next(value) {
+                    done(value);
+                    sub === null || sub === void 0 ? void 0 : sub.unsubscribe();
+                },
+                error(err) {
+                    fail(err);
+                }
+            });
+        });
+    }
+    complete() {
+        this._eventSubs.forEach(sub => sub.unsubscribe());
+    }
+    _initPQ() {
+        const self = this;
+        this._pqSub = this.pq.events.subscribe((eventOrError) => {
+            if ((0, types_1.isPromiseQueueMessage)(eventOrError)) {
+                const { key, value } = eventOrError;
+                self._onValue(key, value);
             }
-            return (0, rxjs_1.firstValueFrom)(this.when(name, time));
+            else {
+                const { key, error } = eventOrError;
+                self.events.next({ target: key, type: 'async-error', value: error });
+            }
+        });
+    }
+    _initEvents() {
+        const self = this;
+        this._eventSubs
+            .push(this.events
+            .pipe((0, rxjs_1.filter)(types_1.isEventValue))
+            .subscribe({
+            next: (event) => self._onValue(event.target, event.value),
+            error: (err) => console.error('error on value event:', err)
+        }));
+        this._eventSubs
+            .push(this.events.pipe((0, rxjs_1.filter)(types_1.isEventError))
+            .subscribe({
+            next(event) {
+                self._onAsyncError(event.target, event.value);
+            },
+            error(e) {
+                (0, utils_1.ce)('error on async error', e);
+            }
+        }));
+        this._eventSubs
+            .push(this.events
+            .pipe((0, rxjs_1.filter)(types_1.isEventInit))
+            .subscribe({
+            next: (event) => self._onInit(event.target, event.value),
+            error: (err) => (0, utils_1.ce)('error on init event:', err)
+        }));
+    }
+    _onAsyncError(key, error) {
+        (0, utils_1.ce)('async error thrown for ', key, error);
+    }
+    _onInit(key, data) {
+        if (this.entries.has(key)) {
+            (0, utils_1.ce)('key', key, 'initialized twice');
+            return;
+        }
+        const { config, type, value } = data;
+        let myConfig = config;
+        if (!myConfig) {
+            if (!type) {
+                myConfig = { type: 'value' };
+            }
+            else {
+                myConfig = { type };
+            }
+        }
+        const entry = new CanDIEntry_1.default(this, key, myConfig, value);
+        entry.checkForLoop();
+        this.entries.set(key, entry);
+    }
+    _onValue(key, value) {
+        const map = new Map(this.values.value);
+        map.set(key, value);
+        this._updateComps(key, map);
+        this.values.next(map);
+    }
+    entriesDepOn(key) {
+        return Array.from(this.entries.values()).filter((entry) => {
+            return entry.deps.includes(key);
         });
     }
     /**
-     * this is a synchronous retrieval function. it returns the value
-     * of the resource IF it has been set, AND its dependencies have been resolved.
+     * This changes any comp values that depend on the changed value.
+     * there may be downstream comps that depend on other comps;
+     * to prevent wear and tear on the event loop, these downstream changes
+     * are either pushed to pq or used to immediately update the map.
      *
-     * @param name
+     * This can cause a cascade loop; to prevent infinite cycling,
+     * there is a maximum number of loop iterations that can happen in this method;
+     * once that threshold is met,
+     * the while loop exits and an error message is emitted.
+     * However, the values are allowed to update to the value of the CanDI instance.
+     *
+     * This is to prevent circular loops from triggering each other
+     * in an infinite loop.
+     *
+     * In a typical arrangement, nearly all comps will be driven by values,
+     * not other comps, so you will only have one while loop --
+     * none of the entries will push anything into changedKeys,
+     * so you will just blow through all the downstream comps once and exit.
+     *
      */
-    value(name) {
-        try {
-            if (Array.isArray(name)) {
-                return name.map((subName) => this.value(subName));
+    _updateComps(key, map) {
+        const changedKeys = [key];
+        let loops = 0;
+        const loopy = (str) => /-loop/.test(str);
+        if (loopy(key)) {
+            console.log('loop key changed:', key);
+        }
+        while (changedKeys.length > 0 && loops < this.maxChangeLoops) {
+            ++loops;
+            const key = changedKeys.shift();
+            const dependants = this.entriesDepOn(key);
+            dependants.forEach((entry) => {
+                const entryKey = entry.key;
+                if (entry.deps.includes(key) && entry.type === 'comp' && entry.active && entry.resolved(map)) {
+                    let updatedValue;
+                    updatedValue = entry.computeFor(map);
+                    if (entry.async) {
+                        this.pq.set(entryKey, updatedValue);
+                        // the _onValue from the promise will eventually resolve and trigger an update cycle of its own
+                    }
+                    else if (map.has(entryKey)) {
+                        if (map.get(entryKey) !== updatedValue) {
+                            map.set(entryKey, updatedValue);
+                            if (this.entriesDepOn(entryKey).length) {
+                                changedKeys.push(entryKey);
+                            } // if no other comps are driven by the value of this entry, no reason to give it a while loop cycle,
+                        } // else -- the value of changed entry is already the same - no need to cascade compute derived comps
+                    }
+                    else {
+                        // initial set of new computed value
+                        map.set(entryKey, updatedValue);
+                        changedKeys.push(entryKey);
+                    }
+                    /**
+                     * at this point either
+                     *     --- (async) --- a new async value has been pushed into pq and will ultimately trigger its own cycle later
+                     * or  --- (sync) ---  the map has been updated with a new recomputed value from the entry (sync)
+                     *                     AND its key as been pushed onto changed keys
+                     *                     so we can see if there are any downstream comps which depend on it.
+                     */
+                }
+            });
+            if (changedKeys.length) {
+                (0, utils_1.ce)('too many triggered changes for changing ', key, changedKeys);
             }
-            if (!this.registry.has(name)) {
-                return undefined;
-            }
-            const reg = this.registry.get(name);
-            return reg.pending ? undefined : reg.value;
         }
-        catch (err) {
-            console.log('---- value error:', err);
-            return undefined;
-        }
-    }
-    has(name) {
-        if (Array.isArray(name)) {
-            return name.every((subName) => this.has(subName));
-        }
-        if (!this.registry.has(name)) {
-            return false;
-        }
-        return !this.registry.get(name).pending;
-    }
-    when(deps, maxTime = 0) {
-        if (this.has(deps)) {
-            return (0, rxjs_1.of)(Array.isArray(deps) ? deps.map((n) => this.value(n)) : this.value(deps));
-        }
-        if ((typeof maxTime !== 'undefined') && maxTime >= 0) {
-            return this.observe(deps)
-                .pipe((0, rxjs_1.first)(), (0, rxjs_1.timeout)(maxTime + 1), // this is absent from clause below
-            (0, rxjs_1.map)((valueSet) => {
-                return Array.isArray(deps) ? valueSet : valueSet[0];
-            }));
-        }
-        return this.observe(deps).pipe((0, rxjs_1.first)(), (0, rxjs_1.map)((valueSet) => {
-            return Array.isArray(deps) ? valueSet : valueSet[0];
-        }));
-    }
-    observe(name) {
-        const nameArray = Array.isArray(name) ? name : [name];
-        return (0, rxjs_1.merge)((0, rxjs_1.of)(nameArray[0]), this.loadStream).pipe((0, rxjs_1.filter)((loadedName) => nameArray.includes(loadedName)), (0, rxjs_1.filter)(() => this.has(nameArray)), (0, rxjs_1.map)(() => {
-            return this.value(nameArray);
-        }));
     }
 }
 exports.CanDI = CanDI;

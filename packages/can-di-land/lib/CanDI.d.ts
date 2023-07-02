@@ -1,5 +1,5 @@
-import { Observable, Subject } from 'rxjs';
-import { ResConfig, Resource, ResourceKey, ResourceType } from './types';
+import { BehaviorSubject, Observable, Subject } from 'rxjs';
+import { KeyArg, ResConfig, ResEvent, Resource, ResourceKey, ResourceType, ResourceValue, ValueMap } from './types';
 type ResDef = {
     name: ResourceKey;
     value: any;
@@ -14,25 +14,57 @@ type ResDef = {
  * until the dependencies are resolved.
  */
 export declare class CanDI {
-    registry: Map<any, Resource>;
-    loadStream: Subject<any>;
+    configs: Map<any, ResConfig>;
+    values: BehaviorSubject<ValueMap>;
+    resources: Map<any, any>;
+    resEvents: Subject<ResEvent>;
     constructor(values?: ResDef[]);
-    set(name: ResourceKey, resource: any, config?: ResConfig | ResourceType): CanDI;
+    private _resEventSub?;
+    private _listenForEvents;
+    private updateResource;
+    protected _updateResource(key: ResourceKey, resource: any): void;
     /**
-     * returns the value of the resource(s); note, this is an async method.
-     * @param name
-     * @param time
-     */
-    get(name: ResourceKey | ResourceKey[], time?: number): Promise<any>;
-    /**
-     * this is a synchronous retrieval function. it returns the value
-     * of the resource IF it has been set, AND its dependencies have been resolved.
+     * upserts a value into the values object.
+     * We assume all safeguards have been checked
+     * by the calling context.
      *
-     * @param name
+     * @param key
+     * @param value
      */
-    value(name: ResourceKey | ResourceKey[]): any;
-    has(name: ResourceKey | ResourceKey[]): boolean;
-    when(deps: ResourceKey | ResourceKey[], maxTime?: number): Observable<any>;
-    observe(name: string | string[]): Observable<any[]>;
+    protected _setValue(key: ResourceKey, value: any): void;
+    /**
+     * upserts a value into the resource collection. In the absence of pre-existing config
+     * or a config parameter assumes it is a value type
+     */
+    set(key: ResourceKey, value: ResourceValue, config?: ResConfig | string): void;
+    /**
+     * A synchronous method that returns a value or an array of values
+     * @param keys a key or an array of keys
+     * @param alwaysArray {boolean} even if keys is not an array (a single key) return an array of values
+     * @param map {ValueMap} a key-value pair of the current values (optional)
+     */
+    value(keys: KeyArg, alwaysArray?: boolean, map?: ValueMap): ResourceValue | ResourceValue[] | undefined;
+    /**
+     * returns a function that wraps a call to the resource with
+     * all possible prepended arguments from the configuration.
+     *
+     * We do not care at this point whether the function
+     * is marked as async in the configuration.
+     *
+     * The metaFunction is _dynamic_ -- the resource and all its dependencies
+     * are polled every time the method is called; no caching is done in closure.
+     */
+    private metaFunction;
+    /**
+     * return true if the key(s) requested are present in the CanDI's value.
+     * (or, if presented, a Map);
+     */
+    has(keys: KeyArg, map?: ValueMap): boolean;
+    /**
+     * returns an observable that emits an array of values every time
+     * the observed values change, once all the keys are present.
+     * will emit once if they are already present.
+     */
+    when(keys: KeyArg, once?: boolean): Observable<Resource[]>;
 }
 export {};

@@ -1,6 +1,6 @@
 import { CanDI } from '../lib'
 
-describe('CanDI', () => {
+describe.skip('CanDI', () => {
   describe('add', () => {
     describe('func', () => {
       it('adds a function', async () => {

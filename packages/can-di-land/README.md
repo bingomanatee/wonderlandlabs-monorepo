@@ -87,7 +87,7 @@ import { CanDI } from '@wonderlandlabs/can-di-land';
 A few things to call out:
 
 1. 'sum-of-foo-and-vey' is "got" before it has been defined.
-2. 'sum-of-foo-and-vey' is a 'comp' (computed) value; it's value is the result of executing the defining function
+2. 'sum-of-foo-and-vey' is a 'comp' (resolved) value; it's value is the result of executing the defining function
 3. the dependencies of the configuration of 'sum-of-foo-and-vey' are injected in the order they appear in the config;
 4. the dependencies of 'sum-of-foo-and-vey' have not been defined when it is added
 5. vey is set twice -- synchronously -- but the async resolution of vey accepts the second value.
@@ -113,7 +113,7 @@ The value returned from `set` is exactly the value passed in to `set`
 
 Functions must be javascript Functions. Their dependencies, if any, are curried in front of any arguments.
 
-### **computed values**: `comp`
+### **resolved values**: `comp`
 
 Computed values are defined by a function that derives a value from their dependencies.
 The resource is in fact a "Factory" for the returned value.
@@ -162,7 +162,7 @@ is ignored once a named value has been registered.
 ## Removing an entry
 
 There is no (good) way to delete an entry. Deleting an entry that is depended on will invalidate
-cached computed values and basically wreck the can's integrity.
+cached resolved values and basically wreck the can's integrity.
 
 ## Resource names
 
@@ -298,7 +298,7 @@ There is at this point no type restraints on entries, except the resource for a
 It is designed to be usable in general browser applications and Node.js; It has only a very light
 dependency on rxjs. 
 
-## Async and computed values
+## Async and resolved values
 
 if the configuration `async` is set, it has different effects on different data types. 
 
@@ -318,7 +318,7 @@ thing that matters. However -- for `comp` values there is another wrinkle: the f
 may stay the same but if the _dependents_ change, the factory value will be updated to reflect the
 new dependencies. 
 
-`computeOnce` determines that computed factory values are only produced once. This is important for
+`computeOnce` determines that resolved factory values are only produced once. This is important for
 entries that are, for instance, data registries or other fundamental building blocks that must
 maintain referential integrity for the lifespan of the app.
 

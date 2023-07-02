@@ -11,7 +11,15 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CanDI = void 0;
 const rxjs_1 = require("rxjs");
-const ResourceObj_1 = require("./ResourceObj");
+const types_1 = require("./types");
+function compareArrays(a, b) {
+    if (a.length !== b.length) {
+        return false;
+    }
+    return a.every((value, index) => {
+        return value === b[index];
+    });
+}
 /**
  * tracks resources added, with defined dependencies, an optional list of registry names.
  * note - resources are added immediately on the call of "set" -- however
@@ -21,106 +29,213 @@ const ResourceObj_1 = require("./ResourceObj");
  */
 class CanDI {
     constructor(values) {
-        this.registry = new Map();
-        this.loadStream = new rxjs_1.Subject();
+        this.configs = new Map();
+        this.values = new rxjs_1.BehaviorSubject(new Map());
+        this.resources = new Map();
+        this.resEvents = new rxjs_1.Subject();
+        this._listenForEvents();
         values === null || values === void 0 ? void 0 : values.forEach((val) => {
-            const resource = val.value;
-            const config = val.config || val.type;
-            if (config) {
-                this.set(val.name, resource, config);
+            let config = val.config;
+            if (!config) {
+                if (val.type) {
+                    config = { type: val.type };
+                }
+                else {
+                    config = { type: 'value' };
+                }
+            }
+            this.resEvents.next({
+                value: {
+                    // @ts-ignore
+                    resource: val.value,
+                    config
+                }, target: val.name, type: 'init'
+            });
+        });
+    }
+    _listenForEvents() {
+        const self = this;
+        this._resEventSub = this.resEvents.subscribe((event) => {
+            switch (event.type) {
+                case 'init':
+                    if (self.configs.has(event.target)) {
+                        throw new Error('cannot re-configure ' + event.target);
+                    }
+                    self.configs.set(event.target, event.value.config);
+                    if ('resource' in event.value) {
+                        self.resEvents.next({ type: 'resource', target: event.target, value: event.value.resource });
+                    }
+                    break;
+                case 'resource':
+                    console.log('resource event:', event);
+                    if (self.configs.has(event.target)) {
+                        self.updateResource(event.target, event.value);
+                    }
+                    else {
+                        console.warn('--- resEvents: resource updated without config', event);
+                    }
+                    break;
             }
         });
     }
-    set(name, resource, config) {
-        if (this.registry.has(name)) {
-            const dep = this.registry.get(name);
-            dep.resource = resource; // will throw if config.constant === false
-            this.loadStream.next(name);
-            return this;
-        }
+    updateResource(key, resource) {
+        const config = this.configs.get(key);
         if (!config) {
-            config = { type: 'value' };
+            console.warn('un-documented resource:', key);
+            return;
         }
-        else if (typeof config === 'string') {
-            config = { type: config };
+        if (config.final && this.resources.has(key)) {
+            console.warn('attempt to re-define a final key ', key);
+            return;
         }
-        if (!['comp', 'func', 'value'].includes(config.type)) {
-            throw new Error('unknown type  for ' + name + ': ' + config.type);
+        this._updateResource(key, resource);
+        switch (config.type) {
+            case 'value':
+                if (config.async) {
+                    (() => __awaiter(this, void 0, void 0, function* () {
+                        let resolved = yield resource;
+                        this._setValue(key, resolved);
+                    }))();
+                }
+                else {
+                    this._setValue(key, resource);
+                }
+                break;
+            case 'comp':
+                if (config.async) {
+                    (() => __awaiter(this, void 0, void 0, function* () {
+                        const response = yield this.metaFunction(key)();
+                        this._setValue(key, response);
+                    }))();
+                }
+                else {
+                    this._setValue(key, this.metaFunction(key)()); // sets the _value_ of the metaFunction
+                }
+                break;
+            case 'func':
+                this._setValue(key, this.metaFunction(key)); // sets the metaFunction itself
+                break;
+            default:
+                console.warn('bad type for key ', key, ':', config.type);
         }
-        /**
-         * at this point two things are true:
-         1: this is the first time the resource has been defined (it's not in the registry yet)
-         2: the config is a defined ResConfig object
-         3: the config is one of the accepted resource types
-         */
-        this.registry.set(name, new ResourceObj_1.ResourceObj(this, name, resource, config));
-        this.loadStream.next(name);
-        return this;
+    }
+    _updateResource(key, resource) {
+        this.resources.set(key, resource);
     }
     /**
-     * returns the value of the resource(s); note, this is an async method.
-     * @param name
-     * @param time
-     */
-    get(name, time) {
-        return __awaiter(this, void 0, void 0, function* () {
-            if (this.has(name)) {
-                return this.value(name);
-            }
-            return (0, rxjs_1.firstValueFrom)(this.when(name, time));
-        });
-    }
-    /**
-     * this is a synchronous retrieval function. it returns the value
-     * of the resource IF it has been set, AND its dependencies have been resolved.
+     * upserts a value into the values object.
+     * We assume all safeguards have been checked
+     * by the calling context.
      *
-     * @param name
+     * @param key
+     * @param value
      */
-    value(name) {
-        try {
-            if (Array.isArray(name)) {
-                return name.map((subName) => this.value(subName));
+    _setValue(key, value) {
+        const map = new Map(this.values.value);
+        map.set(key, value);
+        this.values.next(map);
+    }
+    // ------------------------- IO methods ------------------------
+    /**
+     * upserts a value into the resource collection. In the absence of pre-existing config
+     * or a config parameter assumes it is a value type
+     */
+    set(key, value, config) {
+        if (!this.configs.has(key)) {
+            if (!config) {
+                return this.set(key, value, { type: 'value' });
             }
-            if (!this.registry.has(name)) {
-                return undefined;
+            if ((0, types_1.isResourceType)(config)) {
+                return this.set(key, value, { type: config });
             }
-            const reg = this.registry.get(name);
-            return reg.pending ? undefined : reg.value;
+            if (!(0, types_1.isResConfig)(config)) {
+                throw new Error('cannot configure in set ');
+            }
+            this.configs.set(key, config);
         }
-        catch (err) {
-            console.log('---- value error:', err);
+        this.resEvents.next({ target: key, type: 'resource', value });
+    }
+    /**
+     * A synchronous method that returns a value or an array of values
+     * @param keys a key or an array of keys
+     * @param alwaysArray {boolean} even if keys is not an array (a single key) return an array of values
+     * @param map {ValueMap} a key-value pair of the current values (optional)
+     */
+    value(keys, alwaysArray = false, map) {
+        if (!this.has(keys, map)) {
             return undefined;
         }
+        const source = (map || this.values.value);
+        // at this point we know the item / items in keys are ALL in the values
+        if ((!Array.isArray(keys)) && (!alwaysArray)) {
+            /**
+             if a single item is being requested,
+             and we don't demand an array response,
+             return just that item, not in an array
+             */
+            return source.get(keys);
+        }
+        /**
+         at this point we will return an array,
+         as either alwaysArray is true
+         or keys are an array
+         */
+        let list = Array.isArray(keys) ? keys : [keys];
+        return list.map((key) => source.get(key));
     }
-    has(name) {
-        if (Array.isArray(name)) {
-            return name.every((subName) => this.has(subName));
-        }
-        if (!this.registry.has(name)) {
-            return false;
-        }
-        return !this.registry.get(name).pending;
+    /**
+     * returns a function that wraps a call to the resource with
+     * all possible prepended arguments from the configuration.
+     *
+     * We do not care at this point whether the function
+     * is marked as async in the configuration.
+     *
+     * The metaFunction is _dynamic_ -- the resource and all its dependencies
+     * are polled every time the method is called; no caching is done in closure.
+     */
+    metaFunction(key) {
+        return (...params) => {
+            var _a;
+            const fn = this.resources.get(key);
+            if (typeof fn !== 'function') {
+                console.error('Cannot make computer out of ', key);
+                throw new Error('non-functional key');
+            }
+            let args = [...params];
+            const conf = this.configs.get(key);
+            if (conf && Array.isArray(conf.args)) {
+                args = [...conf.args, ...args];
+            }
+            if ((_a = conf === null || conf === void 0 ? void 0 : conf.deps) === null || _a === void 0 ? void 0 : _a.length) {
+                args = [...this.value(conf.deps, true), ...args];
+            }
+            return fn(...args);
+        };
     }
-    when(deps, maxTime = 0) {
-        if (this.has(deps)) {
-            return (0, rxjs_1.of)(Array.isArray(deps) ? deps.map((n) => this.value(n)) : this.value(deps));
+    // ---------- checks and streams -------------
+    /**
+     * return true if the key(s) requested are present in the CanDI's value.
+     * (or, if presented, a Map);
+     */
+    has(keys, map) {
+        if (!Array.isArray(keys)) {
+            return this.has([keys]);
         }
-        if ((typeof maxTime !== 'undefined') && maxTime >= 0) {
-            return this.observe(deps)
-                .pipe((0, rxjs_1.first)(), (0, rxjs_1.timeout)(maxTime + 1), // this is absent from clause below
-            (0, rxjs_1.map)((valueSet) => {
-                return Array.isArray(deps) ? valueSet : valueSet[0];
-            }));
-        }
-        return this.observe(deps).pipe((0, rxjs_1.first)(), (0, rxjs_1.map)((valueSet) => {
-            return Array.isArray(deps) ? valueSet : valueSet[0];
-        }));
+        return keys.every((key) => (map || this.values.value).has(key));
     }
-    observe(name) {
-        const nameArray = Array.isArray(name) ? name : [name];
-        return (0, rxjs_1.merge)((0, rxjs_1.of)(nameArray[0]), this.loadStream).pipe((0, rxjs_1.filter)((loadedName) => nameArray.includes(loadedName)), (0, rxjs_1.filter)(() => this.has(nameArray)), (0, rxjs_1.map)(() => {
-            return this.value(nameArray);
-        }));
+    /**
+     * returns an observable that emits an array of values every time
+     * the observed values change, once all the keys are present.
+     * will emit once if they are already present.
+     */
+    when(keys, once = true) {
+        const self = this;
+        return this.values.pipe((0, rxjs_1.filter)((map) => self.has(keys, map)), // only emits if all keys are present
+        (0, rxjs_1.map)((map) => self.value(keys, true, map)), // transforms  map (ValueMap) into ResourceValue[]
+        (0, rxjs_1.distinctUntilChanged)(compareArrays), // only emits if one of the values has changed ( or the first time)
+        (once ? (0, rxjs_1.tap)(() => {
+        }) : (0, rxjs_1.first)()) // if once is true, only emits the first time the values are present
+        );
     }
 }
 exports.CanDI = CanDI;

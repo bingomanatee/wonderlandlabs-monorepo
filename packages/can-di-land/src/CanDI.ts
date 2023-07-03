@@ -1,23 +1,27 @@
 import {
-  BehaviorSubject, distinctUntilChanged,
-  filter, first,
-  map, Observable,
-  Subject, Subscription, tap,
+  BehaviorSubject,
+  distinctUntilChanged,
+  filter,
+  first,
+  map,
+  Observable,
+  Subject,
+  Subscription,
+  tap,
 } from 'rxjs'
 import {
   isResConfig,
   isResourceType,
   KeyArg,
   ResConfig,
+  ResConfigKey,
+  ResDef,
   ResEvent,
   Resource,
   ResourceKey,
-  ResourceType,
   ResourceValue,
   ValueMap
 } from './types';
-
-type ResDef = { name: ResourceKey, value: any, config?: ResConfig, type?: ResourceType }
 
 function compareArrays(a: any[], b: any[]) {
   if (a.length !== b.length) {
@@ -170,7 +174,7 @@ export class CanDI {
         throw new Error('cannot configure in set ');
       }
       this.configs.set(key, config);
-    }  else {
+    } else {
       config = this.configs.get(key)!;
     }
     if (config.final && this.resources.has(key)) {
@@ -269,5 +273,25 @@ export class CanDI {
       (once ? tap(() => {
       }) : first()) // if once is true, only emits the first time the values are present
     );
+  }
+
+  // -------------- introspection ---------
+
+  private _config(key: ResourceKey, prop: ResConfigKey, ifAbsent?: any): any | undefined {
+    if (!this.configs.has(key)) {
+      return undefined;
+    }
+    const config = this.configs.get(key)!;
+    if (!(prop in config)) {
+      if (ifAbsent instanceof Error) {
+        throw ifAbsent;
+      }
+      return ifAbsent;
+    }
+    return config[prop];
+  }
+
+  typeof(key: ResourceKey) {
+    return this._config(key, 'type', new Error(`key ${key} is defined but of indeterminate type `));
   }
 }

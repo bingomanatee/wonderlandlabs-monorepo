@@ -243,5 +243,22 @@ class CanDI {
         }) : (0, rxjs_1.first)()) // if once is true, only emits the first time the values are present
         );
     }
+    // -------------- introspection ---------
+    _config(key, prop, ifAbsent) {
+        if (!this.configs.has(key)) {
+            return undefined;
+        }
+        const config = this.configs.get(key);
+        if (!(prop in config)) {
+            if (ifAbsent instanceof Error) {
+                throw ifAbsent;
+            }
+            return ifAbsent;
+        }
+        return config[prop];
+    }
+    typeof(key) {
+        return this._config(key, 'type', new Error(`key ${key} is defined but of indeterminate type `));
+    }
 }
 exports.CanDI = CanDI;

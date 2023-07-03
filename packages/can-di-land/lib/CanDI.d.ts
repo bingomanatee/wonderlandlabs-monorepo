@@ -1,11 +1,5 @@
 import { BehaviorSubject, Observable, Subject } from 'rxjs';
-import { KeyArg, ResConfig, ResEvent, Resource, ResourceKey, ResourceType, ResourceValue, ValueMap } from './types';
-type ResDef = {
-    name: ResourceKey;
-    value: any;
-    config?: ResConfig;
-    type?: ResourceType;
-};
+import { KeyArg, ResConfig, ResDef, ResEvent, Resource, ResourceKey, ResourceValue, ValueMap } from './types';
 /**
  * tracks resources added, with defined dependencies, an optional list of registry names.
  * note - resources are added immediately on the call of "set" -- however
@@ -66,5 +60,6 @@ export declare class CanDI {
      * will emit once if they are already present.
      */
     when(keys: KeyArg, once?: boolean): Observable<Resource[]>;
+    private _config;
+    typeof(key: ResourceKey): any;
 }
-export {};

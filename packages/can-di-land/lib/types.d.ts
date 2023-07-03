@@ -3,6 +3,7 @@ export type ValueMap = Map<ResourceKey, any>;
 export type ResourceKey = any;
 export type ResourceValue = any;
 export declare function isResourceType(arg: unknown): arg is ResourceType;
+export type ResConfigKey = 'deps' | 'type' | 'args' | 'final' | 'computeOnce' | 'bind' | 'meta';
 export type ResConfig = {
     deps?: ResourceKey[];
     type: ResourceType;
@@ -36,3 +37,9 @@ export type ResEvent = (ResEventInit | ResEventResource | ResEventValue) & {
     target: ResourceKey;
 };
 export type GenFunction = (...args: any[]) => any;
+export type ResDef = {
+    name: ResourceKey;
+    value: any;
+    config?: ResConfig;
+    type?: ResourceType;
+};

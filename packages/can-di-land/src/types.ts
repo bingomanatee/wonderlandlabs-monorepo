@@ -11,15 +11,16 @@ export function isResourceType(arg: unknown): arg is ResourceType {
   return resourceTypes.includes(arg);
 }
 
+export type ResConfigKey = 'deps' | 'type' | 'args' | 'final' | 'computeOnce' | 'bind' | 'meta'
 export type ResConfig = {
   deps?: ResourceKey[],
   type: ResourceType,
   args?: any[],
   final?: boolean,
-  computeOnce?: boolean,
-  async?: boolean,
-  bind?: boolean,
-  meta?: boolean,
+  computeOnce?: boolean, // indicates that the 'comp' resource function can only be called once. Ignored by other resource types.
+  async?: boolean, // indicates that it is a value that must be resolved, such as a REST call.
+  bind?: boolean, // bind the function to the CanDI instance; if true, meta must be true as well
+  meta?: boolean // is a function that returns a value - perhaps because it needs a closure; not currently fully implemented
 }
 
 export function isResConfig(config: unknown) : config is ResConfig {
@@ -50,3 +51,4 @@ export type ResEventValue = {type: 'value', value: any};
 export type ResEvent = (ResEventInit | ResEventResource | ResEventValue) & {target: ResourceKey}
 
 export type GenFunction = (...args: any[]) => any;
+export type ResDef = { name: ResourceKey, value: any, config?: ResConfig, type?: ResourceType }

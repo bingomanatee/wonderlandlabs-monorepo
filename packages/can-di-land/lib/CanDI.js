@@ -67,7 +67,6 @@ class CanDI {
                     }
                     break;
                 case 'resource':
-                    console.log('resource event:', event);
                     if (self.configs.has(event.target)) {
                         self.updateResource(event.target, event.value);
                     }
@@ -152,6 +151,13 @@ class CanDI {
                 throw new Error('cannot configure in set ');
             }
             this.configs.set(key, config);
+        }
+        else {
+            config = this.configs.get(key);
+        }
+        if (config.final && this.resources.has(key)) {
+            console.error('set: cannot set final ', key, 'from ', this.resources.get(key), 'to', value);
+            throw new Error(`cannot set final entry ${key}`);
         }
         this.resEvents.next({ target: key, type: 'resource', value });
     }

@@ -41,17 +41,48 @@ The loader component suspended interaction while data was being loaded/saved.
 Amd with more components coming down the pike I wanted to ensure the system had integrity. 
 I also wanted to ensure that I didn't load more components than was necessary for a given page to operate.
 For instance, the page that loaded projects didn't need the configuration component to be present
-until a project was loaded. 
+until a project was loaded.
 
 ## Some Behavior of CanDI instances
 
 * a registered entry is only considered resolved when its dependencies (if any) are all resolved.
 * registered entry values can be re-set
 * if a entry is configured to be "final" it can only be set once; re-sets will throw errors.
-* get(name) is asynchronous; it only returns when dependencies are resolved.
-* value(name) is synchronous; it returns undefined (but does not throw) if the entry for name is pending. 
-* if maxTime is passed to get(name, maxTime), it will throw if dependencies are not resolved before the time limit.
-* it is not an error to call `get(name)` or `has(name)` before the entry name has been defined. 
+* get(key) is asynchronous; it only returns when dependencies are resolved.
+* value(key) is synchronous; it returns undefined (but does not throw) if the entry for key is pending. 
+* if maxTime is passed to get(key, maxTime), it will throw if dependencies are not resolved before the time limit.
+* it is not an error to call `get(key)` or `has(key)` before the entry key has been defined. 
+
+## A few notes on terminology 
+
+The terminology used here isn't based on any formal or theoretical model;
+just observed patterns of key/value usage in the JS community. There are cases where a term has a 
+synonym described below in parentheses.
+
+* **Entry** (a.k.a. "entity") A collective term for everything keyed off a single key; 
+  this includes the key, the resource and the value
+* **Key** (a.k.a. "key") A unique value used to identify a single Entry. /
+  In general, keys are strings; but as they are used throughout as Map instance keys, 
+  practically any JS token can be used as a key. 
+* **Resource** The resource is "that which produces the value associated with a key." 
+  For Value type entries, an entries' resource _is_ its value. For 'func'/'comp' entries, 
+  they are the _basis_ for an entries' value. 
+* **Value** The _expression_ of an entries' resource. 
+* **Type** the variation of how an entry expresses its value based on its resource. 
+  currently the type options are 'value', 'func' and 'comp'.
+* **config** (a.k.a. configuration) The behavioral modifiers that affect how a resource is transmuted into
+  a value, including how often / if its resource can be updated, injected args for function-based
+  entries, and whether it is asynchronous. Configuration _must_ include type, but all other fields
+  in a configuration are optional. 
+  Configuration is stored internally as a POJO meeting the type requirements detailed in `type.ts`.
+* **Resolved** (antonym: pending) An entry is resolved when it's value is "pending". Async 'func' / 'comp' 
+  entries are resolved when its promise completes (for the first time). Even if its resource
+  is updated later on, it is considered "resolved" and presents its former value until the next 
+  promise resolution. (I.e., when an entry resolves, it stays resolved,
+  even if its resource/value changes). 
+* **Registered** (a.k.a. defined) entries have a defined configuration paired with a given key. 
+  (and usually, it also has a resource as well.)
+  Resolved entries are by definition Registered, but not necessarily the other way around. 
 
 ## Resource types and configuration
 
@@ -161,12 +192,15 @@ is ignored once a named value has been registered.
 
 ## Removing an entry
 
-There is no (good) way to delete an entry. Deleting an entry that is depended on will invalidate
-cached resolved values and basically wreck the can's integrity.
+There is no way to delete an entry. The design of CanDI is to create a write and read store;
+once resolved an entry can be changed but never removed. Because of the dependency network that CanDI
+creates, once keys are resolved they are considered eligible to provide values, for the lifetime of the 
+CanDI instance. Removing and un-registering a value would create complex, unreliable side effects for the
+entries they support. 
 
-## Resource names
+## Resource keys
 
-In this example and the tests, all resources have string names; this is a pretty common assumption.
+In this example and the tests, all resources have string keys; this is a pretty common assumption.
 It is the best and simplest way to register values ina `CanDI`. (take care with blank spaces and casing of course.)
 
 However, it is not a *requirement* that entries are keyed with strings.
@@ -179,29 +213,29 @@ when passed to `get()` or `when()`.
 
 ## Entries, resources and values.
 
-an Entry is a definition that is paired with a specific name. When you call `myCan.set(name, resource, config?)`
-you define an entry for that name, which is available (and listed under `myCan.registry.get(name)`).
+an Entry is a definition that is paired with a specific key. When you call `myCan.set(key, resource, config?)`
+you define an entry for that key, which is available (and listed under `myCan.registry.get(key)`).
 
-The second argument to `myCan.set(name, resource, config?)` is called a `resource`. It is stored in
-`myCan.registry.get(name).resource`.
+The second argument to `myCan.set(key, resource, config?)` is called a `resource`. It is stored in
+`myCan.registry.get(key).resource`.
 
 The *value* of a registered item is returned by `myCan.value(mame)` -- a synchronous function.
-the _immediate_ value of a registry item by the _async_ function `myCan.get(name)`.
+the _immediate_ value of a registry item by the _async_ function `myCan.get(key)`.
 it returns a Promise that resolves when the dependencies are provided.
 
 * For `value` types, the resource and the value are in fact identical (and referentially identical), to what is returned
-  from `get(name)`.
-* For `comp` (factory) types, it is a function _that produces the value_, which you retrieve from `myCan.get(name)`.
+  from `get(key)`.
+* For `comp` (factory) types, it is a function _that produces the value_, which you retrieve from `myCan.get(key)`.
 * For `func` types it is decorated with a secondary functional wrapper to include any derived values.
 
 ### Pending, undefined, defined and resolved entries
 
 Entries that have not been defined -- or defined entries with undefined/pending dependencies -- 
-are considered "Pending"; they are undefined when `myComp.value(name)` is called, a
-nd will delay completion of `myCan.get(name)` until they are resolved. 
+are considered "Pending"; they are undefined when `myComp.value(key)` is called, a
+nd will delay completion of `myCan.get(key)` until they are resolved. 
 
 Entries that have been defined, and have pending/undefined dependencies, are considered "pending";
-they are present in the registry but will hold up `get(name)` Promise resolution. 
+they are present in the registry but will hold up `get(key)` Promise resolution. 
 
 An entry is considered **resolved** (and not **pending**) if:
 
@@ -214,16 +248,16 @@ Note that for `pending` comp or func entries
 -- entries whose listed dependencies are not resolved --
 will always return undefined. from `myConp.value(funcName)`. 
 
-An entry is **defined** when its parameters have been `set(name...)`. 
+An entry is **defined** when its parameters have been `set(key...)`. 
 It will have an entry in the `myComp.registry` Map, 
 but may be pending if their dependencies are not resolved. 
 
-## async `myCan.get(name, maxTime?)`
+## async `myCan.get(key, maxTime?)`
 
 The get method is async; it completes when all the required dependencies have been defined.
 For values, which by definition cannot have dependencies, it returns as soon as the entry is defined.
 
-You can call `myCan.get(name)` before an entry is defined.
+You can call `myCan.get(key)` before an entry is defined.
 It will error ('time out') in the next execution cycle if the entry has not been defined at that time.
 
 In order to prevent a `get()` call from hanging forever, the get call will terminate after a certain time.
@@ -236,12 +270,12 @@ that is -- get will retrieve an entry value if
 * it has no dependencies or
 * its dependencies are defined before the maxTimeout time
 
-## sync `myCan.value(name)`
+## sync `myCan.value(key)`
 
 value is immediate; it returns undefined unless the entry _and its dependencies(if any)_ are defined
 before `.value()` is called.
 
-## async `myCan.when([name] | name, maxTime?)`
+## async `myCan.when([key, key2, ...keyN] | key, maxTime?)`
 
 `when()` accepts a single key, or an array of keys. it returns a promise that resolves when
 all the listed dependencies (and _their_ dependencies) are defined, or throws when the maxTime elapses.
@@ -250,7 +284,7 @@ a set of dependencies resolves.
 
 It accepts a single entry key or an array of entry keys.
 
-## sync `myCan.has(name | [name])`
+## sync `myCan.has(key | [key])`
 
 returns true if the entry and its dependencies (if any) are _currently_ defined/resolved.
 
@@ -341,7 +375,7 @@ depending on your compilers, you may have to use the 'meta' property:
 
 const can = new CanDI([
         {
-          name: 'meta',
+          key: 'meta',
           value: () => (function () {
             //@ts-ignore
             (this as CanDI).set('foo', 'bar')
@@ -369,7 +403,7 @@ const point = { x: 100, y: 200 }
 
 const can = new CanDI([
   {
-    name: 'meta',
+    key: 'meta',
     value: () => (function () {
       //@ts-ignore
       return Math.round(Math.sqrt(this.x ** 2 + this.y ** 2))

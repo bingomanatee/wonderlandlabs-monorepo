@@ -1,5 +1,6 @@
 import { BehaviorSubject, Observable, Subject } from 'rxjs';
 import { KeyArg, ResConfig, ResDef, ResEvent, Resource, ResourceKey, ResourceValue, ValueMap } from './types';
+import { PromiseQueue } from './PromiseQueue';
 /**
  * tracks resources added, with defined dependencies, an optional list of registry names.
  * note - resources are added immediately on the call of "set" -- however
@@ -12,10 +13,13 @@ export declare class CanDI {
     values: BehaviorSubject<ValueMap>;
     resources: Map<any, any>;
     resEvents: Subject<ResEvent>;
+    pq: PromiseQueue;
+    private _resEventResSub?;
     constructor(values?: ResDef[]);
     private _resEventSub?;
+    private _pqSub?;
     private _listenForEvents;
-    private updateResource;
+    private _upsertResource;
     protected _updateResource(key: ResourceKey, resource: any): void;
     /**
      * upserts a value into the values object.
@@ -60,6 +64,14 @@ export declare class CanDI {
      * will emit once if they are already present.
      */
     when(keys: KeyArg, once?: boolean): Observable<Resource[]>;
+    /**
+     * returns a specific property of a resources' config.
+     * If there is no config it will return undefined --ignoring isAbsent.
+     * If there is a config BUT it has no EXPLICIT property definition for the requested property,
+     * it returns ifAbsent (or throws it if it is an error).
+     */
     private _config;
     typeof(key: ResourceKey): any;
+    private _init;
+    private _interpretKeyConfig;
 }

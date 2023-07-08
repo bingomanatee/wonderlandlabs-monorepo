@@ -22,16 +22,8 @@ import {
   ResourceValue,
   ValueMap
 } from './types';
-
-function compareArrays(a: any[], b: any[]) {
-  if (a.length !== b.length) {
-    return false;
-  }
-
-  return a.every((value, index) => {
-    return value === b[index];
-  });
-}
+import { PromiseQueue } from './PromiseQueue'
+import { asArray, compareArrays } from './utils'
 
 /**
  * tracks resources added, with defined dependencies, an optional list of registry names.
@@ -45,60 +37,58 @@ export class CanDI {
   public values = new BehaviorSubject<ValueMap>(new Map());
   public resources = new Map<ResourceKey, any>();
   public resEvents = new Subject<ResEvent>();
+  public pq = new PromiseQueue();
+  private _resEventResSub?: Subscription;
 
   constructor(values?: ResDef[]) {
     this._listenForEvents();
     values?.forEach((val) => {
-      let config = val.config;
-      if (!config) {
-        if (val.type) {
-          config = { type: val.type }
-        } else {
-          config = { type: 'value' };
-        }
-      }
-      this.resEvents.next({
-        value: {
-          // @ts-ignore
-          resource: val.value,
-          config
-        }, target: val.name, type: 'init'
-      })
+      this._init(val);
     })
   }
 
   private _resEventSub?: Subscription;
+  private _pqSub?: Subscription;
 
   private _listenForEvents() {
     const self = this;
-    this._resEventSub = this.resEvents.subscribe((event) => {
-      switch (event.type) {
-        case 'init':
-          if (self.configs.has(event.target)) {
-            throw new Error('cannot re-configure ' + event.target);
-          }
-          self.configs.set(event.target, event.value.config);
-          if ('resource' in event.value) {
-            self.resEvents.next({ type: 'resource', target: event.target, value: event.value.resource })
-          }
-          break;
 
-        case 'resource':
-          if (self.configs.has(event.target)) {
-            self.updateResource(event.target, event.value);
-          } else {
-            console.warn('--- resEvents: resource updated without config', event);
-          }
-          break;
-      }
-    });
+    this._resEventSub = this.resEvents
+      .pipe(
+        filter((event: ResEvent) => event.type === 'init')
+      )
+      .subscribe((event: ResEvent) => {
+        const { target, value } = event;
+        if (self.configs.has(target)) {
+          console.error('cannot re-configure ', target, 'for', target, 'with', event);
+          return;
+        }
+        self.configs.set(target, value.config);
+        if ('resource' in value) {
+          self.resEvents.next({ type: 'resource', target: event.target, value: event.value.resource })
+        }
+      });
+
+    this._resEventResSub = this.resEvents
+      .pipe(
+        filter((event: ResEvent) => event.type === 'resource')
+      )
+      .subscribe(
+        (event: ResEvent) => {
+          const { target, value } = event;
+          self._upsertResource(target, value);
+        });
+
+    this._pqSub = this.pq.events.subscribe(({ key, value }) => {
+      self._setValue(key, value);
+    })
   }
 
-  private updateResource(key: ResourceKey, resource: any) {
+  private _upsertResource(key: ResourceKey, resource: any) {
     const config = this.configs.get(key);
 
     if (!config) {
-      console.warn('un-documented resource:', key);
+      console.error('un-configured resource:', key, 'set to ', resource);
       return;
     }
     if (config.final && this.resources.has(key)) {
@@ -110,10 +100,7 @@ export class CanDI {
     switch (config.type) {
       case 'value':
         if (config.async) {
-          (async () => {
-            let resolved = await resource;
-            this._setValue(key, resolved);
-          })()
+          this.pq.set(key, resource);
         } else {
           this._setValue(key, resource);
         }
@@ -163,22 +150,9 @@ export class CanDI {
    * or a config parameter assumes it is a value type
    */
   set(key: ResourceKey, value: ResourceValue, config?: ResConfig | string): void {
-    if (!this.configs.has(key)) {
-      if (!config) {
-        return this.set(key, value, { type: 'value' });
-      }
-      if (isResourceType(config)) {
-        return this.set(key, value, { type: config })
-      }
-      if (!isResConfig(config)) {
-        throw new Error('cannot configure in set ');
-      }
-      this.configs.set(key, config);
-    } else {
-      config = this.configs.get(key)!;
-    }
+    config = this._interpretKeyConfig(key, config);
     if (config.final && this.resources.has(key)) {
-      console.error('set: cannot set final ', key, 'from ', this.resources.get(key), 'to', value);
+      // console.error('set: cannot set final ', key, 'from ', this.resources.get(key), 'to', value);
       throw new Error(`cannot set final entry ${key}`);
     }
     this.resEvents.next({ target: key, type: 'resource', value })
@@ -212,8 +186,7 @@ export class CanDI {
      as either alwaysArray is true
      or keys are an array
      */
-    let list = Array.isArray(keys) ? keys : [keys];
-    return list.map((key) => source.get(key));
+    return asArray(keys).map((key: ResourceKey) => source.get(key));
   }
 
   /**
@@ -277,6 +250,12 @@ export class CanDI {
 
   // -------------- introspection ---------
 
+  /**
+   * returns a specific property of a resources' config.
+   * If there is no config it will return undefined --ignoring isAbsent.
+   * If there is a config BUT it has no EXPLICIT property definition for the requested property,
+   * it returns ifAbsent (or throws it if it is an error).
+   */
   private _config(key: ResourceKey, prop: ResConfigKey, ifAbsent?: any): any | undefined {
     if (!this.configs.has(key)) {
       return undefined;
@@ -293,5 +272,34 @@ export class CanDI {
 
   typeof(key: ResourceKey) {
     return this._config(key, 'type', new Error(`key ${key} is defined but of indeterminate type `));
+  }
+
+  private _init(val: ResDef) {
+    let { config, key, type, value } = val;
+    if (!config) {
+      config = type ? { type } : { type: 'value' }
+    }
+    this.resEvents.next({
+      value: {
+        // @ts-ignore
+        resource: value,
+        config
+      }, target: key, type: 'init'
+    })
+  }
+
+  private _interpretKeyConfig(key: ResourceKey, config: ResConfig | string | undefined) {
+    if (this.configs.has(key)) {
+      config = this.configs.get(key)!;
+    }
+    if (!config) {
+      config = { type: 'value' };
+    } else if (isResourceType(config)) {
+      config = { type: config };
+    }
+    if (!isResConfig(config)) {
+      throw new Error('cannot configure in set ');
+    }
+    return config;
   }
 }

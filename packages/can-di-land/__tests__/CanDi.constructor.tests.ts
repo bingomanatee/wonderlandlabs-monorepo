@@ -1,51 +1,18 @@
 import { CanDI } from '../lib';
-import { ResDef } from '../src/types'
-import { ResourceKey } from '../lib/types'
+import {
+  entry_value,
+  async_value_is_eventually_present,
+  subject,
+  entry__exists, summerFn, summerFnAsync, delay, cannot_redefine_async
+} from '../testUtils'
+
+/**
+ * we abstract reused tests into the utils library to prevent redundant code.
+ */
 
 // a decorator factory for CanDI tests;
 // accepts the initial param for the can,
 // then injects it as the subject.
-
-function subject(initParams: ResDef[],
-                 test: (can: CanDI) => Promise<any> | void)
-  : () => void {
-  const can = new CanDI(initParams);
-  return () => test(can)
-}
-
-// we are abstracting the body of some of these tests
-// to prevent duplication as they are reused in both varieties of computeOnce
-function notPresentUntilResolved(key: ResourceKey, pending: Promise<any>) {
-  return async (can: CanDI) => {
-    expect(can.has(key)).toBeFalsy();
-    await pending;
-    expect(can.has(key)).toBeTruthy();
-  }
-}
-
-function isPresent(name: ResourceKey, value, type, otherConfigs = {}) {
-  return subject([{name, value, config: {type, ...otherConfigs, final: true}}],
-    (can) => {
-      expect(can.has(name)).toBeTruthy();
-    })
-}
-
-function finalTest(key: ResourceKey, value: any, isAsync: boolean)  {
-  return subject([
-    { name:key, value, config: { final: true, async: isAsync, type: 'value' } },
-  ], async (can) => {
-    // cannot be defined _before_ its value is present
-    expect(() => {
-      can.set(key, 20);
-    }).toThrow();
-    if (!isAsync) return;
-    // cannot be defined _after_ its value is present
-    await value;
-    expect(() => {
-      can.set(key, 20);
-    }).toThrow();
-  });
-}
 
 describe('CanDI', () => {
   describe('constructor', () => {
@@ -55,57 +22,305 @@ describe('CanDI', () => {
     });
 
     describe('type: value', () => {
+      /** there are many ways to define/ config for constructor items:
+       * 1) without any config; defaults to a "vanilla" value entity
+       * 2) with a type but no more specific configuration
+       * 3) with an explicit configuration defines type.
+       */
       it('accepts value types', subject([
-        { name: 'foo', value: '1' }, // implicit type
-        { name: 'bar', value: '2', type: 'value' },
-        { name: 'vey', value: '3', config: { type: 'value' } }
+        { key: 'foo', value: '1' }, // implicit type
+        { key: 'bar', value: '2', type: 'value' },
+        { key: 'vey', value: '3', config: { type: 'value' } }
       ], (can) => {
         expect(can.has('foo')).toBeTruthy();
+        expect(can.has('bar')).toBeTruthy();
+        expect(can.has('vey')).toBeTruthy();
         expect(can.typeof('foo')).toEqual('value');
         expect(can.typeof('bar')).toEqual('value');
         expect(can.typeof('vey')).toEqual('value');
       }));
 
-      describe('async', () => {
+      describe('async value', () => {
         it('is not present until it is resolved', async () => {
           const pending = new Promise((done) => done(100));
           return subject(
-            [{ name: 'asyncKey', value: pending, config: { type: 'value', async: true } }],
-            notPresentUntilResolved('asyncKey', pending)
+            [{ key: 'asyncComputeOnce', value: pending, config: { type: 'value', async: true } }],
+            async_value_is_eventually_present('asyncComputeOnce', pending),
+            'value -- async -- not present until resolved'
           )();
         });
+      });
 
-        describe('async final', () => {
-          it('is not present until it is resolved', // identical to the above test - but async this time
-            async () => {
-              const pending = new Promise((done) => done(100));
-              return subject(
-                [{ name: 'asyncKey', value: pending, config: { type: 'value', async: true, final: true } }],
-                notPresentUntilResolved('asyncKey', pending)
-              )();
-            });
+      describe('async final value', () => {
+        it('is not present until it is resolved', // identical to the above test - but async this time
+          ((pending) => subject(
+              [
+                {
+                  key: 'asyncFinalComputeOnce', value: pending,
+                  config: { type: 'value', async: true, final: true }
+                }
+              ],
+              async_value_is_eventually_present('asyncFinalComputeOnce', pending),
+              'async - final - value'
+            )
+          )(delay(100, 300))
+        )
 
-          it('cannot be redefined', async () => {
-            const pending = Promise.resolve(1);
-            return (finalTest('asyncFinalVar', pending, true))()
+        it('cannot be redefined',
+          ((promise) =>
+              subject([{
+                key: 'asyncFinalValue',
+                value: promise,
+                config: { type: 'value', async: true, final: true }
+              }], cannot_redefine_async('asyncFinalValue', promise))
+          )(delay(200, 100)))
+      });
+
+      describe('final value', () => {
+        it('is immediately present',
+          subject([{ key: 'fooComputeOnce', value: 100, config: { type: 'value', final: true } }],
+            entry_value('fooComputeOnce', 100),
+            'final is present')
+        );
+
+        it('cannot be redefined',
+          subject([{
+            key: 'finalValue',
+            value: 200,
+            config: { type: 'value', async: true, final: true }
+          }], (can) => {
+            expect(() => can.set('finalValue', 300)).toThrow();
+          }));
+      });
+
+      describe('computeOnce value', () => {
+        /**
+         * these are all the above tests - the results should not change.
+         * This is just validating that there are no unforeseen /unwanted side effects
+         * of using the computeOnce property into the value type,
+         * as that property is only designed to have effects with 'comp' type entities.
+         */
+        describe('async value', () => {
+          it('is not present until it is resolved', async () => {
+            const pending = new Promise((done) => done(100));
+            return subject(
+              [{ key: 'asyncKey', value: pending, config: { type: 'value', async: true, computeOnce: true } }],
+              async_value_is_eventually_present('asyncKey', pending)
+            )();
           });
         });
 
-        describe('final', () => {
-          it('is immediately present',
-            isPresent('foo',  100, 'value', {})
+        describe('async final value', () => {
+          it('is not present until it is resolved', // identical to the above test - but async this time
+            ((pending) => subject(
+                [
+                  {
+                    key: 'asyncKey',
+                    value: pending,
+                    config: { type: 'value', async: true, final: true, computeOnce: true }
+                  }
+                ],
+                async_value_is_eventually_present('asyncKey', pending)
+              )
+            )(delay(300, 200))
           );
 
           it('cannot be redefined', async () => {
-            const pending = Promise.resolve(1);
-            return (finalTest('finalVar', 30, false))()
+            // return (final_value__set('asyncFinalVar', Promise.resolve(1), true, true))()
           });
         });
 
-        describe('computeOnce', () => {
-          // this flag doesn't affect tests
-        })
+        describe('final value', () => {
+          it('is eventually present',
+            ((pending) =>
+              subject([{
+                  key: 'asyncFinalValue',
+                  value: pending,
+                  config: { type: 'value', async: true, final: true }
+                }],
+                async_value_is_eventually_present('asyncFinalValue', pending)
+              ))(new Promise(async (done) => {
+              setTimeout(() => done(100), 200);
+            }))
+          );
+
+          it('cannot be redefined', async () => {
+            const pending = new Promise(async (done) => {
+              setTimeout(() => done(30), 200);
+            })
+            // return (final_value__set('finalVar', 30, false))()
+          });
+        });
       });
+    });
+
+    describe('type: func', () => {
+      /** there are two ways to define config for constructor items:
+       * 1) with a type but no more specific configuration
+       * 2) with an explicit configuration defines type.
+       *
+       * (the "default" type will never be func.)
+       */
+      it('accepts func type without config', subject([
+            { key: 'bar', value: () => 2, type: 'func' },
+          ],
+          entry__exists('bar', 'func')
+        )
+      );
+      it('accepts func type with config', subject([
+            { key: 'bar', value: () => 2, config: { type: 'func' } },
+          ],
+          entry__exists('bar', 'func')
+        )
+      );
+
+      it('returns a function', subject(
+        [{
+          key: 'funcProp', value: async function () {
+            return 100
+          }, config: { type: 'func' }
+        }],
+        (can) => expect(typeof can.value('funcProp')).toBe('function')
+      ));
+
+      it('produces a function that takes props and returns a value', subject([
+        {
+          key: 'summer',
+          value: summerFn,
+          type: 'func'
+        }
+      ], (can) => {
+        expect(can.value('summer')(1, 2)).toBe(3);
+      }));
+
+
+      it('produces a function includes arguments and a value', subject([
+        {
+          key: 'summer',
+          value: summerFn,
+          config: {
+            type: 'func',
+            args: [100, 200]
+          }
+        }
+      ], (can) => {
+        expect(can.value('summer')(1, 2)).toBe(303);
+      }));
+
+      describe('async', () => {
+        it('is immediately present', subject(
+          [{
+            key: 'asyncFunc', value: async function () {
+              return await 100
+            }, config: { type: 'func', async: true }
+          }],
+          entry__exists('asyncFunc', 'func')
+        ));
+
+        it('returns a function', subject(
+          [{
+            key: 'asyncFunc', value: async function () {
+              return await 100
+            }, config: { type: 'func', async: true }
+          }],
+          (can) => expect(typeof can.value('asyncFunc')).toBe('function')
+        ));
+
+        it('produces a function that takes props and returns an async value', subject([
+          {
+            key: 'summerAsync',
+            value: summerFnAsync,
+            config: {
+              type: 'func',
+              async: true
+            }
+          }
+        ], async (can) => {
+          const result = can.value('summerAsync')(1, 2);
+          expect(typeof (result.then)).toBe('function');
+          const value = await result;
+          expect(value).toBe(3);
+        }));
+
+
+        it('produces a function includes arguments and a value', subject([
+          {
+            key: 'summerAsync',
+            value: summerFnAsync,
+            config: {
+              type: 'func',
+              args: [100, 200]
+            }
+          }
+        ], async (can) => {
+          const result = can.value('summerAsync')(1, 2);
+          expect(typeof (result.then)).toBe('function');
+          const value = await result;
+          expect(value).toBe(303);
+        }));
+      });
+    });
+
+    describe('type: comp', () => {
+      /** there are two ways to define config for constructor items:
+       * 1) with a type but no more specific configuration
+       * 2) with an explicit configuration defines type.
+       *
+       * (the "default" type will never be func.)
+       */
+      it('accepts comp type without config', subject([
+            { key: 'bar', value: () => 2, type: 'comp' },
+          ],
+          entry__exists('bar', 'comp')
+        )
+      );
+      it('accepts comp type with config', subject([
+            { key: 'bar', value: () => 2, config: { type: 'comp' } },
+          ],
+          entry__exists('bar', 'comp')
+        )
+      );
+    });
+
+    it('returns a value',
+      subject([{ key: 'syncComp', value: () => 2, type: 'comp' }], entry_value('syncComp', 2))
+    );
+
+    it('includes arguments',
+      subject([{
+        key: 'syncComp', value: (a: number, b: number) => a + b, config: {
+          type: 'comp', args: [1, 3]
+        }
+      }], entry_value('syncComp', 4))
+    );
+
+    describe('async', () => {
+      it('eventually returns a value',
+        subject([{
+          key: 'asyncComp', value: () => delay(2, 100), config: {
+            type: 'comp',
+            async: true
+          }
+        }], async (can) => {
+          expect(can.has('asyncComp')).toBeFalsy();
+          await (delay(null, 250));
+          expect(can.has('asyncComp')).toBeTruthy();
+          expect(can.value('asyncComp')).toBe(2);
+        })
+      );
+
+      it('includes arguments',
+        subject([{
+          key: 'asyncCompArg', value: (a: number, b: number) => delay(a + b, 100), config: {
+            type: 'comp', args: [1, 3], async: true
+          }
+        }], async (can) => {
+          expect(can.has('asyncCompArg')).toBeFalsy();
+          await (delay(null, 250));
+          expect(can.has('asyncCompArg')).toBeTruthy();
+          expect(can.value('asyncCompArg')).toBe(4);
+        })
+      );
     });
   });
 });

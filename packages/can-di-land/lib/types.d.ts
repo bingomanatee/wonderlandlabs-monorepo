@@ -38,8 +38,14 @@ export type ResEvent = (ResEventInit | ResEventResource | ResEventValue) & {
 };
 export type GenFunction = (...args: any[]) => any;
 export type ResDef = {
-    name: ResourceKey;
+    key: ResourceKey;
     value: any;
     config?: ResConfig;
     type?: ResourceType;
 };
+export type ResDefMutator = (def: ResDef) => ResDef;
+export type PromiseQueueEvent = {
+    key: ResourceKey;
+    value: any;
+};
+export declare function isPromise(arg: any): arg is Promise<any>;

@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.isResConfig = exports.isResourceType = void 0;
+exports.isPromise = exports.isResConfig = exports.isResourceType = void 0;
 const resourceTypes = ['value', 'func', 'comp'];
 function isResourceType(arg) {
     // @ts-ignore
@@ -20,3 +20,7 @@ function isResConfig(config) {
     (param in config) && (typeof config[param] !== 'boolean')));
 }
 exports.isResConfig = isResConfig;
+function isPromise(arg) {
+    return (!!(arg && typeof arg == 'object' && ('then' in arg) && typeof arg.then === 'function'));
+}
+exports.isPromise = isPromise;

@@ -1,4 +1,4 @@
-import { GenFunction, ResourceKey, ResourceType, ResourceValue } from './lib/types'
+import { GenFunction, Key, ResourceType, ResourceValue } from './lib/types'
 import { ResDef, ResDefMutator } from './src/types'
 import { CanDI } from './lib'
 import { c } from '@wonderlandlabs/collect'
@@ -15,9 +15,9 @@ export function subject(initParams: ResDef[],
   const can = new CanDI(initParams);
   return () => {
     if (alert) {
-      console.log(alert, c(can.configs).getReduce((list, config, key) => {
+      /*console.log(alert, c(can.configs).getReduce((list, config, key) => {
         return [...list, key, 'conf:', config]
-      }, []))
+      }, []))*/
     }
     test(can)
   }
@@ -27,7 +27,7 @@ export function subject(initParams: ResDef[],
  * Constructor tests --- value
  */
 
-export function async_value_is_eventually_present(key: ResourceKey, pending: Promise<any>) {
+export function async_value_is_eventually_present(key: Key, pending: Promise<any>) {
   return async (can: CanDI) => {
     expect(can.has(key)).toBeFalsy();
     await pending;
@@ -35,7 +35,7 @@ export function async_value_is_eventually_present(key: ResourceKey, pending: Pro
   }
 }
 
-export function entry_value(name: ResourceKey, value: any) {
+export function entry_value(name: Key, value: any) {
   return (can: CanDI) => {
     expect(can.has(name)).toBeTruthy();
     expect(can.value(name)).toEqual(value);
@@ -46,10 +46,10 @@ export function entry_value(name: ResourceKey, value: any) {
  * Constructor tests -- func
  */
 
-export function entry__exists(key: ResourceKey, type: ResourceType) {
+export function entry__exists(key: Key, type: ResourceType) {
   return (can: CanDI) => {
     expect(can.has(key)).toBeTruthy();
-    expect(can.typeof(key)).toBe(type)
+    expect(can.keyType(key)).toBe(type)
   }
 }
 
@@ -67,7 +67,7 @@ export function delay(value: any, time: number) {
   });
 }
 
-export function cannot_redefine_async(key: ResourceKey, promise: Promise<any>) {
+export function cannot_redefine_async(key: Key, promise: Promise<any>) {
   return async (can: CanDI) => {
     // cannot redefine value BEFORE it resolves...
     expect(() => can.set(key, 100)).toThrow();

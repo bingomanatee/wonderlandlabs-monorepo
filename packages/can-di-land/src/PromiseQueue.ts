@@ -1,5 +1,5 @@
 import { Subject } from 'rxjs'
-import { isPromise, PromiseQueueEvent, ResourceKey } from './types'
+import { isPromise, PromiseQueueEvent, Key } from './types'
 
 /**
  * This class keeps a list of pending promises and emitts a key-value pair when a promise completes.
@@ -7,22 +7,25 @@ import { isPromise, PromiseQueueEvent, ResourceKey } from './types'
  * the prior promise's value is ignored. This follows the "debounce" pattern.
  */
 export class PromiseQueue {
-  private promises: Map<ResourceKey, Subject<any>> = new Map();
+  private promises: Map<Key, Subject<any>> = new Map();
 
-  set(key: ResourceKey, promise: Promise<any>) {
+  set(key: Key, promise: Promise<any>) {
     if (!isPromise(promise)) {
       promise = Promise.resolve(promise);
     }
     this.promises.get(key)?.complete();
     const subject = this._asSubject(key, promise);
     this.promises.set(key, subject);
-
     return this;
+  }
+
+  has(key: Key) {
+    return this.promises.has(key);
   }
 
   public events = new Subject<PromiseQueueEvent>();
 
-  private _asSubject(key: ResourceKey, promise: Promise<any>) {
+  private _asSubject(key: Key, promise: Promise<any>) {
     const self = this;
     const subject = new Subject();
     promise.then((value) => {

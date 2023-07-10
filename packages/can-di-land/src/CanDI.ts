@@ -1,5 +1,5 @@
 import {
-  BehaviorSubject,
+  BehaviorSubject, combineLatest,
   distinctUntilChanged,
   filter,
   first,
@@ -10,7 +10,8 @@ import {
   tap,
 } from 'rxjs'
 import {
-  isResConfig,
+  GenFunction, isEventInit, isEventResource,
+  isResConfig, isResEventValue, isResEventValues,
   isResourceType,
   KeyArg,
   ResConfig,
@@ -18,12 +19,14 @@ import {
   ResDef,
   ResEvent,
   Resource,
-  ResourceKey,
+  Key,
   ResourceValue,
   ValueMap
 } from './types';
 import { PromiseQueue } from './PromiseQueue'
-import { asArray, compareArrays } from './utils'
+import { asArray, compareArrays, mergeMap } from './utils'
+import { DependencyAnalyzer } from './DependencyAnalyzer'
+import { c } from '@wonderlandlabs/collect'
 
 /**
  * tracks resources added, with defined dependencies, an optional list of registry names.
@@ -33,58 +36,117 @@ import { asArray, compareArrays } from './utils'
  * until the dependencies are resolved.
  */
 export class CanDI {
-  public configs = new Map<ResourceKey, ResConfig>();
-  public values = new BehaviorSubject<ValueMap>(new Map());
-  public resources = new Map<ResourceKey, any>();
-  public resEvents = new Subject<ResEvent>();
-  public pq = new PromiseQueue();
-  private _resEventResSub?: Subscription;
 
   constructor(values?: ResDef[]) {
     this._listenForEvents();
     values?.forEach((val) => {
       this._init(val);
-    })
+      // would it be better to initialize the can's props "en masse"?
+    });
   }
 
+
+  /**
+   * Resources are a somewhat redundant initial write of data from set and init calls.
+   * They hold the functions used by 'comp' | 'func' types.
+   * Their values are decorated with deps/args parameters
+   * and either passed into the value collection below as a function (func).
+   * or executed then their output is passed into the value collection.
+   * This may be done indirectly through the promiseQueue for async entries.
+   */
+  public resources: ValueMap = new Map<Key, any>();
+  public values = new BehaviorSubject<ValueMap>(new Map())
+  public configs = new Map<Key, ResConfig>();
+  public events = new Subject<ResEvent>();
+  public pq = new PromiseQueue();
+
+// ---------------- initial observer for events ----------
+
+  private _resEventResSub?: Subscription;
+  private _valEventResSub?: Subscription
+  private _multiValSub?: Subscription
   private _resEventSub?: Subscription;
   private _pqSub?: Subscription;
 
   private _listenForEvents() {
     const self = this;
 
-    this._resEventSub = this.resEvents
+    this._resEventSub = this.events
       .pipe(
-        filter((event: ResEvent) => event.type === 'init')
+        filter(isEventInit)
       )
-      .subscribe((event: ResEvent) => {
+      .subscribe((event) => {
         const { target, value } = event;
-        if (self.configs.has(target)) {
-          console.error('cannot re-configure ', target, 'for', target, 'with', event);
-          return;
-        }
-        self.configs.set(target, value.config);
-        if ('resource' in value) {
-          self.resEvents.next({ type: 'resource', target: event.target, value: event.value.resource })
-        }
+        self._initValue(target, value);
       });
 
-    this._resEventResSub = this.resEvents
+    this._resEventResSub = this.events
       .pipe(
-        filter((event: ResEvent) => event.type === 'resource')
+        filter(isEventResource)
       )
       .subscribe(
-        (event: ResEvent) => {
+        (event) => {
           const { target, value } = event;
           self._upsertResource(target, value);
         });
 
+    this._valEventResSub = this.events
+      .pipe(
+        filter(isResEventValue)
+      )
+      .subscribe(
+        (event) => {
+          const { target, value } = event;
+          self._updateValue(target, value);
+        });
+
+    this._multiValSub = this.events
+      .pipe(
+        filter(isResEventValues)
+      )
+      .subscribe((event) => {
+        const { value } = event;
+        this._updateValues(value);
+      })
     this._pqSub = this.pq.events.subscribe(({ key, value }) => {
       self._setValue(key, value);
     })
   }
 
-  private _upsertResource(key: ResourceKey, resource: any) {
+  // ----------------- initial values from constructor ------------
+
+  private _init(val: ResDef) {
+    let { config, key, type, value } = val;
+    if (!config) {
+      config = type ? { type } : { type: 'value' }
+    }
+    this.events.next({
+      value: {
+        // @ts-ignore
+        resource: value,
+        config
+      }, target: key, type: 'init'
+    })
+  }
+
+  private _initValue(target: Key, value: Resource) {
+    const { config } = value;
+    if (this.configs.has(target)) {
+      console.error('cannot re-configure ', target, 'for', target, 'with', event);
+      return;
+    }
+    // first write of config for key
+    this.configs.set(target, this._interpretKeyConfig(target, config));
+    // initialize the data upsert
+    if ('resource' in value) {
+      this.events.next({ type: 'resource', target: target, value: value.resource })
+    }
+  }
+
+  /**
+   * This is the initial action triggered by `set(key, value)`.
+   */
+  private _upsertResource(key: Key, resource: any) {
     const config = this.configs.get(key);
 
     if (!config) {
@@ -95,8 +157,8 @@ export class CanDI {
       console.warn('attempt to re-define a final key ', key);
       return;
     }
+    this.resources.set(key, resource);
 
-    this._updateResource(key, resource)
     switch (config.type) {
       case 'value':
         if (config.async) {
@@ -107,17 +169,20 @@ export class CanDI {
         break;
 
       case 'comp':
-        if (config.async) {
-          (async () => {
-            const response = await this.metaFunction(key)();
-            this._setValue(key, response);
-          })()
+        if (config.deps?.length && !this.has(config.deps)) {
+          /*
+           do nothing - pending all dependencies.
+           Note - setting the resource for a pending value but NOT updating the values stream
+           is an _intended_ possibility
+          */
+        } else if (config.async) {
+          this.pq.set(key, this.resAsFunction(key)());
         } else {
-          this._setValue(key, this.metaFunction(key)()); // sets the _value_ of the metaFunction
+          this._setValue(key, this.resAsFunction(key)()); // sets the _value_ of the resAsFunction
         }
         break;
       case 'func':
-        this._setValue(key, this.metaFunction(key)); // sets the metaFunction itself
+        this._setValue(key, this.resAsFunction(key)); // sets the resAsFunction itself
         break;
 
       default:
@@ -125,22 +190,49 @@ export class CanDI {
     }
   }
 
-  protected _updateResource(key: ResourceKey, resource: any) {
-    this.resources.set(key, resource);
-  }
-
   /**
-   * upserts a value into the values object.
-   * We assume all safeguards have been checked
-   * by the calling context.
+   * this method _requests_ a value update. Dpennding on configs, it may or may not compete.
    *
    * @param key
    * @param value
    */
-  protected _setValue(key: ResourceKey, value: any) {
-    const map = new Map(this.values.value);
-    map.set(key, value);
-    this.values.next(map);
+  protected _setValue(key: Key, value: any) {
+    this.events.next({ type: 'value', value, target: key })
+  }
+
+  // ------------------------- Update Methods ---------------------
+  /**
+   * These methods are the final write methods for updating the value stream.
+   * It is assumed that upstream of calling them, the resource has been updated.
+   */
+  protected _updateValue(key: Key, value: ResourceValue) {
+    this._updateValues(new Map([[key, value]]))
+  }
+
+  protected _updateValues(values: ValueMap) {
+    values.forEach((value, key) => {
+      if (this._finalized(key)) {
+        values.delete(key);
+      }
+    });
+
+    if (!values.size) {
+      return;
+    }
+    const next = this.resolveDeps(values); // update any comps based on new deps values.
+    this.values.next(next);
+  }
+
+  /**
+   * this is a prep method for updating many values.
+   * The comp entries are called in a specific order to minimize dependency sync errors.
+   * @param values
+   */
+  resolveDeps(values: ValueMap) {
+    const currentValues = mergeMap(this.values.value, values);
+    const depper = new DependencyAnalyzer(this);
+    depper.updateComputed(currentValues, values);
+    return currentValues;
   }
 
   // ------------------------- IO methods ------------------------
@@ -149,14 +241,78 @@ export class CanDI {
    * upserts a value into the resource collection. In the absence of pre-existing config
    * or a config parameter assumes it is a value type
    */
-  set(key: ResourceKey, value: ResourceValue, config?: ResConfig | string): void {
-    config = this._interpretKeyConfig(key, config);
-    if (config.final && this.resources.has(key)) {
-      // console.error('set: cannot set final ', key, 'from ', this.resources.get(key), 'to', value);
-      throw new Error(`cannot set final entry ${key}`);
+  set(key: Key, value: ResourceValue, config?: ResConfig | string): void {
+    if (!this.configs.has(key)) {
+      config = this._interpretKeyConfig(key, config);
+      this.events.next({
+        type: 'init',
+        target: key,
+        value: {
+          config,
+          resource: value
+        }
+      })
+    } else {
+      const config = this.configs.get(key)!;
+      if (config.final && this.resources.has(key)) {
+        // console.error('set: cannot set final ', key, 'from ', this.resources.get(key), 'to', value);
+        throw new Error(`cannot set final entry ${key}`);
+      }
+      this.events.next({ target: key, type: 'resource', value })
     }
-    this.resEvents.next({ target: key, type: 'resource', value })
+
   }
+
+  /*  /!**
+     * Values are a set of concrete values -- either of value type of conf results.
+     * All async must be resolved, and it is assumed finality was checked by the caller.
+     * @param values
+     *!/
+    setMany(values: ValueMap) {
+      let resMap: ValueMap | undefined;
+      let valueMap: ValueMap | undefined;
+
+      values.forEach((value, key) => {
+        switch (this.keyType(key)) {
+          case 'value':
+            if (!resMap) {
+              resMap = new Map(this.resources);
+            }
+            if (!valueMap) {
+              valueMap = new Map(this.values.value);
+            }
+
+            resMap.set(key, value);
+            valueMap.set(key, value);
+            break;
+
+          case 'func':
+            // only needs to be set once
+            if (!this.values.value.has(key)) {
+              if (!valueMap) {
+                valueMap = new Map(this.values.value);
+              }
+              valueMap.set(key, this.resAsFunction(key))
+            }
+            break;
+
+          case 'comp':
+            if (!valueMap) {
+              valueMap = new Map(this.values.value);
+            }
+
+            valueMap.set(key, value);
+            break
+        }
+      });
+      if (resMap) {
+        this.resources = mergeMap(this.resources, resMap);
+      }
+
+      if (valueMap) {
+        this._updateValues(valueMap);
+      }
+    }*/
 
   /**
    * A synchronous method that returns a value or an array of values
@@ -186,7 +342,7 @@ export class CanDI {
      as either alwaysArray is true
      or keys are an array
      */
-    return asArray(keys).map((key: ResourceKey) => source.get(key));
+    return asArray(keys).map((key: Key) => source.get(key));
   }
 
   /**
@@ -196,26 +352,46 @@ export class CanDI {
    * We do not care at this point whether the function
    * is marked as async in the configuration.
    *
-   * The metaFunction is _dynamic_ -- the resource and all its dependencies
+   * The resAsFunction is _dynamic_ -- the resource and all its dependencies
    * are polled every time the method is called; no caching is done in closure.
+   *
+   * Because there are times when the driving dependent array is in flux it is an optional argument.
+   * In its absence, the class' values subject value is used (downstream).
    */
-  private metaFunction(key: ResourceKey): (...params: any) => any {
+  public resAsFunction(key: Key, values ?: ValueMap): (...params: any) => any {
+    const self = this;
     return (...params) => {
-      const fn = this.resources.get(key);
+      const fn = self.resources.get(key);
       if (typeof fn !== 'function') {
         console.error('Cannot make computer out of ', key);
         throw new Error('non-functional key');
       }
-      let args = [...params];
-      const conf = this.configs.get(key);
-      if (conf && Array.isArray(conf.args)) {
-        args = [...conf.args, ...args];
+      let fnParams = params;
+      let prepend = (args: any[] | undefined) => {
+        if (Array.isArray(args) && args.length) {
+          fnParams = [...args, ...fnParams];
+        }
       }
-      if (conf?.deps?.length) {
-        args = [...this.value(conf.deps, true), ...args];
+      const conf = self.configs.get(key);
+      if (!conf) {
+        console.error('attempt to compute a function without a comp', key);
+        return undefined;
+      }
+      const { args, deps } = conf;
+      prepend(args);
+
+      if (deps?.length) {
+        if (!self.has(deps, values)) {
+          console.error('attempt to call resAsFunction with pending deps:', key, conf, 'current value keys: ', Array.from(this.values.value.keys()));
+          return undefined;
+        }
+
+        let depValues;
+        depValues = self.value(deps, true, values);
+        prepend(depValues);
       }
 
-      return fn(...args);
+      return fn(...fnParams);
     }
   }
 
@@ -226,10 +402,11 @@ export class CanDI {
    * (or, if presented, a Map);
    */
   public has(keys: KeyArg, map?: ValueMap): boolean {
+    const subject = (map || this.values.value);
     if (!Array.isArray(keys)) {
-      return this.has([keys]);
+      return subject.has(keys);
     }
-    return keys.every((key) => (map || this.values.value).has(key));
+    return keys.every((key) => subject.has(key));
   }
 
   /**
@@ -249,6 +426,9 @@ export class CanDI {
   }
 
   // -------------- introspection ---------
+  protected _finalized(key: Key) {
+    return !!this.configs.get(key)?.final && this.has(key);
+  }
 
   /**
    * returns a specific property of a resources' config.
@@ -256,7 +436,7 @@ export class CanDI {
    * If there is a config BUT it has no EXPLICIT property definition for the requested property,
    * it returns ifAbsent (or throws it if it is an error).
    */
-  private _config(key: ResourceKey, prop: ResConfigKey, ifAbsent?: any): any | undefined {
+  private _config(key: Key, prop: ResConfigKey, ifAbsent?: any): any | undefined {
     if (!this.configs.has(key)) {
       return undefined;
     }
@@ -270,25 +450,11 @@ export class CanDI {
     return config[prop];
   }
 
-  typeof(key: ResourceKey) {
+  keyType(key: Key) {
     return this._config(key, 'type', new Error(`key ${key} is defined but of indeterminate type `));
   }
 
-  private _init(val: ResDef) {
-    let { config, key, type, value } = val;
-    if (!config) {
-      config = type ? { type } : { type: 'value' }
-    }
-    this.resEvents.next({
-      value: {
-        // @ts-ignore
-        resource: value,
-        config
-      }, target: key, type: 'init'
-    })
-  }
-
-  private _interpretKeyConfig(key: ResourceKey, config: ResConfig | string | undefined) {
+  private _interpretKeyConfig(key: Key, config: ResConfig | string | undefined) {
     if (this.configs.has(key)) {
       config = this.configs.get(key)!;
     }
@@ -300,6 +466,106 @@ export class CanDI {
     if (!isResConfig(config)) {
       throw new Error('cannot configure in set ');
     }
+    if (config.type === 'value' && config.deps?.length) {
+      console.error('bad value config -- no deps allowed', key, config);
+      throw new Error('cannot add dependencies to value configs');
+    }
     return config;
+  }
+
+  /*  _checkDeps(key: Key) {
+      const depNode = new DependencyAnalyzer(key, this);
+      const errors = depNode.errors;
+      if (errors.length) {
+        console.error('dependency errors:', errors);
+        throw errors;
+      }
+      ;
+    }
+
+    _updateDeps(key: Key) {
+      const updateMap = new Map();
+      const promiseMap = new Map();
+      this.configs.forEach((config: ResConfig, configKey) => {
+        if (config.final && this.has(configKey)) {
+          return;
+          // lock in any finalized value
+        }
+        if (!config.deps?.includes(key)) {
+          return;
+        }
+        // other dependencies are missing;
+        if (!this.has(config.deps)) {
+          return;
+        }
+
+        switch (config.type) {
+          case 'func':
+            if (!this.values.value.has(configKey)) {
+              updateMap.set(configKey, this.resAsFunction(configKey));
+            }
+            break;
+
+          case 'comp':
+            if (config.async) {
+              promiseMap.set(configKey, this.resAsFunction(configKey)())
+            } else {
+              updateMap.set(configKey, this.resAsFunction(configKey)());
+            }
+            break;
+        }
+
+        if (updateMap.size) {
+          this.events.next({ type: 'values', value: updateMap })
+        }
+        if (promiseMap.size) {
+          let resolvers: GenFunction[] = [];
+          promiseMap.forEach((promise, key) => {
+            resolvers.push(async () => {
+              let value = await (promise);
+              promiseMap.set(key, value);
+            })
+          });
+          Promise.all(resolvers)
+            .then((result) => {
+              this.events.next({ type: 'values', value: promiseMap })
+            })
+            .catch(err => {
+              console.error('error resolving deps:', err, promiseMap);
+              throw err;
+            });
+        }
+      })
+    }*/
+
+  /**
+   * returns a map of values, keyed by the comp that depends on them.
+   * @param values
+   * @param includeFinals
+   */
+  public compDeps(values?: ValueMap, includeFinals = false) {
+    if (!values) {
+      values = this.values.value;
+    }
+
+    return c(this.configs)
+      .getReduce((list, config, key) => {
+
+        const { deps, type, final } = config;
+        if (type !== 'comp' || (!deps?.length)) {
+          return list;
+        }
+        if (final && values?.has(key) && (!includeFinals)) {
+          return list;
+        }
+
+        if (deps.every((depKey: Key) => values?.has(depKey))) {
+          return list;
+        }
+
+        list.set(key, deps.map((depKey: Key) => values?.get(depKey)));
+
+        return list;
+      }, new Map())
   }
 }

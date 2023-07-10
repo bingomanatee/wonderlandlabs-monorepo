@@ -1,5 +1,5 @@
 import { Subject } from 'rxjs';
-import { PromiseQueueEvent, ResourceKey } from './types';
+import { PromiseQueueEvent, Key } from './types';
 /**
  * This class keeps a list of pending promises and emitts a key-value pair when a promise completes.
  * The catch is -- if a new promise is enqueued before an old promise completes,
@@ -7,7 +7,8 @@ import { PromiseQueueEvent, ResourceKey } from './types';
  */
 export declare class PromiseQueue {
     private promises;
-    set(key: ResourceKey, promise: Promise<any>): this;
+    set(key: Key, promise: Promise<any>): this;
+    has(key: Key): boolean;
     events: Subject<PromiseQueueEvent>;
     private _asSubject;
 }

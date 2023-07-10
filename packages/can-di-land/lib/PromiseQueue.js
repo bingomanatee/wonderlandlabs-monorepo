@@ -23,6 +23,9 @@ class PromiseQueue {
         this.promises.set(key, subject);
         return this;
     }
+    has(key) {
+        return this.promises.has(key);
+    }
     _asSubject(key, promise) {
         const self = this;
         const subject = new rxjs_1.Subject();

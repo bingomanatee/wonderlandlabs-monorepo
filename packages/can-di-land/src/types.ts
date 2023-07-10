@@ -1,11 +1,10 @@
-
-
 export type ResourceType = 'value' | 'func' | 'comp';
-export type ValueMap = Map<ResourceKey, any>;
-export type ResourceKey = any; // this is more of a "documentation type" to indicate a value is a key to a resource
+export type ValueMap = Map<Key, any>;
+export type Key = any; // this is more of a "documentation type" to indicate a value is a key to a resource
 // than an actual type constraint
 export type ResourceValue = any; // again - a semantic flag
 const resourceTypes = ['value', 'func', 'comp'];
+
 export function isResourceType(arg: unknown): arg is ResourceType {
   // @ts-ignore
   return resourceTypes.includes(arg);
@@ -13,7 +12,7 @@ export function isResourceType(arg: unknown): arg is ResourceType {
 
 export type ResConfigKey = 'deps' | 'type' | 'args' | 'final' | 'computeOnce' | 'bind' | 'meta'
 export type ResConfig = {
-  deps?: ResourceKey[],
+  deps?: Key[],
   type: ResourceType,
   args?: any[],
   final?: boolean,
@@ -23,7 +22,7 @@ export type ResConfig = {
   meta?: boolean // is a function that returns a value - perhaps because it needs a closure; not currently fully implemented
 }
 
-export function isResConfig(config: unknown) : config is ResConfig {
+export function isResConfig(config: unknown): config is ResConfig {
   if (!(config && typeof config === 'object')) {
     return false;
   }
@@ -42,19 +41,36 @@ export type Resource = {
   config: ResConfig,
 }
 
-export type KeyArg = ResourceKey | ResourceKey[];
-export type ResEventType = 'value' | 'init' | 'resource';
+export type KeyArg = Key | Key[];
+export type ResEventType = 'value' | 'init' | 'resource' | 'values';
 
-export type ResEventInit = {type: 'init', value: Resource };
-export type ResEventResource = {type: 'resource', value: any};
-export type ResEventValue = {type: 'value', value: any};
-export type ResEvent = (ResEventInit | ResEventResource | ResEventValue) & {target: ResourceKey}
+export type ResEventInit = { type: 'init', value: Resource, target: Key  };
+export type ResEventResource = { type: 'resource', value: any, target: Key  };
+export type ResEventValue = { type: 'value', value: any, target: Key };
+export type ResEventValues = { type: 'values', value: ValueMap }
+export type ResEvent = (ResEventInit | ResEventResource | ResEventValue | ResEventValues)
+
+export function isEventInit(arg: unknown) : arg is ResEventInit {
+  return !!(arg && typeof arg === 'object' && 'type' in arg && arg.type === 'init' && 'value' in arg && 'target' in arg)
+}
+
+export function isEventResource(arg: unknown): arg is ResEventResource {
+  return !!(arg && typeof arg === 'object' && 'type' in arg && arg.type === 'resource' && 'value' in arg && 'target' in arg)
+}
+
+export function isResEventValue(arg: unknown): arg is ResEventValue {
+  return !!(arg && typeof arg === 'object' && 'type' in arg && arg.type === 'value' && 'value' in arg && 'target' in arg)
+}
+
+export function isResEventValues(arg: unknown): arg is ResEventValues {
+  return !!(arg && typeof arg === 'object' && 'type' in arg && arg.type === 'values' && 'value' in arg)
+}
 
 export type GenFunction = (...args: any[]) => any;
-export type ResDef = { key: ResourceKey, value: any, config?: ResConfig, type?: ResourceType }
+export type ResDef = { key: Key, value: any, config?: ResConfig, type?: ResourceType }
 export type ResDefMutator = (def: ResDef) => ResDef;
 export type PromiseQueueEvent = {
-  key: ResourceKey,
+  key: Key,
   value: any
 }
 

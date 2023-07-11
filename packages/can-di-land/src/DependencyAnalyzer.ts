@@ -1,19 +1,13 @@
-import { ResConfig, Key, ValueMap } from './types'
-import { PromiseQueue } from './PromiseQueue'
+import { CanDiType, Key, Config, ValueMap } from './types'
 import { c } from '@wonderlandlabs/collect'
-
-type CanDiType = {
-  configs: Map<Key, ResConfig>,
-  pq: PromiseQueue,
-  resAsFunction(key: Key, values ?: ValueMap): (...params: any) => any
-}
+import CanDIEntry from './CanDIEntry'
 
 type DepError = { root?: Key, to?: Key, msg: string }
 
 export class DependencyAnalyzer {
   constructor(public can: CanDiType) {
-    can.configs.forEach((config: ResConfig, configKey: Key) => {
-      config.deps?.forEach((dep) => {
+    can.entries.forEach((entry: CanDIEntry, configKey: Key) => {
+      entry.deps.forEach((dep) => {
         this._addDep(configKey, dep);
       })
     })
@@ -104,7 +98,7 @@ class DepNode {
   recompute(allValues: Map<any, any>, changedValues: ValueMap, recomputedIds: any[]) {
     const can: CanDiType = this.da.can;
     this.childNodes.forEach((node) => node.recompute(allValues, changedValues, recomputedIds))
-      if (can.configs.get(this.key)?.final) {
+      if (can.entries.get(this.key)?.final) {
         if(allValues.has(this.key)) {
           return;
         }
@@ -119,7 +113,7 @@ class DepNode {
           return;
         }
 
-        allValues.set(this.key, can.resAsFunction(this.key, allValues)());
+     //   allValues.set(this.key, can.resAsFunction(this.key, allValues)());
       }
   }
 

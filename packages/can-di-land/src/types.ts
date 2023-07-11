@@ -1,8 +1,13 @@
+import { BehaviorSubject, Subject } from 'rxjs'
+import { PromiseQueue } from './PromiseQueue'
+import CanDIEntry from './CanDIEntry'
+
 export type ResourceType = 'value' | 'func' | 'comp';
 export type ValueMap = Map<Key, any>;
+export type StreamMap = Map<Key, BehaviorSubject<any>>
 export type Key = any; // this is more of a "documentation type" to indicate a value is a key to a resource
 // than an actual type constraint
-export type ResourceValue = any; // again - a semantic flag
+export type Value = any; // again - a semantic flag
 const resourceTypes = ['value', 'func', 'comp'];
 
 export function isResourceType(arg: unknown): arg is ResourceType {
@@ -11,7 +16,7 @@ export function isResourceType(arg: unknown): arg is ResourceType {
 }
 
 export type ResConfigKey = 'deps' | 'type' | 'args' | 'final' | 'computeOnce' | 'bind' | 'meta'
-export type ResConfig = {
+export type Config = {
   deps?: Key[],
   type: ResourceType,
   args?: any[],
@@ -22,7 +27,7 @@ export type ResConfig = {
   meta?: boolean // is a function that returns a value - perhaps because it needs a closure; not currently fully implemented
 }
 
-export function isResConfig(config: unknown): config is ResConfig {
+export function isResConfig(config: unknown): config is Config {
   if (!(config && typeof config === 'object')) {
     return false;
   }
@@ -37,14 +42,14 @@ export function isResConfig(config: unknown): config is ResConfig {
 }
 
 export type Resource = {
-  resource?: ResourceValue,
-  config: ResConfig,
+  resource?: Value,
+  config: Config,
 }
 
 export type KeyArg = Key | Key[];
 export type ResEventType = 'value' | 'init' | 'resource' | 'values';
 
-export type ResEventInit = { type: 'init', value: Resource, target: Key  };
+export type ResEventInit = { type: 'init', value: ResDef, target: Key  };
 export type ResEventResource = { type: 'resource', value: any, target: Key  };
 export type ResEventValue = { type: 'value', value: any, target: Key };
 export type ResEventValues = { type: 'values', value: ValueMap }
@@ -58,7 +63,7 @@ export function isEventResource(arg: unknown): arg is ResEventResource {
   return !!(arg && typeof arg === 'object' && 'type' in arg && arg.type === 'resource' && 'value' in arg && 'target' in arg)
 }
 
-export function isResEventValue(arg: unknown): arg is ResEventValue {
+export function isEventValue(arg: unknown): arg is ResEventValue {
   return !!(arg && typeof arg === 'object' && 'type' in arg && arg.type === 'value' && 'value' in arg && 'target' in arg)
 }
 
@@ -67,7 +72,7 @@ export function isResEventValues(arg: unknown): arg is ResEventValues {
 }
 
 export type GenFunction = (...args: any[]) => any;
-export type ResDef = { key: Key, value: any, config?: ResConfig, type?: ResourceType }
+export type ResDef = { key: Key, value: any, config?: Config, type?: ResourceType }
 export type ResDefMutator = (def: ResDef) => ResDef;
 export type PromiseQueueEvent = {
   key: Key,
@@ -76,4 +81,15 @@ export type PromiseQueueEvent = {
 
 export function isPromise(arg: any): arg is Promise<any> {
   return (!!(arg && typeof arg == 'object' && ('then' in arg) && typeof arg.then === 'function'))
+}
+
+export type CanDiType = {
+  entries: Map<Key, CanDIEntry>,
+  pq: PromiseQueue,
+  get(key: Key) : Value
+  gets(...keys: Key[]): Value[]
+  events: Subject<ResEvent>;
+  has(key: Key | Key[]) : boolean;
+  set(key: Key, value: Value) : void;
+  add(key: Key, value: Value, config?: Config) : void
 }

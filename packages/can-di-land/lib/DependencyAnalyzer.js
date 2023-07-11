@@ -6,9 +6,8 @@ class DependencyAnalyzer {
     constructor(can) {
         this.can = can;
         this.dependsOn = new Map();
-        can.configs.forEach((config, configKey) => {
-            var _a;
-            (_a = config.deps) === null || _a === void 0 ? void 0 : _a.forEach((dep) => {
+        can.entries.forEach((entry, configKey) => {
+            entry.deps.forEach((dep) => {
                 this._addDep(configKey, dep);
             });
         });
@@ -92,7 +91,7 @@ class DepNode {
         var _a;
         const can = this.da.can;
         this.childNodes.forEach((node) => node.recompute(allValues, changedValues, recomputedIds));
-        if ((_a = can.configs.get(this.key)) === null || _a === void 0 ? void 0 : _a.final) {
+        if ((_a = can.entries.get(this.key)) === null || _a === void 0 ? void 0 : _a.final) {
             if (allValues.has(this.key)) {
                 return;
             }
@@ -104,7 +103,7 @@ class DepNode {
                 // there were no changed dependencies, and no dependency was recomputed
                 return;
             }
-            allValues.set(this.key, can.resAsFunction(this.key, allValues)());
+            //   allValues.set(this.key, can.resAsFunction(this.key, allValues)());
         }
     }
     link(nodeMap) {

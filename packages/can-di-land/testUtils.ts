@@ -1,6 +1,6 @@
-import { GenFunction, Key, ResourceType, ResourceValue } from './lib/types'
+import { GenFunction, Key, ResourceType, Value } from './src/types'
 import { ResDef, ResDefMutator } from './src/types'
-import { CanDI } from './lib'
+import { CanDI} from './src'
 import { c } from '@wonderlandlabs/collect'
 
 /**
@@ -11,7 +11,7 @@ import { c } from '@wonderlandlabs/collect'
  */
 export function subject(initParams: ResDef[],
                         test: (can: CanDI) => Promise<any> | void, alert?: string)
-  : () => void {
+  : () => any {
   const can = new CanDI(initParams);
   return () => {
     if (alert) {
@@ -38,7 +38,7 @@ export function async_value_is_eventually_present(key: Key, pending: Promise<any
 export function entry_value(name: Key, value: any) {
   return (can: CanDI) => {
     expect(can.has(name)).toBeTruthy();
-    expect(can.value(name)).toEqual(value);
+    expect(can.get(name)).toEqual(value);
   }
 }
 
@@ -49,7 +49,7 @@ export function entry_value(name: Key, value: any) {
 export function entry__exists(key: Key, type: ResourceType) {
   return (can: CanDI) => {
     expect(can.has(key)).toBeTruthy();
-    expect(can.keyType(key)).toBe(type)
+    expect(can.entries.get(key)?.type).toBe(type)
   }
 }
 
@@ -69,6 +69,10 @@ export function delay(value: any, time: number) {
 
 export function cannot_redefine_async(key: Key, promise: Promise<any>) {
   return async (can: CanDI) => {
+    console.log('cannot_redefine_async: can entries are...');
+    can.entries.forEach((entry, key) => {
+      console.log(key, ':', entry);
+    })
     // cannot redefine value BEFORE it resolves...
     expect(() => can.set(key, 100)).toThrow();
     await promise;

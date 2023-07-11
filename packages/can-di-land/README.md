@@ -157,7 +157,7 @@ a config and it will interpret it correctly. All of these are valid calls:
 
 ```javascript
 
-const can = new CanDI();
+const can = new CanD_oldI();
 can.set('foo', 100);
 can.set('bar', { type: 'value' });
 can.set('foo2', 100, 'value');
@@ -305,7 +305,7 @@ function point3(x: number, y: number, z: number) {
   return ({ x, y, z });
 }
 
-const can = new CanDI();
+const can = new CanD_oldI();
 can.set('point', point3, 'func');
 console.log(con.value('point')(1, 2, 3));
 //  {x: 1, y: 2, z: 3}

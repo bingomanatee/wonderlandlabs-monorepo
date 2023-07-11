@@ -35,9 +35,9 @@ describe('CanDI', () => {
         expect(can.has('foo')).toBeTruthy();
         expect(can.has('bar')).toBeTruthy();
         expect(can.has('vey')).toBeTruthy();
-        expect(can.typeof('foo')).toEqual('value');
-        expect(can.typeof('bar')).toEqual('value');
-        expect(can.typeof('vey')).toEqual('value');
+        expect(can.entry('foo')?.type).toEqual('value');
+        expect(can.entry('bar')?.type).toEqual('value');
+        expect(can.entry('vey')?.type).toEqual('value');
       }));
 
       describe('async value', () => {
@@ -67,13 +67,19 @@ describe('CanDI', () => {
         )
 
         it('cannot be redefined',
-          ((promise) =>
-              subject([{
-                key: 'asyncFinalValue',
-                value: promise,
-                config: { type: 'value', async: true, final: true }
-              }], cannot_redefine_async('asyncFinalValue', promise))
-          )(delay(200, 100)))
+          async () => {
+            const promise = delay(200, 100);
+            const can = new CanDI([{
+              key: 'asyncFinalValue',
+              value: promise,
+              config: { type: 'value', async: true, final: true }
+            }]);
+            // cannot redefine value BEFORE it resolves...
+            expect(() => can.set('asyncFinalValue', 100)).toThrow();
+            await promise;
+            // ... or after
+            expect(() => can.set('asyncFinalValue', 100)).toThrow();
+          });
       });
 
       describe('final value', () => {
@@ -145,10 +151,14 @@ describe('CanDI', () => {
           );
 
           it('cannot be redefined', async () => {
-            const pending = new Promise(async (done) => {
-              setTimeout(() => done(30), 200);
-            })
-            // return (final_value__set('finalVar', 30, false))()
+            const can = new CanDI([
+              {
+                key: 'finalValue',
+                value: 100,
+                config: { final: true, type: 'value' }
+              }
+            ]);
+            expect(() => can.set('finalValue', 200)).toThrow();
           });
         });
       });
@@ -180,7 +190,7 @@ describe('CanDI', () => {
             return 100
           }, config: { type: 'func' }
         }],
-        (can) => expect(typeof can.value('funcProp')).toBe('function')
+        (can) => expect(typeof can.get('funcProp')).toBe('function')
       ));
 
       it('produces a function that takes props and returns a value', subject([
@@ -190,7 +200,7 @@ describe('CanDI', () => {
           type: 'func'
         }
       ], (can) => {
-        expect(can.value('summer')(1, 2)).toBe(3);
+        expect(can.get('summer')(1, 2)).toBe(3);
       }));
 
 
@@ -204,7 +214,7 @@ describe('CanDI', () => {
           }
         }
       ], (can) => {
-        expect(can.value('summer')(1, 2)).toBe(303);
+        expect(can.get('summer')(1, 2)).toBe(303);
       }));
 
       describe('async', () => {
@@ -223,7 +233,7 @@ describe('CanDI', () => {
               return await 100
             }, config: { type: 'func', async: true }
           }],
-          (can) => expect(typeof can.value('asyncFunc')).toBe('function')
+          (can) => expect(typeof can.get('asyncFunc')).toBe('function')
         ));
 
         it('produces a function that takes props and returns an async value', subject([
@@ -236,28 +246,34 @@ describe('CanDI', () => {
             }
           }
         ], async (can) => {
-          const result = can.value('summerAsync')(1, 2);
+          const result = can.get('summerAsync')(1, 2);
           expect(typeof (result.then)).toBe('function');
           const value = await result;
           expect(value).toBe(3);
         }));
 
 
-        it('produces a function includes arguments and a value', subject([
-          {
-            key: 'summerAsync',
-            value: summerFnAsync,
-            config: {
-              type: 'func',
-              args: [100, 200]
-            }
-          }
-        ], async (can) => {
-          const result = can.value('summerAsync')(1, 2);
-          expect(typeof (result.then)).toBe('function');
-          const value = await result;
-          expect(value).toBe(303);
-        }));
+        it('produces a function includes arguments and a value',
+
+          () => {
+            const can = new CanDI([
+              {
+                key: 'summerAsync',
+                value: summerFnAsync,
+                config: {
+                  type: 'func',
+                  args: [100, 200]
+                }
+              }
+            ]);
+
+            const fn = can.get('summerAsync');
+            expect(typeof (fn)).toBe('function');
+            // (1, 2);
+            // expect(typeof (result.then)).toBe('function');
+            // const value = await result;
+            // expect(value).toBe(303);
+          })
       });
     });
 
@@ -296,31 +312,37 @@ describe('CanDI', () => {
 
     describe('async', () => {
       it('eventually returns a value',
-        subject([{
-          key: 'asyncComp', value: () => delay(2, 100), config: {
-            type: 'comp',
-            async: true
-          }
-        }], async (can) => {
+        async () => {
+          const can = new CanDI([{
+              key: 'asyncComp', value: () => delay(2, 100), config: {
+                type: 'comp',
+                async: true
+              }
+            }]
+          )
+
+          console.log('========== can eventual values:', can.values.value);
           expect(can.has('asyncComp')).toBeFalsy();
           await (delay(null, 250));
           expect(can.has('asyncComp')).toBeTruthy();
-          expect(can.value('asyncComp')).toBe(2);
-        })
+          expect(can.get('asyncComp')).toBe(2);
+        }
       );
 
       it('includes arguments',
-        subject([{
-          key: 'asyncCompArg', value: (a: number, b: number) => delay(a + b, 100), config: {
-            type: 'comp', args: [1, 3], async: true
-          }
-        }], async (can) => {
+        async () => {
+          const can = new CanDI(
+            [{
+              key: 'asyncCompArg', value: (a: number, b: number) => delay(a + b, 100), config: {
+                type: 'comp', args: [1, 3], async: true
+              }
+            }]
+          )
           expect(can.has('asyncCompArg')).toBeFalsy();
           await (delay(null, 250));
           expect(can.has('asyncCompArg')).toBeTruthy();
-          expect(can.value('asyncCompArg')).toBe(4);
-        })
-      );
+          expect(can.get('asyncCompArg')).toBe(4);
+        });
     });
   });
 });

@@ -1,10 +1,4 @@
-import { ResConfig, Key, ValueMap } from './types';
-import { PromiseQueue } from './PromiseQueue';
-type CanDiType = {
-    configs: Map<Key, ResConfig>;
-    pq: PromiseQueue;
-    resAsFunction(key: Key, values?: ValueMap): (...params: any) => any;
-};
+import { CanDiType, Key, ValueMap } from './types';
 type DepError = {
     root?: Key;
     to?: Key;

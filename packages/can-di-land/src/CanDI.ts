@@ -5,15 +5,17 @@ import CanDIEntry from './CanDIEntry'
 
 export class CanDI {
 
-  constructor(values?: ResDef[]) {
+  constructor(values?: ResDef[], maxChangeLoops = 30) {
     this._initEvents();
     this._initPQ();
     values?.forEach((val) => {
       this.events.next({ type: 'init', target: val.key, value: val })
       // would it be better to initialize the can's props "en masse"?
     });
+    this.maxChangeLoops = maxChangeLoops;
   }
 
+  private maxChangeLoops: number;
   public values = new BehaviorSubject<ValueMap>(new Map())
   public entries = new Map<Key, CanDIEntry>();
   public events = new Subject<ResEvent>();
@@ -26,23 +28,21 @@ export class CanDI {
     if (!entry) {
       throw new Error(`cannot set value of entry: ${key}`)
     }
-    if (key === 'finalValue') console.log('----- setting ', key, value);
     entry.next(value);
-    if (key === 'finalValue') console.log('-----  DONE setting ', key, value);
   }
 
-  add(key: Key, value: Value, config? : Config | ResourceType) : void {
+  add(key: Key, value: Value, config?: Config | ResourceType): void {
     if (this.entries.has(key)) {
       throw new Error(`cannot redefine entry ${key}`)
     }
     if (!config) {
-      return this.add(key, value, {type: 'value'})
+      return this.add(key, value, { type: 'value' })
     }
     if (typeof config === 'string') {
-      return this.add(key, value, {type: config})
+      return this.add(key, value, { type: config })
     }
 
-    this.events.next({ type: 'init', target: key, value: {key, value, config} })
+    this.events.next({ type: 'init', target: key, value: { key, value, config } })
   }
 
   // ------- introspection/querying --------------
@@ -113,16 +113,12 @@ export class CanDI {
     let myConfig = config;
     if (!myConfig) {
       if (!type) {
-        myConfig = {type: 'value'}
+        myConfig = { type: 'value' }
       } else {
-        myConfig = {type}
+        myConfig = { type }
       }
     }
 
-    if (key === 'finalValue') {
-      console.log('========= data for', key, data);
-      console.log('======== values for ', key, 'config:', config, 'my', myConfig, 'value:', value);
-    }
     this.entries.set(
       key,
       new CanDIEntry(
@@ -137,6 +133,80 @@ export class CanDI {
   private _onValue(key: Key, value: any) {
     const map = new Map(this.values.value);
     map.set(key, value);
+    this._updateComps(key, map);
     this.values.next(map);
+  }
+
+  public entriesDepOn(key: Key) {
+    return Array.from(this.entries.values()).filter((entry: CanDIEntry) => {
+      return entry.deps.includes(key);
+    });
+  }
+
+  /**
+   * This changes any comp values that depend on the changed value.
+   * there may be downstream comps that depend on other comps;
+   * to prevent wear and tear on the event loop, these downstream changes
+   * are either pushed to pq or used to immediately update the map.
+   *
+   * This can cause a cascade loop; to prevent infinite cycling,
+   * there is a maximum number of loop iterations that can happen in this method;
+   * once that threshold is met,
+   * the while loop exits and an error message is emitted.
+   * However, the values are allowed to update to the value of the CanDI instance.
+   *
+   * This is to prevent circular loops from triggering each other
+   * in an infinite loop.
+   *
+   * In a typical arrangement, nearly all comps will be driven by values,
+   * not other comps, so you will only have one while loop --
+   * none of the entries will push anything into changedKeys,
+   * so you will just blow through all the downstream comps once and exit.
+   *
+   */
+  private _updateComps(key: Key, map: ValueMap) {
+    const changedKeys: Key[] = [key];
+    let loops = 0;
+    while (changedKeys.length > 0 && loops < this.maxChangeLoops) {
+      ++loops;
+
+      const key = changedKeys.shift();
+      const dependants = this.entriesDepOn(key);
+      dependants.forEach((entry) => {
+        const entryKey = entry.key;
+        if (entry.deps.includes(key) && entry.type === 'comp' && entry.active && entry.resolved(map)) {
+          const updatedValue = entry.computeFor(map);
+          if (entry.async) {
+            this.pq.set(entryKey, updatedValue);
+            // the _onValue from the promise will eventually resolve and trigger an update cycle of its own
+          } else if (map.has(entryKey)) {
+            if (map.get(entryKey) !== updatedValue) {
+              map.set(key, updatedValue);
+
+              if (this.entriesDepOn(entryKey).length) {
+                changedKeys.push(entryKey);
+              } // if no other comps are driven by the value of this entry, no reason to give it a while loop cycle,
+
+            } // else -- the value of changed entry is already the same - no need to cascade compute derived comps
+          } else {
+            map.set(key, updatedValue);
+            changedKeys.push(entryKey);
+          }
+
+          /**
+           * at this point either
+           *     --- (async) --- a new async value has been pushed into pq and will ultimately trigger its own cycle later
+           * or  --- (sync) ---  the map has been updated with a new recomputed value from the entry (sync)
+           *                     AND its key as been pushed onto changed keys
+           *                     so we can see if there are any downstream comps which depend on it.
+           */
+        }
+      });
+
+      if (changedKeys.length) {
+        console.error('too many triggered changes for changing ', key, changedKeys);
+      }
+    }
+
   }
 }

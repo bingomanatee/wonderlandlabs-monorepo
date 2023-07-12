@@ -1,4 +1,4 @@
-import { CanDiType, GenFunction, Key, Config, Value } from './types'
+import { CanDiType, GenFunction, Key, Config, Value, ValueMap } from './types'
 import { BehaviorSubject, map } from 'rxjs'
 
 
@@ -34,14 +34,27 @@ export default class CanDIEntry {
     ).subscribe((value) => this._onValue(value))
   }
 
-  private get fnArgs() {
-    const depValues = this.deps.length ? this.can.gets(...this.deps) : []
+  private fnArgs(map?: ValueMap) {
     const argValues = this.args.length ? this.args : [];
-    return [...depValues, ...argValues];
+    return [...this.depValues(map), ...argValues];
   }
 
-  private fn(fn: GenFunction) {
-    return (...params: any[]) => fn(...this.fnArgs, ...params);
+  private depValues(map?: ValueMap) {
+    if (!this.deps.length) return [];
+    if (!map) return this.can.gets(this.deps);
+    return this.deps.map((key) => map.get(key));
+  }
+
+  private fn(fn: GenFunction, map?: ValueMap) {
+    return (...params: any[]) => fn(...this.fnArgs(map), ...params);
+  }
+
+  computeFor(map: ValueMap) {
+    const fn = this.stream.value;
+    if (typeof fn !== 'function') {
+      throw new Error(`${this.key} cannot computeFor -- non function`);
+    }
+    return fn(fn, map)();
   }
 
   next(value: Value) {
@@ -75,6 +88,21 @@ export default class CanDIEntry {
         break;
     }
     return out;
+  }
+
+  public get active() {
+    if (this.final && this._valueSent) {
+      return false;
+    }
+    return true;
+  }
+
+  public resolved(map?: ValueMap) {
+    if (!this.deps.length) return true;
+    if (!map) {
+      return this.can.has(this.deps);
+    }
+    return this.deps.every((key) => map!.has(key));
   }
 
   private _valueSent = false;

@@ -22,13 +22,26 @@ class CanDIEntry {
         const self = this;
         this.stream.pipe((0, rxjs_1.map)((value) => self.transform(value))).subscribe((value) => this._onValue(value));
     }
-    get fnArgs() {
-        const depValues = this.deps.length ? this.can.gets(...this.deps) : [];
+    fnArgs(map) {
         const argValues = this.args.length ? this.args : [];
-        return [...depValues, ...argValues];
+        return [...this.depValues(map), ...argValues];
     }
-    fn(fn) {
-        return (...params) => fn(...this.fnArgs, ...params);
+    depValues(map) {
+        if (!this.deps.length)
+            return [];
+        if (!map)
+            return this.can.gets(this.deps);
+        return this.deps.map((key) => map.get(key));
+    }
+    fn(fn, map) {
+        return (...params) => fn(...this.fnArgs(map), ...params);
+    }
+    computeFor(map) {
+        const fn = this.stream.value;
+        if (typeof fn !== 'function') {
+            throw new Error(`${this.key} cannot computeFor -- non function`);
+        }
+        return fn(fn, map)();
     }
     next(value) {
         if (this.key === 'finalValue') {
@@ -57,6 +70,20 @@ class CanDIEntry {
                 break;
         }
         return out;
+    }
+    get active() {
+        if (this.final && this._valueSent) {
+            return false;
+        }
+        return true;
+    }
+    resolved(map) {
+        if (!this.deps.length)
+            return true;
+        if (!map) {
+            return this.can.has(this.deps);
+        }
+        return this.deps.every((key) => map.has(key));
     }
     _onValue(value) {
         if (this.final && this._valueSent) {

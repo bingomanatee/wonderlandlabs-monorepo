@@ -1,4 +1,4 @@
-import { CanDiType, Key, Config, Value } from './types';
+import { CanDiType, Key, Config, Value, ValueMap } from './types';
 export default class CanDIEntry {
     private can;
     key: Key;
@@ -11,11 +11,15 @@ export default class CanDIEntry {
     final: boolean;
     private stream;
     private _watchResource;
-    private get fnArgs();
+    private fnArgs;
+    private depValues;
     private fn;
+    computeFor(map: ValueMap): any;
     next(value: Value): void;
     get value(): any;
     transform(value: Value): any;
+    get active(): boolean;
+    resolved(map?: ValueMap): boolean;
     private _valueSent;
     _onValue(value: Value): void;
 }

@@ -68,6 +68,7 @@ export type CanDiType = {
     get(key: Key): Value;
     gets(...keys: Key[]): Value[];
     events: Subject<ResEvent>;
+    values: BehaviorSubject<ValueMap>;
     has(key: Key | Key[]): boolean;
     set(key: Key, value: Value): void;
     add(key: Key, value: Value, config?: Config): void;

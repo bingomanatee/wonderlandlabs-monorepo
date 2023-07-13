@@ -1,6 +1,6 @@
 {
   "name": "@wonderlandlabs/can-di-land",
-  "version": "0.0.6",
+  "version": "0.1.0",
   "description": "A DI tool for managing dynamic dependencies",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",

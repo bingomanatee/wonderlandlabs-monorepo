@@ -45,7 +45,7 @@ synonym described below in parentheses.
 
 * **Entry** (a.k.a. "entity") A collective term for everything keyed off a single key; 
   this includes the key, the resource and the value
-* **Key** (a.k.a. "key") A unique value used to identify a single Entry. /
+* **Key** (a.k.a. "name") A unique value used to identify a single Entry. /
   In general, keys are strings; but as they are used throughout as Map instance keys, 
   practically any JS token can be used as a key. 
 * **Resource** The resource is "that which produces the value associated with a key." 

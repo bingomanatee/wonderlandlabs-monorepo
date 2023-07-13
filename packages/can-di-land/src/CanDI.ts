@@ -261,14 +261,12 @@ export class CanDI {
   private _updateComps(key: Key, map: ValueMap) {
     const changedKeys: Key[] = [key];
     let loops = 0;
-    const loopy = (str: string) => /-loop/.test(str);
-    if (loopy(key)) {
-      console.log('loop key changed:', key);
-    }
+    // console.log(' ---------- _updateComps for ', key, 'with map', map);
     while (changedKeys.length > 0 && loops < this.maxChangeLoops) {
       ++loops;
 
       const key = changedKeys.shift();
+      // console.log('loop ', loops, 'processing ', key, 'from changedKeys', changedKeys, 'map is ', map);
       const dependants = this.entriesDepOn(key);
       dependants.forEach((entry) => {
         const entryKey = entry.key;
@@ -302,10 +300,9 @@ export class CanDI {
         }
       });
 
-      if (changedKeys.length) {
-        ce('too many triggered changes for changing ', key, changedKeys);
-      }
     }
-
+    if (changedKeys.length) {
+      ce('too many triggered changes for changing ', key, changedKeys);
+    }
   }
 }

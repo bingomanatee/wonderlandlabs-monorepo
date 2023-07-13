@@ -7,13 +7,12 @@ export type StreamMap = Map<Key, BehaviorSubject<any>>;
 export type Key = any;
 export type Value = any;
 export declare function isResourceType(arg: unknown): arg is ResourceType;
-export type ResConfigKey = 'deps' | 'type' | 'args' | 'final' | 'computeOnce' | 'bind' | 'meta';
+export type ResConfigKey = 'deps' | 'type' | 'args' | 'final' | 'bind' | 'meta';
 export type Config = {
     deps?: Key[];
     type: ResourceType;
     args?: any[];
     final?: boolean;
-    computeOnce?: boolean;
     async?: boolean;
     bind?: boolean;
     meta?: boolean;
@@ -44,8 +43,14 @@ export type ResEventValues = {
     type: 'values';
     value: ValueMap;
 };
-export type ResEvent = (ResEventInit | ResEventResource | ResEventValue | ResEventValues);
+export type ResEventError = {
+    type: 'async-error';
+    target: Key;
+    value: any;
+};
+export type ResEvent = (ResEventInit | ResEventResource | ResEventValue | ResEventValues | ResEventError);
 export declare function isEventInit(arg: unknown): arg is ResEventInit;
+export declare function isEventError(arg: unknown): arg is ResEventError;
 export declare function isEventResource(arg: unknown): arg is ResEventResource;
 export declare function isEventValue(arg: unknown): arg is ResEventValue;
 export declare function isResEventValues(arg: unknown): arg is ResEventValues;
@@ -57,10 +62,16 @@ export type ResDef = {
     type?: ResourceType;
 };
 export type ResDefMutator = (def: ResDef) => ResDef;
-export type PromiseQueueEvent = {
+type PromiseQueueMessage = {
     key: Key;
     value: any;
 };
+type PromiseQueueError = {
+    key: Key;
+    error: any;
+};
+export declare function isPromiseQueueMessage(arg: any): arg is PromiseQueueMessage;
+export type PromiseQueueEvent = PromiseQueueMessage | PromiseQueueError;
 export declare function isPromise(arg: any): arg is Promise<any>;
 export type CanDiType = {
     entries: Map<Key, CanDIEntry>;
@@ -73,3 +84,4 @@ export type CanDiType = {
     set(key: Key, value: Value): void;
     add(key: Key, value: Value, config?: Config): void;
 };
+export {};

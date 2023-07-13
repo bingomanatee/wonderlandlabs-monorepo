@@ -1,6 +1,7 @@
 import { CanDiType, Key, Config, ValueMap } from './types'
 import { c } from '@wonderlandlabs/collect'
 import CanDIEntry from './CanDIEntry'
+import { ce } from './utils'
 
 type DepError = { root?: Key, to?: Key, msg: string }
 
@@ -62,7 +63,7 @@ export class DependencyAnalyzer {
 
   updateComputed(allValues: Map<any, any>, changedValues: ValueMap) {
     if (this.errors?.length) {
-      console.error('cannot update dependencies - loop:', this.errors);
+      ce('cannot update dependencies - loop:', this.errors);
       return;
     }
 

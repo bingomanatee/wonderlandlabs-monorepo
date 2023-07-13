@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.mergeMap = exports.asArray = exports.compareArrays = void 0;
+exports.ce = exports.mergeMap = exports.asArray = exports.compareArrays = void 0;
 function compareArrays(a, b) {
     if (a.length !== b.length) {
         return false;
@@ -20,3 +20,10 @@ function mergeMap(mapA, mapB) {
     return map;
 }
 exports.mergeMap = mergeMap;
+const TEST_MODE = false;
+function ce(...args) {
+    if (!TEST_MODE) {
+        console.error(...args);
+    }
+}
+exports.ce = ce;

@@ -6,8 +6,8 @@
   "types": "lib/index.d.ts",
   "author": "David Edelhart",
   "license": "MIT",
-  "private": false,
   "dependencies": {
+    "lodash.isequal": "^4.5.0",
     "rxjs": "^7.8.1"
   },
   "files": [
@@ -27,5 +27,8 @@
     "preversion": "npm run lint",
     "version": "npm run && git add -A src",
     "postversion": "git push && git push --tags"
+  },
+  "devDependencies": {
+    "@types/lodash.isequal": "^4.5.6"
   }
 }

@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.PromiseQueue = void 0;
 const rxjs_1 = require("rxjs");
 const types_1 = require("./types");
+const utils_1 = require("./utils");
 /**
  * This class keeps a list of pending promises and emitts a key-value pair when a promise completes.
  * The catch is -- if a new promise is enqueued before an old promise completes,
@@ -34,11 +35,13 @@ class PromiseQueue {
                 subject.next(value);
             }
         }).catch((err) => {
-            console.error('error in PromiseQueue: ', key, err);
+            (0, utils_1.ce)('error in PromiseQueue: ', key, err);
+            self.events.next({ key, error: err });
         });
         subject.subscribe({
             error(err) {
-                console.warn('error on PromiseQueue:', key, err);
+                // should never happen
+                (0, utils_1.ce)('error on PromiseQueue:', key, err);
             },
             next(value) {
                 self.events.next({ key, value });

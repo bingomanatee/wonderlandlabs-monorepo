@@ -15,13 +15,12 @@ export function isResourceType(arg: unknown): arg is ResourceType {
   return resourceTypes.includes(arg);
 }
 
-export type ResConfigKey = 'deps' | 'type' | 'args' | 'final' | 'computeOnce' | 'bind' | 'meta'
+export type ResConfigKey = 'deps' | 'type' | 'args' | 'final' | 'bind' | 'meta'
 export type Config = {
   deps?: Key[],
   type: ResourceType,
   args?: any[],
   final?: boolean,
-  computeOnce?: boolean, // indicates that the 'comp' resource function can only be called once. Ignored by other resource types.
   async?: boolean, // indicates that it is a value that must be resolved, such as a REST call.
   bind?: boolean, // bind the function to the CanDI instance; if true, meta must be true as well
   meta?: boolean // is a function that returns a value - perhaps because it needs a closure; not currently fully implemented
@@ -35,7 +34,7 @@ export function isResConfig(config: unknown): config is Config {
   if (!config && isResourceType(config.type)) {
     return false;
   }
-  return !['final', 'computeOnce', 'async', 'bind', 'meta'].some((param: string) => (
+  return !['final', 'async'].some((param: string) => (
     // @ts-ignore
     (param in config) && (typeof config[param] !== 'boolean')
   ));
@@ -52,13 +51,18 @@ export type ResEventType = 'value' | 'init' | 'resource' | 'values';
 export type ResEventInit = { type: 'init', value: ResDef, target: Key  };
 export type ResEventResource = { type: 'resource', value: any, target: Key  };
 export type ResEventValue = { type: 'value', value: any, target: Key };
-export type ResEventValues = { type: 'values', value: ValueMap }
-export type ResEvent = (ResEventInit | ResEventResource | ResEventValue | ResEventValues)
+export type ResEventValues = { type: 'values', value: ValueMap };
+export type ResEventError = {type: 'async-error', target: Key, value: any}
+export type ResEvent = (ResEventInit | ResEventResource | ResEventValue | ResEventValues | ResEventError)
 
 export function isEventInit(arg: unknown) : arg is ResEventInit {
   return !!(arg && typeof arg === 'object' && 'type' in arg && arg.type === 'init' && 'value' in arg && 'target' in arg)
 }
 
+export function isEventError(arg: unknown) : arg is ResEventError {
+  return !!(arg && typeof arg === 'object' && 'type' in arg && arg.type === 'async-error' && 'value' in arg && 'target' in arg)
+
+}
 export function isEventResource(arg: unknown): arg is ResEventResource {
   return !!(arg && typeof arg === 'object' && 'type' in arg && arg.type === 'resource' && 'value' in arg && 'target' in arg)
 }
@@ -74,10 +78,19 @@ export function isResEventValues(arg: unknown): arg is ResEventValues {
 export type GenFunction = (...args: any[]) => any;
 export type ResDef = { key: Key, value: any, config?: Config, type?: ResourceType }
 export type ResDefMutator = (def: ResDef) => ResDef;
-export type PromiseQueueEvent = {
+type PromiseQueueMessage = {
   key: Key,
   value: any
 }
+
+type PromiseQueueError = {
+  key: Key, error: any
+}
+
+export function isPromiseQueueMessage(arg: any) : arg is PromiseQueueMessage {
+  return !!(arg && typeof arg === 'object' && 'key' in arg && 'value' in arg)
+}
+export type PromiseQueueEvent = PromiseQueueMessage | PromiseQueueError
 
 export function isPromise(arg: any): arg is Promise<any> {
   return (!!(arg && typeof arg == 'object' && ('then' in arg) && typeof arg.then === 'function'))

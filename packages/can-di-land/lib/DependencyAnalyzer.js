@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.DependencyAnalyzer = void 0;
 const collect_1 = require("@wonderlandlabs/collect");
+const utils_1 = require("./utils");
 class DependencyAnalyzer {
     constructor(can) {
         this.can = can;
@@ -55,7 +56,7 @@ class DependencyAnalyzer {
     updateComputed(allValues, changedValues) {
         var _a;
         if ((_a = this.errors) === null || _a === void 0 ? void 0 : _a.length) {
-            console.error('cannot update dependencies - loop:', this.errors);
+            (0, utils_1.ce)('cannot update dependencies - loop:', this.errors);
             return;
         }
         const nodes = Array.from((0, collect_1.c)(this.dependsOn).getMap((deps, parentId) => {

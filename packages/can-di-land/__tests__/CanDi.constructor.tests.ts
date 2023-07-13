@@ -98,70 +98,6 @@ describe('CanDI', () => {
             expect(() => can.set('finalValue', 300)).toThrow();
           }));
       });
-
-      describe('computeOnce value', () => {
-        /**
-         * these are all the above tests - the results should not change.
-         * This is just validating that there are no unforeseen /unwanted side effects
-         * of using the computeOnce property into the value type,
-         * as that property is only designed to have effects with 'comp' type entities.
-         */
-        describe('async value', () => {
-          it('is not present until it is resolved', async () => {
-            const pending = new Promise((done) => done(100));
-            return subject(
-              [{ key: 'asyncKey', value: pending, config: { type: 'value', async: true, computeOnce: true } }],
-              async_value_is_eventually_present('asyncKey', pending)
-            )();
-          });
-        });
-
-        describe('async final value', () => {
-          it('is not present until it is resolved', // identical to the above test - but async this time
-            ((pending) => subject(
-                [
-                  {
-                    key: 'asyncKey',
-                    value: pending,
-                    config: { type: 'value', async: true, final: true, computeOnce: true }
-                  }
-                ],
-                async_value_is_eventually_present('asyncKey', pending)
-              )
-            )(delay(300, 200))
-          );
-
-          it('cannot be redefined', async () => {
-            // return (final_value__set('asyncFinalVar', Promise.resolve(1), true, true))()
-          });
-        });
-
-        describe('final value', () => {
-          it('is eventually present',
-            ((pending) =>
-              subject([{
-                  key: 'asyncFinalValue',
-                  value: pending,
-                  config: { type: 'value', async: true, final: true }
-                }],
-                async_value_is_eventually_present('asyncFinalValue', pending)
-              ))(new Promise(async (done) => {
-              setTimeout(() => done(100), 200);
-            }))
-          );
-
-          it('cannot be redefined', async () => {
-            const can = new CanDI([
-              {
-                key: 'finalValue',
-                value: 100,
-                config: { final: true, type: 'value' }
-              }
-            ]);
-            expect(() => can.set('finalValue', 200)).toThrow();
-          });
-        });
-      });
     });
 
     describe('type: func', () => {
@@ -321,7 +257,6 @@ describe('CanDI', () => {
             }]
           )
 
-          console.log('========== can eventual values:', can.values.value);
           expect(can.has('asyncComp')).toBeFalsy();
           await (delay(null, 250));
           expect(can.has('asyncComp')).toBeTruthy();

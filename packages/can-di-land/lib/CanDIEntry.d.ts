@@ -18,8 +18,21 @@ export default class CanDIEntry {
     next(value: Value): void;
     get value(): any;
     transform(value: Value): any;
+    /**
+     * indicates whether this entry is open to being updated.
+     */
     get active(): boolean;
+    /**
+     * whether this entry has all the deps it needs to allow its value to be added to the CanDI's map
+     * As it is used in _updateComps, where the "next map" is detached and extensively preprocessed,
+     * the "value map" is optionally passed in as a parameter;
+     * in other situations, the can's `has(..)` method is sufficient.
+     */
     resolved(map?: ValueMap): boolean;
     private _valueSent;
+    /**
+     * used in subscribing to this entries' stream
+     */
     _onValue(value: Value): void;
+    checkForLoop(subEntry?: CanDIEntry): void;
 }

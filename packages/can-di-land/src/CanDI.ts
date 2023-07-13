@@ -1,7 +1,20 @@
-import { BehaviorSubject, filter, Subject, Subscription } from 'rxjs'
-import { Config, isEventInit, isEventValue, Key, ResDef, ResEvent, ResourceType, Value, ValueMap } from './types'
+import { BehaviorSubject, distinctUntilChanged, filter, first, map, Subject, Subscription } from 'rxjs'
+import {
+  Config,
+  GenFunction, isEventError,
+  isEventInit,
+  isEventValue, isPromiseQueueMessage,
+  Key,
+  ResDef,
+  ResEvent,
+  ResourceType,
+  Value,
+  ValueMap
+} from './types'
 import { PromiseQueue } from './PromiseQueue'
 import CanDIEntry from './CanDIEntry'
+import { ce } from './utils'
+import isEqual from 'lodash.isequal'
 
 export class CanDI {
 
@@ -67,6 +80,49 @@ export class CanDI {
     return this.entries.get(key);
   }
 
+  when(deps: Key | Key[], once = true) {
+    if (!deps) {
+      throw new Error('when requires non-empty criteria');
+    }
+    const fr = filter((vm: ValueMap) => {
+      if (Array.isArray(deps)) {
+        return deps.every((key) => vm.has(key));
+      }
+      return vm.has(deps);
+    });
+    const mp = map((vm: ValueMap) => {
+      if (Array.isArray(deps)) {
+        return deps.map((key) => vm.get(key));
+      }
+      return vm.get(deps);
+    });
+
+    if (once) {
+      return this.values.pipe(fr, mp, distinctUntilChanged(isEqual), first())
+    }
+    return this.values.pipe(fr, mp, distinctUntilChanged(isEqual));
+  }
+
+  /**
+   * this is an "old school" async function that returns a promise.
+   * @param deps
+   */
+  getAsync(deps: Key|Key[]) {
+    return new Promise((done, fail) => {
+      let sub: Subscription | undefined = undefined;
+      sub = this.when(deps)
+        .subscribe({
+          next(value) {
+            done(value);
+            sub?.unsubscribe();
+          },
+          error(err) {
+            fail(err);
+          }
+        })
+    })
+  }
+
   // --------------- event management -------------
   private _eventSubs: Subscription[] = [];
 
@@ -78,20 +134,45 @@ export class CanDI {
 
   private _initPQ() {
     const self = this;
-    this._pqSub = this.pq.events.subscribe(({ key, value }) => {
-      self._onValue(key, value);
+    this._pqSub = this.pq.events.subscribe((eventOrError) => {
+      if (isPromiseQueueMessage(eventOrError)) {
+        const {key, value} = eventOrError;
+        self._onValue(key, value);
+      } else {
+        const {key, error} = eventOrError;
+        self.events.next({target: key, type: 'async-error', value: error})
+      }
     })
   }
 
   private _initEvents() {
+    const self = this;
     this._eventSubs
       .push(
         this.events
           .pipe(
             filter(isEventValue)
           )
-          .subscribe((event) => this._onValue(event.target, event.value))
+          .subscribe({
+            next: (event) => self._onValue(event.target, event.value),
+            error: (err) => console.error('error on value event:', err)
+          })
       )
+
+    this._eventSubs
+      .push(
+        this.events.pipe(
+          filter(isEventError)
+        )
+          .subscribe({
+            next(event) {
+              self._onAsyncError(event.target, event.value);
+            },
+            error(e) {
+              ce('error on async error', e);
+            }
+          })
+      );
 
     this._eventSubs
       .push(
@@ -99,13 +180,22 @@ export class CanDI {
           .pipe(
             filter(isEventInit)
           )
-          .subscribe((event) => this._onInit(event.target, event.value))
+          .subscribe(
+            {
+              next: (event) => self._onInit(event.target, event.value),
+              error: (err) => ce('error on init event:', err)
+            }
+          )
       )
+  }
+
+  _onAsyncError(key: Key, error: any) {
+    ce('async error thrown for ', key, error);
   }
 
   _onInit(key: Key, data: ResDef) {
     if (this.entries.has(key)) {
-      console.error('key', key, 'initialized twice');
+      ce('key', key, 'initialized twice');
       return;
     }
 
@@ -119,14 +209,18 @@ export class CanDI {
       }
     }
 
+    const entry = new CanDIEntry(
+      this,
+      key,
+      myConfig!,
+      value
+    )
+
+    entry.checkForLoop();
+
     this.entries.set(
       key,
-      new CanDIEntry(
-        this,
-        key,
-        myConfig!,
-        value
-      )
+      entry
     )
   }
 
@@ -167,6 +261,10 @@ export class CanDI {
   private _updateComps(key: Key, map: ValueMap) {
     const changedKeys: Key[] = [key];
     let loops = 0;
+    const loopy = (str: string) => /-loop/.test(str);
+    if (loopy(key)) {
+      console.log('loop key changed:', key);
+    }
     while (changedKeys.length > 0 && loops < this.maxChangeLoops) {
       ++loops;
 
@@ -175,13 +273,15 @@ export class CanDI {
       dependants.forEach((entry) => {
         const entryKey = entry.key;
         if (entry.deps.includes(key) && entry.type === 'comp' && entry.active && entry.resolved(map)) {
-          const updatedValue = entry.computeFor(map);
+          let updatedValue;
+
+          updatedValue = entry.computeFor(map);
           if (entry.async) {
             this.pq.set(entryKey, updatedValue);
             // the _onValue from the promise will eventually resolve and trigger an update cycle of its own
           } else if (map.has(entryKey)) {
             if (map.get(entryKey) !== updatedValue) {
-              map.set(key, updatedValue);
+              map.set(entryKey, updatedValue);
 
               if (this.entriesDepOn(entryKey).length) {
                 changedKeys.push(entryKey);
@@ -189,7 +289,8 @@ export class CanDI {
 
             } // else -- the value of changed entry is already the same - no need to cascade compute derived comps
           } else {
-            map.set(key, updatedValue);
+            // initial set of new computed value
+            map.set(entryKey, updatedValue);
             changedKeys.push(entryKey);
           }
 
@@ -204,7 +305,7 @@ export class CanDI {
       });
 
       if (changedKeys.length) {
-        console.error('too many triggered changes for changing ', key, changedKeys);
+        ce('too many triggered changes for changing ', key, changedKeys);
       }
     }
 

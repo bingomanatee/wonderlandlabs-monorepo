@@ -15,11 +15,18 @@ export declare class CanDI {
     gets(keys: Key[]): Value | undefined;
     has(key: Key | Key[]): boolean;
     entry(key: Key): CanDIEntry | undefined;
+    when(deps: Key | Key[], once?: boolean): import("rxjs").Observable<any>;
+    /**
+     * this is an "old school" async function that returns a promise.
+     * @param deps
+     */
+    getAsync(deps: Key | Key[]): Promise<unknown>;
     private _eventSubs;
     complete(): void;
     private _pqSub?;
     private _initPQ;
     private _initEvents;
+    _onAsyncError(key: Key, error: any): void;
     _onInit(key: Key, data: ResDef): void;
     private _onValue;
     entriesDepOn(key: Key): CanDIEntry[];

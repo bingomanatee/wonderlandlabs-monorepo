@@ -1,5 +1,6 @@
 import { Subject } from 'rxjs'
 import { isPromise, PromiseQueueEvent, Key } from './types'
+import { ce } from './utils'
 
 /**
  * This class keeps a list of pending promises and emitts a key-value pair when a promise completes.
@@ -33,11 +34,13 @@ export class PromiseQueue {
         subject.next(value);
       }
     }).catch((err) => {
-      console.error('error in PromiseQueue: ', key, err);
+      ce('error in PromiseQueue: ', key, err);
+      self.events.next({key, error: err})
     })
     subject.subscribe({
       error(err) {
-        console.warn('error on PromiseQueue:', key, err);
+        // should never happen
+        ce('error on PromiseQueue:', key, err);
       },
       next(value) {
         self.events.next({ key, value })

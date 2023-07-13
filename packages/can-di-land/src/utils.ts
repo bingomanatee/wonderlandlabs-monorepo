@@ -17,3 +17,11 @@ export function mergeMap(mapA: Map<any, any>, mapB: Map<any, any>) {
   mapB.forEach((v ,k) => map.set(k, v));
   return map;
 }
+
+const TEST_MODE = false;
+
+export function ce(...args: any[]) {
+  if (!TEST_MODE) {
+    console.error(...args)
+  }
+}

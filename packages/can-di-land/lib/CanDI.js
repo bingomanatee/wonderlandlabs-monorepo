@@ -8,6 +8,8 @@ const rxjs_1 = require("rxjs");
 const types_1 = require("./types");
 const PromiseQueue_1 = require("./PromiseQueue");
 const CanDIEntry_1 = __importDefault(require("./CanDIEntry"));
+const utils_1 = require("./utils");
+const lodash_isequal_1 = __importDefault(require("lodash.isequal"));
 class CanDI {
     constructor(values, maxChangeLoops = 30) {
         this.values = new rxjs_1.BehaviorSubject(new Map());
@@ -61,28 +63,95 @@ class CanDI {
     entry(key) {
         return this.entries.get(key);
     }
+    when(deps, once = true) {
+        if (!deps) {
+            throw new Error('when requires non-empty criteria');
+        }
+        const fr = (0, rxjs_1.filter)((vm) => {
+            if (Array.isArray(deps)) {
+                return deps.every((key) => vm.has(key));
+            }
+            return vm.has(deps);
+        });
+        const mp = (0, rxjs_1.map)((vm) => {
+            if (Array.isArray(deps)) {
+                return deps.map((key) => vm.get(key));
+            }
+            return vm.get(deps);
+        });
+        if (once) {
+            return this.values.pipe(fr, mp, (0, rxjs_1.distinctUntilChanged)(lodash_isequal_1.default), (0, rxjs_1.first)());
+        }
+        return this.values.pipe(fr, mp, (0, rxjs_1.distinctUntilChanged)(lodash_isequal_1.default));
+    }
+    /**
+     * this is an "old school" async function that returns a promise.
+     * @param deps
+     */
+    getAsync(deps) {
+        return new Promise((done, fail) => {
+            let sub = undefined;
+            sub = this.when(deps)
+                .subscribe({
+                next(value) {
+                    done(value);
+                    sub === null || sub === void 0 ? void 0 : sub.unsubscribe();
+                },
+                error(err) {
+                    fail(err);
+                }
+            });
+        });
+    }
     complete() {
         this._eventSubs.forEach(sub => sub.unsubscribe());
     }
     _initPQ() {
         const self = this;
-        this._pqSub = this.pq.events.subscribe(({ key, value }) => {
-            self._onValue(key, value);
+        this._pqSub = this.pq.events.subscribe((eventOrError) => {
+            if ((0, types_1.isPromiseQueueMessage)(eventOrError)) {
+                const { key, value } = eventOrError;
+                self._onValue(key, value);
+            }
+            else {
+                const { key, error } = eventOrError;
+                self.events.next({ target: key, type: 'async-error', value: error });
+            }
         });
     }
     _initEvents() {
+        const self = this;
         this._eventSubs
             .push(this.events
             .pipe((0, rxjs_1.filter)(types_1.isEventValue))
-            .subscribe((event) => this._onValue(event.target, event.value)));
+            .subscribe({
+            next: (event) => self._onValue(event.target, event.value),
+            error: (err) => console.error('error on value event:', err)
+        }));
+        this._eventSubs
+            .push(this.events.pipe((0, rxjs_1.filter)(types_1.isEventError))
+            .subscribe({
+            next(event) {
+                self._onAsyncError(event.target, event.value);
+            },
+            error(e) {
+                (0, utils_1.ce)('error on async error', e);
+            }
+        }));
         this._eventSubs
             .push(this.events
             .pipe((0, rxjs_1.filter)(types_1.isEventInit))
-            .subscribe((event) => this._onInit(event.target, event.value)));
+            .subscribe({
+            next: (event) => self._onInit(event.target, event.value),
+            error: (err) => (0, utils_1.ce)('error on init event:', err)
+        }));
+    }
+    _onAsyncError(key, error) {
+        (0, utils_1.ce)('async error thrown for ', key, error);
     }
     _onInit(key, data) {
         if (this.entries.has(key)) {
-            console.error('key', key, 'initialized twice');
+            (0, utils_1.ce)('key', key, 'initialized twice');
             return;
         }
         const { config, type, value } = data;
@@ -95,7 +164,9 @@ class CanDI {
                 myConfig = { type };
             }
         }
-        this.entries.set(key, new CanDIEntry_1.default(this, key, myConfig, value));
+        const entry = new CanDIEntry_1.default(this, key, myConfig, value);
+        entry.checkForLoop();
+        this.entries.set(key, entry);
     }
     _onValue(key, value) {
         const map = new Map(this.values.value);
@@ -132,6 +203,10 @@ class CanDI {
     _updateComps(key, map) {
         const changedKeys = [key];
         let loops = 0;
+        const loopy = (str) => /-loop/.test(str);
+        if (loopy(key)) {
+            console.log('loop key changed:', key);
+        }
         while (changedKeys.length > 0 && loops < this.maxChangeLoops) {
             ++loops;
             const key = changedKeys.shift();
@@ -139,21 +214,23 @@ class CanDI {
             dependants.forEach((entry) => {
                 const entryKey = entry.key;
                 if (entry.deps.includes(key) && entry.type === 'comp' && entry.active && entry.resolved(map)) {
-                    const updatedValue = entry.computeFor(map);
+                    let updatedValue;
+                    updatedValue = entry.computeFor(map);
                     if (entry.async) {
                         this.pq.set(entryKey, updatedValue);
                         // the _onValue from the promise will eventually resolve and trigger an update cycle of its own
                     }
                     else if (map.has(entryKey)) {
                         if (map.get(entryKey) !== updatedValue) {
-                            map.set(key, updatedValue);
+                            map.set(entryKey, updatedValue);
                             if (this.entriesDepOn(entryKey).length) {
                                 changedKeys.push(entryKey);
                             } // if no other comps are driven by the value of this entry, no reason to give it a while loop cycle,
                         } // else -- the value of changed entry is already the same - no need to cascade compute derived comps
                     }
                     else {
-                        map.set(key, updatedValue);
+                        // initial set of new computed value
+                        map.set(entryKey, updatedValue);
                         changedKeys.push(entryKey);
                     }
                     /**
@@ -166,7 +243,7 @@ class CanDI {
                 }
             });
             if (changedKeys.length) {
-                console.error('too many triggered changes for changing ', key, changedKeys);
+                (0, utils_1.ce)('too many triggered changes for changing ', key, changedKeys);
             }
         }
     }

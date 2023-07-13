@@ -51,7 +51,7 @@ synonym described below in parentheses.
 * **Resource** The resource is "that which produces the value associated with a key." 
   For Value type entries, an entries' resource _is_ its value. For 'func'/'comp' entries, 
   they are the _basis_ for an entries' value. 
-* **Value** The _expression_ of an entries' resource. e.g., the computted entries' function's output.
+* **Value** The _expression_ of an entries' resource. e.g., the computed entries' function's output.
 * **Type** the variation of how an entry expresses its value based on its resource. 
   currently the type options are 'value', 'func' and 'comp'.
 * **config** (a.k.a. configuration) The behavioral modifiers that affect how a resource is transmuted into
@@ -67,6 +67,14 @@ synonym described below in parentheses.
 * **Registered** (a.k.a. defined) entries have a defined configuration paired with a given key. 
   (and usually, it also has a resource as well.)
   Resolved entries are by definition Registered, but not necessarily the other way around. 
+* **Computed** (a.k.a. 'comp') entries are often referred to in DI as "factories": entries defined by a 
+  function that is fed dependencies as parameters when they are available or change. (this is the basis of Angular.)
+
+### RxJS 
+
+You do not have to understand RxJS to use @wonderlandlabs/can-di-land. However there are references to subscription
+that you may better understand after reviewing (Subject)[https://rxjs.dev/guide/subject] in the RxJS docs.
+(BehaviorSubject)[https://rxjs.dev/api/index/class/BehaviorSubject] are also used and referenced. 
 
 ## Resource types and configuration
 

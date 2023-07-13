@@ -273,9 +273,7 @@ export class CanDI {
       dependants.forEach((entry) => {
         const entryKey = entry.key;
         if (entry.deps.includes(key) && entry.type === 'comp' && entry.active && entry.resolved(map)) {
-          let updatedValue;
-
-          updatedValue = entry.computeFor(map);
+          const updatedValue = entry.computeFor(map);
           if (entry.async) {
             this.pq.set(entryKey, updatedValue);
             // the _onValue from the promise will eventually resolve and trigger an update cycle of its own

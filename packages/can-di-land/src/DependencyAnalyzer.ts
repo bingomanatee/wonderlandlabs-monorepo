@@ -15,7 +15,7 @@ export class DependencyAnalyzer {
   }
 
   public get errors() {
-    let errs: DepError[] = [];
+    const errs: DepError[] = [];
 
     this.dependsOn.forEach((list, parentKey) => {
       list.forEach((dep) => {

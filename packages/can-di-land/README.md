@@ -72,8 +72,9 @@ synonym described below in parentheses.
 
 ### RxJS 
 
-You do not have to understand RxJS to use @wonderlandlabs/can-di-land. However there are references to subscription
-that you may better understand after reviewing (Subject)[https://rxjs.dev/guide/subject] in the RxJS docs.
+You do not have to understand RxJS to use @wonderlandlabs/can-di-land. 
+However, there are references to subscription that you may better understand 
+after reviewing (Subject)[https://rxjs.dev/guide/subject] in the RxJS docs.
 (BehaviorSubject)[https://rxjs.dev/api/index/class/BehaviorSubject] are also used and referenced. 
 
 ## Resource types and configuration

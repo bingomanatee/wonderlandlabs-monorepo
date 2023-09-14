@@ -27,7 +27,7 @@ capitalizes each word.
 
 The 'typeof' paradigm is too coarse for some purposes and too broad for others. While 
 Typescript does a good job of static checking, many times, values are not fixed at design 
-time, so its good to know precisely what they are at runtime. 
+time, so it's good to know precisely what they are at runtime. 
 
 The main utility of the type library is describe(value) which takes in any value
 and returns a TypeDef describer. 
@@ -37,6 +37,14 @@ javascript: null, array, and POJOs are all objects, as are Sets and Maps. But al
 are times when you want to know whether an item is in a specific category (such as "scalar")
 without caring about whether it is an integer or string. Or for example, there is a collective family of "void"
 that encompasses undefined and null. 
+
+Here are some examples of how native typings can in some contexts either be too broad or too narrow,
+requiring repeated boilerplating:
+
+* there are two "voidy" types, undefined and null that are functionally identical 99% of the time
+* there is no native definition of 'scalar' types 
+* there is no native differentiation between integer and float numeric types 
+* the overlap between null and object, and object and array, requires repeated boilerplate
 
 Here is the complete matrix of describe outputs depending on whether you query the "form", "family" or "type"
 of the output: 

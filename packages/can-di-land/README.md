@@ -52,7 +52,7 @@ synonym described below in parentheses.
   For Value type entries, an entries' resource _is_ its value. For 'func'/'comp' entries, 
   they are the _basis_ for an entries' value. 
 * **Value** The _expression_ of an entries' resource. e.g., the computed entries' function's output.
-* **Type** the variation of how an entry expresses its value based on its resource. 
+* **ValueType** the variation of how an entry expresses its value based on its resource. 
   currently the type options are 'value', 'func' and 'comp'.
 * **config** (a.k.a. configuration) The behavioral modifiers that affect how a resource is transmuted into
   a value, including how often / if its resource can be updated, injected args for function-based

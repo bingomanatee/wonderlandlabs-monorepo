@@ -1,0 +1,37 @@
+{
+  "name": "@wonderlandlabs/forest-ts",
+  "version": "0.1.1",
+  "description": "A TS friendly state system",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "author": "David Edelhart",
+  "license": "MIT",
+  "dependencies": {
+    "@wonderlandlabs/walrus": "^0.0.9",
+    "lodash.isequal": "^4.5.0",
+    "rxjs": "^7.8.1",
+    "uuid": "^9.0.0"
+  },
+  "files": [
+    "lib/**/*"
+  ],
+  "homepage": "https://github.com/bingomanatee/wonderlandlabs-monorepo/tree/main/packages/forest-ts",
+  "scripts": {
+    "build": "tsc",
+    "uglify": "node ./uglify.js",
+    "format": "prettier --write \"src/**/*.(js|ts)\"",
+    "lint": "eslint src --ext .js,.ts",
+    "lint:fix": "eslint src --fix --ext .js,.ts",
+    "test": "jest --config jest.config.js",
+    "bt": "tsc; jest --config jest.config.js",
+    "prepare": "npm run build; npm run uglify",
+    "prepublishOnly": "npm test && npm run lint",
+    "preversion": "npm run lint",
+    "version": "npm run && git add -A src",
+    "postversion": "git push && git push --tags"
+  },
+  "devDependencies": {
+    "@types/lodash.isequal": "^4.5.6",
+    "@types/uuid": "^9.0.3"
+  }
+}

@@ -1498,6 +1498,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/uuid@npm:^9.0.3":
+  version: 9.0.3
+  resolution: "@types/uuid@npm:9.0.3"
+  checksum: 3dde198defd71c067dd14b3050a8fe6d1ead5fe94ec318472e2c30a399d13f18941fe66cffabdcac7267177c9de2f975fdee6f0cc87cde610a2578e1ce4cc3af
+  languageName: node
+  linkType: hard
+
 "@types/yargs-parser@npm:*":
   version: 21.0.0
   resolution: "@types/yargs-parser@npm:21.0.0"
@@ -1716,6 +1723,29 @@ __metadata:
   checksum: c63a748e17cb55aa8b70771af69d740c09db9e38a1da1c0a0e3849597c52899e6d780c446107962eeca9dab536fb8a58b504efb1c8b1ca9f846e018e0cb43130
   languageName: node
   linkType: hard
+
+"@wonderlandlabs/forest-ts@workspace:packages/forest-ts":
+  version: 0.0.0-use.local
+  resolution: "@wonderlandlabs/forest-ts@workspace:packages/forest-ts"
+  dependencies:
+    "@types/lodash.isequal": ^4.5.6
+    "@types/uuid": ^9.0.3
+    "@wonderlandlabs/walrus": ^0.0.9
+    lodash.isequal: ^4.5.0
+    rxjs: ^7.8.1
+    uuid: ^9.0.0
+  languageName: unknown
+  linkType: soft
+
+"@wonderlandlabs/walrus@^0.0.9, @wonderlandlabs/walrus@workspace:packages/walrus":
+  version: 0.0.0-use.local
+  resolution: "@wonderlandlabs/walrus@workspace:packages/walrus"
+  dependencies:
+    "@types/lodash.isequal": ^4.5.6
+    lodash.isequal: ^4.5.0
+    uuid: ^9.0.0
+  languageName: unknown
+  linkType: soft
 
 "@wonderlandlabs/walrus@npm:^0.0.2":
   version: 0.0.2

@@ -1,0 +1,33 @@
+{
+  "name": "@wonderlandlabs/walrus",
+  "version": "0.1.1",
+  "description": "utility class for type checking, text ops",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "author": "David Edelhart",
+  "license": "MIT",
+  "dependencies": {
+    "lodash.isequal": "^4.5.0"
+  },
+  "files": [
+    "dist/**/*"
+  ],
+  "homepage": "https://github.com/bingomanatee/wonderlandlabs-monorepo/tree/main/packages/walrus",
+  "scripts": {
+    "build": "tsc",
+    "uglify": "node ./uglify.js",
+    "format": "prettier --write \"src/**/*.(js|ts)\"",
+    "lint": "eslint src --ext .js,.ts",
+    "lint:fix": "eslint src --fix --ext .js,.ts",
+    "test": "jest --config jest.config.js",
+    "bt": "tsc; jest --config jest.config.js",
+    "prepare": "npm run build; npm run uglify",
+    "prepublishOnly": "npm test && npm run lint",
+    "preversion": "npm run lint",
+    "version": "npm run && git add -A src",
+    "postversion": "git push && git push --tags"
+  },
+  "devDependencies": {
+    "@types/lodash.isequal": "^4.5.6"
+  }
+}

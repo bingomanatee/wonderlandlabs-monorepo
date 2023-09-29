@@ -110,12 +110,13 @@ type.describe([], "family") =  "container"
 ### describeNumber (value) => string
 
 returns one of a possible value describing a (potentially) numeric value in detail: 'integer','decimal','infinite','nan'.
+note that 'nan' includes both the "classic" nan result for math results and all other non-numeric types. 
 
 ### Why would we want this if we have typescript? 
 
 while you could define container and scalar types you still would have to write some fairly complex type guards to enforce them.
 the describe method is useful in writing cleaner type guards; for instance instead of constantly having to assert
-` arg && typeof arg === 'object' && !Array.isArray(arg) ` in your typeguards, you can simmply assert 
+` arg && typeof arg === 'object' && !Array.isArray(arg) ` in your typeguards, you can simply assert 
 `type.describe(arg, true) ==== TypeInum.object` and be assured that the input is truly an object type and not one of the many 
 quasi-object variations like Sets or Maps. 
 

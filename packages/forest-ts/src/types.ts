@@ -1,81 +1,92 @@
-import { BehaviorSubject } from 'rxjs'
-import { Schema } from './Schema'
-import { FormEnum, TypeEnum } from '@wonderlandlabs/walrus/dist/enums'
-import { type } from '@wonderlandlabs/walrus'
+import { Observable, Observer, Subject, Subscription } from 'rxjs'
+import { TypeEnumType } from '@wonderlandlabs/walrus/dist/enums'
+import { IDENTITY, SINGLE } from './constants'
+import CollectionClass from './CollectionClass'
 
 export type LeafId = string;
 
+export type TransAction = (tree: Tree) => void;
+
 export interface LeafObj<ValueType> {
   $value: ValueType
-  $id: string
-  $subject: BehaviorSubject<ValueType>
-  $composedSubject: BehaviorSubject<ValueType>
-  $child(key: any): LeafObj<any> | undefined
-  $children?: Map<any, LeafObj<any>>
-  $options: SchemaProps
-  $tree: Tree
-  $complete(): void
-  $blockUpdateToChildren: boolean
-  $blockUpdateToParent: boolean
-  $parent?: LeafObj<any>
-  $parentField?: any
+  $identity: any,
+  $subscribe(observer: Observer<LeafObj<ValueType>>) : Subscription;
 }
-
-export type LeafOpts = {
-  name?: string,
-  fields?: Schema[]
-}
-
-export type SchemaRecord = Record<string, SchemaPropsInput>;
 
 export interface Tree {
-  addLeaf(leaf: LeafObj<any>): void
-  value(id: LeafId): any
-  update(id: LeafId, value: any): void
+  put(collection: string, value: LeafRecord): void
+  get(collection: string, id: any): any
+  do(action: TransAction) : void
+  collection(name: string): CollectionClass
+  query(query: QueryDef) : Observable<LeafObj<any>[]>
+  fetch(query: QueryDef) : any
+  leaf(collection: string, id: any) : LeafObj<any>
 }
 
-type ValidatorFn = (value: any) => any
-export type SchemaProps = {
-  notes?: string
-  $type: TypeEnum | 'any'
-  key?: any,
-  valueType?: TypeEnum
-  keyType?: TypeEnum
-  test?: ValidatorFn
+type ValidatorFn = (value: any, collection?: CollectionClass) => any
+
+type MutableType = TypeEnumType | TypeEnumType[]
+
+export type ValueSchema = {
+  type?: MutableType,
+  validator?: ValidatorFn
+  optional?: boolean,
   defaultValue?: any,
-  fields?: SchemaTupleList | SchemaRecord
-} & (
-  { name: string, typescriptName?: string }
-  |
-  { typescriptName: string, name: string }
-  )
-
-export type SchemaTuple = {
-  schema: SchemaProps,
-  name: any,
-  value?: any
+  keyType?: MutableType
+  valueType?: MutableType
 }
 
+export type RecordFieldSchema = {
+  name: string,
+} & ValueSchema
 
-export type SchemaTupleList = SchemaTuple[];
-
-export function isSchemaTuple(arg: any) : arg is SchemaTuple {
-  return arg && typeof arg === 'object' && 'name' in arg && isSchema(arg.schema);
+export type JoinExpression = {
+  name: string,
+  form: TypeEnumType
 }
 
-export function isSchemaTupleList(arg: any) : arg is SchemaTupleList {
-  return arg && Array.isArray(arg) && arg.every(isSchemaTuple);
+export type Identity = string | ((value: LeafRecord, collection?: CollectionClass) => any) | typeof SINGLE;
+
+export type CollectionDef = {
+  name: string,
+  identity: Identity
+  fields: RecordFieldSchema[]
+  joins?: JoinExpression[]
 }
 
-export function isSchemaRecord(arg: any) : arg is SchemaRecord {
-  return arg && !Array.isArray(arg) && (typeof arg === 'object')
-    && Array.from(Object.values(arg)).every(isSchema);
+export type LeafRecord = Record<string, any>
+
+/*
+export type RecordSchema = {
+  name: string,
+  typescriptName?: string
+  identity: string | LeafSelectorFn
+  fields?: RecordFieldSchema[]
+  joins?: JoinExpression[]
+} & ValueSchema
+*/
+
+export type JoinSchema = {
+  name: string,
+
+  fromCollection: string,
+  fromField?: string | typeof IDENTITY
+
+  toCollection: string,
+  toField?: string | typeof IDENTITY
+
+  dynamic?: boolean // join in-memory with generated "join" collection
 }
 
-export function isSchemaProps(arg: any): arg is SchemaProps {
-  return type.describe(arg, 'form') === FormEnum.object && '$type' in arg;
+export type QueryDefJoin = {
+  name: string,
+  fields?: string[],
+  joins?: QueryDefJoin[]
 }
 
-export function isSchema(arg: any): arg is Schema {
-  return arg && typeof arg === 'object' && '$type' in arg
+export type QueryDef = {
+  collection: string,
+  identity?: any,
+  fields?: string[],
+  joins?: QueryDefJoin[]
 }

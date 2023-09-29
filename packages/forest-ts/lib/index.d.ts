@@ -1,3 +1,4 @@
-export { Schema } from './Schema';
 export { Leaf } from './Leaf';
-export { TypeEnum, FormEnum } from '@wonderlandlabs/walrus/dist/enums';
+export { TreeClass } from './TreeClass';
+export { TypeEnumType, NumberEnumType } from '@wonderlandlabs/walrus/dist/enums';
+export * as constants from './constants';

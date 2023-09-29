@@ -1,49 +1,65 @@
-import { BehaviorSubject } from 'rxjs';
-import { Schema } from './Schema';
-import { TypeEnum } from '@wonderlandlabs/walrus/dist/enums';
+import { Observable, Observer, Subscription } from 'rxjs';
+import { TypeEnumType } from '@wonderlandlabs/walrus/dist/enums';
+import { IDENTITY, SINGLE } from './constants';
+import CollectionClass from './CollectionClass';
 export type LeafId = string;
+export type TransAction = (tree: Tree) => void;
 export interface LeafObj<ValueType> {
     $value: ValueType;
-    $id: string;
-    $subject: BehaviorSubject<ValueType>;
-    $composedSubject: BehaviorSubject<ValueType>;
-    $child(key: any): LeafObj<any> | undefined;
-    $children?: Map<any, LeafObj<any>>;
-    $options: LeafOpts;
-    $tree: Tree;
-    $complete(): void;
-    $blockUpdateToChildren: boolean;
-    $blockUpdateToParent: boolean;
-    $parent?: LeafObj<any>;
-    $parentField?: any;
+    $identity: any;
+    $subscribe(observer: Observer<LeafObj<ValueType>>): Subscription;
 }
-export type LeafOpts = {
-    name?: string;
-    fields?: Schema[];
-};
 export interface Tree {
-    addLeaf(leaf: LeafObj<any>): void;
-    value(id: LeafId): any;
-    update(id: LeafId, value: any): void;
+    put(collection: string, value: LeafRecord): void;
+    get(collection: string, id: any): any;
+    do(action: TransAction): void;
+    collection(name: string): CollectionClass;
+    query(query: QueryDef): Observable<LeafObj<any>[]>;
+    fetch(query: QueryDef): any;
+    leaf(collection: string, id: any): LeafObj<any>;
 }
-type ValidatorFn = (value: any) => any;
-export type SchemaPropsInput = {
-    notes?: string;
-    $type: TypeEnum | 'any';
-    key?: any;
-    valueType?: TypeEnum;
-    keyType?: TypeEnum;
-    test?: ValidatorFn;
+type ValidatorFn = (value: any, collection?: CollectionClass) => any;
+type MutableType = TypeEnumType | TypeEnumType[];
+export type ValueSchema = {
+    type?: MutableType;
+    validator?: ValidatorFn;
+    optional?: boolean;
     defaultValue?: any;
-    fields?: Schema[] | Record<string, SchemaPropsInput>;
-} & ({
+    keyType?: MutableType;
+    valueType?: MutableType;
+};
+export type RecordFieldSchema = {
     name: string;
-    typescriptName?: string;
-} | {
-    typescriptName: string;
+} & ValueSchema;
+export type JoinExpression = {
     name: string;
-});
-export type SchemaProps = SchemaPropsInput & {
-    fields: Schema[];
+    form: TypeEnumType;
+};
+export type Identity = string | ((value: LeafRecord, collection?: CollectionClass) => any) | typeof SINGLE;
+export type CollectionDef = {
+    name: string;
+    identity: Identity;
+    fields: RecordFieldSchema[];
+    joins?: JoinExpression[];
+};
+export type LeafRecord = Record<string, any>;
+export type JoinSchema = {
+    name: string;
+    fromCollection: string;
+    fromField?: string | typeof IDENTITY;
+    toCollection: string;
+    toField?: string | typeof IDENTITY;
+    dynamic?: boolean;
+};
+export type QueryDefJoin = {
+    name: string;
+    fields?: string[];
+    joins?: QueryDefJoin[];
+};
+export type QueryDef = {
+    collection: string;
+    identity?: any;
+    fields?: string[];
+    joins?: QueryDefJoin[];
 };
 export {};

@@ -1,12 +1,13 @@
-import { LeafId, LeafObj } from './types';
-import { Tree } from './types';
+import { CollectionDef, LeafObj, QueryDef, TransAction, Tree } from './types';
+import CollectionClass from './CollectionClass';
 export declare class TreeClass implements Tree {
-    private root;
-    constructor(root: LeafObj<any>);
-    private leaves;
-    addLeaf(leaf: LeafObj<any>): void;
-    value(leafId: LeafId): any;
-    private pending;
-    private get lastPending();
-    update(leafId: LeafId, value: any): void;
+    $collections: Map<string, CollectionClass>;
+    addCollection(content: CollectionDef, values?: any[]): void;
+    do(action: TransAction): void;
+    collection(name: string): CollectionClass;
+    get(collection: string, id: any): any;
+    put(collection: string, value: any): void;
+    query(query: QueryDef): import("rxjs").Observable<LeafObj<any>[]>;
+    fetch(query: QueryDef): any;
+    leaf(collection: string, id: any): LeafObj<any>;
 }

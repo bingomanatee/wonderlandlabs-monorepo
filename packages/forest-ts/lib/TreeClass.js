@@ -1,75 +1,48 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.TreeClass = void 0;
-const collect_1 = require("@wonderlandlabs/collect");
-const uuid_1 = require("uuid");
-class TreePending {
-    constructor(type, name, options) {
-        this.type = type;
-        this.$id = (0, uuid_1.v4)();
-    }
-    has(leafId) {
-        var _a;
-        return (_a = this.backups) === null || _a === void 0 ? void 0 : _a.has(leafId);
-    }
-    get(leafId) {
-        var _a;
-        return (_a = this.backups) === null || _a === void 0 ? void 0 : _a.get(leafId);
-    }
-    backup(leafId, value) {
-        if (!this.backups) {
-            this.backups = new Map();
-        }
-        this.backups.set(leafId, value);
-    }
-}
+const CollectionClass_1 = __importDefault(require("./CollectionClass"));
+const ErrorPlus_1 = require("./ErrorPlus");
+const Leaf_1 = require("./Leaf");
 class TreeClass {
-    constructor(root) {
-        this.root = root;
-        this.leaves = new Map();
-        this.pending = [];
-        this.addLeaf(root);
+    constructor() {
+        this.$collections = new Map();
     }
-    addLeaf(leaf) {
-        this.leaves.set(leaf.$id, leaf);
+    addCollection(content, values) {
+        if (!content.name) {
+            throw new Error('addCollection requires name');
+        }
+        if (this.$collections.has(content.name)) {
+            throw new Error('cannot redefine collection ' + content.name);
+        }
+        this.$collections.set(content.name, new CollectionClass_1.default(this, content, values));
     }
-    value(leafId) {
-        const pending = this.pending.find((pending) => pending.has(leafId));
-        const leaf = this.leaves.get(leafId);
-        if (!leaf) {
-            throw new Error(`cannot identify leaf ${leafId}`);
-        }
-        const base = pending ? pending.get(leafId) : leaf.$subject.value;
-        return composeValue(base, leaf);
+    do(action) {
+        return action(this);
     }
-    get lastPending() {
-        return this.pending.length ? this.pending[this.pending.length - 1] : null;
+    collection(name) {
+        if (!this.$collections.has(name)) {
+            throw new ErrorPlus_1.ErrorPlus('cannot get collection', name);
+        }
+        return this.$collections.get(name);
     }
-    update(leafId, value) {
-        const leaf = this.leaves.get(leafId);
-        if (!leaf) {
-            throw new Error(`write: cannot find ${leafId}`);
-        }
-        if (!this.pending.length) { // should probably never happen - all writes should be transactionally wrapped but...
-            leaf.$subject.next(value);
-        }
-        else {
-            const backup = this.pending.find((pending) => pending.has(leafId));
-            if (!backup) {
-                this.lastPending.backup(leafId, leaf.$value);
-            }
-            leaf.$subject.next(value);
-        }
+    get(collection, id) {
+        return this.collection(collection).get(id);
+    }
+    put(collection, value) {
+        return this.collection(collection).put(value);
+    }
+    query(query) {
+        return this.collection(query.collection).query(query);
+    }
+    fetch(query) {
+        return this.collection(query.collection).fetch(query);
+    }
+    leaf(collection, id) {
+        return new Leaf_1.Leaf(this, collection, id);
     }
 }
 exports.TreeClass = TreeClass;
-function composeValue(value, leaf) {
-    var _a;
-    let con = (0, collect_1.c)(value).clone();
-    if (con.family === "container" /* FormEnum.container */) {
-        (_a = leaf.$children) === null || _a === void 0 ? void 0 : _a.forEach((leaf, name) => {
-            con.set(name, leaf.$value);
-        });
-    }
-    return con.value;
-}

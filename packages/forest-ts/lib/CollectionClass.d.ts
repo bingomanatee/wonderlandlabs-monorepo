@@ -3,8 +3,8 @@ import { BehaviorSubject } from 'rxjs';
 export default class CollectionClass {
     tree: Tree;
     config: CollectionDef;
-    values: Map<any, any>;
     constructor(tree: Tree, config: CollectionDef, values?: any[]);
+    get values(): any;
     private _fieldMap?;
     get fieldMap(): Map<string, RecordFieldSchema>;
     private _validateConfig;
@@ -19,5 +19,7 @@ export default class CollectionClass {
     put(value: LeafRecord): void;
     get(id: any): any;
     query(query: Partial<QueryDef>): import("rxjs").Observable<import("./types").LeafObj<any>[]>;
-    fetch(query: QueryDef): undefined;
+    private _fetch;
+    has(identity: any): any;
+    fetch(query: Partial<QueryDef>): import("./types").LeafObj<any>[];
 }

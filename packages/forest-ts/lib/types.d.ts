@@ -1,14 +1,27 @@
-import { Observable, Observer, Subscription } from 'rxjs';
+import { Observable, Observer, SubjectLike, Subscription } from 'rxjs';
 import { TypeEnumType } from '@wonderlandlabs/walrus/dist/enums';
-import { IDENTITY, SINGLE } from './constants';
 import CollectionClass from './CollectionClass';
 export type LeafId = string;
 export type TransAction = (tree: Tree) => void;
+export type LeafObjJSONJoins = Record<string, LeafObjJSON<any>[]>;
+export type LeafObjJSON<ValueType> = {
+    value: ValueType;
+    collection: string;
+    identity: any;
+    joins: LeafObjJSONJoins;
+};
 export interface LeafObj<ValueType> {
     $value: ValueType;
     $identity: any;
+    toJSON(): LeafObjJSON<ValueType>;
     $subscribe(observer: Observer<LeafObj<ValueType>>): Subscription;
 }
+export type UpdateMsg = {
+    action: string;
+    collection: string;
+    identity?: any;
+    value?: any;
+};
 export interface Tree {
     put(collection: string, value: LeafRecord): void;
     get(collection: string, id: any): any;
@@ -16,11 +29,13 @@ export interface Tree {
     collection(name: string): CollectionClass;
     query(query: QueryDef): Observable<LeafObj<any>[]>;
     fetch(query: QueryDef): any;
-    leaf(collection: string, id: any): LeafObj<any>;
+    leaf(collection: string, id: any, joins: JoinObj): LeafObj<any>;
+    joins: Map<string, JoinSchema>;
+    updates: SubjectLike<UpdateMsg>;
 }
 type ValidatorFn = (value: any, collection?: CollectionClass) => any;
 type MutableType = TypeEnumType | TypeEnumType[];
-export type ValueSchema = {
+export type BaseRecordFieldSchema = {
     type?: MutableType;
     validator?: ValidatorFn;
     optional?: boolean;
@@ -30,36 +45,38 @@ export type ValueSchema = {
 };
 export type RecordFieldSchema = {
     name: string;
-} & ValueSchema;
+} & BaseRecordFieldSchema;
 export type JoinExpression = {
     name: string;
     form: TypeEnumType;
 };
-export type Identity = string | ((value: LeafRecord, collection?: CollectionClass) => any) | typeof SINGLE;
+type IDFactory = (value: LeafRecord, collection?: CollectionClass) => any;
+export type Identity = string | IDFactory;
+type FieldDefObject = Record<string, BaseRecordFieldSchema | TypeEnumType>;
 export type CollectionDef = {
     name: string;
     identity: Identity;
-    fields: RecordFieldSchema[];
+    fields: RecordFieldSchema[] | FieldDefObject;
     joins?: JoinExpression[];
+    values?: any[];
 };
 export type LeafRecord = Record<string, any>;
 export type JoinSchema = {
     name: string;
-    fromCollection: string;
-    fromField?: string | typeof IDENTITY;
-    toCollection: string;
-    toField?: string | typeof IDENTITY;
+    from: string;
+    fromField?: string;
+    to: string;
+    toField?: string;
     dynamic?: boolean;
 };
-export type QueryDefJoin = {
-    name: string;
-    fields?: string[];
+export type JoinObj = {
     joins?: QueryDefJoin[];
 };
 export type QueryDef = {
     collection: string;
     identity?: any;
-    fields?: string[];
-    joins?: QueryDefJoin[];
-};
+} & JoinObj;
+export type QueryDefJoin = {
+    name: string;
+} & JoinObj;
 export {};

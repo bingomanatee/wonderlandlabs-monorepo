@@ -3,49 +3,54 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const ErrorPlus_1 = require("./ErrorPlus");
 const walrus_1 = require("@wonderlandlabs/walrus");
 const rxjs_1 = require("rxjs");
-const lodash_1 = require("lodash");
-const constants_1 = require("./constants");
-function compareMaps(map1, map2, query) {
-    if (query.identity) {
-        const firstValue = map1.get(query.identity);
-        const secondValue = map2.get(query.identity);
-        return (0, lodash_1.isEqual)(firstValue, secondValue);
-    }
-    if (map1.size !== map2.size) {
-        return false;
-    }
-    return Array.from(map1.keys()).every((key) => {
-        let v1 = map1.get(key);
-        let v2 = map2.get(key);
-        if (v1 === v2) {
-            return true;
-        }
-        return (0, lodash_1.isEqual)(v1, v2);
-    });
-}
+const collect_1 = require("@wonderlandlabs/collect");
+const utils_1 = require("./utils");
 class CollectionClass {
     constructor(tree, config, values) {
         this.tree = tree;
         this.config = config;
-        this.values = new Map();
         this._validateConfig();
-        this.subject = new rxjs_1.BehaviorSubject(this.values);
+        const map = new Map();
         values === null || values === void 0 ? void 0 : values.forEach((value) => {
-            this.setValue(value);
+            this.validate(value);
+            const id = this.identityOf(value);
+            map.set(id, value);
         });
+        this.subject = new rxjs_1.BehaviorSubject(map);
+        this.subject.subscribe(() => {
+            this.tree.updates.next({
+                action: 'update-collection',
+                collection: this.name,
+            });
+        });
+    }
+    get values() {
+        return this.subject.value;
     }
     get fieldMap() {
         if (!this._fieldMap) {
-            this._fieldMap = this.config.fields.reduce((m, field) => {
-                m.set(field.name, field);
-                return m;
-            }, new Map());
+            if (Array.isArray(this.config.fields)) {
+                this._fieldMap = this.config.fields.reduce((m, field) => {
+                    m.set(field.name, field);
+                    return m;
+                }, new Map());
+            }
+            else {
+                this._fieldMap = new Map();
+                (0, collect_1.c)(this.config.fields).forEach((field, name) => {
+                    if (typeof field !== 'object') {
+                        field = { type: field };
+                    }
+                    this._fieldMap.set(name, Object.assign(Object.assign({}, field), { name }));
+                });
+            }
         }
         return this._fieldMap;
     }
     _validateConfig() {
-        if (!this.config.identity)
+        if (!this.config.identity) {
             throw new ErrorPlus_1.ErrorPlus('colletion config missing identity', this.config);
+        }
         switch (typeof this.config.identity) {
             case 'string':
                 const idDef = this.fieldMap.get(this.config.identity);
@@ -66,7 +71,7 @@ class CollectionClass {
         return this.config.name;
     }
     validate(value) {
-        for (let def of this.config.fields) {
+        this.fieldMap.forEach((def) => {
             if (def.name in value) {
                 const fieldValue = value[def.name];
                 const fvType = walrus_1.type.describe(fieldValue, true);
@@ -102,18 +107,16 @@ class CollectionClass {
                     throw new ErrorPlus_1.ErrorPlus(`validation error: ${this.name} record missing required field ${def.name}`, { data: value, collection: this, field: def.name });
                 }
             }
-        }
+        });
     }
     identityOf(value) {
-        if (this.config.identity === constants_1.SINGLE) {
-            return constants_1.SINGLE;
-        }
         if (typeof this.config.identity === 'string') {
             return value[this.config.identity];
         }
         if (typeof this.config.identity === 'function') {
             return this.config.identity(value, this);
         }
+        throw new ErrorPlus_1.ErrorPlus('config identity is not valid', { config: this.config, collection: this });
     }
     /**
      * this is an "inner put" that (will be) triggering transactional backups
@@ -123,7 +126,6 @@ class CollectionClass {
         const next = new Map(this.values);
         const id = this.identityOf(value);
         next.set(id, value);
-        this.values = next;
         this.subject.next(next);
         return id;
     }
@@ -142,25 +144,32 @@ class CollectionClass {
         if (query.collection && (query.collection !== this.name)) {
             throw new ErrorPlus_1.ErrorPlus(`cannot query ${this.name}with query for ${query.collection}`, query);
         }
+        const self = this;
         const cQuery = Object.assign({ collection: this.name }, query);
         if (cQuery.identity) {
             return this.subject
-                .pipe((0, rxjs_1.takeWhile)((values) => values.has(query.identity)), (0, rxjs_1.distinctUntilChanged)((map1, map2) => compareMaps(map1, map2, cQuery)), (0, rxjs_1.map)(() => ([this.tree.leaf(this.name, query.identity)])));
+                .pipe((0, rxjs_1.takeWhile)((values) => values.has(query.identity)), (0, rxjs_1.distinctUntilChanged)((map1, map2) => (0, utils_1.compareMaps)(map1, map2, cQuery)), (0, rxjs_1.map)(() => self._fetch(cQuery)));
         }
-        return this.subject.pipe((0, rxjs_1.distinctUntilChanged)((map1, map2) => compareMaps(map1, map2, cQuery)), (0, rxjs_1.map)((values) => (Array.from(values.keys())
-            .map((id) => {
-            return this.tree.leaf(this.name, id);
-        }))));
+        return this.subject.pipe((0, rxjs_1.distinctUntilChanged)((map1, map2) => (0, utils_1.compareMaps)(map1, map2, cQuery)), (0, rxjs_1.map)(() => this._fetch(cQuery)));
+    }
+    _fetch(query) {
+        const localQuery = Object.assign({ collection: this.name }, query);
+        if (query.identity) {
+            if (!this.has(query.identity)) {
+                return [];
+            }
+            return [this.tree.leaf(this.name, query.identity, localQuery)];
+        }
+        return Array.from(this.values.keys()).map((key) => this.tree.leaf(this.name, key, localQuery));
+    }
+    has(identity) {
+        return this.values.has(identity);
     }
     fetch(query) {
-        let out;
-        let sub = this.query(query)
-            .subscribe((value) => {
-            out = value;
-            sub.unsubscribe();
-        });
-        sub === null || sub === void 0 ? void 0 : sub.unsubscribe();
-        return out;
+        if (query.collection && (query.collection !== this.name)) {
+            throw new ErrorPlus_1.ErrorPlus(`cannot query ${this.name}with query for ${query.collection}`, query);
+        }
+        return this._fetch(query);
     }
 }
 exports.default = CollectionClass;

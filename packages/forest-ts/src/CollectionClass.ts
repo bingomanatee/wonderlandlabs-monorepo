@@ -3,57 +3,60 @@ import { TypeEnumType } from '@wonderlandlabs/walrus/dist/enums'
 import { ErrorPlus } from './ErrorPlus'
 import { type } from '@wonderlandlabs/walrus'
 import { BehaviorSubject, distinctUntilChanged, map, takeWhile } from 'rxjs'
-import { isEqual } from 'lodash'
-import { SINGLE } from './constants'
 
-function compareMaps(map1: Map<any, any>, map2: Map<any, any>, query: QueryDef) {
-
-  if (query.identity) {
-    const firstValue = map1.get(query.identity);
-    const secondValue = map2.get(query.identity)
-    return isEqual(firstValue, secondValue )
-  }
-
-  if (map1.size !== map2.size) {
-    return false;
-  }
-  return Array.from(map1.keys()).every((key) => {
-    let v1 = map1.get(key);
-    let v2 = map2.get(key);
-
-    if (v1 === v2) {
-      return true;
-    }
-    return isEqual(v1, v2);
-  });
-
-}
+import { c } from '@wonderlandlabs/collect'
+import { compareMaps } from './utils'
 
 export default class CollectionClass {
-  values: Map<any, any> = new Map()
-
   constructor(public tree: Tree, public config: CollectionDef, values?: any[]) {
     this._validateConfig();
 
-    this.subject = new BehaviorSubject(this.values);
+    const map = new Map();
     values?.forEach((value) => {
-      this.setValue(value);
-    })
+      this.validate(value);
+      const id = this.identityOf(value);
+      map.set(id, value);
+    });
+
+    this.subject = new BehaviorSubject(map);
+
+    this.subject.subscribe(() => {
+      this.tree.updates.next({
+        action: 'update-collection',
+        collection: this.name,
+      });
+    });
+  }
+
+  get values() {
+    return this.subject.value;
   }
 
   private _fieldMap?: Map<string, RecordFieldSchema>
   get fieldMap() {
     if (!this._fieldMap) {
-      this._fieldMap = this.config.fields.reduce((m, field) => {
-        m.set(field.name, field);
-        return m;
-      }, new Map())
+      if (Array.isArray(this.config.fields)) {
+        this._fieldMap = this.config.fields.reduce((m, field) => {
+          m.set(field.name, field);
+          return m;
+        }, new Map())
+      } else {
+        this._fieldMap = new Map();
+        c(this.config.fields).forEach((field, name) => {
+          if (typeof field !== 'object') {
+            field = {type: field}
+          }
+          this._fieldMap!.set(name, { ...field, name });
+        });
+      }
     }
     return this._fieldMap;
   }
 
   private _validateConfig() {
-    if (!this.config.identity) throw new ErrorPlus('colletion config missing identity', this.config);
+    if (!this.config.identity) {
+      throw new ErrorPlus('colletion config missing identity', this.config);
+    }
 
     switch (typeof this.config.identity) {
       case 'string':
@@ -70,7 +73,7 @@ export default class CollectionClass {
       case 'function':
         break;
       default:
-        throw new ErrorPlus('identity must be a string or function', {config: this.config})
+        throw new ErrorPlus('identity must be a string or function', { config: this.config })
     }
   }
 
@@ -81,7 +84,7 @@ export default class CollectionClass {
   public subject: BehaviorSubject<any>
 
   public validate(value: LeafRecord) {
-    for (let def of this.config.fields) {
+    this.fieldMap.forEach((def) => {
       if (def.name in value) {
         const fieldValue = value[def.name]
         const fvType = type.describe(fieldValue, true) as TypeEnumType;
@@ -122,19 +125,17 @@ export default class CollectionClass {
           )
         }
       }
-    }
+    });
   }
 
   public identityOf(value: LeafRecord) {
-    if (this.config.identity === SINGLE) {
-      return SINGLE;
-    }
     if (typeof this.config.identity === 'string') {
       return value[this.config.identity];
     }
     if (typeof this.config.identity === 'function') {
       return this.config.identity(value, this);
     }
+    throw new ErrorPlus('config identity is not valid', { config: this.config, collection: this })
   }
 
   /**
@@ -145,7 +146,6 @@ export default class CollectionClass {
     const next = new Map(this.values);
     const id = this.identityOf(value);
     next.set(id, value);
-    this.values = next;
     this.subject.next(next);
     return id;
   }
@@ -168,41 +168,44 @@ export default class CollectionClass {
       throw  new ErrorPlus(`cannot query ${this.name}with query for ${query.collection}`, query)
     }
 
-    const cQuery = {collection: this.name, ...query}
+    const self = this;
+    const cQuery = { collection: this.name, ...query }
     if (cQuery.identity) {
       return this.subject
         .pipe(
           takeWhile((values) => values.has(query.identity!)),
           distinctUntilChanged((map1, map2) => compareMaps(map1, map2, cQuery)),
-          map(() => ([this.tree.leaf(this.name, query.identity!)])
+          map(() => self._fetch(cQuery)
           ),
         )
     }
 
     return this.subject.pipe(
       distinctUntilChanged((map1, map2) => compareMaps(map1, map2, cQuery)),
-      map((values) => (
-          Array.from(values.keys())
-            .map(
-              (id) => {
-                return this.tree.leaf(this.name, id);
-              }
-            )
-        )
-      )
+      map(() => this._fetch(cQuery))
     )
   }
 
-  fetch(query: QueryDef) {
-    let out;
-    let sub = this.query(query)
-      .subscribe((value) => {
-        out = value;
-        sub.unsubscribe();
-      });
-
-    sub?.unsubscribe()
-
-    return out;
+  private _fetch(query: Partial<QueryDef>) {
+    const localQuery = { collection: this.name, ...query };
+    if (query.identity) {
+      if (!this.has(query.identity)) {
+        return [];
+      }
+      return [this.tree.leaf(this.name, query.identity, localQuery)]
+    }
+    return Array.from(this.values.keys()).map((key) => this.tree.leaf(this.name, key, localQuery))
   }
+
+  has(identity: any) {
+    return this.values.has(identity);
+  }
+
+  fetch(query: Partial<QueryDef>) {
+    if (query.collection && (query.collection !== this.name)) {
+      throw  new ErrorPlus(`cannot query ${this.name}with query for ${query.collection}`, query)
+    }
+    return this._fetch(query);
+  }
+
 }

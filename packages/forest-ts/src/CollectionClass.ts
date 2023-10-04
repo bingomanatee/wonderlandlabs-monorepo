@@ -8,11 +8,11 @@ import { c } from '@wonderlandlabs/collect'
 import { compareMaps } from './utils'
 
 export default class CollectionClass {
-  constructor(public tree: Tree, public config: CollectionDef, values?: any[]) {
+  constructor(public tree: Tree, public config: CollectionDef, records?: LeafRecord[]) {
     this._validateConfig();
 
     const map = new Map();
-    values?.forEach((value) => {
+    records?.forEach((value) => {
       this.validate(value);
       const id = this.identityOf(value);
       map.set(id, value);
@@ -158,7 +158,7 @@ export default class CollectionClass {
 
   get(id: any) {
     if (!this.values.has(id)) {
-      console.warn(`attempt to get a value for ${id} that is not in ${this.name}`, this, id);
+      // console.warn(`attempt to get a value for ${id} that is not in ${this.name}`, this, id);
     }
     return this.values.get(id);
   }

@@ -29,7 +29,7 @@ export interface Tree {
     collection(name: string): CollectionClass;
     query(query: QueryDef): Observable<LeafObj<any>[]>;
     fetch(query: QueryDef): any;
-    leaf(collection: string, id: any, joins: JoinObj): LeafObj<any>;
+    leaf(collection: string, id: any, joins: QueryDefJoin): LeafObj<any>;
     joins: Map<string, JoinSchema>;
     updates: SubjectLike<UpdateMsg>;
 }
@@ -46,10 +46,6 @@ export type BaseRecordFieldSchema = {
 export type RecordFieldSchema = {
     name: string;
 } & BaseRecordFieldSchema;
-export type JoinExpression = {
-    name: string;
-    form: TypeEnumType;
-};
 type IDFactory = (value: LeafRecord, collection?: CollectionClass) => any;
 export type Identity = string | IDFactory;
 type FieldDefObject = Record<string, BaseRecordFieldSchema | TypeEnumType>;
@@ -57,8 +53,7 @@ export type CollectionDef = {
     name: string;
     identity: Identity;
     fields: RecordFieldSchema[] | FieldDefObject;
-    joins?: JoinExpression[];
-    values?: any[];
+    records?: any[];
 };
 export type LeafRecord = Record<string, any>;
 export type JoinSchema = {
@@ -72,11 +67,23 @@ export type JoinSchema = {
 export type JoinObj = {
     joins?: QueryDefJoin[];
 };
+export declare function isJoinObj(join: any): join is JoinObj;
 export type QueryDef = {
     collection: string;
     identity?: any;
 } & JoinObj;
-export type QueryDefJoin = {
+export type CompFn = (leaf1: LeafObj<any>, leaf2: LeafObj<any>) => number;
+type QueryNamedDefJoin = {
     name: string;
+    sorter?: SortDef;
 } & JoinObj;
+export declare function isQueryNamedDefJoin(join: any): join is QueryNamedDefJoin;
+type SortDef = CompFn | string | string[];
+type QueryCollectionDefJoin = {
+    collection: string;
+    sorter?: SortDef;
+} & JoinObj;
+export declare function isQueryCollectionDefJoin(join: any): join is QueryNamedDefJoin;
+export declare function isQueryDefJoin(join: any): join is QueryDefJoin;
+export type QueryDefJoin = (QueryNamedDefJoin | QueryCollectionDefJoin);
 export {};

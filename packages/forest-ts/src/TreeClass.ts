@@ -1,9 +1,33 @@
-import { CollectionDef, JoinObj, JoinSchema, LeafObj, QueryDef, TransAction, Tree, UpdateMsg } from './types'
+import { c } from '@wonderlandlabs/collect'
+import {text} from '@wonderlandlabs/walrus';
+
+import { sortBy } from 'lodash'
+
+import {
+  CollectionDef, isQueryCollectionDefJoin,
+  isQueryNamedDefJoin,
+  JoinSchema,
+  LeafObj,
+  QueryDef, QueryDefJoin,
+  TransAction,
+  Tree,
+  UpdateMsg
+} from './types'
 import CollectionClass from './CollectionClass'
 import { ErrorPlus } from './ErrorPlus'
 import { Leaf } from './Leaf'
 import { Subject, SubjectLike } from 'rxjs'
 import JoinIndex from './JoinIndex'
+
+function prefix(item: string  | string[]): string[] {
+  if (typeof item === 'string'){
+    return prefix([item])
+  }
+
+  return item.map((str) => {
+    return text.addBefore(str, '$value.');
+  })
+}
 
 export class TreeClass implements Tree {
   public $collections: Map<string, CollectionClass> = new Map();
@@ -23,10 +47,10 @@ export class TreeClass implements Tree {
       throw new Error('cannot redefine collection ' + content.name);
     }
 
-    let values = content.values ?? [];
-    delete content.values;
+    let records = content.records ?? [];
+    delete content.records;
 
-    this.$collections.set(content.name, new CollectionClass(this, content, values));
+    this.$collections.set(content.name, new CollectionClass(this, content, records));
     this.updates.next({
       action: 'add-collection',
       collection: content.name
@@ -70,26 +94,70 @@ export class TreeClass implements Tree {
     return this.collection(query.collection).fetch(query);
   }
 
-  leaf(collection: string, id: any, query?: JoinObj): LeafObj<any> {
+  findMatchingJoins(collection: string, coll2: string) {
+    return c(this.joins).getReduce((list, join: JoinSchema) => {
+      if (join.from === collection && join.to === coll2) {
+        list.push(join);
+      } else if (join.to === collection && join.from === coll2) {
+        list.push(join);
+      }
+
+      return list;
+    }, [])
+  }
+
+  leaf(collection: string, id: any, query?: QueryDefJoin): LeafObj<any> {
     const leaf = new Leaf(this, collection, id);
 
     if (query?.joins) {
       query.joins.forEach((join) => {
-        if (!this.joins.has(join.name)) {
-          throw new ErrorPlus('cannot find query join', join);
+        let joinDef;
+        if (isQueryNamedDefJoin(join)) {
+          if (!this.joins.has(join.name)) {
+            throw new ErrorPlus('cannot find query join ' + join.name, join);
+          }
+          if (!this._indexes.has(join.name)) {
+            throw new ErrorPlus('no index for join ' + join.name, join);
+          }
+          joinDef = this.joins.get(join.name)!;
+        } else if (isQueryCollectionDefJoin(join)) {
+          const matches = this.findMatchingJoins(collection, join.collection);
+          switch (matches.length) {
+            case 0:
+              throw new Error(`cannot find amy joins between ${collection} and ${join.collection}`)
+              break;
+
+            case 1:
+              joinDef = matches[0];
+              break;
+
+            default:
+              throw new ErrorPlus(`there are two or more joins between ${collection} and ${join.collection} -- you must name the specific join you want to use`,
+                query);
+          }
+        } else {
+          throw new ErrorPlus('join is not proper', join);
         }
-        if (!this._indexes.has(join.name)) {
-          throw new ErrorPlus('no index for join', join);
+        let index;
+        try {
+          index = this._indexes.get(joinDef.name)!;
+        } catch (err) {
+          console.log('---- error getting index for ', joinDef, 'from join', join);
+          throw err;
         }
-        const index = this._indexes.get(join.name)!;
-        const joinDef = this.joins.get(join.name)!;
 
         if (joinDef.to === collection) {
-          console.log('.... getting joins: to for ', collection, 'id', id);
-          leaf.$joins[join.name] = index.toLeafsFor(id, join);
+          leaf.$joins[joinDef.name] = index.toLeafsFor(id, join);
         } else {
-          console.log('.... getting joins: from for ', collection, 'id', id);
-          leaf.$joins[join.name] = index.fromLeafsFor(id, join);
+          leaf.$joins[joinDef.name] = index.fromLeafsFor(id, join);
+        }
+        if (join.sorter) {
+          console.log('sorting ', leaf.$joins[joinDef.name], 'with', join.sorter);
+          if (typeof join.sorter === 'function') {
+            leaf.$joins[joinDef.name] = leaf.$joins[joinDef.name].sort(join.sorter);
+          } else {
+            leaf.$joins[joinDef.name] = sortBy(leaf.$joins[joinDef.name], prefix(join.sorter));
+          }
         }
       })
     }

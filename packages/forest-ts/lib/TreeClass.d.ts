@@ -1,4 +1,4 @@
-import { CollectionDef, JoinObj, JoinSchema, LeafObj, QueryDef, TransAction, Tree, UpdateMsg } from './types';
+import { CollectionDef, JoinSchema, LeafObj, QueryDef, QueryDefJoin, TransAction, Tree, UpdateMsg } from './types';
 import CollectionClass from './CollectionClass';
 import { SubjectLike } from 'rxjs';
 export declare class TreeClass implements Tree {
@@ -14,6 +14,7 @@ export declare class TreeClass implements Tree {
     put(collection: string, value: any): void;
     query(query: QueryDef): import("rxjs").Observable<LeafObj<any>[]>;
     fetch(query: QueryDef): any;
-    leaf(collection: string, id: any, query?: JoinObj): LeafObj<any>;
+    findMatchingJoins(collection: string, coll2: string): any;
+    leaf(collection: string, id: any, query?: QueryDefJoin): LeafObj<any>;
     updates: SubjectLike<UpdateMsg>;
 }

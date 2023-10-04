@@ -3,7 +3,7 @@ import { BehaviorSubject } from 'rxjs';
 export default class CollectionClass {
     tree: Tree;
     config: CollectionDef;
-    constructor(tree: Tree, config: CollectionDef, values?: any[]);
+    constructor(tree: Tree, config: CollectionDef, records?: LeafRecord[]);
     get values(): any;
     private _fieldMap?;
     get fieldMap(): Map<string, RecordFieldSchema>;

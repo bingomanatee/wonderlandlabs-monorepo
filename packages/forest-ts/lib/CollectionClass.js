@@ -6,12 +6,12 @@ const rxjs_1 = require("rxjs");
 const collect_1 = require("@wonderlandlabs/collect");
 const utils_1 = require("./utils");
 class CollectionClass {
-    constructor(tree, config, values) {
+    constructor(tree, config, records) {
         this.tree = tree;
         this.config = config;
         this._validateConfig();
         const map = new Map();
-        values === null || values === void 0 ? void 0 : values.forEach((value) => {
+        records === null || records === void 0 ? void 0 : records.forEach((value) => {
             this.validate(value);
             const id = this.identityOf(value);
             map.set(id, value);
@@ -136,7 +136,7 @@ class CollectionClass {
     }
     get(id) {
         if (!this.values.has(id)) {
-            console.warn(`attempt to get a value for ${id} that is not in ${this.name}`, this, id);
+            // console.warn(`attempt to get a value for ${id} that is not in ${this.name}`, this, id);
         }
         return this.values.get(id);
     }

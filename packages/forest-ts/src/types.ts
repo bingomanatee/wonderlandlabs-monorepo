@@ -1,6 +1,7 @@
 import { Observable, Observer, SubjectLike, Subscription } from 'rxjs'
 import { TypeEnumType } from '@wonderlandlabs/walrus/dist/enums'
 import CollectionClass from './CollectionClass'
+import { type, TypeEnum } from '@wonderlandlabs/walrus'
 
 export type LeafId = string;
 
@@ -19,7 +20,7 @@ export interface LeafObj<ValueType> {
   $value: ValueType
   $identity: any,
   toJSON(): LeafObjJSON<ValueType>
-  $subscribe(observer: Observer<LeafObj<ValueType>>) : Subscription;
+  $subscribe(observer: Observer<LeafObj<ValueType>>): Subscription;
 }
 
 export type UpdateMsg = {
@@ -32,11 +33,11 @@ export type UpdateMsg = {
 export interface Tree {
   put(collection: string, value: LeafRecord): void
   get(collection: string, id: any): any
-  do(action: TransAction) : void
+  do(action: TransAction): void
   collection(name: string): CollectionClass
-  query(query: QueryDef) : Observable<LeafObj<any>[]>
-  fetch(query: QueryDef) : any
-  leaf(collection: string, id: any, joins: JoinObj) : LeafObj<any>
+  query(query: QueryDef): Observable<LeafObj<any>[]>
+  fetch(query: QueryDef): any
+  leaf(collection: string, id: any, joins: QueryDefJoin): LeafObj<any>
   joins: Map<string, JoinSchema>,
   updates: SubjectLike<UpdateMsg>
 }
@@ -58,11 +59,6 @@ export type RecordFieldSchema = {
   name: string,
 } & BaseRecordFieldSchema
 
-export type JoinExpression = {
-  name: string,
-  form: TypeEnumType
-}
-
 type IDFactory = (value: LeafRecord, collection?: CollectionClass) => any
 export type Identity = string | IDFactory;
 type FieldDefObject = Record<string, BaseRecordFieldSchema | TypeEnumType>
@@ -71,21 +67,10 @@ export type CollectionDef = {
   name: string,
   identity: Identity
   fields: RecordFieldSchema[] | FieldDefObject
-  joins?: JoinExpression[],
-  values?: any[]
+  records?: any[]
 }
 
 export type LeafRecord = Record<string, any>
-
-/*
-export type RecordSchema = {
-  name: string,
-  typescriptName?: string
-  identity: string | LeafSelectorFn
-  fields?: RecordFieldSchema[]
-  joins?: JoinExpression[]
-} & BaseRecordFieldSchema
-*/
 
 export type JoinSchema = {
   name: string,
@@ -104,11 +89,51 @@ export type JoinObj = {
   joins?: QueryDefJoin[]
 }
 
+export function isJoinObj(join: any): join is JoinObj {
+  if (!(type.describe(join, true) === TypeEnum.object)){
+    return false;
+  }
+  if (join.joins) {
+    return Array.isArray(join.joins)
+  }
+  return true;
+}
+
 export type QueryDef = {
   collection: string,
   identity?: any,
 } & JoinObj;
 
-export type QueryDefJoin = {
+export type CompFn = (leaf1: LeafObj<any>, leaf2: LeafObj<any>) => number;
+
+type QueryNamedDefJoin = {
   name: string,
-} & JoinObj;
+  sorter?: SortDef
+} & JoinObj
+
+export function isQueryNamedDefJoin(join: any): join is QueryNamedDefJoin {
+  return (type.describe(join, true) === TypeEnum.object) && (
+    ('name' in join) && (typeof join.name === 'string')
+    && (isJoinObj(join))
+  );
+}
+
+type SortDef = CompFn | string | string[]
+
+type QueryCollectionDefJoin = {
+  collection: string,
+  sorter?: SortDef
+} & JoinObj
+
+export function isQueryCollectionDefJoin(join: any): join is QueryNamedDefJoin {
+  return (type.describe(join, true) === TypeEnum.object) && (
+    ('collection' in join) && (typeof join.collection === 'string')
+    && (isJoinObj(join))
+  );
+}
+
+export function isQueryDefJoin(join: any) : join is QueryDefJoin {
+  return isQueryNamedDefJoin(join) || isQueryCollectionDefJoin(join);
+}
+
+export type QueryDefJoin = (QueryNamedDefJoin | QueryCollectionDefJoin);

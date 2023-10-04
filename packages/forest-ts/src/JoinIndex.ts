@@ -25,7 +25,6 @@ export default class JoinIndex {
   }
 
   clearCache() {
-    console.log('---- clear cache---');
     this.isGenerated = false;
     this.fromIndex = new Map();
     this.toIndex = new Map();
@@ -68,7 +67,6 @@ export default class JoinIndex {
   private generateFromFieldToToField() { // generate in the case where both fromField and toField exist.
     const { join, fromColl, toColl } = this;
     const { fromField, toField } = join;
-    console.log('gen frofield/tofield')
 
     let toMap = c(toColl.values).getReduce((m, record: LeafRecord, identity, any) => {
       let key;
@@ -115,21 +113,15 @@ export default class JoinIndex {
   private generateFromFieldToToId() {
     const { join, fromColl, toColl } = this;
     const { fromField } = join;
-    console.log('gen frofield/toId')
 
     fromColl.values.forEach((fromData: LeafRecord, fromIdentity: any) => {
-      console.log('--- fromData:', fromData, 'id = ', fromIdentity);
-
       if (!(fromField! in fromData)) {
         return;
       }
       const toId = fromData[fromField!];
 
       if (toColl.has(toId)) {
-        console.log('indexing', fromIdentity, toId);
         this._index(fromIdentity, toId);
-      } else {
-        console.log('--- no fk ', toId);
       }
     });
   }
@@ -137,7 +129,6 @@ export default class JoinIndex {
   private generateFromIdToToField() {
     const { join, fromColl, toColl } = this;
     const { toField } = join;
-    console.log('gen fromid/toField')
     toColl.values.forEach((toData: LeafRecord, toIdentity: any) => {
       if (!(toField! in toData)) {
         return;
@@ -150,7 +141,6 @@ export default class JoinIndex {
   }
 
   private generateFromIdToToId() {
-    console.log('gen fromid/toid')
     const { fromColl, toColl } = this;
     for (const fromId in fromColl.values.keys()) {
       if (toColl.has(fromId)) {
@@ -163,7 +153,6 @@ export default class JoinIndex {
     if (!this.isGenerated) {
       this.generate();
     }
-    console.log(id, 'TLF: toIndexFor --- index = ', this.toIndex, 'join = ', this.join.from, '...', this.join.to);
     if (!this.toIndex.has(id)) {
       return [];
     }
@@ -177,9 +166,7 @@ export default class JoinIndex {
     if (!this.isGenerated) {
       this.generate();
     }
-    console.log(id, 'FLF fromIndex --- index = ', this.fromIndex, 'join = ', this.join.from, '...', this.join.to);
     if (!this.fromIndex.has(id)) {
-      console.log('FLF no match for id', id);
       return [];
     }
     const fromIndexes = this.fromIndex.get(id)!;

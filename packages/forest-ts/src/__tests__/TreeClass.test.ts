@@ -1,5 +1,5 @@
-import { TreeClass, constants } from '../../lib'
-import { TypeEnum } from '@wonderlandlabs/walrus'
+import { TreeClass, constants } from '../../lib';
+import { TypeEnum } from '@wonderlandlabs/walrus';
 
 const { isSingle, SINGLE } = constants;
 
@@ -59,37 +59,37 @@ describe('Forest', () => {
 
         tree.put('foo', { id: 200, content: 'Rope' });
 
-        expect(tree.get('foo', 200).content).toEqual('Rope')
+        expect(tree.get('foo', 200).content).toEqual('Rope');
       });
 
       describe('with preset records', () => {
         it('should accept existing records', () => {
           const tree = new TreeClass();
           tree.addCollection({
-              name: 'squares',
-              identity: 'base',
-              fields: [
-                {
-                  name: 'base',
-                  type: TypeEnum.number
-                },
-                {
-                  name: 'squared',
-                  type: TypeEnum.number
-                }
-              ],
-              records: [
-                { base: 1, squared: 1 },
-                { base: 2, squared: 4 },
-                { base: 3, squared: 9 }
-              ]
-            }
+            name: 'squares',
+            identity: 'base',
+            fields: [
+              {
+                name: 'base',
+                type: TypeEnum.number
+              },
+              {
+                name: 'squared',
+                type: TypeEnum.number
+              }
+            ],
+            records: [
+              { base: 1, squared: 1 },
+              { base: 2, squared: 4 },
+              { base: 3, squared: 9 }
+            ]
+          }
           );
           expect(tree.get('squares', 1).squared).toEqual(1);
           expect(tree.get('squares', 2).squared).toEqual(4);
           expect(tree.get('squares', 3).squared).toEqual(9);
-        })
-      })
+        });
+      });
     });
 
     describe('query', () => {
@@ -98,33 +98,33 @@ describe('Forest', () => {
 
         const tree = new TreeClass();
         tree.addCollection({
-            name: 'costs',
-            identity: 'date',
-            fields: [
-              { name: 'date', type: TypeEnum.string },
-              { name: 'cost', type: TypeEnum.number }
-            ],
-            records: [
-              { date: FIRST_DATE, cost: 200 }
-            ]
-          }
+          name: 'costs',
+          identity: 'date',
+          fields: [
+            { name: 'date', type: TypeEnum.string },
+            { name: 'cost', type: TypeEnum.number }
+          ],
+          records: [
+            { date: FIRST_DATE, cost: 200 }
+          ]
+        }
         );
 
-        let history: any[] = [];
+        const history: any[] = [];
 
         tree.collection('costs')!.query({ identity: FIRST_DATE }).subscribe(
           // @ts-ignore
-          ([leaf]) => {
-            history.push(leaf.$value.cost)
+          ([ leaf ]) => {
+            history.push(leaf.$value.cost);
           });
 
-        expect(history).toEqual([200]);
+        expect(history).toEqual([ 200 ]);
 
         tree.put('costs', {
           date: FIRST_DATE,
           cost: 400
         });
-        expect(history).toEqual([200, 400]);
+        expect(history).toEqual([ 200, 400 ]);
 
         // doesn't echo lateral changes
 
@@ -132,7 +132,7 @@ describe('Forest', () => {
           date: '2023-02-01',
           cost: 600
         });
-        expect(history).toEqual([200, 400]);
+        expect(history).toEqual([ 200, 400 ]);
 
         // doesn't echo non-changes
         tree.put('costs', {
@@ -140,59 +140,59 @@ describe('Forest', () => {
           cost: 400
         });
 
-        expect(history).toEqual([200, 400]);
+        expect(history).toEqual([ 200, 400 ]);
 
         // will echo another real change
         tree.put('costs', {
           date: FIRST_DATE,
           cost: 300
         });
-        expect(history).toEqual([200, 400, 300]);
-      })
+        expect(history).toEqual([ 200, 400, 300 ]);
+      });
 
       it('should follow all records', () => {
 
         const tree = new TreeClass();
         tree.addCollection({
-            name: 'costs',
-            identity: 'date',
-            fields: [
-              { name: 'date', type: TypeEnum.string },
-              { name: 'cost', type: TypeEnum.number }
-            ],
-            records: [
-              { date: '2023-01-01', cost: 200 },
-              { date: '2023-02-01', cost: 400 }
-            ]
-          },
+          name: 'costs',
+          identity: 'date',
+          fields: [
+            { name: 'date', type: TypeEnum.string },
+            { name: 'cost', type: TypeEnum.number }
+          ],
+          records: [
+            { date: '2023-01-01', cost: 200 },
+            { date: '2023-02-01', cost: 400 }
+          ]
+        },
         );
 
-        let history: any[] = [];
+        const history: any[] = [];
 
         tree.query({ collection: 'costs' }).subscribe((records) => {
           history.push(records.map((leaf) => ([
             leaf.$identity,
             leaf.$value.cost
-          ])))
+          ])));
         });
 
         expect(history).toEqual([
           [
-            ['2023-01-01', 200],
-            ['2023-02-01', 400]
+            [ '2023-01-01', 200 ],
+            [ '2023-02-01', 400 ]
           ]
         ]);
 
         tree.put('costs', { date: '2023-03-01', cost: 800 });
         expect(history).toEqual([
           [
-            ['2023-01-01', 200],
-            ['2023-02-01', 400]
+            [ '2023-01-01', 200 ],
+            [ '2023-02-01', 400 ]
           ],
           [
-            ['2023-01-01', 200],
-            ['2023-02-01', 400],
-            ['2023-03-01', 800]
+            [ '2023-01-01', 200 ],
+            [ '2023-02-01', 400 ],
+            [ '2023-03-01', 800 ]
           ]
         ]);
 
@@ -200,39 +200,39 @@ describe('Forest', () => {
         // doesn't echo non-changes
         tree.put('costs', { date: '2023-02-01', cost: 400 });
         expect(history).toEqual([
-            [
-              ['2023-01-01', 200],
-              ['2023-02-01', 400]
-            ],
-            [
-              ['2023-01-01', 200],
-              ['2023-02-01', 400],
-              ['2023-03-01', 800]
-            ]
+          [
+            [ '2023-01-01', 200 ],
+            [ '2023-02-01', 400 ]
+          ],
+          [
+            [ '2023-01-01', 200 ],
+            [ '2023-02-01', 400 ],
+            [ '2023-03-01', 800 ]
           ]
+        ]
         );
 
         // acknowledges add
         tree.put('costs', { date: '2023-04-01', cost: 600 });
         expect(history).toEqual([
-            [
-              ['2023-01-01', 200],
-              ['2023-02-01', 400]
-            ],
-            [
-              ['2023-01-01', 200],
-              ['2023-02-01', 400],
-              ['2023-03-01', 800]
-            ],
-            [
-              ['2023-01-01', 200],
-              ['2023-02-01', 400],
-              ['2023-03-01', 800],
-              ['2023-04-01', 600]
-            ]
+          [
+            [ '2023-01-01', 200 ],
+            [ '2023-02-01', 400 ]
+          ],
+          [
+            [ '2023-01-01', 200 ],
+            [ '2023-02-01', 400 ],
+            [ '2023-03-01', 800 ]
+          ],
+          [
+            [ '2023-01-01', 200 ],
+            [ '2023-02-01', 400 ],
+            [ '2023-03-01', 800 ],
+            [ '2023-04-01', 600 ]
           ]
+        ]
         );
-      })
+      });
 
       it('should join related records', () => {
         const tree = new TreeClass(
@@ -304,105 +304,103 @@ describe('Forest', () => {
         );
 
         const fetched = tree.collection('people').fetch({
-          joins: [{
+          joins: [ {
             name: 'people-address'
-          }]
+          } ]
         });
 
         const fetchedJSON = fetched.map((record) => record.toJSON());
 
-        //  console.log('json of query: ', JSON.stringify(fetchedJSON));
-
         expect(fetchedJSON).toEqual(
-          [{
-            "value": { "id": 100, "name": "Bob", "address": 1 },
-            "identity": 100,
-            "collection": "people",
-            "joins": {
-              "people-address": [{
-                "value": {
-                  "id": 1,
-                  "addr": "100 First St",
-                  "city": "Portland",
-                  "state": "OR"
-                }, "identity": 1, "collection": "address", "joins": {}
-              }]
+          [ {
+            'value': { 'id': 100, 'name': 'Bob', 'address': 1 },
+            'identity': 100,
+            'collection': 'people',
+            'joins': {
+              'people-address': [ {
+                'value': {
+                  'id': 1,
+                  'addr': '100 First St',
+                  'city': 'Portland',
+                  'state': 'OR'
+                }, 'identity': 1, 'collection': 'address', 'joins': {}
+              } ]
             }
           }, {
-            "value": { "id": 200, "name": "Sue", "address": 2 },
-            "identity": 200,
-            "collection": "people",
-            "joins": {
-              "people-address": [{
-                "value": {
-                  "id": 2,
-                  "addr": "333 Folsom St",
-                  "city": "San Francisco",
-                  "state": "CA"
-                }, "identity": 2, "collection": "address", "joins": {}
-              }]
+            'value': { 'id': 200, 'name': 'Sue', 'address': 2 },
+            'identity': 200,
+            'collection': 'people',
+            'joins': {
+              'people-address': [ {
+                'value': {
+                  'id': 2,
+                  'addr': '333 Folsom St',
+                  'city': 'San Francisco',
+                  'state': 'CA'
+                }, 'identity': 2, 'collection': 'address', 'joins': {}
+              } ]
             }
           }, {
-            "value": { "id": 300, "name": "Pat", "address": 0 },
-            "identity": 300,
-            "collection": "people",
-            "joins": { "people-address": [] }
+            'value': { 'id': 300, 'name': 'Pat', 'address': 0 },
+            'identity': 300,
+            'collection': 'people',
+            'joins': { 'people-address': [] }
           }, {
-            "value": { "id": 400, "name": "Jim", "address": 2 },
-            "identity": 400,
-            "collection": "people",
-            "joins": {
-              "people-address": [{
-                "value": {
-                  "id": 2,
-                  "addr": "333 Folsom St",
-                  "city": "San Francisco",
-                  "state": "CA"
-                }, "identity": 2, "collection": "address", "joins": {}
-              }]
+            'value': { 'id': 400, 'name': 'Jim', 'address': 2 },
+            'identity': 400,
+            'collection': 'people',
+            'joins': {
+              'people-address': [ {
+                'value': {
+                  'id': 2,
+                  'addr': '333 Folsom St',
+                  'city': 'San Francisco',
+                  'state': 'CA'
+                }, 'identity': 2, 'collection': 'address', 'joins': {}
+              } ]
             }
-          }]
+          } ]
         );
 
         const addressFetched = tree.collection('address').fetch({
-          joins: [{
+          joins: [ {
             name: 'people-address'
-          }]
+          } ]
         });
 
         const addressFetchedJSON = addressFetched.map(record => record.toJSON());
 
         expect(addressFetchedJSON).toEqual(
-          [{
-            "value": { "id": 1, "addr": "100 First St", "city": "Portland", "state": "OR" },
-            "identity": 1,
-            "collection": "address",
-            "joins": {
-              "people-address": [{
-                "value": { "id": 100, "name": "Bob", "address": 1 },
-                "identity": 100,
-                "collection": "people",
-                "joins": {}
-              }]
+          [ {
+            'value': { 'id': 1, 'addr': '100 First St', 'city': 'Portland', 'state': 'OR' },
+            'identity': 1,
+            'collection': 'address',
+            'joins': {
+              'people-address': [ {
+                'value': { 'id': 100, 'name': 'Bob', 'address': 1 },
+                'identity': 100,
+                'collection': 'people',
+                'joins': {}
+              } ]
             }
           }, {
-            "value": { "id": 2, "addr": "333 Folsom St", "city": "San Francisco", "state": "CA" },
-            "identity": 2,
-            "collection": "address",
-            "joins": {
-              "people-address": [{
-                "value": { "id": 200, "name": "Sue", "address": 2 },
-                "identity": 200,
-                "collection": "people",
-                "joins": {}
+            'value': { 'id': 2, 'addr': '333 Folsom St', 'city': 'San Francisco', 'state': 'CA' },
+            'identity': 2,
+            'collection': 'address',
+            'joins': {
+              'people-address': [ {
+                'value': { 'id': 200, 'name': 'Sue', 'address': 2 },
+                'identity': 200,
+                'collection': 'people',
+                'joins': {}
               }, {
-                "value": { "id": 400, "name": "Jim", "address": 2 },
-                "identity": 400,
-                "collection": "people",
-                "joins": {}
-              }]
+                'value': { 'id': 400, 'name': 'Jim', 'address': 2 },
+                'identity': 400,
+                'collection': 'people',
+                'joins': {}
+              } ]
             }
-          }]
+          } ]
         );
       });
 
@@ -502,94 +500,94 @@ describe('Forest', () => {
         );
 
         const fetched = tree.collection('people').fetch({
-          joins: [{
+          joins: [ {
             name: 'people-address',
             joins: [
               { name: 'address-state' }
             ]
-          }]
+          } ]
         });
         const json = fetched.map(record => record.toJSON());
 
         expect(json).toEqual(
-          [{
-            "value": { "id": 100, "name": "Bob", "address": 1 },
-            "identity": 100,
-            "collection": "people",
-            "joins": {
-              "people-address": [{
-                "value": {
-                  "id": 1,
-                  "addr": "100 First St",
-                  "city": "Portland",
-                  "state": "OR"
+          [ {
+            'value': { 'id': 100, 'name': 'Bob', 'address': 1 },
+            'identity': 100,
+            'collection': 'people',
+            'joins': {
+              'people-address': [ {
+                'value': {
+                  'id': 1,
+                  'addr': '100 First St',
+                  'city': 'Portland',
+                  'state': 'OR'
                 },
-                "identity": 1,
-                "collection": "address",
-                "joins": {
-                  "address-state": [{
-                    "value": { "abbr": "OR", "name": "Oregon" },
-                    "identity": "OR",
-                    "collection": "state",
-                    "joins": {}
-                  }]
+                'identity': 1,
+                'collection': 'address',
+                'joins': {
+                  'address-state': [ {
+                    'value': { 'abbr': 'OR', 'name': 'Oregon' },
+                    'identity': 'OR',
+                    'collection': 'state',
+                    'joins': {}
+                  } ]
                 }
-              }]
+              } ]
             }
           }, {
-            "value": { "id": 200, "name": "Sue", "address": 2 },
-            "identity": 200,
-            "collection": "people",
-            "joins": {
-              "people-address": [{
-                "value": {
-                  "id": 2,
-                  "addr": "333 Folsom St",
-                  "city": "San Francisco",
-                  "state": "CA"
+            'value': { 'id': 200, 'name': 'Sue', 'address': 2 },
+            'identity': 200,
+            'collection': 'people',
+            'joins': {
+              'people-address': [ {
+                'value': {
+                  'id': 2,
+                  'addr': '333 Folsom St',
+                  'city': 'San Francisco',
+                  'state': 'CA'
                 },
-                "identity": 2,
-                "collection": "address",
-                "joins": {
-                  "address-state": [{
-                    "value": { "abbr": "CA", "name": "California" },
-                    "identity": "CA",
-                    "collection": "state",
-                    "joins": {}
-                  }]
+                'identity': 2,
+                'collection': 'address',
+                'joins': {
+                  'address-state': [ {
+                    'value': { 'abbr': 'CA', 'name': 'California' },
+                    'identity': 'CA',
+                    'collection': 'state',
+                    'joins': {}
+                  } ]
                 }
-              }]
+              } ]
             }
           }, {
-            "value": { "id": 300, "name": "Pat", "address": 0 },
-            "identity": 300,
-            "collection": "people",
-            "joins": { "people-address": [] }
+            'value': { 'id': 300, 'name': 'Pat', 'address': 0 },
+            'identity': 300,
+            'collection': 'people',
+            'joins': { 'people-address': [] }
           }, {
-            "value": { "id": 400, "name": "Jim", "address": 2 },
-            "identity": 400,
-            "collection": "people",
-            "joins": {
-              "people-address": [{
-                "value": {
-                  "id": 2,
-                  "addr": "333 Folsom St",
-                  "city": "San Francisco",
-                  "state": "CA"
+            'value': { 'id': 400, 'name': 'Jim', 'address': 2 },
+            'identity': 400,
+            'collection': 'people',
+            'joins': {
+              'people-address': [ {
+                'value': {
+                  'id': 2,
+                  'addr': '333 Folsom St',
+                  'city': 'San Francisco',
+                  'state': 'CA'
                 },
-                "identity": 2,
-                "collection": "address",
-                "joins": {
-                  "address-state": [{
-                    "value": { "abbr": "CA", "name": "California" },
-                    "identity": "CA",
-                    "collection": "state",
-                    "joins": {}
-                  }]
+                'identity': 2,
+                'collection': 'address',
+                'joins': {
+                  'address-state': [ {
+                    'value': { 'abbr': 'CA', 'name': 'California' },
+                    'identity': 'CA',
+                    'collection': 'state',
+                    'joins': {}
+                  } ]
                 }
-              }]
+              } ]
             }
-          }]
+          } ]
         );
 
         const stateFetched = tree.collection('state').fetch({
@@ -602,70 +600,70 @@ describe('Forest', () => {
               ]
             }
           ]
-        })
+        });
         const stateJson = stateFetched.map(record => record.toJSON());
 
         expect(stateJson).toEqual(
-          [{
-            "value": { "abbr": "CA", "name": "California" },
-            "identity": "CA",
-            "collection": "state",
-            "joins": {
-              "address-state": [{
-                "value": {
-                  "id": 2,
-                  "addr": "333 Folsom St",
-                  "city": "San Francisco",
-                  "state": "CA"
+          [ {
+            'value': { 'abbr': 'CA', 'name': 'California' },
+            'identity': 'CA',
+            'collection': 'state',
+            'joins': {
+              'address-state': [ {
+                'value': {
+                  'id': 2,
+                  'addr': '333 Folsom St',
+                  'city': 'San Francisco',
+                  'state': 'CA'
                 },
-                "identity": 2,
-                "collection": "address",
-                "joins": {
-                  "people-address": [{
-                    "value": { "id": 200, "name": "Sue", "address": 2 },
-                    "identity": 200,
-                    "collection": "people",
-                    "joins": {}
+                'identity': 2,
+                'collection': 'address',
+                'joins': {
+                  'people-address': [ {
+                    'value': { 'id': 200, 'name': 'Sue', 'address': 2 },
+                    'identity': 200,
+                    'collection': 'people',
+                    'joins': {}
                   }, {
-                    "value": { "id": 400, "name": "Jim", "address": 2 },
-                    "identity": 400,
-                    "collection": "people",
-                    "joins": {}
-                  }]
+                    'value': { 'id': 400, 'name': 'Jim', 'address': 2 },
+                    'identity': 400,
+                    'collection': 'people',
+                    'joins': {}
+                  } ]
                 }
-              }]
+              } ]
             }
           }, {
-            "value": { "abbr": "OR", "name": "Oregon" },
-            "identity": "OR",
-            "collection": "state",
-            "joins": {
-              "address-state": [{
-                "value": {
-                  "id": 1,
-                  "addr": "100 First St",
-                  "city": "Portland",
-                  "state": "OR"
+            'value': { 'abbr': 'OR', 'name': 'Oregon' },
+            'identity': 'OR',
+            'collection': 'state',
+            'joins': {
+              'address-state': [ {
+                'value': {
+                  'id': 1,
+                  'addr': '100 First St',
+                  'city': 'Portland',
+                  'state': 'OR'
                 },
-                "identity": 1,
-                "collection": "address",
-                "joins": {
-                  "people-address": [{
-                    "value": { "id": 100, "name": "Bob", "address": 1 },
-                    "identity": 100,
-                    "collection": "people",
-                    "joins": {}
-                  }]
+                'identity': 1,
+                'collection': 'address',
+                'joins': {
+                  'people-address': [ {
+                    'value': { 'id': 100, 'name': 'Bob', 'address': 1 },
+                    'identity': 100,
+                    'collection': 'people',
+                    'joins': {}
+                  } ]
                 }
-              }]
+              } ]
             }
           }, {
-            "value": { "abbr": "WA", "name": "Washington" },
-            "identity": "WA",
-            "collection": "state",
-            "joins": { "address-state": [] }
-          }]
-        )
+            'value': { 'abbr': 'WA', 'name': 'Washington' },
+            'identity': 'WA',
+            'collection': 'state',
+            'joins': { 'address-state': [] }
+          } ]
+        );
       });
 
       it('should sort records by sort field in query', () => {
@@ -752,44 +750,44 @@ describe('Forest', () => {
 
 
         expect(json).toEqual(
-          [{
-            "value": { "id": 100, "name": "Bob" },
-            "identity": 100,
-            "collection": "people",
-            "joins": {
-              "people-purchases": [{
-                "value": { "id": 4, "product": "Jam", "customer": 100, "amount": 5 },
-                "identity": 4,
-                "collection": "purchases",
-                "joins": {}
+          [ {
+            'value': { 'id': 100, 'name': 'Bob' },
+            'identity': 100,
+            'collection': 'people',
+            'joins': {
+              'people-purchases': [ {
+                'value': { 'id': 4, 'product': 'Jam', 'customer': 100, 'amount': 5 },
+                'identity': 4,
+                'collection': 'purchases',
+                'joins': {}
               }, {
-                "value": { "id": 2, "product": "Gas", "customer": 100, "amount": 10 },
-                "identity": 2,
-                "collection": "purchases",
-                "joins": {}
+                'value': { 'id': 2, 'product': 'Gas', 'customer': 100, 'amount': 10 },
+                'identity': 2,
+                'collection': 'purchases',
+                'joins': {}
               }, {
-                "value": { "id": 1, "product": "Figs", "customer": 100, "amount": 50 },
-                "identity": 1,
-                "collection": "purchases",
-                "joins": {}
+                'value': { 'id': 1, 'product': 'Figs', 'customer': 100, 'amount': 50 },
+                'identity': 1,
+                'collection': 'purchases',
+                'joins': {}
               }, {
-                "value": { "id": 3, "product": "Ham", "customer": 100, "amount": 105 },
-                "identity": 3,
-                "collection": "purchases",
-                "joins": {}
+                'value': { 'id': 3, 'product': 'Ham', 'customer': 100, 'amount': 105 },
+                'identity': 3,
+                'collection': 'purchases',
+                'joins': {}
               }, {
-                "value": { "id": 5, "product": "Dogs", "customer": 100, "amount": 3000 },
-                "identity": 5,
-                "collection": "purchases",
-                "joins": {}
-              }]
+                'value': { 'id': 5, 'product': 'Dogs', 'customer': 100, 'amount': 3000 },
+                'identity': 5,
+                'collection': 'purchases',
+                'joins': {}
+              } ]
             }
           }, {
-            "value": { "id": 200, "name": "alex" },
-            "identity": 200,
-            "collection": "people",
-            "joins": { "people-purchases": [] }
-          }]
+            'value': { 'id': 200, 'name': 'alex' },
+            'identity': 200,
+            'collection': 'people',
+            'joins': { 'people-purchases': [] }
+          } ]
         );
 
         const fetchByProduct = tree.collection('people').fetch({
@@ -801,48 +799,47 @@ describe('Forest', () => {
           ]
         });
         const byProductJason = fetchByProduct.map((r) => r.toJSON());
-       // console.log('sorted products', JSON.stringify(byProductJason));
 
-        expect(byProductJason).toEqual([{
-            "value": { "id": 100, "name": "Bob" },
-            "identity": 100,
-            "collection": "people",
-            "joins": {
-              "people-purchases": [{
-                "value": { "id": 5, "product": "Dogs", "customer": 100, "amount": 3000 },
-                "identity": 5,
-                "collection": "purchases",
-                "joins": {}
-              }, {
-                "value": { "id": 1, "product": "Figs", "customer": 100, "amount": 50 },
-                "identity": 1,
-                "collection": "purchases",
-                "joins": {}
-              }, {
-                "value": { "id": 2, "product": "Gas", "customer": 100, "amount": 10 },
-                "identity": 2,
-                "collection": "purchases",
-                "joins": {}
-              }, {
-                "value": { "id": 3, "product": "Ham", "customer": 100, "amount": 105 },
-                "identity": 3,
-                "collection": "purchases",
-                "joins": {}
-              }, {
-                "value": { "id": 4, "product": "Jam", "customer": 100, "amount": 5 },
-                "identity": 4,
-                "collection": "purchases",
-                "joins": {}
-              }]
-            }
-          }, {
-            "value": { "id": 200, "name": "alex" },
-            "identity": 200,
-            "collection": "people",
-            "joins": { "people-purchases": [] }
-          }]
-        )
-      })
+        expect(byProductJason).toEqual([ {
+          'value': { 'id': 100, 'name': 'Bob' },
+          'identity': 100,
+          'collection': 'people',
+          'joins': {
+            'people-purchases': [ {
+              'value': { 'id': 5, 'product': 'Dogs', 'customer': 100, 'amount': 3000 },
+              'identity': 5,
+              'collection': 'purchases',
+              'joins': {}
+            }, {
+              'value': { 'id': 1, 'product': 'Figs', 'customer': 100, 'amount': 50 },
+              'identity': 1,
+              'collection': 'purchases',
+              'joins': {}
+            }, {
+              'value': { 'id': 2, 'product': 'Gas', 'customer': 100, 'amount': 10 },
+              'identity': 2,
+              'collection': 'purchases',
+              'joins': {}
+            }, {
+              'value': { 'id': 3, 'product': 'Ham', 'customer': 100, 'amount': 105 },
+              'identity': 3,
+              'collection': 'purchases',
+              'joins': {}
+            }, {
+              'value': { 'id': 4, 'product': 'Jam', 'customer': 100, 'amount': 5 },
+              'identity': 4,
+              'collection': 'purchases',
+              'joins': {}
+            } ]
+          }
+        }, {
+          'value': { 'id': 200, 'name': 'alex' },
+          'identity': 200,
+          'collection': 'people',
+          'joins': { 'people-purchases': [] }
+        } ]
+        );
+      });
     });
 
     describe('SINGLE collections', () => {
@@ -863,10 +860,10 @@ describe('Forest', () => {
           ]
         });
 
-        tree.put('bob', { name: "Bob", age: 100 });
+        tree.put('bob', { name: 'Bob', age: 100 });
 
         expect(tree.collection('bob').fetch({}))
-          .toEqual([{ $tree: tree, $collection: 'bob', $identity: SINGLE, $joins: {} }]);
+          .toEqual([ { $tree: tree, $collection: 'bob', $identity: SINGLE, $joins: {} } ]);
       });
     });
   });

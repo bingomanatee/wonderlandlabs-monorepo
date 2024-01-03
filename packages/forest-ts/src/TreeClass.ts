@@ -1,7 +1,7 @@
-import { c } from '@wonderlandlabs/collect'
-import {text} from '@wonderlandlabs/walrus';
+import { c } from '@wonderlandlabs/collect';
+import { text } from '@wonderlandlabs/walrus';
 
-import { sortBy } from 'lodash'
+import { sortBy } from 'lodash';
 
 import {
   CollectionDef, isQueryCollectionDefJoin,
@@ -12,23 +12,27 @@ import {
   TransAction,
   Tree,
   UpdateMsg
-} from './types'
-import CollectionClass from './CollectionClass'
-import { ErrorPlus } from './ErrorPlus'
-import { Leaf } from './Leaf'
-import { Subject, SubjectLike } from 'rxjs'
-import JoinIndex from './JoinIndex'
+} from './types';
+import CollectionClass from './CollectionClass';
+import { ErrorPlus } from './ErrorPlus';
+import { Leaf } from './Leaf';
+import { Subject, SubjectLike } from 'rxjs';
+import JoinIndex from './JoinIndex';
 
-function prefix(item: string  | string[]): string[] {
-  if (typeof item === 'string'){
-    return prefix([item])
+function prefix(item: string | string[]): string[] {
+  if (typeof item === 'string') {
+    return prefix([ item ]);
   }
 
   return item.map((str) => {
     return text.addBefore(str, '$value.');
-  })
+  });
 }
 
+/**
+ * A Tree is a "local database" -- a collection of collections and the definitions
+ * of how the records are related to each other.
+ */
 export class TreeClass implements Tree {
   public $collections: Map<string, CollectionClass> = new Map();
 
@@ -47,21 +51,21 @@ export class TreeClass implements Tree {
       throw new Error('cannot redefine collection ' + content.name);
     }
 
-    let records = content.records ?? [];
+    const records = content.records ?? [];
     delete content.records;
 
     this.$collections.set(content.name, new CollectionClass(this, content, records));
     this.updates.next({
       action: 'add-collection',
       collection: content.name
-    })
+    });
   }
 
   private _indexes: Map<string, JoinIndex> = new Map();
 
   public addJoin(join: JoinSchema) {
     if (this.joins.has(join.name)) {
-      throw new ErrorPlus('cannot redefine existing join ' + join.name, { join, tree: this })
+      throw new ErrorPlus('cannot redefine existing join ' + join.name, { join, tree: this });
     }
     this.joins.set(join.name, join);
     this._indexes.set(join.name, new JoinIndex(this, join.name));
@@ -73,7 +77,7 @@ export class TreeClass implements Tree {
 
   collection(name: string): CollectionClass {
     if (!this.$collections.has(name)) {
-      throw new ErrorPlus('cannot get collection', name)
+      throw new ErrorPlus('cannot get collection', name);
     }
     return this.$collections.get(name)!;
   }
@@ -103,7 +107,7 @@ export class TreeClass implements Tree {
       }
 
       return list;
-    }, [])
+    }, []);
   }
 
   leaf(collection: string, id: any, query?: QueryDefJoin): LeafObj<any> {
@@ -123,17 +127,17 @@ export class TreeClass implements Tree {
         } else if (isQueryCollectionDefJoin(join)) {
           const matches = this.findMatchingJoins(collection, join.collection);
           switch (matches.length) {
-            case 0:
-              throw new Error(`cannot find amy joins between ${collection} and ${join.collection}`)
-              break;
+          case 0:
+            throw new Error(`cannot find amy joins between ${collection} and ${join.collection}`);
+            break;
 
-            case 1:
-              joinDef = matches[0];
-              break;
+          case 1:
+            joinDef = matches[0];
+            break;
 
-            default:
-              throw new ErrorPlus(`there are two or more joins between ${collection} and ${join.collection} -- you must name the specific join you want to use`,
-                query);
+          default:
+            throw new ErrorPlus(`there are two or more joins between ${collection} and ${join.collection} -- you must name the specific join you want to use`,
+              query);
           }
         } else {
           throw new ErrorPlus('join is not proper', join);
@@ -152,18 +156,17 @@ export class TreeClass implements Tree {
           leaf.$joins[joinDef.name] = index.fromLeafsFor(id, join);
         }
         if (join.sorter) {
-          console.log('sorting ', leaf.$joins[joinDef.name], 'with', join.sorter);
           if (typeof join.sorter === 'function') {
             leaf.$joins[joinDef.name] = leaf.$joins[joinDef.name].sort(join.sorter);
           } else {
             leaf.$joins[joinDef.name] = sortBy(leaf.$joins[joinDef.name], prefix(join.sorter));
           }
         }
-      })
+      });
     }
 
     return leaf;
   }
 
-  updates: SubjectLike<UpdateMsg> = new Subject()
+  updates: SubjectLike<UpdateMsg> = new Subject();
 }

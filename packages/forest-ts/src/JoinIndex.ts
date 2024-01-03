@@ -1,14 +1,14 @@
-import { TreeClass } from './TreeClass'
-import { ErrorPlus } from './ErrorPlus'
-import { JoinSchema, LeafRecord, QueryDefJoin, UpdateMsg } from './types'
-import CollectionClass from './CollectionClass'
-import { c } from '@wonderlandlabs/collect'
+import { TreeClass } from './TreeClass';
+import { ErrorPlus } from './ErrorPlus';
+import { JoinSchema, LeafRecord, QueryDefJoin, UpdateMsg } from './types';
+import CollectionClass from './CollectionClass';
+import { c } from '@wonderlandlabs/collect';
 
 function upsertIntoMap(m: Map<any, any>, key: any, value: any) {
   if (m.has(key)) {
-    m.get(key).push(value)
+    m.get(key).push(value);
   } else {
-    m.set(key, [value])
+    m.set(key, [ value ]);
   }
 }
 
@@ -68,7 +68,7 @@ export default class JoinIndex {
     const { join, fromColl, toColl } = this;
     const { fromField, toField } = join;
 
-    let toMap = c(toColl.values).getReduce((m, record: LeafRecord, identity, any) => {
+    const toMap = c(toColl.values).getReduce((m, record: LeafRecord, identity, any) => {
       let key;
       if (!(toField! in record)) {
         return m;
@@ -77,7 +77,7 @@ export default class JoinIndex {
 
       upsertIntoMap(toMap, key, identity);
       return m;
-    })
+    });
 
     fromColl.values.forEach((fromData: LeafRecord, fromIdentity: any) => {
       if (!(fromField! in fromData)) {
@@ -158,8 +158,7 @@ export default class JoinIndex {
     }
     const toIndexes = this.toIndex.get(id)!;
 
-    console.log("indexes = ", toIndexes)
-    return toIndexes.map((fromId: any) => this.tree.leaf(this.join.from, fromId, join))
+    return toIndexes.map((fromId: any) => this.tree.leaf(this.join.from, fromId, join));
   }
 
   fromLeafsFor(id: any, join?: QueryDefJoin) {
@@ -170,6 +169,6 @@ export default class JoinIndex {
       return [];
     }
     const fromIndexes = this.fromIndex.get(id)!;
-    return fromIndexes.map((toId: any) => this.tree.leaf(this.join.to, toId, join))
+    return fromIndexes.map((toId: any) => this.tree.leaf(this.join.to, toId, join));
   }
 }

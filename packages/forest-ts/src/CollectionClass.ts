@@ -1,11 +1,11 @@
-import { CollectionDef, LeafRecord, QueryDef, RecordFieldSchema, Tree } from './types'
-import { TypeEnumType } from '@wonderlandlabs/walrus/dist/enums'
-import { ErrorPlus } from './ErrorPlus'
-import { type } from '@wonderlandlabs/walrus'
-import { BehaviorSubject, distinctUntilChanged, map, takeWhile } from 'rxjs'
+import { CollectionDef, LeafRecord, QueryDef, RecordFieldSchema, Tree } from './types';
+import { TypeEnumType } from '@wonderlandlabs/walrus/dist/enums';
+import { ErrorPlus } from './ErrorPlus';
+import { type } from '@wonderlandlabs/walrus';
+import { BehaviorSubject, distinctUntilChanged, map, takeWhile } from 'rxjs';
 
-import { c } from '@wonderlandlabs/collect'
-import { compareMaps } from './utils'
+import { c } from '@wonderlandlabs/collect';
+import { compareMaps } from './utils';
 
 export default class CollectionClass {
   constructor(public tree: Tree, public config: CollectionDef, records?: LeafRecord[]) {
@@ -32,19 +32,19 @@ export default class CollectionClass {
     return this.subject.value;
   }
 
-  private _fieldMap?: Map<string, RecordFieldSchema>
+  private _fieldMap?: Map<string, RecordFieldSchema>;
   get fieldMap() {
     if (!this._fieldMap) {
       if (Array.isArray(this.config.fields)) {
         this._fieldMap = this.config.fields.reduce((m, field) => {
           m.set(field.name, field);
           return m;
-        }, new Map())
+        }, new Map());
       } else {
         this._fieldMap = new Map();
         c(this.config.fields).forEach((field, name) => {
           if (typeof field !== 'object') {
-            field = {type: field}
+            field = { type: field };
           }
           this._fieldMap!.set(name, { ...field, name });
         });
@@ -59,40 +59,40 @@ export default class CollectionClass {
     }
 
     switch (typeof this.config.identity) {
-      case 'string':
-        const idDef = this.fieldMap.get(this.config.identity);
-        if (!idDef) {
-          throw new ErrorPlus(
-            `collection config identity must include identity field ${this.config.identity}`,
-            this.config)
-        }
-        if (idDef.optional) {
-          throw new ErrorPlus('collection identity field cannot be empty', this.config)
-        }
-        break;
-      case 'function':
-        break;
-      default:
-        throw new ErrorPlus('identity must be a string or function', { config: this.config })
+    case 'string':
+      const idDef = this.fieldMap.get(this.config.identity);
+      if (!idDef) {
+        throw new ErrorPlus(
+          `collection config identity must include identity field ${this.config.identity}`,
+          this.config);
+      }
+      if (idDef.optional) {
+        throw new ErrorPlus('collection identity field cannot be empty', this.config);
+      }
+      break;
+    case 'function':
+      break;
+    default:
+      throw new ErrorPlus('identity must be a string or function', { config: this.config });
     }
   }
 
   get name() {
-    return this.config.name
+    return this.config.name;
   }
 
-  public subject: BehaviorSubject<any>
+  public subject: BehaviorSubject<any>;
 
   public validate(value: LeafRecord) {
     this.fieldMap.forEach((def) => {
       if (def.name in value) {
-        const fieldValue = value[def.name]
+        const fieldValue = value[def.name];
         const fvType = type.describe(fieldValue, true) as TypeEnumType;
         if (def.type) {
           if (Array.isArray(def.type)) {
             if (!(def.type as TypeEnumType[]).includes(fvType)) {
               throw new ErrorPlus(`field ${def.name} does not match any allowed type`,
-                { def, value, collection: this.name })
+                { def, value, collection: this.name });
             }
           } else {
             if (fvType !== def.type) {
@@ -101,7 +101,7 @@ export default class CollectionClass {
                   type: def.type,
                   field: def.name,
                   value, collection: this.name
-                })
+                });
             }
           }
         }
@@ -114,7 +114,7 @@ export default class CollectionClass {
                 def.name,
                 value,
                 collection: this.name
-              })
+              });
           }
         }
       } else {
@@ -122,7 +122,7 @@ export default class CollectionClass {
           throw new ErrorPlus(
             `validation error: ${this.name} record missing required field ${def.name}`,
             { data: value, collection: this, field: def.name }
-          )
+          );
         }
       }
     });
@@ -135,7 +135,7 @@ export default class CollectionClass {
     if (typeof this.config.identity === 'function') {
       return this.config.identity(value, this);
     }
-    throw new ErrorPlus('config identity is not valid', { config: this.config, collection: this })
+    throw new ErrorPlus('config identity is not valid', { config: this.config, collection: this });
   }
 
   /**
@@ -157,19 +157,16 @@ export default class CollectionClass {
   }
 
   get(id: any) {
-    if (!this.values.has(id)) {
-      // console.warn(`attempt to get a value for ${id} that is not in ${this.name}`, this, id);
-    }
     return this.values.get(id);
   }
 
   query(query: Partial<QueryDef>) {
     if (query.collection && (query.collection !== this.name)) {
-      throw  new ErrorPlus(`cannot query ${this.name}with query for ${query.collection}`, query)
+      throw  new ErrorPlus(`cannot query ${this.name}with query for ${query.collection}`, query);
     }
 
     const self = this;
-    const cQuery = { collection: this.name, ...query }
+    const cQuery = { collection: this.name, ...query };
     if (cQuery.identity) {
       return this.subject
         .pipe(
@@ -177,13 +174,13 @@ export default class CollectionClass {
           distinctUntilChanged((map1, map2) => compareMaps(map1, map2, cQuery)),
           map(() => self._fetch(cQuery)
           ),
-        )
+        );
     }
 
     return this.subject.pipe(
       distinctUntilChanged((map1, map2) => compareMaps(map1, map2, cQuery)),
       map(() => this._fetch(cQuery))
-    )
+    );
   }
 
   private _fetch(query: Partial<QueryDef>) {
@@ -192,9 +189,9 @@ export default class CollectionClass {
       if (!this.has(query.identity)) {
         return [];
       }
-      return [this.tree.leaf(this.name, query.identity, localQuery)]
+      return [ this.tree.leaf(this.name, query.identity, localQuery) ];
     }
-    return Array.from(this.values.keys()).map((key) => this.tree.leaf(this.name, key, localQuery))
+    return Array.from(this.values.keys()).map((key) => this.tree.leaf(this.name, key, localQuery));
   }
 
   has(identity: any) {
@@ -203,7 +200,7 @@ export default class CollectionClass {
 
   fetch(query: Partial<QueryDef>) {
     if (query.collection && (query.collection !== this.name)) {
-      throw  new ErrorPlus(`cannot query ${this.name}with query for ${query.collection}`, query)
+      throw  new ErrorPlus(`cannot query ${this.name}with query for ${query.collection}`, query);
     }
     return this._fetch(query);
   }

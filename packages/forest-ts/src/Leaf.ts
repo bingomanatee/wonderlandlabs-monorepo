@@ -1,6 +1,6 @@
-import { LeafObj, LeafObjJSONJoins, QueryDef, Tree } from './types'
-import { map, Observer, Subscription } from 'rxjs'
-import { c } from '@wonderlandlabs/collect'
+import { LeafObj, LeafObjJSONJoins, QueryDef, Tree } from './types';
+import { map, Observer, Subscription } from 'rxjs';
+import { c } from '@wonderlandlabs/collect';
 
 export class Leaf<ValueType> implements LeafObj<ValueType> {
   constructor(
@@ -13,7 +13,7 @@ export class Leaf<ValueType> implements LeafObj<ValueType> {
   $subscribe(observer: Observer<LeafObj<ValueType>>): Subscription {
     return this.$query({})
       .pipe(
-        map(([leaf]) => leaf)
+        map(([ leaf ]) => leaf)
       )
       .subscribe(observer);
   }
@@ -25,7 +25,7 @@ export class Leaf<ValueType> implements LeafObj<ValueType> {
   }
 
   get $getCollection() {
-    return this.$tree.collection(this.$collection)
+    return this.$tree.collection(this.$collection);
   }
 
   get $value() {
@@ -36,21 +36,21 @@ export class Leaf<ValueType> implements LeafObj<ValueType> {
   }
 
   get $exists() {
-    return this.$getCollection.has(this.$identity)
+    return this.$getCollection.has(this.$identity);
   }
 
-  public $joins: Record<string, LeafObj<any>[]> = {}
+  public $joins: Record<string, LeafObj<any>[]> = {};
 
   public toJSON() {
     const joins: LeafObjJSONJoins = {};
     c(this.$joins).forEach((leafs: LeafObj<any>[], identity) => {
-      joins[identity] = leafs.map((leaf) => leaf.toJSON())
-    })
+      joins[identity] = leafs.map((leaf) => leaf.toJSON());
+    });
     return {
       value: this.$value,
       identity: this.$identity,
       collection: this.$collection,
       joins: joins
-    }
+    };
   }
 }

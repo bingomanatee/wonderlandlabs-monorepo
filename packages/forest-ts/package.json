@@ -7,7 +7,8 @@
   "author": "David Edelhart",
   "license": "MIT",
   "dependencies": {
-    "@wonderlandlabs/walrus": "^0.0.9",
+    "@wonderlandlabs/collect": "^1.0.2",
+    "@wonderlandlabs/walrus": "workspace:^",
     "lodash.isequal": "^4.5.0",
     "rxjs": "^7.8.1",
     "uuid": "^9.0.0"

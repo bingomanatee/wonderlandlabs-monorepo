@@ -1,7 +1,7 @@
-import { Observable, Observer, SubjectLike, Subscription } from 'rxjs'
-import { TypeEnumType } from '@wonderlandlabs/walrus/dist/enums'
-import CollectionClass from './CollectionClass'
-import { type, TypeEnum } from '@wonderlandlabs/walrus'
+import { Observable, Observer, SubjectLike, Subscription } from 'rxjs';
+import { TypeEnumType } from '@wonderlandlabs/walrus/dist/enums';
+import CollectionClass from './CollectionClass';
+import { type, TypeEnum } from '@wonderlandlabs/walrus';
 
 export type LeafId = string;
 
@@ -94,7 +94,7 @@ export function isJoinObj(join: any): join is JoinObj {
     return false;
   }
   if (join.joins) {
-    return Array.isArray(join.joins)
+    return Array.isArray(join.joins);
   }
   return true;
 }

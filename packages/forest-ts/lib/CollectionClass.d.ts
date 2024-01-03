@@ -1,5 +1,10 @@
 import { CollectionDef, LeafRecord, QueryDef, RecordFieldSchema, Tree } from './types';
 import { BehaviorSubject } from 'rxjs';
+/**
+ * This is a bundle of records with the same fields.
+ * There is a special case where the collection has a single record whose ID is `isSingle` (a constant symbol)
+ * in which only one record exists in the collection.
+ */
 export default class CollectionClass {
     tree: Tree;
     config: CollectionDef;

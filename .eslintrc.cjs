@@ -12,7 +12,7 @@ module.exports = {
     "indent": [ "error", 2 ],
     'curly': 1,
     '@typescript-eslint/no-unused-vars': 0,
-    'no-unused-vars': 'ignore',
+    'no-unused-vars': 0,
     "semi": [ "error", "always" ],
     "object-curly-spacing": [ "warn", "always" ],
     "array-bracket-spacing": [ "warn", "always" ],

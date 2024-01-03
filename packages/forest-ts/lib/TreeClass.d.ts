@@ -1,6 +1,10 @@
 import { CollectionDef, JoinSchema, LeafObj, QueryDef, QueryDefJoin, TransAction, Tree, UpdateMsg } from './types';
 import CollectionClass from './CollectionClass';
 import { SubjectLike } from 'rxjs';
+/**
+ * A Tree is a "local database" -- a collection of collections and the definitions
+ * of how the records are related to each other.
+ */
 export declare class TreeClass implements Tree {
     $collections: Map<string, CollectionClass>;
     joins: Map<string, JoinSchema>;

@@ -7,6 +7,15 @@ import { BehaviorSubject, distinctUntilChanged, map, takeWhile } from 'rxjs';
 import { c } from '@wonderlandlabs/collect';
 import { compareMaps } from './utils';
 
+const NAME_TEST = /^[a-z\-_$0-9]+$/;
+
+//console.log('name test of good name "f00-bar"', NAME_TEST.test('f00-bar'));
+// console.log('name test of bad name "spacey lacey"', NAME_TEST.test('spacey lacy'));
+/**
+ * This is a bundle of records with the same fields.
+ * There is a special case where the collection has a single record whose ID is `isSingle` (a constant symbol)
+ * in which only one record exists in the collection.
+ */
 export default class CollectionClass {
   constructor(public tree: Tree, public config: CollectionDef, records?: LeafRecord[]) {
     this._validateConfig();
@@ -55,7 +64,7 @@ export default class CollectionClass {
 
   private _validateConfig() {
     if (!this.config.identity) {
-      throw new ErrorPlus('colletion config missing identity', this.config);
+      throw new ErrorPlus('collection config missing identity', this.config);
     }
 
     switch (typeof this.config.identity) {
@@ -74,6 +83,10 @@ export default class CollectionClass {
       break;
     default:
       throw new ErrorPlus('identity must be a string or function', { config: this.config });
+    }
+
+    if (!(this.config.name && typeof this.config.name === 'string' && NAME_TEST.test(this.config.name))) {
+      throw new ErrorPlus('collections must have name');
     }
   }
 

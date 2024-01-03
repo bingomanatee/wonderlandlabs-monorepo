@@ -10,16 +10,34 @@ export type TransAction = (tree: Tree) => void;
 export type LeafObjJSONJoins = Record<string, LeafObjJSON<any>[]>;
 
 export type LeafObjJSON<ValueType> = {
-  value: ValueType,
+  value: ValueType | undefined,
   collection: string,
   identity: any,
+  joins?: LeafObjJSONJoins
+}
+
+function isNonEmptyString(a: unknown): a is string {
+  return !!((typeof a === 'string') && a);
+}
+
+export function isLeafJSON(a: unknown): a is LeafObjJSON<any> {
+  return !!(a && typeof a === 'object') && ('collection' in a && isNonEmptyString(a.collection)) &&
+    ('identity' in a);
+}
+
+export type LeafObjJSONAbsent = {
+  collection: string,
+  identity: any,
+  $exists: false,
   joins: LeafObjJSONJoins
 }
 
 export interface LeafObj<ValueType> {
   $value: ValueType
   $identity: any,
-  toJSON(): LeafObjJSON<ValueType>
+
+  toJSON(): LeafObjJSON<ValueType> | LeafObjJSONAbsent
+
   $subscribe(observer: Observer<LeafObj<ValueType>>): Subscription;
 }
 
@@ -32,12 +50,19 @@ export type UpdateMsg = {
 
 export interface Tree {
   put(collection: string, value: LeafRecord): void
+
   get(collection: string, id: any): any
+
   do(action: TransAction): void
+
   collection(name: string): CollectionClass
+
   query(query: QueryDef): Observable<LeafObj<any>[]>
+
   fetch(query: QueryDef): any
+
   leaf(collection: string, id: any, joins: QueryDefJoin): LeafObj<any>
+
   joins: Map<string, JoinSchema>,
   updates: SubjectLike<UpdateMsg>
 }
@@ -90,7 +115,7 @@ export type JoinObj = {
 }
 
 export function isJoinObj(join: any): join is JoinObj {
-  if (!(type.describe(join, true) === TypeEnum.object)){
+  if (!(type.describe(join, true) === TypeEnum.object)) {
     return false;
   }
   if (join.joins) {
@@ -132,7 +157,7 @@ export function isQueryCollectionDefJoin(join: any): join is QueryNamedDefJoin {
   );
 }
 
-export function isQueryDefJoin(join: any) : join is QueryDefJoin {
+export function isQueryDefJoin(join: any): join is QueryDefJoin {
   return isQueryNamedDefJoin(join) || isQueryCollectionDefJoin(join);
 }
 

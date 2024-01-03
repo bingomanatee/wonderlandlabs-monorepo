@@ -5,15 +5,22 @@ export type LeafId = string;
 export type TransAction = (tree: Tree) => void;
 export type LeafObjJSONJoins = Record<string, LeafObjJSON<any>[]>;
 export type LeafObjJSON<ValueType> = {
-    value: ValueType;
+    value: ValueType | undefined;
     collection: string;
     identity: any;
+    joins?: LeafObjJSONJoins;
+};
+export declare function isLeafJSON(a: unknown): a is LeafObjJSON<any>;
+export type LeafObjJSONAbsent = {
+    collection: string;
+    identity: any;
+    $exists: false;
     joins: LeafObjJSONJoins;
 };
 export interface LeafObj<ValueType> {
     $value: ValueType;
     $identity: any;
-    toJSON(): LeafObjJSON<ValueType>;
+    toJSON(): LeafObjJSON<ValueType> | LeafObjJSONAbsent;
     $subscribe(observer: Observer<LeafObj<ValueType>>): Subscription;
 }
 export type UpdateMsg = {

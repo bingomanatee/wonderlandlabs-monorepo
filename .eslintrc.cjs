@@ -12,6 +12,8 @@ module.exports = {
     "indent": [ "error", 2 ],
     'curly': 1,
     '@typescript-eslint/no-unused-vars': 0,
+    '@typescript-eslint/no-explicit-any' : 'warn',
+    '@typescript-eslint/no-this-alias' : 'off',
     'no-unused-vars': 0,
     "semi": [ "error", "always" ],
     "object-curly-spacing": [ "warn", "always" ],

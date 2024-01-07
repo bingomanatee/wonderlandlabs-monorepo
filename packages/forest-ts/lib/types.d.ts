@@ -53,16 +53,18 @@ export type BaseRecordFieldSchema = {
 export type RecordFieldSchema = {
     name: string;
 } & BaseRecordFieldSchema;
-type IDFactory = (value: LeafRecord, collection?: CollectionClass) => any;
+type IDFactory = (value: LeafRecord, collection?: CollectionClass) => unknown;
 export type Identity = string | IDFactory;
 type FieldDefObject = Record<string, BaseRecordFieldSchema | TypeEnumType>;
+export type CollectionTestFn = (record: unknown) => boolean;
 export type CollectionDef = {
     name: string;
     identity: Identity;
     fields: RecordFieldSchema[] | FieldDefObject;
-    records?: any[];
+    records?: LeafRecord[];
+    test?: CollectionTestFn;
 };
-export type LeafRecord = Record<string, any>;
+export type LeafRecord = Record<string, unknown>;
 export type JoinSchema = {
     name: string;
     from: string;

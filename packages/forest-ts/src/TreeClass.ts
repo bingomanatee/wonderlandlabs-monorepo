@@ -4,11 +4,13 @@ import { text } from '@wonderlandlabs/walrus';
 import { sortBy } from 'lodash';
 
 import {
-  CollectionDef, isQueryCollectionDefJoin,
+  CollectionDef,
+  isQueryCollectionDefJoin,
   isQueryNamedDefJoin,
   JoinSchema,
   LeafObj,
-  QueryDef, QueryDefJoin,
+  QueryDef,
+  QueryDefJoin,
   TransAction,
   Tree,
   UpdateMsg

@@ -63,30 +63,28 @@ export default class CollectionClass {
   }
 
   private _validateConfig() {
-    if (!this.config.identity) {
+    const identity = this.config.identity;
+    if (!identity) {
       throw new ErrorPlus('collection config missing identity', this.config);
     }
-
-    switch (typeof this.config.identity) {
-    case 'string':
-      const idDef = this.fieldMap.get(this.config.identity);
+    if (typeof identity === 'string') {
+      const idDef = this.fieldMap.get(identity);
       if (!idDef) {
         throw new ErrorPlus(
-          `collection config identity must include identity field ${this.config.identity}`,
+          `collection config identity must include identity field ${identity}`,
           this.config);
       }
       if (idDef.optional) {
-        throw new ErrorPlus('collection identity field cannot be empty', this.config);
+        throw new ErrorPlus('collection identity field cannot be optional', this.config);
       }
-      break;
-    case 'function':
-      break;
-    default:
+    } else if (typeof identity === 'function') {
+      // is assumed to be valid
+    } else {
       throw new ErrorPlus('identity must be a string or function', { config: this.config });
     }
 
     if (!(this.config.name && typeof this.config.name === 'string' && NAME_TEST.test(this.config.name))) {
-      throw new ErrorPlus('collections must have name');
+      throw new ErrorPlus('collections must have non-empty name (string, snake_case)');
     }
   }
 
@@ -175,7 +173,7 @@ export default class CollectionClass {
 
   query(query: Partial<QueryDef>) {
     if (query.collection && (query.collection !== this.name)) {
-      throw  new ErrorPlus(`cannot query ${this.name}with query for ${query.collection}`, query);
+      throw new ErrorPlus(`cannot query ${this.name}with query for ${query.collection}`, query);
     }
 
     const self = this;
@@ -213,7 +211,7 @@ export default class CollectionClass {
 
   fetch(query: Partial<QueryDef>) {
     if (query.collection && (query.collection !== this.name)) {
-      throw  new ErrorPlus(`cannot query ${this.name}with query for ${query.collection}`, query);
+      throw new ErrorPlus(`cannot query ${this.name}with query for ${query.collection}`, query);
     }
     return this._fetch(query);
   }

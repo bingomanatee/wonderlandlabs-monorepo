@@ -112,8 +112,9 @@ describe('Forest', () => {
 
         const history: any[] = [];
 
-        tree.collection('costs')!.query({ identity: FIRST_DATE }).subscribe(
-          // @ts-ignore
+        const collection = tree.collection('costs');
+        expect(collection).toBeTruthy();
+        collection.query({ identity: FIRST_DATE }).subscribe(
           ([ leaf ]) => {
             history.push(leaf.$value.cost);
           });

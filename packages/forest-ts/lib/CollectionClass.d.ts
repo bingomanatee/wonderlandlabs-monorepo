@@ -16,11 +16,11 @@ export default class CollectionClass {
     get name(): string;
     subject: BehaviorSubject<any>;
     validate(value: LeafRecord): void;
-    identityOf(value: LeafRecord): any;
+    identityOf(value: LeafRecord): unknown;
     /**
      * this is an "inner put" that (will be) triggering transactional backups
      */
-    setValue(value: LeafRecord): any;
+    setValue(value: LeafRecord): unknown;
     put(value: LeafRecord): void;
     get(id: any): any;
     query(query: Partial<QueryDef>): import("rxjs").Observable<import("./types").LeafObj<any>[]>;

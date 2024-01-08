@@ -1,4 +1,4 @@
-import { isLeafJSON, LeafObj, LeafObjJSONJoins, QueryDef, Tree } from './types';
+import { isLeafJSON, LeafObj, LeafObjJSONJoins, QueryDef, TreeIF } from './types';
 import { map, Observer, Subscription } from 'rxjs';
 import { c } from '@wonderlandlabs/collect';
 
@@ -9,7 +9,7 @@ import { c } from '@wonderlandlabs/collect';
  */
 export class Leaf<ValueType> implements LeafObj<ValueType> {
   constructor(
-    private $tree: Tree,
+    private $tree: TreeIF,
     public $collection: string, // should be collectionName maybe?
     public $identity: any
   ) {

@@ -1,5 +1,6 @@
-import { CollectionDef, LeafRecord, QueryDef, RecordFieldSchema, Tree } from './types';
+import { CollectionDef, Data, QueryDef, RecordFieldSchema, Tree } from './types';
 import { BehaviorSubject } from 'rxjs';
+type RecordMap = Map<any, any>;
 /**
  * This is a bundle of records with the same fields.
  * There is a special case where the collection has a single record whose ID is `isSingle` (a constant symbol)
@@ -8,23 +9,24 @@ import { BehaviorSubject } from 'rxjs';
 export default class CollectionClass {
     tree: Tree;
     config: CollectionDef;
-    constructor(tree: Tree, config: CollectionDef, records?: LeafRecord[]);
-    get values(): any;
+    constructor(tree: Tree, config: CollectionDef, records?: Data[]);
+    get values(): RecordMap;
     private _fieldMap?;
     get fieldMap(): Map<string, RecordFieldSchema>;
     private _validateConfig;
     get name(): string;
     subject: BehaviorSubject<any>;
-    validate(value: LeafRecord): void;
-    identityOf(value: LeafRecord): unknown;
+    validate(value: Data): void;
+    identityOf(value: Data): unknown;
     /**
      * this is an "inner put" that (will be) triggering transactional backups
      */
-    setValue(value: LeafRecord): unknown;
-    put(value: LeafRecord): void;
+    setValue(value: Data): unknown;
+    put(value: Data): void;
     get(id: any): any;
     query(query: Partial<QueryDef>): import("rxjs").Observable<import("./types").LeafObj<any>[]>;
     private _fetch;
-    has(identity: any): any;
+    has(identity: any): boolean;
     fetch(query: Partial<QueryDef>): import("./types").LeafObj<any>[];
 }
+export {};

@@ -5,7 +5,7 @@ import { type, TypeEnum } from '@wonderlandlabs/walrus';
 
 export type LeafId = string;
 
-export type TransAction = (tree: Tree) => void;
+export type TransAction = (tree: TreeIF) => void;
 
 export type LeafObjJSONJoins = Record<string, LeafObjJSON<any>[]>;
 
@@ -44,28 +44,73 @@ export interface LeafObj<ValueType> {
 
 export type UpdateMsg = {
   action: string,
-  collection: string,
+  collection?: string,
   identity?: any,
   value?: any,
 }
 
-export interface Tree {
-  put(collection: string, value: LeafRecord): void
+export type UpdatePutMsg = UpdateMsg & {
+  action: 'put-data',
+  collection: string,
+  identity: any,
+  prev: Data | undefined
+}
 
-  get(collection: string, id: any): any
+export type DoProps = {
+  name?: string,
+  args?: any[]
+}
 
-  do(action: TransAction): void
+export interface TransManagerIF {
+  tree: TreeIF,
 
-  collection(name: string): CollectionClass
+  start(props?: DoProps): TransHandlerIF;
 
-  query(query: QueryDef): Observable<LeafObj<any>[]>
+  remove(index: number, success: boolean): void;
+}
 
-  fetch(query: QueryDef): any
+export interface TransHandlerIF {
 
-  leaf(collection: string, id: any, joins: QueryDefJoin): LeafObj<any>
+  id: number,
 
-  joins: Map<string, JoinSchema>,
-  updates: SubjectLike<UpdateMsg>
+  complete(): void;
+
+  fail(err: Error): void;
+}
+
+export interface TreeIF {
+
+  put(collection: string, value: Data): void;
+
+  get(collection: string, id: any): any;
+
+  has(collection: string, id: any):  boolean;
+
+  do(action: TransAction): void;
+
+  collection(name: string): CollectionClass;
+
+  query(query: QueryDef): Observable<LeafObj<any>[]>;
+
+  fetch(query: QueryDef): any;
+
+  leaf(collection: string, id: any, joins: QueryDefJoin): LeafObj<any>;
+
+  joins: Map<string, JoinSchema>;
+  /**
+   * The specification of relationships between two collections.
+   */
+
+  updates: SubjectLike<UpdateMsg>;
+
+  /**
+   * updates is a generic 'pipe' for observing all sorts of change
+   * in a tree across all collections.
+   * It drives the transaction/fallback mechanic
+   * and allows for observation of any activity in the entire tree.
+   */
+
+  revert(handlers: TransHandlerIF[]): void;
 }
 
 type ValidatorFn = (value: any, collection?: CollectionClass) => any
@@ -85,7 +130,7 @@ export type RecordFieldSchema = {
   name: string,
 } & BaseRecordFieldSchema
 
-type IDFactory = (value: LeafRecord, collection?: CollectionClass) => unknown
+type IDFactory = (value: Data, collection?: CollectionClass) => unknown
 export type Identity = string | IDFactory;
 type FieldDefObject = Record<string, BaseRecordFieldSchema | TypeEnumType>
 
@@ -95,12 +140,12 @@ export type CollectionDef = {
   name: string,
   identity: Identity
   fields: RecordFieldSchema[] | FieldDefObject
-  records?:  LeafRecord[]
+  records?: Data[]
   test?: CollectionTestFn
 }
 
 // the general pattern of any data stored in a collection
-export type LeafRecord = Record<string, unknown>
+export type Data = Record<string, unknown>
 
 export type JoinSchema = {
   name: string,

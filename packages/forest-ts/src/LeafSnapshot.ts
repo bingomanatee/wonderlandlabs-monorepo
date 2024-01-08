@@ -1,10 +1,10 @@
-import { LeafObj, LeafRecord, Tree } from './types';
+import { LeafObj, Data, TreeIF } from './types';
 import { TreeClass } from './TreeClass';
 import { Subscription } from 'rxjs';
 
 
 export default class LeafSnapshot implements LeafObj<unknown> {
-  public $value: LeafRecord;
+  public $value: Data;
 
   constructor(private $tree: TreeClass,
     public $collection: string,

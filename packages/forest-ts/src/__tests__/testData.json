@@ -1,0 +1,87 @@
+{
+  "products": {
+    "collections": [
+      {
+        "name": "customers",
+        "identity": "id",
+        "fields": [
+          {
+            "name": "id",
+            "type": "number"
+          },
+          {
+            "name": "name",
+            "type": "string"
+          }
+        ],
+        "records": [
+          {
+            "id": 1,
+            "name": "Bob"
+          },
+          {
+            "id": 2,
+            "name": "Sue"
+          }
+        ]
+      },
+      {
+        "name": "products",
+        "identity": "sku",
+        "fields": [
+          {
+            "name": "sku",
+            "type": "string"
+          },
+          {
+            "name": "name",
+            "type": "string"
+          },
+          {
+            "name": "cost",
+            "type": "number"
+          }
+        ],
+        "records": [
+          {
+            "name": "Happy Fun Ball",
+            "sku": "100-TOY",
+            "cost": 24.50
+          },
+          {
+            "name": "Artco art kit",
+            "sku": "335-ARTS",
+            "cost": 50.00
+          },
+          {
+            "name": "Coleco Video Game Fun Action game",
+            "sku": "252-ELEC",
+            "cost": 39.99
+          }
+        ]
+      },
+      {
+        "name": "cart_items",
+        "identity": "cart-item",
+        "fields": [
+          {
+            "name": "cart-item",
+            "type": "string"
+          },
+          {
+            "name": "customer-id",
+            "type": "number"
+          },
+          {
+            "name": "product-id",
+            "type": "number"
+          },
+          {
+            "name": "count",
+            "type": "number"
+          }
+        ]
+      }
+    ]
+  }
+}

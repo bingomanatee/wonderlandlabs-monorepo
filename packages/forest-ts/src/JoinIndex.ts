@@ -1,6 +1,6 @@
 import { TreeClass } from './TreeClass';
 import { ErrorPlus } from './ErrorPlus';
-import { JoinSchema, LeafRecord, QueryDefJoin, UpdateMsg } from './types';
+import { JoinSchema, Data, QueryDefJoin, UpdateMsg } from './types';
 import CollectionClass from './CollectionClass';
 import { c } from '@wonderlandlabs/collect';
 
@@ -68,7 +68,7 @@ export default class JoinIndex {
     const { join, fromColl, toColl } = this;
     const { fromField, toField } = join;
 
-    const toMap = c(toColl.values).getReduce((m, record: LeafRecord, identity, any) => {
+    const toMap = c(toColl.values).getReduce((m, record: Data, identity, any) => {
       let key;
       if (!(toField! in record)) {
         return m;
@@ -79,7 +79,7 @@ export default class JoinIndex {
       return m;
     });
 
-    fromColl.values.forEach((fromData: LeafRecord, fromIdentity: any) => {
+    fromColl.values.forEach((fromData: Data, fromIdentity: any) => {
       if (!(fromField! in fromData)) {
         return;
       }
@@ -114,7 +114,7 @@ export default class JoinIndex {
     const { join, fromColl, toColl } = this;
     const { fromField } = join;
 
-    fromColl.values.forEach((fromData: LeafRecord, fromIdentity: any) => {
+    fromColl.values.forEach((fromData: Data, fromIdentity: any) => {
       if (!(fromField! in fromData)) {
         return;
       }
@@ -129,7 +129,7 @@ export default class JoinIndex {
   private generateFromIdToToField() {
     const { join, fromColl, toColl } = this;
     const { toField } = join;
-    toColl.values.forEach((toData: LeafRecord, toIdentity: any) => {
+    toColl.values.forEach((toData: Data, toIdentity: any) => {
       if (!(toField! in toData)) {
         return;
       }

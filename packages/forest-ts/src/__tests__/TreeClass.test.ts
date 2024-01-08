@@ -1,5 +1,8 @@
 import { TreeClass, constants } from '../../lib';
 import { TypeEnum } from '@wonderlandlabs/walrus';
+// @ts-expect-error for some reason the json import isn't TS friendly
+import products from './testData.json';
+import { UpdateMsg } from '../types';
 
 const { isSingle, SINGLE } = constants;
 
@@ -865,6 +868,53 @@ describe('Forest', () => {
 
         expect(tree.collection('bob').fetch({}))
           .toEqual([ { $tree: tree, $collection: 'bob', $identity: SINGLE, $joins: {} } ]);
+      });
+    });
+
+    /* validating that all legitimate activity is logged */
+    describe('update', () => {
+      describe('put', () => {
+        console.log('---- update start');
+        const shoppingSite = new TreeClass(products.products.collections);
+        expect(shoppingSite.collection('products')!.values.size).toBe(3); // double checking pre-existing data
+        const messages: UpdateMsg[] = [];
+        const sub = shoppingSite.updates.subscribe({
+          next(msg: UpdateMsg) {
+            messages.push(msg);
+          }
+        });
+
+        expect(messages.length).toEqual(0);
+
+        shoppingSite.put('products', { name: 'Barbie', cost: 25.00, sku: '666-DOLL' });
+        console.log('----- messages are now:', messages);
+
+        const [ m1, m2 ] = messages;
+        expect(messages.length).toEqual(2);
+        expect(m1.action).toEqual('put-data');
+        expect(m1.identity).toEqual('666-DOLL');
+        expect(m2.action).toEqual('update-collection');
+        expect(m2.collection).toEqual('products');
+        sub.unsubscribe();
+        console.log('---- update end');
+      });
+      describe('put(invalid)', () => {
+        console.log('---- update start');
+        const shoppingSite = new TreeClass(products.products.collections);
+
+        const messages: UpdateMsg[] = [];
+        const sub = shoppingSite.updates.subscribe({
+          next(msg: UpdateMsg) {
+            messages.push(msg);
+          }
+        });
+
+        expect(() => {
+          shoppingSite.put('products', { name: 'Barbie', cost: 25.00, sku: 1000 }); // invalid - sku cannot be number.
+
+        }).toThrow();
+
+        expect(messages.length).toEqual(0);
       });
     });
   });

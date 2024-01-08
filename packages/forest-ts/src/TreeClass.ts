@@ -4,7 +4,7 @@ import { text } from '@wonderlandlabs/walrus';
 import { sortBy } from 'lodash';
 
 import {
-  CollectionDef,
+  CollectionDef, DoProps,
   isQueryCollectionDefJoin,
   isQueryNamedDefJoin,
   JoinSchema,
@@ -12,7 +12,7 @@ import {
   QueryDef,
   QueryDefJoin,
   TransAction,
-  Tree,
+  TreeIF,
   UpdateMsg
 } from './types';
 import CollectionClass from './CollectionClass';
@@ -20,6 +20,7 @@ import { ErrorPlus } from './ErrorPlus';
 import { Leaf } from './Leaf';
 import { Subject, SubjectLike } from 'rxjs';
 import JoinIndex from './JoinIndex';
+import TransManager from './TransManager';
 
 function prefix(item: string | string[]): string[] {
   if (typeof item === 'string') {
@@ -35,31 +36,31 @@ function prefix(item: string | string[]): string[] {
  * A Tree is a "local database" -- a collection of collections and the definitions
  * of how the records are related to each other.
  */
-export class TreeClass implements Tree {
-  public $collections: Map<string, CollectionClass> = new Map();
-
-  public joins: Map<string, JoinSchema> = new Map();
-
+export class TreeClass implements TreeIF {
   constructor(collections?: CollectionDef[], joins?: JoinSchema[]) {
     collections?.forEach((coll) => this.addCollection(coll));
     joins?.forEach((join) => this.addJoin(join));
   }
 
-  public addCollection(content: CollectionDef) {
-    if (!content.name) {
+  public $collections: Map<string, CollectionClass> = new Map();
+
+  public joins: Map<string, JoinSchema> = new Map();
+
+  public addCollection(config: CollectionDef) {
+    if (!config.name) {
       throw new Error('addCollection requires name');
     }
-    if (this.$collections.has(content.name)) {
-      throw new Error('cannot redefine collection ' + content.name);
+    if (this.$collections.has(config.name)) {
+      throw new Error('cannot redefine collection ' + config.name);
     }
 
-    const records = content.records ?? [];
-    delete content.records;
+    const records = config.records ?? [];
+    delete config.records;
 
-    this.$collections.set(content.name, new CollectionClass(this, content, records));
+    this.$collections.set(config.name, new CollectionClass(this, config, records));
     this.updates.next({
       action: 'add-collection',
-      collection: content.name
+      collection: config.name
     });
   }
 
@@ -73,8 +74,24 @@ export class TreeClass implements Tree {
     this._indexes.set(join.name, new JoinIndex(this, join.name));
   }
 
-  do(action: TransAction) {
-    return action(this);
+  private $_transManager?: TransManager;
+
+  /** perform a synchronous task that is emveloped by
+   * transactional fallback
+   */
+  do(action: TransAction, props?: DoProps) {
+    if (!this.$_transManager) {
+      this.$_transManager = new TransManager(this);
+    }
+    const handler = this.$_transManager.start(props);
+    try {
+      const out = action(this);
+      handler.complete();
+      return out;
+      return out;
+    } catch (err) {
+      handler.fail(err);
+    }
   }
 
   collection(name: string): CollectionClass {
@@ -89,6 +106,11 @@ export class TreeClass implements Tree {
   }
 
   put(collection: string, value: any) {
+    if (!this.$collections.has(collection)) {
+      throw new ErrorPlus('TreeClass.put: missing target collection', {
+        collection, value
+      });
+    }
     return this.collection(collection).put(value);
   }
 
@@ -171,4 +193,12 @@ export class TreeClass implements Tree {
   }
 
   updates: SubjectLike<UpdateMsg> = new Subject();
+
+  has(coll: string, id: any) {
+    const c = this.collection(coll);
+    if (!c) {
+      return false;
+    }
+    return c.has(id);
+  }
 }

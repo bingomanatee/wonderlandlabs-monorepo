@@ -15,7 +15,7 @@ export declare class Leaf<ValueType> implements LeafObj<ValueType> {
     $query(queryDef: Partial<QueryDef>): import("rxjs").Observable<LeafObj<any>[]>;
     get $getCollection(): import("./CollectionClass").default;
     get $value(): any;
-    get $exists(): any;
+    get $exists(): boolean;
     /**
      * the records related to this one, joined to a specific target "name" which is its identity
      */

@@ -31,7 +31,7 @@ export type UpdateMsg = {
     value?: any;
 };
 export interface Tree {
-    put(collection: string, value: LeafRecord): void;
+    put(collection: string, value: Data): void;
     get(collection: string, id: any): any;
     do(action: TransAction): void;
     collection(name: string): CollectionClass;
@@ -39,6 +39,9 @@ export interface Tree {
     fetch(query: QueryDef): any;
     leaf(collection: string, id: any, joins: QueryDefJoin): LeafObj<any>;
     joins: Map<string, JoinSchema>;
+    /**
+     * The specification of relationships between two collections.
+     */
     updates: SubjectLike<UpdateMsg>;
 }
 type ValidatorFn = (value: any, collection?: CollectionClass) => any;
@@ -54,7 +57,7 @@ export type BaseRecordFieldSchema = {
 export type RecordFieldSchema = {
     name: string;
 } & BaseRecordFieldSchema;
-type IDFactory = (value: LeafRecord, collection?: CollectionClass) => unknown;
+type IDFactory = (value: Data, collection?: CollectionClass) => unknown;
 export type Identity = string | IDFactory;
 type FieldDefObject = Record<string, BaseRecordFieldSchema | TypeEnumType>;
 export type CollectionTestFn = (record: unknown) => boolean;
@@ -62,10 +65,10 @@ export type CollectionDef = {
     name: string;
     identity: Identity;
     fields: RecordFieldSchema[] | FieldDefObject;
-    records?: LeafRecord[];
+    records?: Data[];
     test?: CollectionTestFn;
 };
-export type LeafRecord = Record<string, unknown>;
+export type Data = Record<string, unknown>;
 export type JoinSchema = {
     name: string;
     from: string;

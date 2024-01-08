@@ -9,7 +9,7 @@ export declare class TreeClass implements Tree {
     $collections: Map<string, CollectionClass>;
     joins: Map<string, JoinSchema>;
     constructor(collections?: CollectionDef[], joins?: JoinSchema[]);
-    addCollection(content: CollectionDef): void;
+    addCollection(config: CollectionDef): void;
     private _indexes;
     addJoin(join: JoinSchema): void;
     do(action: TransAction): void;

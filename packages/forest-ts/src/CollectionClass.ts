@@ -1,12 +1,21 @@
-import { CollectionDef, LeafRecord, QueryDef, RecordFieldSchema, Tree } from './types';
+import { CollectionDef, Data, QueryDef, RecordFieldSchema, TreeIF } from './types';
 import { TypeEnumType } from '@wonderlandlabs/walrus/dist/enums';
 import { ErrorPlus } from './ErrorPlus';
-import { type } from '@wonderlandlabs/walrus';
+import { type, TypeEnum } from '@wonderlandlabs/walrus';
 import { BehaviorSubject, distinctUntilChanged, map, takeWhile } from 'rxjs';
 
 import { c } from '@wonderlandlabs/collect';
 import { compareMaps } from './utils';
 
+function asTypeEnum(value:  string | TypeEnumType): TypeEnumType {
+  if (typeof value === 'string' && value in TypeEnum) {
+    // @ts-ignore
+    return TypeEnum[value];
+  }
+  return value;
+}
+
+type RecordMap = Map<any, any>;
 const NAME_TEST = /^[a-z\-_$0-9]+$/;
 
 //console.log('name test of good name "f00-bar"', NAME_TEST.test('f00-bar'));
@@ -17,7 +26,7 @@ const NAME_TEST = /^[a-z\-_$0-9]+$/;
  * in which only one record exists in the collection.
  */
 export default class CollectionClass {
-  constructor(public tree: Tree, public config: CollectionDef, records?: LeafRecord[]) {
+  constructor(public tree: TreeIF, public config: CollectionDef, records?: Data[]) {
     this._validateConfig();
 
     const map = new Map();
@@ -27,7 +36,7 @@ export default class CollectionClass {
       map.set(id, value);
     });
 
-    this.subject = new BehaviorSubject(map);
+    this.subject = new BehaviorSubject<RecordMap>(map);
 
     this.subject.subscribe(() => {
       this.tree.updates.next({
@@ -37,7 +46,7 @@ export default class CollectionClass {
     });
   }
 
-  get values() {
+  get values() : RecordMap {
     return this.subject.value;
   }
 
@@ -46,7 +55,13 @@ export default class CollectionClass {
     if (!this._fieldMap) {
       if (Array.isArray(this.config.fields)) {
         this._fieldMap = this.config.fields.reduce((m, field) => {
-          m.set(field.name, field);
+          const schema = { ...field };
+          if (typeof field.type === 'string') {
+            schema.type = asTypeEnum(field.type);
+          } else if (Array.isArray(field.type)) {
+            schema.type = field.type.map(asTypeEnum);
+          }
+          m.set(field.name, schema);
           return m;
         }, new Map());
       } else {
@@ -94,7 +109,7 @@ export default class CollectionClass {
 
   public subject: BehaviorSubject<any>;
 
-  public validate(value: LeafRecord) {
+  public validate(value: Data) {
     this.fieldMap.forEach((def) => {
       if (def.name in value) {
         const fieldValue = value[def.name];
@@ -107,12 +122,14 @@ export default class CollectionClass {
             }
           } else {
             if (fvType !== def.type) {
+              const info = {
+                type: def.type,
+                field: def.name,
+                value, collection: this.name
+              };
+
               throw new ErrorPlus('field does not match allowed type',
-                {
-                  type: def.type,
-                  field: def.name,
-                  value, collection: this.name
-                });
+                info);
             }
           }
         }
@@ -139,7 +156,7 @@ export default class CollectionClass {
     });
   }
 
-  public identityOf(value: LeafRecord) {
+  public identityOf(value: Data) {
     if (typeof this.config.identity === 'string') {
       return value[this.config.identity];
     }
@@ -152,16 +169,26 @@ export default class CollectionClass {
   /**
    * this is an "inner put" that (will be) triggering transactional backups
    */
-  public setValue(value: LeafRecord) {
+  public setValue(value: Data) {
     this.validate(value);
     const next = new Map(this.values);
     const id = this.identityOf(value);
+
+    const info = {
+      action: 'put-data',
+      collection: this.name,
+      identity: id,
+      value
+    };
+    console.log('setValue: messaging update', info);
+    this.tree.updates.next(info);
+
     next.set(id, value);
     this.subject.next(next);
     return id;
   }
 
-  put(value: LeafRecord) {
+  put(value: Data) {
     return this.tree.do(() => {
       return this.setValue(value);
     });

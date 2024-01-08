@@ -10,7 +10,7 @@ import { c } from '@wonderlandlabs/collect';
 export class Leaf<ValueType> implements LeafObj<ValueType> {
   constructor(
     private $tree: Tree,
-    private $collection: string, // should be collectionName maybe?
+    public $collection: string, // should be collectionName maybe?
     public $identity: any
   ) {
   }

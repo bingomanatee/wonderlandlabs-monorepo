@@ -7,7 +7,7 @@ import { Observer, Subscription } from 'rxjs';
  */
 export declare class Leaf<ValueType> implements LeafObj<ValueType> {
     private $tree;
-    private $collection;
+    $collection: string;
     $identity: any;
     constructor($tree: Tree, $collection: string, // should be collectionName maybe?
     $identity: any);

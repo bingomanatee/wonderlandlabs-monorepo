@@ -35,6 +35,7 @@ export type LeafObjJSONAbsent = {
 export interface LeafObj<ValueType> {
   $value: ValueType
   $identity: any,
+  $collection: string,
 
   toJSON(): LeafObjJSON<ValueType> | LeafObjJSONAbsent
 

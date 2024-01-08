@@ -1,7 +1,6 @@
 import { TreeClass } from './TreeClass';
 import { ErrorPlus } from './ErrorPlus';
-import { JoinSchema, Data, QueryDefJoin, UpdateMsg } from './types';
-import CollectionClass from './CollectionClass';
+import { CollectionIF, Data, DataID, JoinSchema, QueryDefJoin, UpdateMsg } from './types';
 import { c } from '@wonderlandlabs/collect';
 
 function upsertIntoMap(m: Map<any, any>, key: any, value: any) {
@@ -48,7 +47,7 @@ export default class JoinIndex {
     upsertIntoMap(this.toIndex, toId, fromId);
   }
 
-  get fromColl(): CollectionClass {
+  get fromColl(): CollectionIF {
     const coll = this.tree.collection(this.join.from);
     if (!coll) {
       throw new ErrorPlus('cannot find from collection', this);
@@ -68,13 +67,11 @@ export default class JoinIndex {
     const { join, fromColl, toColl } = this;
     const { fromField, toField } = join;
 
-    const toMap = c(toColl.values).getReduce((m, record: Data, identity, any) => {
-      let key;
+    const toMap = c(toColl.values).getReduce((m, record: Data, identity) => {
       if (!(toField! in record)) {
         return m;
       }
-      key = record[toField!];
-
+      const key = record[toField!];
       upsertIntoMap(toMap, key, identity);
       return m;
     });
@@ -115,10 +112,10 @@ export default class JoinIndex {
     const { fromField } = join;
 
     fromColl.values.forEach((fromData: Data, fromIdentity: any) => {
-      if (!(fromField! in fromData)) {
+      if (!(fromField && fromField in fromData)) {
         return;
       }
-      const toId = fromData[fromField!];
+      const toId : DataID = fromData[fromField] as DataID;
 
       if (toColl.has(toId)) {
         this._index(fromIdentity, toId);
@@ -130,10 +127,10 @@ export default class JoinIndex {
     const { join, fromColl, toColl } = this;
     const { toField } = join;
     toColl.values.forEach((toData: Data, toIdentity: any) => {
-      if (!(toField! in toData)) {
+      if (!toField || !(toField in toData)) {
         return;
       }
-      const fromId = toData[toField!];
+      const fromId : DataID = toData[toField] as DataID;
       if (fromColl.has(fromId)) {
         this._index(fromId, toIdentity);
       }

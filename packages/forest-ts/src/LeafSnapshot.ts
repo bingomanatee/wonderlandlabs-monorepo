@@ -1,14 +1,12 @@
-import { LeafObj, Data, TreeIF } from './types';
-import { TreeClass } from './TreeClass';
+import { Data, DataID, LeafObj, TreeIF } from './types';
 import { Subscription } from 'rxjs';
 
-
-export default class LeafSnapshot implements LeafObj<unknown> {
+export default class LeafSnapshot implements LeafObj {
   public $value: Data;
 
-  constructor(private $tree: TreeClass,
+  constructor(private $tree: TreeIF,
     public $collection: string,
-    public $identity: unknown,
+    public $identity: DataID,
   ) {
     this.$value = $tree.get($collection, $identity)?.value;
   }
@@ -26,7 +24,7 @@ export default class LeafSnapshot implements LeafObj<unknown> {
     return new Subscription();
   }
 
-  public static fromLeafObj(leaf: LeafObj<any>) {
-    return new LeafSnapshot(leaf.$identity, leaf.$collection, leaf.$identity);
+  public static fromLeafObj(leaf: LeafObj, tree: TreeIF) {
+    return new LeafSnapshot(tree, leaf.$collection, leaf.$identity);
   }
 }

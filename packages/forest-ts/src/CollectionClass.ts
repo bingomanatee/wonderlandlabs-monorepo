@@ -1,21 +1,21 @@
-import { CollectionDef, Data, QueryDef, RecordFieldSchema, TreeIF } from './types';
+import { CollectionDef, Data, DataID, DataIsValid, QueryDef, RecordMap, RecordFieldSchema, TreeIF } from './types';
 import { TypeEnumType } from '@wonderlandlabs/walrus/dist/enums';
 import { ErrorPlus } from './ErrorPlus';
-import { type, TypeEnum } from '@wonderlandlabs/walrus';
+import { TypeEnum } from '@wonderlandlabs/walrus';
 import { BehaviorSubject, distinctUntilChanged, map, takeWhile } from 'rxjs';
 
 import { c } from '@wonderlandlabs/collect';
-import { compareMaps } from './utils';
+import { compareMaps, validateField } from './utils';
+import { CollectionIF } from './types';
 
 function asTypeEnum(value:  string | TypeEnumType): TypeEnumType {
   if (typeof value === 'string' && value in TypeEnum) {
-    // @ts-ignore
+    // @ts-expect-error extracting from TypeEnum falsely is TS error
     return TypeEnum[value];
   }
   return value;
 }
 
-type RecordMap = Map<any, any>;
 const NAME_TEST = /^[a-z\-_$0-9]+$/;
 
 //console.log('name test of good name "f00-bar"', NAME_TEST.test('f00-bar'));
@@ -25,7 +25,7 @@ const NAME_TEST = /^[a-z\-_$0-9]+$/;
  * There is a special case where the collection has a single record whose ID is `isSingle` (a constant symbol)
  * in which only one record exists in the collection.
  */
-export default class CollectionClass {
+export default class CollectionClass implements CollectionIF {
   constructor(public tree: TreeIF, public config: CollectionDef, records?: Data[]) {
     this._validateConfig();
 
@@ -111,54 +111,22 @@ export default class CollectionClass {
 
   public validate(value: Data) {
     this.fieldMap.forEach((def) => {
-      if (def.name in value) {
-        const fieldValue = value[def.name];
-        const fvType = type.describe(fieldValue, true) as TypeEnumType;
-        if (def.type) {
-          if (Array.isArray(def.type)) {
-            if (!(def.type as TypeEnumType[]).includes(fvType)) {
-              throw new ErrorPlus(`field ${def.name} does not match any allowed type`,
-                { def, value, collection: this.name });
-            }
-          } else {
-            if (fvType !== def.type) {
-              const info = {
-                type: def.type,
-                field: def.name,
-                value, collection: this.name
-              };
-
-              throw new ErrorPlus('field does not match allowed type',
-                info);
-            }
-          }
-        }
-        if (def.validator) {
-          const error = def.validator(fieldValue, this);
-          if (error) {
-            throw new ErrorPlus(`failed validation filter for ${def.name}`,
-              {
-                field:
-                def.name,
-                value,
-                collection: this.name
-              });
-          }
-        }
-      } else {
-        if (!def.optional) {
-          throw new ErrorPlus(
-            `validation error: ${this.name} record missing required field ${def.name}`,
-            { data: value, collection: this, field: def.name }
-          );
-        }
-      }
+      validateField(value, def, this);
+    });
+    this.dataValidators.forEach((div) => {
+      div(value, this);
     });
   }
 
-  public identityOf(value: Data) {
+  private dataValidators: Set<DataIsValid> = new Set();
+
+  public addValidator(div: DataIsValid) {
+    this.dataValidators.add(div);
+  }
+
+  public identityOf(value: Data) : DataID {
     if (typeof this.config.identity === 'string') {
-      return value[this.config.identity];
+      return value[this.config.identity] as DataID;
     }
     if (typeof this.config.identity === 'function') {
       return this.config.identity(value, this);
@@ -180,7 +148,6 @@ export default class CollectionClass {
       identity: id,
       value
     };
-    console.log('setValue: messaging update', info);
     this.tree.updates.next(info);
 
     next.set(id, value);
@@ -188,13 +155,13 @@ export default class CollectionClass {
     return id;
   }
 
-  put(value: Data) {
+  put(value: Data): DataID {
     return this.tree.do(() => {
       return this.setValue(value);
-    });
+    }) as DataID;
   }
 
-  get(id: any) {
+  get(id: DataID) {
     return this.values.get(id);
   }
 
@@ -232,7 +199,7 @@ export default class CollectionClass {
     return Array.from(this.values.keys()).map((key) => this.tree.leaf(this.name, key, localQuery));
   }
 
-  has(identity: any) {
+  has(identity: DataID) {
     return this.values.has(identity);
   }
 

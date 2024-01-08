@@ -3,24 +3,21 @@ import { text } from '@wonderlandlabs/walrus';
 
 import { sortBy } from 'lodash';
 
-import {
-  CollectionDef, DoProps,
-  isQueryCollectionDefJoin,
-  isQueryNamedDefJoin,
-  JoinSchema,
-  LeafObj,
-  QueryDef,
-  QueryDefJoin,
-  TransAction,
-  TreeIF,
-  UpdateMsg
-} from './types';
 import CollectionClass from './CollectionClass';
 import { ErrorPlus } from './ErrorPlus';
 import { Leaf } from './Leaf';
 import { Subject, SubjectLike } from 'rxjs';
 import JoinIndex from './JoinIndex';
 import TransManager from './TransManager';
+import {
+  isQueryCollectionDefJoin,
+  isQueryNamedDefJoin,
+  JoinSchema,
+  QueryDef,
+  QueryDefJoin
+} from './types/types.query-and-join';
+import { LeafObj } from './types/types.leaf';
+import { CollectionDef, CollectionIF, DataID, DoProps, TransAction, TransHandlerIF, TreeIF, UpdateMsg } from './types';
 
 function prefix(item: string | string[]): string[] {
   if (typeof item === 'string') {
@@ -42,7 +39,7 @@ export class TreeClass implements TreeIF {
     joins?.forEach((join) => this.addJoin(join));
   }
 
-  public $collections: Map<string, CollectionClass> = new Map();
+  public $collections: Map<string, CollectionIF> = new Map();
 
   public joins: Map<string, JoinSchema> = new Map();
 
@@ -50,7 +47,7 @@ export class TreeClass implements TreeIF {
     if (!config.name) {
       throw new Error('addCollection requires name');
     }
-    if (this.$collections.has(config.name)) {
+    if (this.hasCollection(config.name)) {
       throw new Error('cannot redefine collection ' + config.name);
     }
 
@@ -76,7 +73,7 @@ export class TreeClass implements TreeIF {
 
   private $_transManager?: TransManager;
 
-  /** perform a synchronous task that is emveloped by
+  /** perform a synchronous task that is enveloped by
    * transactional fallback
    */
   do(action: TransAction, props?: DoProps) {
@@ -85,19 +82,21 @@ export class TreeClass implements TreeIF {
     }
     const handler = this.$_transManager.start(props);
     try {
-      const out = action(this);
+      const rest = (props?.args || []);
+      const out = action(this, ...rest);
       handler.complete();
       return out;
-      return out;
     } catch (err) {
-      handler.fail(err);
+      handler.fail();
+      throw err;
     }
   }
 
-  collection(name: string): CollectionClass {
+  collection(name: string): CollectionIF {
     if (!this.$collections.has(name)) {
       throw new ErrorPlus('cannot get collection', name);
     }
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     return this.$collections.get(name)!;
   }
 
@@ -134,7 +133,7 @@ export class TreeClass implements TreeIF {
     }, []);
   }
 
-  leaf(collection: string, id: any, query?: QueryDefJoin): LeafObj<any> {
+  leaf(collection: string, id: DataID, query?: QueryDefJoin): LeafObj {
     const leaf = new Leaf(this, collection, id);
 
     if (query?.joins) {
@@ -194,11 +193,16 @@ export class TreeClass implements TreeIF {
 
   updates: SubjectLike<UpdateMsg> = new Subject();
 
-  has(coll: string, id: any) {
-    const c = this.collection(coll);
-    if (!c) {
-      return false;
-    }
-    return c.has(id);
+  has(coll: string, id: DataID) {
+    return this.$collections.has(coll) && this.$collections.get(coll)!.has(id);
   }
+
+  hasCollection(coll: string) {
+    return this.$collections.has(coll);
+  }
+
+  revert(actions: TransHandlerIF[]) {
+    console.warn('TreeClass.revert not implemented');
+  }
+
 }

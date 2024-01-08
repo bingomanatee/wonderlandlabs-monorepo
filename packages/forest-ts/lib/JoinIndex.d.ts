@@ -1,6 +1,5 @@
 import { TreeClass } from './TreeClass';
-import { JoinSchema, QueryDefJoin } from './types';
-import CollectionClass from './CollectionClass';
+import { CollectionIF, JoinSchema, QueryDefJoin } from './types';
 export default class JoinIndex {
     tree: TreeClass;
     joinName: string;
@@ -11,8 +10,8 @@ export default class JoinIndex {
     toIndex: Map<any, any>;
     private isGenerated;
     private _index;
-    get fromColl(): CollectionClass;
-    get toColl(): CollectionClass;
+    get fromColl(): CollectionIF;
+    get toColl(): CollectionIF;
     private generateFromFieldToToField;
     generate(): void;
     private generateFromFieldToToId;

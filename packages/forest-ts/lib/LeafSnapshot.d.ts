@@ -1,17 +1,16 @@
-import { LeafObj, Data } from './types';
-import { TreeClass } from './TreeClass';
+import { Data, DataID, LeafObj, TreeIF } from './types';
 import { Subscription } from 'rxjs';
-export default class LeafSnapshot implements LeafObj<unknown> {
+export default class LeafSnapshot implements LeafObj {
     private $tree;
     $collection: string;
-    $identity: unknown;
+    $identity: DataID;
     $value: Data;
-    constructor($tree: TreeClass, $collection: string, $identity: unknown);
+    constructor($tree: TreeIF, $collection: string, $identity: DataID);
     toJSON(): {
         value: Data;
         collection: string;
-        identity: unknown;
+        identity: DataID;
     };
     $subscribe(): Subscription;
-    static fromLeafObj(leaf: LeafObj<any>): LeafSnapshot;
+    static fromLeafObj(leaf: LeafObj, tree: TreeIF): LeafSnapshot;
 }

@@ -1,5 +1,6 @@
-import { DoProps, TransHandlerIF, TransManagerIF, TreeIF, UpdatePutMsg } from './types';
+
 import { Unsubscribable } from 'rxjs';
+import { DoProps, TransHandlerIF, TransManagerIF, TreeIF, UpdatePutMsg } from './types';
 
 
 class TransHandler implements TransHandlerIF {
@@ -30,7 +31,7 @@ class TransHandler implements TransHandlerIF {
     this._sub.unsubscribe();
   }
 
-  fail(_err: Error): void {
+  fail(): void {
     this.mgr.remove(this.id, false);
     this._sub.unsubscribe();
   }
@@ -44,7 +45,7 @@ export default class TransManager {
   constructor(public tree: TreeIF) {
   }
 
-  public start(props: DoProps): TransHandlerIF {
+  public start(props?: DoProps): TransHandlerIF {
     const handler = new TransHandler(this, this.nextHandlerId, props);
     this.nextHandlerId += 1;
     this.pendingHandlers.push(handler);

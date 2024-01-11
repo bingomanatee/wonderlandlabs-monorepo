@@ -17,7 +17,17 @@ import {
   QueryDefJoin
 } from './types/types.query-and-join';
 import { LeafObj } from './types/types.leaf';
-import { CollectionDef, CollectionIF, DataID, DoProps, TransAction, TransHandlerIF, TreeIF, UpdateMsg } from './types';
+import {
+  CollectionDef,
+  CollectionIF,
+  DataID,
+  DoProps,
+  TransAction,
+  TransHandlerIF,
+  TreeIF,
+  UpdateMsg,
+  UpdatePutMsg
+} from './types';
 
 function prefix(item: string | string[]): string[] {
   if (typeof item === 'string') {
@@ -74,7 +84,9 @@ export class TreeClass implements TreeIF {
   private $_transManager?: TransManager;
 
   /** perform a synchronous task that is enveloped by
-   * transactional fallback
+   * transactional fallback; on a thrown error,
+   * the collections should revert to
+   * their previous state, due to the existence of a handler.
    */
   do(action: TransAction, props?: DoProps) {
     if (!this.$_transManager) {
@@ -201,7 +213,18 @@ export class TreeClass implements TreeIF {
     return this.$collections.has(coll);
   }
 
+  private unPut(p: UpdatePutMsg) {
+    if (this.hasCollection(p.collection)) {
+      this.collection(p.collection).unPut(p);
+    }
+  }
+
   revert(actions: TransHandlerIF[]) {
+    actions.forEach((handler) => {
+      handler.puts.forEach((p) => {
+        this.unPut(p);
+      });
+    });
     console.warn('TreeClass.revert not implemented');
   }
 

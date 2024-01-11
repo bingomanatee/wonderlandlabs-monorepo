@@ -3,7 +3,7 @@ import { TypeEnum } from '@wonderlandlabs/walrus';
 import products from './testData.json';
 import { UpdateMsg } from '../types';
 
-const { isSingle, SINGLE } = constants;
+const { singleIdFactory, SINGLE } = constants;
 
 describe('Forest', () => {
   describe('TreeClass', () => {
@@ -850,7 +850,7 @@ describe('Forest', () => {
         const tree = new TreeClass();
         tree.addCollection({
           name: 'bob',
-          identity: isSingle,
+          identity: singleIdFactory,
           fields: [
             {
               name: 'name',

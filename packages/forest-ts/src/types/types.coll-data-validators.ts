@@ -2,6 +2,7 @@ import { TypeEnumType } from '@wonderlandlabs/walrus/dist/enums';
 import { QueryDef } from './types.query-and-join';
 import { Observable } from 'rxjs';
 import { LeafObj } from './types.leaf';
+import { UpdatePutMsg } from './types.tree-and-trans';
 export type DataID = string | number | symbol;
 export type Data = Record<string, unknown>
 export interface CollectionIF {
@@ -12,10 +13,11 @@ export interface CollectionIF {
   query(query: Partial<QueryDef>) : Observable<LeafObj[]>
   fetch(query: Partial<QueryDef>) : LeafObj[]
   values: Map<DataID, Data>
+  unPut(p: UpdatePutMsg): void
 }
 
 // expected to throw if data is not valid
-export type DataIsValid = (data: Data, coll: CollectionIF) => void;
+export type DataValidatorFn = (data: Data, coll: CollectionIF) => void;
 type ValidatorFn = (value: any, collection?: CollectionIF) => any
 type MutableType = TypeEnumType | TypeEnumType[]
 export type BaseRecordFieldSchema = {

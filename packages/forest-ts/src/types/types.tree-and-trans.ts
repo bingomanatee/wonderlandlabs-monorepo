@@ -24,6 +24,8 @@ export interface TransHandlerIF {
   complete(): void;
 
   fail(): void;
+
+  puts: UpdatePutMsg[]
 }
 
 export type UpdateMsg = {
@@ -36,6 +38,7 @@ export type UpdatePutMsg = UpdateMsg & {
   action: 'put-data',
   collection: string,
   identity: DataID,
+  create: boolean,
   prev: Data | undefined
 }
 

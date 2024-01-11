@@ -15,7 +15,9 @@ export declare class TreeClass implements TreeIF {
     addJoin(join: JoinSchema): void;
     private $_transManager?;
     /** perform a synchronous task that is enveloped by
-     * transactional fallback
+     * transactional fallback; on a thrown error,
+     * the collections should revert to
+     * their previous state, due to the existence of a handler.
      */
     do(action: TransAction, props?: DoProps): unknown;
     collection(name: string): CollectionIF;
@@ -28,5 +30,6 @@ export declare class TreeClass implements TreeIF {
     updates: SubjectLike<UpdateMsg>;
     has(coll: string, id: DataID): boolean;
     hasCollection(coll: string): boolean;
+    private unPut;
     revert(actions: TransHandlerIF[]): void;
 }

@@ -1,4 +1,14 @@
-import { CollectionDef, Data, DataID, DataIsValid, QueryDef, RecordMap, RecordFieldSchema, TreeIF } from './types';
+import {
+  CollectionDef,
+  Data,
+  DataID,
+  DataValidatorFn,
+  QueryDef,
+  RecordMap,
+  RecordFieldSchema,
+  TreeIF,
+  UpdatePutMsg
+} from './types';
 import { TypeEnumType } from '@wonderlandlabs/walrus/dist/enums';
 import { ErrorPlus } from './ErrorPlus';
 import { TypeEnum } from '@wonderlandlabs/walrus';
@@ -8,7 +18,7 @@ import { c } from '@wonderlandlabs/collect';
 import { compareMaps, validateField } from './utils';
 import { CollectionIF } from './types';
 
-function asTypeEnum(value:  string | TypeEnumType): TypeEnumType {
+function asTypeEnum(value: string | TypeEnumType): TypeEnumType {
   if (typeof value === 'string' && value in TypeEnum) {
     // @ts-expect-error extracting from TypeEnum falsely is TS error
     return TypeEnum[value];
@@ -22,12 +32,15 @@ const NAME_TEST = /^[a-z\-_$0-9]+$/;
 // console.log('name test of bad name "spacey lacey"', NAME_TEST.test('spacey lacy'));
 /**
  * This is a bundle of records with the same fields.
- * There is a special case where the collection has a single record whose ID is `isSingle` (a constant symbol)
+ * There is a special case where the collection has a single record whose ID is `SINGLE` (a constant symbol)
  * in which only one record exists in the collection.
  */
 export default class CollectionClass implements CollectionIF {
   constructor(public tree: TreeIF, public config: CollectionDef, records?: Data[]) {
     this._validateConfig();
+    if (config.test) {
+      this.addValidator(config.test);
+    }
 
     const map = new Map();
     records?.forEach((value) => {
@@ -46,7 +59,23 @@ export default class CollectionClass implements CollectionIF {
     });
   }
 
-  get values() : RecordMap {
+  unPut(p: UpdatePutMsg): void {
+    if (p.create) {
+      this.revertedValues.delete(p.identity);
+    } else {
+      this.revertedValues.set(p.identity, p.prev!);
+    }
+  }
+
+  private _revertedValues?: RecordMap;
+  private get revertedValues() {
+    if (!this._revertedValues) {
+      this._revertedValues = new Map(this.values);
+    }
+    return this._revertedValues;
+  }
+
+  get values(): RecordMap {
     return this.subject.value;
   }
 
@@ -109,6 +138,10 @@ export default class CollectionClass implements CollectionIF {
 
   public subject: BehaviorSubject<any>;
 
+  /**
+   * field and dataValidators throw when they detect an error.
+   * @param value
+   */
   public validate(value: Data) {
     this.fieldMap.forEach((def) => {
       validateField(value, def, this);
@@ -118,13 +151,17 @@ export default class CollectionClass implements CollectionIF {
     });
   }
 
-  private dataValidators: Set<DataIsValid> = new Set();
+  private dataValidators: Set<DataValidatorFn> = new Set();
 
-  public addValidator(div: DataIsValid) {
+  public addValidator(div: DataValidatorFn) {
     this.dataValidators.add(div);
   }
 
-  public identityOf(value: Data) : DataID {
+  public removeValidator(div: DataValidatorFn) {
+    this.dataValidators.delete(div);
+  }
+
+  public identityOf(value: Data): DataID {
     if (typeof this.config.identity === 'string') {
       return value[this.config.identity] as DataID;
     }
@@ -141,14 +178,12 @@ export default class CollectionClass implements CollectionIF {
     this.validate(value);
     const next = new Map(this.values);
     const id = this.identityOf(value);
-
-    const info = {
+    this.tree.updates.next({
       action: 'put-data',
       collection: this.name,
       identity: id,
       value
-    };
-    this.tree.updates.next(info);
+    });
 
     next.set(id, value);
     this.subject.next(next);

@@ -16,6 +16,7 @@ export interface TransHandlerIF {
     id: number;
     complete(): void;
     fail(): void;
+    puts: UpdatePutMsg[];
 }
 export type UpdateMsg = {
     action: string;
@@ -27,6 +28,7 @@ export type UpdatePutMsg = UpdateMsg & {
     action: 'put-data';
     collection: string;
     identity: DataID;
+    create: boolean;
     prev: Data | undefined;
 };
 export type TransAction = (tree: TreeIF, ...rest: unknown[]) => unknown;

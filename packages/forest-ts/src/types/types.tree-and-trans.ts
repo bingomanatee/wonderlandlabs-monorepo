@@ -2,7 +2,7 @@ import { Observable, SubjectLike } from 'rxjs';
 import { Data } from '../types';
 import { JoinSchema, QueryDef, QueryDefJoin } from './types.query-and-join';
 import { LeafObj } from './types.leaf';
-import { CollectionIF, DataID } from './types.coll-data-validators';
+import { CollectionIF, DataID, DataValidatorFn } from './types.coll-data-validators';
 
 export type DoProps = {
   name?: string,
@@ -77,4 +77,6 @@ export interface TreeIF {
    */
 
   revert(handlers: TransHandlerIF[]): void;
+
+  createSchemaValidator(definition: unknown, collection: CollectionIF) : DataValidatorFn | void
 }

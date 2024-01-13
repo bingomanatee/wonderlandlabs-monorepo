@@ -18,16 +18,25 @@ import {
 } from './types/types.query-and-join';
 import { LeafObj } from './types/types.leaf';
 import {
+  BaseRecordFieldSchema,
   CollectionDef,
   CollectionIF,
   DataID,
+  DataValidatorFn,
   DoProps,
+  FieldDef,
+  isBaseRecordFieldSchema,
+  isData,
+  isDataValidatorFn,
+  isFieldDefObj,
   TransAction,
   TransHandlerIF,
   TreeIF,
   UpdateMsg,
   UpdatePutMsg
 } from './types';
+import { validateBaseFieldDef } from './utils/validateBaseFieldDef';
+import { isRecordFieldSchema } from './types/types.coll-data-validators';
 
 function prefix(item: string | string[]): string[] {
   if (typeof item === 'string') {
@@ -43,10 +52,51 @@ function prefix(item: string | string[]): string[] {
  * A Tree is a "local database" -- a collection of collections and the definitions
  * of how the records are related to each other.
  */
-export class TreeClass implements TreeIF {
+export class Tree implements TreeIF {
   constructor(collections?: CollectionDef[], joins?: JoinSchema[]) {
     collections?.forEach((coll) => this.addCollection(coll));
     joins?.forEach((join) => this.addJoin(join));
+  }
+
+  public createSchemaValidator(definition: unknown, collection: CollectionIF): DataValidatorFn | void {
+    if (!definition) {
+      return;
+    }
+    if (isDataValidatorFn(definition)) {
+      return definition;
+    }
+    if (Array.isArray(definition)) {
+      if (definition.every(isRecordFieldSchema)) {
+        return (value: unknown) => {
+          if (!isData(value)) {
+            throw new ErrorPlus('collections only store objects.', { value: value, collection: collection });
+          }
+          for (const field of definition) {
+            const { name: key } = field;
+            validateBaseFieldDef(field as BaseRecordFieldSchema, key, value, collection);
+          }
+        };
+      } else {
+        console.error(
+          '---- array of bad things:', definition
+        );
+        throw new ErrorPlus('bad array schema', { definition });
+      }
+    }
+    if (isFieldDefObj(definition)) {
+      return (value: unknown) => {
+        if (!isData(value)) {
+          throw new ErrorPlus('collections only store objects.', { value: value, collection: collection });
+        }
+        for (const key of Object.keys(definition)) {
+          const fieldDef: FieldDef = definition[key];
+          if (isBaseRecordFieldSchema(fieldDef)) {
+            validateBaseFieldDef(fieldDef as BaseRecordFieldSchema, key, value, collection);
+          }
+        }
+      };
+    }
+    console.warn('cannot codify schema:', definition);
   }
 
   public $collections: Map<string, CollectionIF> = new Map();
@@ -118,7 +168,7 @@ export class TreeClass implements TreeIF {
 
   put(collection: string, value: any) {
     if (!this.$collections.has(collection)) {
-      throw new ErrorPlus('TreeClass.put: missing target collection', {
+      throw new ErrorPlus('Tree.put: missing target collection', {
         collection, value
       });
     }
@@ -220,12 +270,28 @@ export class TreeClass implements TreeIF {
   }
 
   revert(actions: TransHandlerIF[]) {
-    actions.forEach((handler) => {
-      handler.puts.forEach((p) => {
+    const collectionNames = new Set();
+
+    /**
+     * this first pass "ondoes" each change for each handler (typically one)
+     * and creates a clone of the conllection(s) values containing a copy
+     * of the current one, revered by this process.
+     *
+     */
+    [ ...actions ].reverse().forEach((handler) => {
+      [ ...handler.puts ].reverse().forEach((p) => {
         this.unPut(p);
+        collectionNames.add(p.collection);
       });
     });
-    console.warn('TreeClass.revert not implemented');
+
+    /**
+     * Next, each updated collection has its state reversed to the
+     * value created by unPuts.
+     */
+    collectionNames.forEach((cName) => {
+      this.collection(cName as string)?.finishRevert();
+    });
   }
 
 }

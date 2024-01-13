@@ -1,52 +1,38 @@
-import { TreeClass, constants } from '../../lib';
+import { Tree, constants, Leaf } from '../../lib';
 import { TypeEnum } from '@wonderlandlabs/walrus';
-import products from './testData.json';
-import { UpdateMsg } from '../types';
+import testData from './testData.json';
+import { UpdateMsg, TreeIF, LeafObj } from '../../lib/types';
 
 const { singleIdFactory, SINGLE } = constants;
 
 describe('Forest', () => {
-  describe('TreeClass', () => {
+  describe('Tree', () => {
     describe('addCollection', () => {
 
       it('should add a named collection', () => {
-        const tree = new TreeClass();
+        const tree = new Tree();
 
         expect(() => tree.collection('foo')).toThrow();
 
-        tree.addCollection({
-          name: 'foo',
-          identity: 'id',
-          fields: [
-            { name: 'id' },
-            { name: 'content' }
-          ]
-        });
+        tree.addCollection( testData.addCollections.collections[0]);
 
         expect(tree.collection('foo')).toBeTruthy();
       });
 
 
       it('should allow records to be added', () => {
-        const tree = new TreeClass();
-        tree.addCollection({
-          name: 'foo',
-          identity: 'id',
-          fields: [
-            { name: 'id' },
-            { name: 'content' }
-          ]
-        });
+        const tree = new Tree();
+        tree.addCollection( testData.addCollections.collections[0]);
         tree.put('foo', { id: 100, content: 'Bob' });
         expect(tree.get('foo', 100).content).toEqual('Bob');
       });
 
       describe('with type constraints', () => {
-        const tree = new TreeClass();
+        const tree = new Tree();
         tree.addCollection({
           name: 'foo',
           identity: 'id',
-          fields: [
+          schema: [
             { name: 'id', type: TypeEnum.number },
             { name: 'content', type: TypeEnum.string }
           ]
@@ -66,11 +52,11 @@ describe('Forest', () => {
 
       describe('with preset records', () => {
         it('should accept existing records', () => {
-          const tree = new TreeClass();
+          const tree = new Tree();
           tree.addCollection({
             name: 'squares',
             identity: 'base',
-            fields: [
+            schema: [
               {
                 name: 'base',
                 type: TypeEnum.number
@@ -98,11 +84,11 @@ describe('Forest', () => {
       it('should follow a record', () => {
         const FIRST_DATE = '2023-01-01';
 
-        const tree = new TreeClass();
+        const tree = new Tree();
         tree.addCollection({
           name: 'costs',
           identity: 'date',
-          fields: [
+          schema: [
             { name: 'date', type: TypeEnum.string },
             { name: 'cost', type: TypeEnum.number }
           ],
@@ -155,11 +141,11 @@ describe('Forest', () => {
 
       it('should follow all records', () => {
 
-        const tree = new TreeClass();
+        const tree = new Tree();
         tree.addCollection({
           name: 'costs',
           identity: 'date',
-          fields: [
+          schema: [
             { name: 'date', type: TypeEnum.string },
             { name: 'cost', type: TypeEnum.number }
           ],
@@ -238,12 +224,12 @@ describe('Forest', () => {
       });
 
       it('should join related records', () => {
-        const tree = new TreeClass(
+        const tree = new Tree(
           [
             {
               name: 'people',
               identity: 'id',
-              fields: {
+              schema: {
                 id: TypeEnum.number,
                 name: TypeEnum.string,
                 address: TypeEnum.number,
@@ -274,7 +260,7 @@ describe('Forest', () => {
             {
               name: 'address',
               identity: 'id',
-              fields: {
+              schema: {
                 id: TypeEnum.number,
                 addr: TypeEnum.string,
                 city: TypeEnum.string,
@@ -408,12 +394,12 @@ describe('Forest', () => {
       });
 
       it('should deep join records', () => {
-        const tree = new TreeClass(
+        const tree = new Tree(
           [
             {
               name: 'people',
               identity: 'id',
-              fields: {
+              schema: {
                 id: TypeEnum.number,
                 name: TypeEnum.string,
                 address: TypeEnum.number,
@@ -444,7 +430,7 @@ describe('Forest', () => {
             {
               name: 'address',
               identity: 'id',
-              fields: {
+              schema: {
                 id: TypeEnum.number,
                 addr: TypeEnum.string,
                 city: TypeEnum.string,
@@ -468,7 +454,7 @@ describe('Forest', () => {
             {
               name: 'state',
               identity: 'abbr',
-              fields: {
+              schema: {
                 abbr: TypeEnum.string,
                 name: TypeEnum.string
               },
@@ -670,74 +656,9 @@ describe('Forest', () => {
       });
 
       it('should sort records by sort field in query', () => {
-        const tree = new TreeClass(
-          [
-            {
-              name: 'people',
-              identity: 'id',
-              fields: {
-                id: TypeEnum.number,
-                name: TypeEnum.string,
-              },
-              records: [
-                {
-                  id: 100,
-                  name: 'Bob'
-                },
-                { id: 200, name: 'alex' }
-              ]
-            },
-            {
-              name: 'purchases',
-              identity: 'id',
-              fields: {
-                customer: TypeEnum.number,
-                product: TypeEnum.string,
-                id: TypeEnum.number,
-                amount: TypeEnum.number
-              },
-              records: [
-                {
-                  id: 1,
-                  product: 'Figs',
-                  customer: 100,
-                  amount: 50
-                },
-                {
-                  id: 2,
-                  product: 'Gas',
-                  customer: 100,
-                  amount: 10
-                },
-                {
-                  id: 3,
-                  product: 'Ham',
-                  customer: 100,
-                  amount: 105
-                },
-                {
-                  id: 4,
-                  product: 'Jam',
-                  customer: 100,
-                  amount: 5
-                },
-                {
-                  id: 5,
-                  product: 'Dogs',
-                  customer: 100,
-                  amount: 3000
-                }
-              ]
-            }
-          ],
-          [
-            {
-              name: 'people-purchases',
-              from: 'people',
-              to: 'purchases',
-              toField: 'customer',
-            }
-          ]
+        const tree = new Tree(
+          testData.peopleAndPurchases.collections,
+          testData.peopleAndPurchases.joins
         );
 
         const fetch = tree.collection('people').fetch({
@@ -847,11 +768,11 @@ describe('Forest', () => {
 
     describe('SINGLE collections', () => {
       it('should create a single record without a defined ID', () => {
-        const tree = new TreeClass();
+        const tree = new Tree();
         tree.addCollection({
           name: 'bob',
           identity: singleIdFactory,
-          fields: [
+          schema: [
             {
               name: 'name',
               type: TypeEnum.string
@@ -873,8 +794,7 @@ describe('Forest', () => {
     /* validating that all legitimate activity is logged */
     describe('update', () => {
       describe('put', () => {
-        console.log('---- update start');
-        const shoppingSite = new TreeClass(products.products.collections);
+        const shoppingSite = new Tree(testData.products.collections);
         expect(shoppingSite.collection('products')!.values.size).toBe(3); // double checking pre-existing data
         const messages: UpdateMsg[] = [];
         const sub = shoppingSite.updates.subscribe({
@@ -895,7 +815,7 @@ describe('Forest', () => {
         sub.unsubscribe();
       });
       describe('put(invalid)', () => {
-        const shoppingSite = new TreeClass(products.products.collections);
+        const shoppingSite = new Tree(testData.products.collections);
 
         const messages: UpdateMsg[] = [];
         const sub = shoppingSite.updates.subscribe({
@@ -910,6 +830,23 @@ describe('Forest', () => {
         }).toThrow();
 
         expect(messages.length).toEqual(0);
+      });
+
+      describe('transactional reset', () => {
+
+        it('should be able to reset an action', () => {
+
+          const shoppingSite = new Tree(testData.products.collections);
+
+          function addOneOfEach(tree: TreeIF) {
+            const products = tree.collection('products').fetch({ collection: 'products' });
+            products.forEach((product: LeafObj) => {
+              console.log('add1:', product.$value);
+            });
+          }
+
+          shoppingSite.do(addOneOfEach);
+        });
       });
     });
   });

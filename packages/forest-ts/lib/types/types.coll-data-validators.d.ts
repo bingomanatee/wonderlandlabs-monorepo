@@ -5,6 +5,7 @@ import { LeafObj } from './types.leaf';
 import { UpdatePutMsg } from './types.tree-and-trans';
 export type DataID = string | number | symbol;
 export type Data = Record<string, unknown>;
+export declare function isData(def: unknown): def is Data;
 export interface CollectionIF {
     get(id: DataID): Data | undefined;
     name: string;
@@ -14,29 +15,39 @@ export interface CollectionIF {
     fetch(query: Partial<QueryDef>): LeafObj[];
     values: Map<DataID, Data>;
     unPut(p: UpdatePutMsg): void;
+    finishRevert(): void;
 }
 export type DataValidatorFn = (data: Data, coll: CollectionIF) => void;
-type ValidatorFn = (value: any, collection?: CollectionIF) => any;
-type MutableType = TypeEnumType | TypeEnumType[];
+export declare function isDataValidatorFn(def: unknown): def is DataValidatorFn;
+type ValidatorFn = (value: unknown, collection?: CollectionIF) => unknown;
+type FieldTypeOrTypes = TypeEnumType | TypeEnumType[];
 export type BaseRecordFieldSchema = {
-    type?: MutableType;
+    type?: FieldTypeOrTypes;
     validator?: ValidatorFn;
     optional?: boolean;
-    defaultValue?: any;
-    keyType?: MutableType;
-    valueType?: MutableType;
+    defaultValue?: unknown;
+    keyType?: FieldTypeOrTypes;
+    valueType?: FieldTypeOrTypes;
 };
+/**
+ * Although there is a wide variety of fields in a potential schema field def,
+ * to be meaningful it must either have a single field type or a validator function.
+ */
+export declare function isBaseRecordFieldSchema(def: unknown): boolean;
 export type RecordFieldSchema = {
     name: string;
 } & BaseRecordFieldSchema;
 type IDFactory = (value: Data, collection?: CollectionIF) => DataID;
 export type IdentityDefinition = string | IDFactory;
-type FieldDefObject = Record<string, BaseRecordFieldSchema | TypeEnumType>;
+export type FieldDef = BaseRecordFieldSchema | TypeEnumType | string;
+export declare function isRecordFieldSchema(def: unknown): def is RecordFieldSchema;
+export type FieldDefObj = Record<string, FieldDef>;
+export declare function isFieldDefObj(def: unknown): def is FieldDefObj;
 export type CollectionTestFn = (record: unknown) => boolean;
 export type CollectionDef = {
     name: string;
     identity: IdentityDefinition;
-    fields: RecordFieldSchema[] | FieldDefObject;
+    schema?: unknown;
     records?: Data[];
     test?: CollectionTestFn;
 };

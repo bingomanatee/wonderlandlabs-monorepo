@@ -38,6 +38,13 @@ const NAME_TEST = /^[a-z\-_$0-9]+$/;
 export default class CollectionClass implements CollectionIF {
   constructor(public tree: TreeIF, public config: CollectionDef, records?: Data[]) {
     this._validateConfig();
+
+    if (config.schema) {
+      const schemaValidator = this.tree.createSchemaValidator(config.schema, this);
+      if (schemaValidator) {
+        this._schemaValidator = schemaValidator;
+      }
+    }
     if (config.test) {
       this.addValidator(config.test);
     }
@@ -75,56 +82,17 @@ export default class CollectionClass implements CollectionIF {
     return this._revertedValues;
   }
 
-  get values(): RecordMap {
-    return this.subject.value;
-  }
-
-  private _fieldMap?: Map<string, RecordFieldSchema>;
-  get fieldMap() {
-    if (!this._fieldMap) {
-      if (Array.isArray(this.config.fields)) {
-        this._fieldMap = this.config.fields.reduce((m, field) => {
-          const schema = { ...field };
-          if (typeof field.type === 'string') {
-            schema.type = asTypeEnum(field.type);
-          } else if (Array.isArray(field.type)) {
-            schema.type = field.type.map(asTypeEnum);
-          }
-          m.set(field.name, schema);
-          return m;
-        }, new Map());
-      } else {
-        this._fieldMap = new Map();
-        c(this.config.fields).forEach((field, name) => {
-          if (typeof field !== 'object') {
-            field = { type: field };
-          }
-          this._fieldMap!.set(name, { ...field, name });
-        });
-      }
+  public finishRevert() {
+    if (this._revertedValues) {
+      this.subject.next(this._revertedValues);
+      delete this._revertedValues;
     }
-    return this._fieldMap;
   }
 
   private _validateConfig() {
     const identity = this.config.identity;
     if (!identity) {
       throw new ErrorPlus('collection config missing identity', this.config);
-    }
-    if (typeof identity === 'string') {
-      const idDef = this.fieldMap.get(identity);
-      if (!idDef) {
-        throw new ErrorPlus(
-          `collection config identity must include identity field ${identity}`,
-          this.config);
-      }
-      if (idDef.optional) {
-        throw new ErrorPlus('collection identity field cannot be optional', this.config);
-      }
-    } else if (typeof identity === 'function') {
-      // is assumed to be valid
-    } else {
-      throw new ErrorPlus('identity must be a string or function', { config: this.config });
     }
 
     if (!(this.config.name && typeof this.config.name === 'string' && NAME_TEST.test(this.config.name))) {
@@ -136,16 +104,26 @@ export default class CollectionClass implements CollectionIF {
     return this.config.name;
   }
 
+  get values(): RecordMap {
+    return this.subject.value;
+  }
+
   public subject: BehaviorSubject<any>;
+
+  private _schemaValidator?: DataValidatorFn;
+
+  private schemaValidator(value: Data) {
+    if (this._schemaValidator) {
+      this._schemaValidator(value, this);
+    }
+  }
 
   /**
    * field and dataValidators throw when they detect an error.
    * @param value
    */
   public validate(value: Data) {
-    this.fieldMap.forEach((def) => {
-      validateField(value, def, this);
-    });
+    this.schemaValidator(value);
     this.dataValidators.forEach((div) => {
       div(value, this);
     });

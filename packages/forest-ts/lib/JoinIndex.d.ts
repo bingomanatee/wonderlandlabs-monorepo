@@ -1,9 +1,9 @@
-import { TreeClass } from './TreeClass';
+import { Tree } from './Tree';
 import { CollectionIF, JoinSchema, QueryDefJoin } from './types';
 export default class JoinIndex {
-    tree: TreeClass;
+    tree: Tree;
     joinName: string;
-    constructor(tree: TreeClass, joinName: string);
+    constructor(tree: Tree, joinName: string);
     clearCache(): void;
     get join(): JoinSchema;
     fromIndex: Map<any, any>;

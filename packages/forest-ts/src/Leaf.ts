@@ -19,7 +19,7 @@ export class Leaf implements LeafObj {
   $subscribe(observer: Observer<LeafObj>): Subscription {
     return this.$query({})
       .pipe(
-        map(([ leaf ]) => leaf)
+        map(([ leaf ]: LeafObj[]) => leaf)
       )
       .subscribe(observer);
   }

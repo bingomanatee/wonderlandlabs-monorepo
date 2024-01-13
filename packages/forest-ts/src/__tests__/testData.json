@@ -4,7 +4,7 @@
       {
         "name": "customers",
         "identity": "id",
-        "fields": [
+        "schema": [
           {
             "name": "id",
             "type": "number"
@@ -28,7 +28,7 @@
       {
         "name": "products",
         "identity": "sku",
-        "fields": [
+        "schema": [
           {
             "name": "sku",
             "type": "string"
@@ -63,7 +63,7 @@
       {
         "name": "cart_items",
         "identity": "cart-item",
-        "fields": [
+        "schema": [
           {
             "name": "cart-item",
             "type": "string"
@@ -81,6 +81,98 @@
             "type": "number"
           }
         ]
+      }
+    ]
+  },
+  "addCollections": {
+    "collections": [
+      {
+        "name": "foo",
+        "identity": "id",
+        "schema": [
+          { "name": "id", "type": "number" },
+          { "name": "content", "type": "string" }
+        ]
+      }
+    ]
+  },
+  "peopleAndPurchases": {
+    "collections": [
+      {
+        "name": "people",
+        "identity": "id",
+        "schema": {
+          "id": "number",
+          "name": "string"
+        },
+        "records": [
+          {
+            "id": 100,
+            "name": "Bob"
+          },
+          {
+            "id": 200,
+            "name": "alex"
+          }
+        ]
+      },
+      {
+        "name": "purchases",
+        "identity": "id",
+        "schema": {
+          "customer": "number",
+          "product": "string",
+          "id": "number",
+          "amount": "number"
+        },
+        "records": [
+          {
+            "id": 1,
+            "product": "Figs",
+            "customer": 100,
+            "amount": 50
+          },
+          {
+            "id": 2,
+            "product": "Gas",
+            "customer": 100,
+            "amount": 10
+          },
+          {
+            "id": 3,
+            "product": "Ham",
+            "customer": 100,
+            "amount": 105
+          },
+          {
+            "id": 4,
+            "product": "Jam",
+            "customer": 100,
+            "amount": 5
+          },
+          {
+            "id": 5,
+            "product": "Dogs",
+            "customer": 100,
+            "amount": 3000
+          }
+        ],
+        "joins": [
+          {
+            "name": "people-purchases",
+            "from": "people",
+            "to": "purchases",
+            "toField": "customer"
+          }
+        ]
+      }
+    ],
+    "joins": [
+      {
+        "name": "people-purchases",
+        "from": "people",
+        "to": "purchases",
+        "toField": "customer"
       }
     ]
   }

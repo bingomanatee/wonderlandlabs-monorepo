@@ -1,4 +1,4 @@
-import { CollectionDef, Data, DataID, DataValidatorFn, QueryDef, RecordMap, RecordFieldSchema, TreeIF, UpdatePutMsg } from './types';
+import { CollectionDef, Data, DataID, DataValidatorFn, QueryDef, RecordMap, TreeIF, UpdatePutMsg } from './types';
 import { BehaviorSubject } from 'rxjs';
 import { CollectionIF } from './types';
 /**
@@ -13,12 +13,13 @@ export default class CollectionClass implements CollectionIF {
     unPut(p: UpdatePutMsg): void;
     private _revertedValues?;
     private get revertedValues();
-    get values(): RecordMap;
-    private _fieldMap?;
-    get fieldMap(): Map<string, RecordFieldSchema>;
+    finishRevert(): void;
     private _validateConfig;
     get name(): string;
+    get values(): RecordMap;
     subject: BehaviorSubject<any>;
+    private _schemaValidator?;
+    private schemaValidator;
     /**
      * field and dataValidators throw when they detect an error.
      * @param value

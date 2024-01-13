@@ -1,4 +1,4 @@
-import { TreeClass } from './TreeClass';
+import { Tree } from './Tree';
 import { ErrorPlus } from './ErrorPlus';
 import { CollectionIF, Data, DataID, JoinSchema, QueryDefJoin, UpdateMsg } from './types';
 import { c } from '@wonderlandlabs/collect';
@@ -12,7 +12,7 @@ function upsertIntoMap(m: Map<any, any>, key: any, value: any) {
 }
 
 export default class JoinIndex {
-  constructor(public tree: TreeClass, public joinName: string) {
+  constructor(public tree: Tree, public joinName: string) {
     const self = this;
     this.tree.updates.subscribe({
       next(msg: UpdateMsg) {

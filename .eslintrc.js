@@ -5,7 +5,7 @@ module.exports = {
     'eslint:recommended',
     'plugin:@typescript-eslint/recommended',
   ],
-  ignorePatterns: [ 'dist', '.eslintrc.cjs' ],
+  ignorePatterns: [ 'dist', '.eslintrc.js' ],
   parser: '@typescript-eslint/parser',
   plugins: [],
   rules: {

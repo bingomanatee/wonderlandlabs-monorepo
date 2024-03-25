@@ -12,20 +12,20 @@ exports.FormEnum = {
     void: 'void',
 };
 exports.TypeofEnum = {
-    undefined: "undefined",
-    object: "object",
-    boolean: "boolean",
-    number: "number",
-    bigint: "bigint",
-    string: "string",
-    symbol: "symbol",
-    function: "function"
+    undefined: 'undefined',
+    object: 'object',
+    boolean: 'boolean',
+    number: 'number',
+    bigint: 'bigint',
+    string: 'string',
+    symbol: 'symbol',
+    function: 'function'
 };
 exports.NumberEnum = {
-    infinite: "infinite",
-    nan: "nan",
-    integer: "integer",
-    decimal: "decimal",
+    infinite: 'infinite',
+    nan: 'nan',
+    integer: 'integer',
+    decimal: 'decimal',
 };
 exports.TypeEnum = {
     string: 'string',

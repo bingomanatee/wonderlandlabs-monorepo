@@ -12,6 +12,11 @@
   "dependencies": {
     "@wonderlandlabs/collect": "^1.0.2"
   },
+  "scripts": {
+    "tsc": "tsc",
+    "type-check": "tsc --noEmit",
+    "test": "jest"
+  },
   "devDependencies": {
     "@types/jest": "29.2.4",
     "@types/lodash.clonedeep": "^4.5.0",
@@ -24,7 +29,7 @@
     "nx": "16.4.0",
     "prettier": "2.8.1",
     "ts-jest": "29.0.3",
-    "typescript": "4.9.4",
+    "typescript": "^5.4.3",
     "uglify-js": "^3.17.4"
   },
   "packageManager": "yarn@4.0.2"

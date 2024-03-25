@@ -3,6 +3,10 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.describeNumber = exports.describe = exports.typeToForm = exports.types = exports.TypeDef = void 0;
 const enums_1 = require("./enums");
 class TypeDef {
+    type;
+    form;
+    typeOf;
+    test;
     constructor(type, form, typeOf, test) {
         this.type = type;
         this.form = form;
@@ -44,11 +48,11 @@ exports.types = [
     new TypeDef(enums_1.TypeEnum.array, enums_1.FormEnum.array, enums_1.TypeofEnum.object, (v) => Array.isArray(v)),
     new TypeDef(enums_1.TypeEnum.map, enums_1.FormEnum.map, enums_1.TypeofEnum.object, (m) => m instanceof Map),
     new TypeDef(enums_1.TypeEnum.set, enums_1.FormEnum.set, enums_1.TypeofEnum.object, (s) => s instanceof Set),
-    new TypeDef(enums_1.TypeEnum.object, enums_1.FormEnum.object, enums_1.TypeofEnum.object, (o) => o && (typeof o === 'object')),
+    new TypeDef(enums_1.TypeEnum.object, enums_1.FormEnum.object, enums_1.TypeofEnum.object, (o) => o && typeof o === 'object'),
 ];
 function typeToForm(type) {
-    const d = exports.types.find(d => d.type === type);
-    return (d === null || d === void 0 ? void 0 : d.form) || enums_1.FormEnum.void;
+    const d = exports.types.find((d) => d.type === type);
+    return d?.form || enums_1.FormEnum.void;
 }
 exports.typeToForm = typeToForm;
 const describe = (value, reflect = false) => {
@@ -58,13 +62,16 @@ const describe = (value, reflect = false) => {
             if (reflect === true) {
                 return t.type;
             }
-            if (reflect === 'type' || reflect === 'form' || reflect === 'typeOf' || reflect === 'family') {
+            if (reflect === 'type' ||
+                reflect === 'form' ||
+                reflect === 'typeOf' ||
+                reflect === 'family') {
                 return t[reflect];
             }
         }
         return t;
     }
-    const type = typeof (value);
+    const type = typeof value;
     for (let i = 0; i < exports.types.length; ++i) {
         const def = exports.types[i];
         if (def.includes(value, type)) {

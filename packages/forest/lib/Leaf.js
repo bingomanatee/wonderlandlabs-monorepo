@@ -1,0 +1,1 @@
+"use strict";Object.defineProperty(exports,"__esModule",{value:!0});class Leaf{branch;config;name;constructor(e,t,s){this.branch=e,this.config=t,this.name=s}get value(){return this.branch.get(this.name)}}exports.default=Leaf;

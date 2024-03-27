@@ -45,7 +45,7 @@ npm manifest:
     "homepage": "https://github.com/bingomanatee/wonderlandlabs-monorepo/tree/main/packages/can-di-land",
     "scripts": {
       "build": "tsc",
-      "uglify": "node ./uglify.js",
+      "uglify": "node ./uglify.cjs",
       "format": "prettier --write \"src/**/*.(js|ts)\"",
       "lint": "eslint src --ext .js,.ts",
       "lint:fix": "eslint src --fix --ext .js,.ts",

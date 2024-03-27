@@ -20,7 +20,7 @@
   "homepage": "https://github.com/bingomanatee/wonderlandlabs-monorepo/tree/main/packages/forest",
   "scripts": {
     "build": "tsc && yarn uglify",
-    "uglify": "node ./uglify.js",
+    "uglify": "node uglify.cjs",
     "format": "prettier --write \"src/**/*.(js|ts)\"",
     "lint": "eslint src --ext .js,.ts",
     "lint:fix": "eslint src --fix --ext .js,.ts",

@@ -12,12 +12,46 @@ export interface ForestIF {
   branches: Map<string, BranchIF>;
 }
 
-export interface BranchIF {
-  name: string;
-  value: unknown;
+export type LeafConfig = Obj & { type?: string };
+
+export function isLeafConfig(x: unknown): x is LeafConfig {
+  if (!isObj(x)) {
+    return false;
+  }
+  if ('type' in x) {
+    if (type.describe(x.type, true) !== TypeEnum.string) {
+      return false;
+    }
+  }
+  if ('strict' in x) {
+    if (type.describe(x.strict, true) !== TypeEnum.boolean) {
+      return false;
+    }
+  }
+  return true;
 }
 
-export type BranchConfig = Obj & { name: string; $value: unknown };
+export function isLeafIF(x: unknown): x is LeafIF {
+  if (!isObj(x)) {
+    return false;
+  }
+
+  return true;
+}
+
+export interface BranchIF {
+  name: string;
+  readonly value: unknown;
+  leaves?: Map<string, LeafIF>;
+
+  get(key: string): unknown;
+}
+
+export type BranchConfig = Obj & {
+  name: string;
+  $value: unknown;
+  leaves?: Record<string, LeafConfig>;
+};
 
 export function isBranchConfig(x: unknown): x is BranchConfig {
   if (!isObj(x)) {
@@ -28,13 +62,4 @@ export function isBranchConfig(x: unknown): x is BranchConfig {
 
 export interface LeafIF {
   value: unknown;
-}
-
-export type LeafConfig = Obj & { name: string };
-
-export function isLeafConfig(x: unknown): x is LeafConfig {
-  if (!isObj(x)) {
-    return false;
-  }
-  return 'name' in x && !!x.name;
 }

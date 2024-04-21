@@ -1,13 +1,20 @@
-import { BranchConfig, BranchIF, ForestIF, LeafConfig, LeafIF } from './types';
-import { collectObj } from '@wonderlandlabs/collect/lib/types';
-export default class Branch implements BranchIF {
+import { UpdateDirType, BranchConfig, BranchIF, ForestIF, ForestItemIF, LeafConfig, LeafIF, TransID, ChildConfigs, childKey } from './types';
+import ForestItem from './ForestItem';
+export default class Branch extends ForestItem implements BranchIF, ForestItemIF {
     private config;
     forest: ForestIF;
     constructor(config: BranchConfig, forest: ForestIF);
     leaves?: Map<string, LeafIF>;
     addLeaf(config: LeafConfig, name: string): void;
-    name: string;
-    coll: collectObj;
-    get value(): any;
     get(name: string): any;
+    set(name: string, value: unknown): void;
+    static create(config: BranchConfig, name?: string): BranchIF;
+    pushTempValue(value: unknown, id: TransID, direction?: UpdateDirType): void;
+    parent?: ForestItemIF;
+    validate(dir?: UpdateDirType): void;
+    child(name: childKey): ForestItemIF | undefined;
+    addChild(config: Partial<BranchConfig>, name: childKey): Branch;
+    addChildren(children: ChildConfigs): void;
+    hasChild(name: childKey): boolean;
+    children: Map<childKey, BranchIF>;
 }

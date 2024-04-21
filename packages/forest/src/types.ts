@@ -1,50 +1,85 @@
-import { type, TypeEnum } from '@wonderlandlabs/walrus';
+import { UpdateDir, TransStatus } from './constants';
+import { Observer, Subscription } from 'rxjs';
 
 export type Obj = Record<string, unknown>;
 
-export function isObj(x: unknown): x is Obj {
-  return type.describe(x, true) === TypeEnum.object;
-}
+export type ForestId = string;
+
+type UpdateDirKeys = keyof typeof UpdateDir;
+export type UpdateDirType = typeof UpdateDir[UpdateDirKeys];
+
+/* ------------------------ forest -------------------- */
 
 export interface ForestIF {
   createBranch(config: Partial<BranchConfig>, name?: string): BranchIF;
 
-  branches: Map<string, BranchIF>;
+  items: Map<ForestId, ForestItemIF>;
+
+  register(item: ForestItemIF): void;
+
+  trans(name: string, fn: TransFn): void;
+
+  removeTrans(trans: TransIF): void;
 }
 
-export type LeafConfig = Obj & { type?: string };
+/* --------------- Leaf -------------------- */
 
-export function isLeafConfig(x: unknown): x is LeafConfig {
-  if (!isObj(x)) {
-    return false;
-  }
-  if ('type' in x) {
-    if (type.describe(x.type, true) !== TypeEnum.string) {
-      return false;
-    }
-  }
-  if ('strict' in x) {
-    if (type.describe(x.strict, true) !== TypeEnum.boolean) {
-      return false;
-    }
-  }
-  return true;
+export interface LeafIF {
+  value: unknown;
+
+  validate(): void;
 }
 
-export function isLeafIF(x: unknown): x is LeafIF {
-  if (!isObj(x)) {
-    return false;
-  }
+type validateFn = (value: unknown, leaf: LeafIF) => void; // throws on custom validation error
 
-  return true;
-}
+export type LeafConfig = Obj & { type?: string; validate?: validateFn };
 
-export interface BranchIF {
+export type JsonObj = Obj;
+
+/* ----------------- ForestItem ---------------------- */
+
+export interface ForestItemIF {
   name: string;
-  readonly value: unknown;
-  leaves?: Map<string, LeafIF>;
+  forest: ForestIF;
+  forestId: ForestId;
+  value: unknown;
+  readonly committedValue: unknown; // the last valid value of the item; may or may not equal value.
+  readonly hasTempValues: boolean;
 
-  get(key: string): unknown;
+  validate(dir?: UpdateDirType): void; // throws if a target is not valid.
+  pushTempValue(
+    value: unknown,
+    transId: TransID,
+    direction?: UpdateDirType
+  ): void;
+
+  report(): JsonObj;
+
+  commit(): void;
+
+  flushTemp(): void;
+
+  subscribe(
+    observerOrNext?: Partial<Observer<unknown>> | ((value: unknown) => void)
+  ): Subscription;
+}
+
+/* --------------------- branches -------------------- */
+
+export type childKey = string | number;
+
+export interface BranchIF extends ForestItemIF {
+  leaves?: Map<childKey, LeafIF>;
+
+  get(key: childKey): unknown;
+
+  set(key: childKey, value: unknown): void;
+
+  addChild(config: Partial<BranchConfig>, name: string): BranchIF;
+
+  addChildren(children: ChildConfigs): void;
+
+  hasChild(name: childKey): void;
 }
 
 export type BranchConfig = Obj & {
@@ -53,13 +88,30 @@ export type BranchConfig = Obj & {
   leaves?: Record<string, LeafConfig>;
 };
 
-export function isBranchConfig(x: unknown): x is BranchConfig {
-  if (!isObj(x)) {
-    return false;
-  }
-  return '$value' in x && 'name' in x && !!x.name;
+export type ChildConfigs = Record<string, BranchConfig>;
+
+/* --------------- transactions -------------------- */
+
+type TransStatusKeys = keyof typeof TransStatus;
+export type TransStatusItem = typeof TransStatus[TransStatusKeys];
+export type TransID = string;
+
+export interface TransIF {
+  id: TransID;
+  status: TransStatusItem;
+  name: string;
 }
 
-export interface LeafIF {
+export type TransFn = (trans: TransIF) => void;
+
+export type TransValue = {
+  id: TransID;
   value: unknown;
-}
+};
+
+/* ------------------ parent/child ----------------- */
+
+export type ChildData = {
+  key: string;
+  child: ForestItemIF;
+};

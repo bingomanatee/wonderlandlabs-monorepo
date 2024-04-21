@@ -1,8 +1,9 @@
 import { BranchIF, LeafConfig, LeafIF } from './types';
 export default class Leaf implements LeafIF {
     branch: BranchIF;
-    config: LeafConfig;
+    constructor(branch: BranchIF, config: LeafConfig | string, name: string);
     name: string;
-    constructor(branch: BranchIF, config: LeafConfig, name: string);
+    config: LeafConfig;
     get value(): unknown;
+    validate(): void;
 }

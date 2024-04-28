@@ -1,6 +1,6 @@
-import { UpdateDirType, BranchConfig, BranchIF, ForestIF, ForestItemIF, LeafConfig, LeafIF, TransID, ChildConfigs, childKey } from './types';
+import { UpdateDirType, BranchConfig, BranchIF, ForestIF, ForestItemIF, LeafConfig, LeafIF, TransID, ChildConfigs, childKey, DoMethod } from './types';
 import ForestItem from './ForestItem';
-export default class Branch extends ForestItem implements BranchIF, ForestItemIF {
+export default class Branch extends ForestItem implements BranchIF {
     private config;
     forest: ForestIF;
     constructor(config: BranchConfig, forest: ForestIF);
@@ -10,11 +10,13 @@ export default class Branch extends ForestItem implements BranchIF, ForestItemIF
     set(name: string, value: unknown): void;
     static create(config: BranchConfig, name?: string): BranchIF;
     pushTempValue(value: unknown, id: TransID, direction?: UpdateDirType): void;
-    parent?: ForestItemIF;
+    parent?: BranchIF;
     validate(dir?: UpdateDirType): void;
     child(name: childKey): ForestItemIF | undefined;
     addChild(config: Partial<BranchConfig>, name: childKey): Branch;
     addChildren(children: ChildConfigs): void;
     hasChild(name: childKey): boolean;
     children: Map<childKey, BranchIF>;
+    do: Record<string, DoMethod>;
+    _initDo(): void;
 }

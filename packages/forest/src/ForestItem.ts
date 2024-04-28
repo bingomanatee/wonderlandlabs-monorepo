@@ -2,6 +2,7 @@ import {
   ForestId,
   ForestIF,
   ForestItemIF,
+  ForestItemTestFn,
   TransID,
   TransIF,
   TransValue,
@@ -10,14 +11,26 @@ import {
 import { v4 } from 'uuid';
 import { BehaviorSubject, Observer, Subscription } from 'rxjs';
 
+/**
+ * This is an "abstract class" - its used as a basis for other classes.
+ */
 export default class ForestItem implements ForestItemIF {
   forestId: ForestId;
 
-  constructor(public name: string, value: unknown, public forest: ForestIF) {
+  constructor(
+    public readonly name: string,
+    value: unknown,
+    public forest: ForestIF
+  ) {
     this.forestId = v4();
-    forest.register(this);
     this.observable.next(value);
   }
+
+  protected registerInForest() {
+    this.forest.register(this);
+  }
+
+  public test?: ForestItemTestFn;
 
   public observable: BehaviorSubject<unknown> = new BehaviorSubject<unknown>(
     null
@@ -82,7 +95,9 @@ export default class ForestItem implements ForestItemIF {
     }
   }
 
-  public reflectPendingValue(_id: TransID, _direction?: UpdateDirType) {}
+  public reflectPendingValue(_id: TransID, _direction?: UpdateDirType) {
+    // implement in concrete classes
+  }
 
   private tempValues: TransValue[] = [];
 
@@ -90,7 +105,11 @@ export default class ForestItem implements ForestItemIF {
     this.tempValues.push({ value, id });
   }
 
-  public validate() {}
+  public validate() {
+    if (this.test) {
+      this.test(this.value, this); // throws on failure
+    }
+  }
 
   private removeTempValues(id: TransID) {
     const place = this.tempValues.findIndex((candidate) => candidate.id === id);
@@ -98,4 +117,6 @@ export default class ForestItem implements ForestItemIF {
       this.tempValues = this.tempValues.slice(0, place);
     }
   }
+
+  do = {};
 }

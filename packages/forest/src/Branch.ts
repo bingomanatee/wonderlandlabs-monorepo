@@ -9,6 +9,8 @@ import {
   TransID,
   ChildConfigs,
   childKey,
+  BranchConfigDoMethod,
+  DoMethod,
 } from './types';
 import { c } from '@wonderlandlabs/collect';
 import { FormEnum, type } from '@wonderlandlabs/walrus';
@@ -19,12 +21,10 @@ import ForestItem from './ForestItem';
 import { UpdateDir } from './constants';
 import { isBranchConfig, isChildConfigs } from './helpers';
 
-export default class Branch
-  extends ForestItem
-  implements BranchIF, ForestItemIF
-{
+export default class Branch extends ForestItem implements BranchIF {
   constructor(private config: BranchConfig, public forest: ForestIF) {
     super(config.name, config.$value, forest);
+    this.registerInForest();
 
     if (config.leaves) {
       c(config.leaves).forEach((config: LeafConfig, name) => {
@@ -35,6 +35,11 @@ export default class Branch
     if (isChildConfigs(config.children)) {
       this.addChildren(config.children);
     }
+    if (typeof config.test === 'function') {
+      this.test = config.test;
+    }
+
+    this._initDo();
   }
 
   // -------------- Leaves
@@ -96,7 +101,7 @@ export default class Branch
     }
   }
 
-  public parent?: ForestItemIF;
+  public parent?: BranchIF;
 
   validate(dir?: UpdateDirType) {
     const value = this.value;
@@ -147,4 +152,24 @@ export default class Branch
   }
 
   public children: Map<childKey, BranchIF> = new Map();
+
+  // ------------------- actions ------------------------
+
+  do: Record<string, DoMethod> = {};
+
+  _initDo() {
+    this.do = {};
+
+    if (this.config.actions) {
+      c(this.config.actions).forEach(
+        (fn: BranchConfigDoMethod, name: string) => {
+          this.do[name] = (...args) => {
+            this.forest.trans(name, () => {
+              fn(this, ...args);
+            });
+          };
+        }
+      );
+    }
+  }
 }

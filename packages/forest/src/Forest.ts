@@ -1,8 +1,9 @@
 import {
   BranchConfig,
   BranchIF,
+  ForestId,
   ForestIF,
-  ForestItemIF,
+  ForestItemTransactionalIF,
   TransFn,
   TransIF,
 } from './types';
@@ -11,9 +12,9 @@ import { Trans } from './Trans';
 import { isBranchConfig } from './helpers';
 
 export default class Forest implements ForestIF {
-  items: Map<string, ForestItemIF> = new Map();
+  items: Map<ForestId, ForestItemTransactionalIF> = new Map();
 
-  register(item: ForestItemIF): void {
+  register(item: ForestItemTransactionalIF): void {
     this.items.set(item.forestId, item);
   }
 
@@ -22,6 +23,7 @@ export default class Forest implements ForestIF {
       return this.createBranch({ ...config, name });
     }
     if (!isBranchConfig(config)) {
+      console.warn('bad configuration', config);
       throw new Error('bad configuration');
     }
 
@@ -52,7 +54,7 @@ export default class Forest implements ForestIF {
     if (index >= 0) {
       const rejects = this.pending.slice(index);
       this.pending = this.pending.slice(0, index);
-      rejects.forEach((t) => {});
+      // rejects.forEach((t) => {});
     }
   }
 

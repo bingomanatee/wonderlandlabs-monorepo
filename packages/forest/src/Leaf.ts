@@ -1,6 +1,15 @@
-import { BranchIF, LeafConfig, LeafIF } from './types';
+import {
+  BranchIF,
+  DoMethod,
+  LeafConfig,
+  LeafConfigDoMethod,
+  LeafIF,
+  SubscribeListener,
+} from './types';
 import { type } from '@wonderlandlabs/walrus';
 import { isLeafConfig } from './helpers';
+import { c } from '@wonderlandlabs/collect';
+import { map } from 'rxjs';
 
 export default class Leaf implements LeafIF {
   constructor(
@@ -21,11 +30,19 @@ export default class Leaf implements LeafIF {
     }
   }
 
+  get forest() {
+    return this.branch.forest;
+  }
+
   public name: string;
   public config: LeafConfig;
 
   get value() {
     return this.branch.get(this.name);
+  }
+
+  set value(value: unknown) {
+    this.branch.set(this.name, value);
   }
 
   validate() {
@@ -55,6 +72,45 @@ export default class Leaf implements LeafIF {
     }
     if (this.config.validate) {
       this.config.validate(value, this);
+    }
+  }
+
+  get observable() {
+    return this.branch.observable.pipe(
+      map((value) => {
+        return this.branch.get(this.name);
+      })
+    );
+  }
+
+  subscribe(listener: SubscribeListener) {
+    return this.observable.subscribe(listener);
+  }
+
+  report() {
+    return {
+      type: 'leaf',
+      value: this.value,
+      name: this.name,
+      parent: this.branch.forestId,
+    };
+  }
+
+  // ------------------- actions ------------------------
+
+  do: Record<string, DoMethod> = {};
+
+  _initDo() {
+    this.do = {};
+
+    if (this.config.actions) {
+      c(this.config.actions).forEach((fn: LeafConfigDoMethod, name: string) => {
+        this.do[name] = (...args) => {
+          this.forest.trans(name, () => {
+            fn(this, ...args);
+          });
+        };
+      });
     }
   }
 }

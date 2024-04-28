@@ -7,6 +7,14 @@ export type ForestId = string;
 
 type UpdateDirKeys = keyof typeof UpdateDir;
 export type UpdateDirType = typeof UpdateDir[UpdateDirKeys];
+type validateFn = (value: unknown, leaf: LeafIF) => void; // throws on custom validation error
+export type DoMethod = (...args: any[]) => void;
+
+type ForestItemConfig = {
+  type?: string;
+  validate?: validateFn;
+  test?: ForestItemTestFn;
+};
 
 /* ------------------------ forest -------------------- */
 
@@ -35,15 +43,18 @@ export interface TypedBranchIF<ValueType> extends BranchIF {
 
 /* --------------- Leaf -------------------- */
 
-export type DoMethod = (...args: any[]) => void;
-
 export interface LeafIF extends ForestItemIF {
   branch: BranchIF;
 }
 
-type validateFn = (value: unknown, leaf: LeafIF) => void; // throws on custom validation error
+export type LeafConfigDoMethod = (state: LeafIF, ...args: unknown[]) => unknown;
 
-export type LeafConfig = Obj & { type?: string; validate?: validateFn };
+export type LeafConfig = ForestItemConfig & {
+  $value?: unknown;
+  actions?: Record<string, LeafConfigDoMethod>;
+  strict?: boolean;
+  required?: boolean;
+};
 
 export type JsonObj = Obj;
 
@@ -101,34 +112,33 @@ export interface TransactionalForestItemIF {
 export type childKey = string | number;
 
 export interface BranchIF extends ForestItemTransactionalIF {
-  leaves?: Map<childKey, LeafIF>;
-
-  get(key: childKey): unknown;
-
-  set(key: childKey, value: unknown): void;
-
   addChild(config: Partial<BranchConfig>, name: childKey): BranchIF;
 
   addChildren(children: ChildConfigs): void;
 
+  child(name: childKey): ForestItemIF | undefined;
+
+  get(key: childKey): unknown;
+
   hasChild(name: childKey): void;
+
+  leaves?: Map<childKey, LeafIF>;
+
+  set(key: childKey, value: unknown): void;
 }
 
-export type BranchDoMethod = (state: BranchIF, ...args: unknown[]) => unknown;
 export type BranchConfigDoMethod = (
   state: BranchIF,
   ...args: unknown[]
 ) => unknown;
 
-export type LeafConfigDoMethod = (state: LeafIF, ...args: unknown[]) => unknown;
-
-export type BranchConfig = Obj & {
-  name: string;
+export type BranchConfig = ForestItemConfig & {
   $value: unknown;
-  leaves?: Record<string, LeafConfig>;
-  test?: ForestItemTestFn;
-  filter?: ForestItemFilterFn;
   actions?: Record<string, BranchConfigDoMethod>;
+  children?: Record<string, BranchConfig>;
+  filter?: ForestItemFilterFn;
+  leaves?: Record<string, LeafConfig>;
+  name: string;
 };
 
 export type ChildConfigs = Record<string, BranchConfig>;
@@ -141,8 +151,8 @@ export type TransID = string;
 
 export interface TransIF {
   id: TransID;
-  status: TransStatusItem;
   name: string;
+  status: TransStatusItem;
 }
 
 export type TransFn = (trans: TransIF) => void;
@@ -155,6 +165,6 @@ export type TransValue = {
 /* ------------------ parent/child ----------------- */
 
 export type ChildData = {
-  key: string;
   child: ForestItemIF;
+  key: string;
 };

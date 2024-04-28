@@ -27,8 +27,8 @@ export default class Branch extends ForestItem implements BranchIF {
     this.registerInForest();
 
     if (config.leaves) {
-      c(config.leaves).forEach((config: LeafConfig, name) => {
-        this.addLeaf(config, name);
+      c(config.leaves).forEach((leafConfig: LeafConfig, leafName) => {
+        this.addLeaf(leafConfig, leafName);
       });
     }
 

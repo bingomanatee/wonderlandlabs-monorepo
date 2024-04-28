@@ -47,7 +47,10 @@ export interface LeafIF extends ForestItemIF {
   branch: BranchIF;
 }
 
-export type LeafConfigDoMethod = (state: LeafIF, ...args: unknown[]) => unknown;
+export type LeafConfigDoMethod = (
+  state: LeafIF,
+  ...args: unknown[]
+) => unknown | void;
 
 export type LeafConfig = ForestItemConfig & {
   $value?: unknown;

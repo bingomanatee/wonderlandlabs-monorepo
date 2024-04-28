@@ -14,28 +14,22 @@ import { map } from 'rxjs';
 export default class Leaf implements LeafIF {
   constructor(
     public branch: BranchIF,
-    config: LeafConfig | string,
-    name: string
+    public config: LeafConfig,
+    public name: string
   ) {
     this.name = name;
-    if (typeof config === 'string') {
-      config = { type: config };
-    }
 
-    if (isLeafConfig(config)) {
-      this.config = config;
-    } else {
+    if (!isLeafConfig(config)) {
       console.warn('bad leaf config', name, config);
       throw new Error('mis-configured leaf');
     }
+
+    this._initDo();
   }
 
   get forest() {
     return this.branch.forest;
   }
-
-  public name: string;
-  public config: LeafConfig;
 
   get value() {
     return this.branch.get(this.name);
@@ -100,10 +94,11 @@ export default class Leaf implements LeafIF {
 
   do: Record<string, DoMethod> = {};
 
-  _initDo() {
+  private _initDo() {
     this.do = {};
 
     if (this.config.actions) {
+      console.log('Leaf._initDo', this.config.actions);
       c(this.config.actions).forEach((fn: LeafConfigDoMethod, name: string) => {
         this.do[name] = (...args) => {
           this.forest.trans(name, () => {

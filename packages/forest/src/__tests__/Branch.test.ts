@@ -14,7 +14,7 @@ describe('forest', () => {
 
       it('should be created with custom config', () => {
         const f = new Forest();
-        const b = f.createBranch({ $value: 2, name: 'two', color: 'blue' });
+        const b = f.createBranch({ $value: 2, name: 'two' });
         expect(b.value).toBe(2);
 
         b.value = 3;
@@ -82,7 +82,7 @@ describe('forest', () => {
     });
 
     describe('actions', () => {
-      it('executes actions', () => {
+      function createPoint() {
         const f = new Forest();
 
         type PointValue = {
@@ -97,8 +97,19 @@ describe('forest', () => {
             y: 0,
           },
           actions: {
-            offset(s: BranchIF, x, y) {
-              const typedS = s as TypedBranchIF<PointValue>;
+            scaleAndOffset(state, s, x, y) {
+              state.do.scale(s);
+              state.do.offset(x, y);
+            },
+            scale(state, s) {
+              const typedS = state as TypedBranchIF<PointValue>;
+              const newX: number = typedS.value.x * (s as number);
+              const newY: number = typedS.value.y * (s as number);
+              typedS.set('x', newX);
+              typedS.set('y', newY);
+            },
+            offset(state: BranchIF, x, y) {
+              const typedS = state as TypedBranchIF<PointValue>;
               const newX: number = typedS.value.x + (x as number);
               const newY: number = typedS.value.y + (y as number);
               typedS.set('x', newX);
@@ -107,13 +118,28 @@ describe('forest', () => {
           },
         }) as TypedBranchIF<PointValue>;
 
+        return pt;
+      }
+
+      it('executes actions', () => {
+        const pt = createPoint();
+
         pt.do.offset(1, 2);
         expect(pt.value).toEqual({ x: 1, y: 2 });
-        pt.do.offset(5, 5);
-        expect(pt.value).toEqual({ x: 6, y: 7 });
+        pt.do.scale(5);
+        expect(pt.value).toEqual({ x: 5, y: 10 });
+      });
+
+      it('allows you to call actions from actions', () => {
+        const pt = createPoint();
+        pt.do.offset(1, 2);
+
+        pt.do.scaleAndOffset(5, 5, 5);
+
+        expect(pt.value).toEqual({ x: 10, y: 15 });
       });
     });
-    
+
     // describe('transactional insulation', () => {});
   });
 });

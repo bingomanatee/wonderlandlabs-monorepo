@@ -83,5 +83,8 @@
   "exclude": [
     "node_modules",
     "**/__tests__/*"
-  ]
+  ],
+  "rules": {
+    "@typescript-eslint/ban-ts-comment": false
+  }
 }

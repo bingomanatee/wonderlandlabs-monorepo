@@ -125,7 +125,7 @@ export interface BranchIF extends ForestItemTransactionalIF {
 
   hasChild(name: childKey): void;
 
-  leaves?: Map<childKey, LeafIF>;
+  leaves: Map<childKey, LeafIF>;
 
   set(key: childKey, value: unknown): void;
 }

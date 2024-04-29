@@ -26,15 +26,9 @@ export default class Branch extends ForestItem implements BranchIF {
     super(config.name, config.$value, forest);
     this.registerInForest();
 
-    if (config.leaves) {
-      c(config.leaves).forEach((leafConfig: LeafConfig, leafName) => {
-        this.addLeaf(leafConfig, leafName);
-      });
-    }
+    this._initLeaves();
 
-    if (isChildConfigs(config.children)) {
-      this.addChildren(config.children);
-    }
+    this._initChildren();
     if (typeof config.test === 'function') {
       this.test = config.test;
     }
@@ -44,12 +38,17 @@ export default class Branch extends ForestItem implements BranchIF {
 
   // -------------- Leaves
 
-  public leaves?: Map<string, LeafIF>;
+  public leaves: Map<string, LeafIF> = new Map();
+
+  protected _initLeaves() {
+    if (this.config.leaves) {
+      c(this.config.leaves).forEach((leafConfig: LeafConfig, leafName) => {
+        this.addLeaf(leafConfig, leafName);
+      });
+    }
+  }
 
   public addLeaf(config: LeafConfig, name: string) {
-    if (!this.leaves) {
-      this.leaves = new Map();
-    }
     const leaf = new Leaf(this, config, name);
     this.leaves.set(name, leaf);
   }
@@ -115,7 +114,7 @@ export default class Branch extends ForestItem implements BranchIF {
         child.validate(UpdateDir.up);
       });
 
-      this.leaves?.forEach((leaf) => leaf.validate());
+      this.leaves.forEach((leaf) => leaf.validate());
     }
     super.validate();
 
@@ -125,6 +124,12 @@ export default class Branch extends ForestItem implements BranchIF {
   }
 
   // ----------------------- children ------------------
+
+  protected _initChildren() {
+    if (isChildConfigs(this.config.children)) {
+      this.addChildren(this.config.children);
+    }
+  }
 
   public child(name: childKey): ForestItemIF | undefined {
     return this.children.get(name);

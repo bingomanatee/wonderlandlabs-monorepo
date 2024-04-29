@@ -68,7 +68,7 @@ export interface BranchIF extends ForestItemTransactionalIF {
     child(name: childKey): ForestItemIF | undefined;
     get(key: childKey): unknown;
     hasChild(name: childKey): void;
-    leaves?: Map<childKey, LeafIF>;
+    leaves: Map<childKey, LeafIF>;
     set(key: childKey, value: unknown): void;
 }
 export type BranchConfigDoMethod = (state: BranchIF, ...args: unknown[]) => unknown;

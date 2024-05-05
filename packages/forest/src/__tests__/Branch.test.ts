@@ -2,6 +2,7 @@ import { Forest } from '../../lib';
 import { BranchIF } from '../../lib/types';
 import { TypedBranchIF } from '../types';
 
+let debug = false;
 describe('forest', () => {
   describe('Branch', () => {
     describe('creation, basic functionality', () => {
@@ -140,6 +141,168 @@ describe('forest', () => {
       });
     });
 
-    // describe('transactional insulation', () => {});
+    describe('transactional insulation', () => {
+      type CartItem = {
+        name: string;
+        id: string;
+        qty: number;
+        cost: number;
+      };
+
+      type CartValue = {
+        cart: CartItem[];
+      };
+
+      function makeUserCollection(): TypedBranchIF<CartValue> {
+        const f = new Forest();
+        return f.createBranch({
+          $value: { cart: [] },
+          test(value) {
+            const { cart } = value as CartValue;
+
+            cart.forEach((cartItem) => {
+              if (cartItem.qty < 1) {
+                console.warn('bad data:', cartItem);
+                throw new Error('cart qty must be >= 0');
+              }
+              if (cartItem.cost <= 0) {
+                console.warn('bad data:', cartItem);
+                throw new Error('cart cost must be >= 0');
+              }
+            });
+          },
+          actions: {
+            addCartItem(state: BranchIF, name, id, cost, qty) {
+              console.log(
+                'adding cart item - pending is ',
+                state.forest.pending.length
+              );
+              if (debug) {
+                console.log('---- starting addCartItem', name, id, cost, qty);
+              }
+              const cartState = state as TypedBranchIF<CartValue>;
+              const qtyNum: number = qty as number;
+              const cartItems = [ ...cartState.value.cart ];
+              const existing = cartItems.findIndex((item) => {
+                const match = item.id === id;
+                return match;
+              });
+
+              if (existing >= 0) {
+                const newCartItem = { ...cartItems[existing] };
+                newCartItem.qty += qtyNum;
+                if (debug) {
+                  console.log(
+                    '----- replacing ',
+                    cartItems[existing],
+                    'with',
+                    newCartItem
+                  );
+                }
+                cartItems[existing] = newCartItem;
+                if (debug) {
+                  console.log('new cart is:', cartItems);
+                }
+              } else {
+                cartItems.push({
+                  id: id as string,
+                  qty: qtyNum,
+                  cost: cost as number,
+                  name: name as string,
+                });
+              } // --- END mutating cartItems;
+
+              cartState.set('cart', cartItems);
+            },
+
+            addCartItems(state, items) {
+              (items as CartItem[]).forEach((item) => {
+                const { name, id, cost, qty } = item;
+                state.do.addCartItem(name, id, cost, qty);
+              });
+            },
+          },
+          name: 'cart-state',
+        }) as TypedBranchIF<CartValue>;
+      }
+
+      const SEED_INSERTS = [
+        { name: 'figs', id: 'figs-01', cost: 100, qty: 5 },
+        {
+          name: 'wigs',
+          id: 'wigs-01',
+          cost: 50,
+          qty: 2,
+        },
+      ];
+
+      const BAD_ITEMS = [
+        { name: 'figs', id: 'figs-01', cost: 100, qty: 3 },
+        { name: 'pigs', id: 'pigs-01', cost: 200, qty: -1 },
+      ];
+
+      /**
+       * this test ensures that either all the items in cartItems succeed or none of them do.
+       */
+      it.only('should do all or nothing when updating cart', () => {
+        const cartState = makeUserCollection();
+        cartState.subscribe((value) =>
+          console.info('-----[observed] cartState is', value)
+        );
+        expect(cartState.forest.pending.length).toBe(0);
+        cartState.do.addCartItems(SEED_INSERTS);
+        expect(cartState.forest.pending.length).toBe(0);
+
+        /**
+         *
+         *  the point of this test is that the addition of the first item (figs)
+         *  should be rolled back because the second item creates an invalid quantity.
+         *  Even though the first addCartItem completes successfully, it is run
+         *  in the context of the second addCartItem, causing it to be flushed.
+         */
+        expect(cartState.value.cart).toEqual(SEED_INSERTS);
+
+        expect(() => cartState.do.addCartItems(BAD_ITEMS)).toThrow();
+
+        expect(cartState.value.cart).toEqual(SEED_INSERTS);
+      });
+      /**
+       * this test ensures that either all the items in cartItems succeed or none of them do.
+       */
+      it('should partially change the data if addCartItems is externalized', () => {
+        const cartState = makeUserCollection();
+
+        cartState.do.addCartItems(SEED_INSERTS);
+
+        /**
+         *
+         *  the point of this test is that the addition of the first item (figs)
+         *  should be rolled back because the second item creates an invalid quantity.
+         *  Even though the first addCartItem completes successfully, it is run
+         *  in the context of the second addCartItem, causing it to be flushed.
+         */
+        expect(cartState.value.cart).toEqual(SEED_INSERTS);
+        cartState.subscribe((items) =>
+          console.log(
+            ' [OBSERVED] cart items:',
+            JSON.stringify((items as CartValue).cart)
+          )
+        );
+        debug = true;
+        expect(() => {
+          (BAD_ITEMS as CartItem[]).forEach((item) => {
+            const { name, id, cost, qty } = item;
+            console.log('adding cart item:', item, '...');
+            cartState.do.addCartItem(name, id, cost, qty);
+            console.log('... added cart item:', item);
+          });
+        }).toThrow();
+
+        expect(cartState.value.cart).toEqual([
+          { id: 'figs-01', qty: 8, cost: 100, name: 'figs' },
+          { id: 'wigs-01', qty: 2, cost: 50, name: 'wigs' },
+        ]); // when externalized, the quantity update from figs succeeds
+      });
+    });
   });
 });

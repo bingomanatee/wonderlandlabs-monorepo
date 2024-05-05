@@ -111,7 +111,7 @@ export default class ForestItem implements ForestItemIF {
     }
   }
 
-  private removeTempValues(id: TransID) {
+  public removeTempValues(id: TransID) {
     const place = this.tempValues.findIndex((candidate) => candidate.id === id);
     if (place >= 0) {
       this.tempValues = this.tempValues.slice(0, place);

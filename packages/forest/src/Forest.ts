@@ -3,13 +3,14 @@ import {
   BranchIF,
   ForestId,
   ForestIF,
+  ForestItemIF,
   ForestItemTransactionalIF,
   TransFn,
   TransIF,
 } from './types';
 import Branch from './Branch';
 import { Trans } from './Trans';
-import { isBranchConfig } from './helpers';
+import { isBranchConfig, isTransactionalIF } from './helpers';
 
 export default class Forest implements ForestIF {
   items: Map<ForestId, ForestItemTransactionalIF> = new Map();
@@ -37,14 +38,37 @@ export default class Forest implements ForestIF {
   trans(name: string, fn: TransFn) {
     const trans = new Trans({ name, forest: this });
     this.pending.push(trans);
+    console.log('--- starting trans:', name);
     try {
       fn(trans);
       this.removeTrans(trans);
       if (this.pending.length <= 0) {
+        console.log('committing trans:', name);
         this.commit();
+      } else {
+        console.log(
+          'not committing ',
+          name,
+          this.pending.length,
+          'trans still in play'
+        );
       }
     } catch (err) {
+      console.log('redacting trans:', name, (err as Error).message);
       trans.fail(err as Error); // will removeTrans
+      this.removeTrans(trans);
+      console.log(
+        '---- after redacting',
+        name,
+        ' state is',
+        Array.from(this.items.values()).map((i: ForestItemIF) =>
+          JSON.stringify(i.report())
+        )
+      );
+      console.log('surviving pending trans:', this.pending.length);
+      this.pending.forEach((t: TransIF) => {
+        console.log('surviving transaction:', t.name, t.status);
+      });
       throw err;
     }
   }
@@ -54,7 +78,13 @@ export default class Forest implements ForestIF {
     if (index >= 0) {
       const rejects = this.pending.slice(index);
       this.pending = this.pending.slice(0, index);
-      // rejects.forEach((t) => {});
+      rejects.forEach((t) => {
+        this.items.forEach((item: ForestItemIF) => {
+          if (isTransactionalIF(item)) {
+            item.removeTempValues(t.id);
+          }
+        });
+      });
     }
   }
 

@@ -36,7 +36,7 @@ export default class Branch extends ForestItem implements BranchIF {
     this._initDo();
   }
 
-  // -------------- Leaves
+  // -------------- Leaves -----------------
 
   public leaves: Map<string, LeafIF> = new Map();
 

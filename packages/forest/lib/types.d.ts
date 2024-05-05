@@ -19,6 +19,7 @@ export interface ForestIF {
     removeTrans(trans: TransIF): void;
     test?: ForestItemTestFn;
     filter?: ForestItemFilterFn;
+    pending: TransIF[];
 }
 export interface TypedForestIF<ValueType> extends ForestIF {
     value: ValueType;
@@ -53,14 +54,10 @@ export interface ForestItemTransactionalIF extends ForestItemIF {
     pushTempValue(value: unknown, transId: TransID, direction?: UpdateDirType): void;
     flushTemp(): void;
     commit(): void;
+    removeTempValues(id: TransID): void;
 }
 export type ForestItemTestFn = (value: unknown, target: ForestItemIF) => void;
 export type ForestItemFilterFn = (value: unknown, target: ForestItemIF) => unknown;
-export interface TransactionalForestItemIF {
-    commit(): void;
-    readonly committedValue: unknown;
-    readonly hasTempValues: boolean;
-}
 export type childKey = string | number;
 export interface BranchIF extends ForestItemTransactionalIF {
     addChild(config: Partial<BranchConfig>, name: childKey): BranchIF;

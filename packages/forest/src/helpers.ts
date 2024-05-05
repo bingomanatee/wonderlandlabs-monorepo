@@ -1,5 +1,12 @@
 import { type, TypeEnum } from '@wonderlandlabs/walrus';
-import { BranchConfig, ChildConfigs, LeafConfig, LeafIF, Obj } from './types';
+import {
+  BranchConfig,
+  ChildConfigs,
+  ForestItemTransactionalIF,
+  LeafConfig,
+  LeafIF,
+  Obj,
+} from './types';
 
 export function isObj(x: unknown): x is Obj {
   return type.describe(x, true) === TypeEnum.object;
@@ -58,6 +65,25 @@ export function isChildConfigs(x: unknown): x is ChildConfigs {
     if (!x.children.every(isBranchConfig)) {
       return false;
     }
+  }
+  return true;
+}
+
+export function isTransactionalIF(x: unknown): x is ForestItemTransactionalIF {
+  if (!isObj(x)) {
+    return false;
+  }
+  if (typeof x.pushTempValue !== 'function') {
+    return false;
+  }
+  if (typeof x.flushTemp !== 'function') {
+    return false;
+  }
+  if (typeof x.commit !== 'function') {
+    return false;
+  }
+  if (typeof x.removeTempValues !== 'function') {
+    return false;
   }
   return true;
 }

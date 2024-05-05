@@ -36,6 +36,6 @@ export default class ForestItem implements ForestItemIF {
     private tempValues;
     pushTempValue(value: unknown, id: TransID): void;
     validate(): void;
-    private removeTempValues;
+    removeTempValues(id: TransID): void;
     do: {};
 }

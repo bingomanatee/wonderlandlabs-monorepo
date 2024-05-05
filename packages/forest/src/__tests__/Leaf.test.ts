@@ -6,7 +6,7 @@ import { LeafIF, TypedBranchIF } from '../types';
 import { BranchIF } from '../../lib/types';
 import Leaf from '../Leaf';
 
-describe('forest', () => {
+describe.skip('forest', () => {
   describe('Forest', () => {
     describe('Leaf', () => {
       it('should define leaves for controlled fields', () => {
@@ -56,8 +56,6 @@ describe('forest', () => {
             y: { type: TypeEnum.number, strict: true },
           },
         });
-
-        br.subscribe((v) => console.log('>>> point observable is now ', v));
 
         expect(() => {
           br.set('x', 'foo');

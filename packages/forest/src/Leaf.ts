@@ -98,7 +98,6 @@ export default class Leaf implements LeafIF {
     this.do = {};
 
     if (this.config.actions) {
-      console.log('Leaf._initDo', this.config.actions);
       c(this.config.actions).forEach((fn: LeafConfigDoMethod, name: string) => {
         this.do[name] = (...args) => {
           this.forest.trans(name, () => {

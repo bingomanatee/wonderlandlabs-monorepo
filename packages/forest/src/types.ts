@@ -31,6 +31,7 @@ export interface ForestIF {
 
   test?: ForestItemTestFn;
   filter?: ForestItemFilterFn;
+  pending: TransIF[];
 }
 
 export interface TypedForestIF<ValueType> extends ForestIF {
@@ -95,6 +96,8 @@ export interface ForestItemTransactionalIF extends ForestItemIF {
   flushTemp(): void;
 
   commit(): void;
+
+  removeTempValues(id: TransID): void;
 }
 
 export type ForestItemTestFn = (value: unknown, target: ForestItemIF) => void;
@@ -102,13 +105,6 @@ export type ForestItemFilterFn = (
   value: unknown,
   target: ForestItemIF
 ) => unknown;
-
-export interface TransactionalForestItemIF {
-  commit(): void;
-
-  readonly committedValue: unknown; // the last valid value of the item; may or may not equal value.
-  readonly hasTempValues: boolean;
-}
 
 /* --------------------- branches -------------------- */
 

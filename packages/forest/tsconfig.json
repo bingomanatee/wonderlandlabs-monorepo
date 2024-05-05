@@ -85,6 +85,7 @@
     "**/__tests__/*"
   ],
   "rules": {
-    "@typescript-eslint/ban-ts-comment": false
+    "@typescript-eslint/ban-ts-comment": false,
+    "@typescript-eslint/no-non-null-assertion": false,
   }
 }

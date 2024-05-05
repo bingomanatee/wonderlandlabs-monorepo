@@ -1,3 +1,7 @@
-export { default as Forest } from './Forest';
-export { default as Branch } from './Branch';
-export { default as Leaf } from './Leaf';
+import Forest from './forest/Forest';
+import Table from './forest/Table';
+declare const _default: {
+    Forest: typeof Forest;
+    Table: typeof Table;
+};
+export default _default;

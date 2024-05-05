@@ -1,1 +1,0 @@
-"use strict";Object.defineProperty(exports,"__esModule",{value:!0}),exports.UpdateDir=exports.TransStatus=void 0,exports.TransStatus={active:"active",failed:"failed",completed:"completed"},exports.UpdateDir={up:"up",down:"down",new:"new"};

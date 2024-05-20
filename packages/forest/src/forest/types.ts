@@ -27,10 +27,24 @@ export interface TableIF<RecordIdentity = Scalar, RecordValue = unknown> {
   current: Records<RecordIdentity, RecordValue>;
   stack: Records<RecordIdentity, RecordValue>[];
   currentIndex: number;
+  validate: () => void; // throws on error
 
   atTime(index: number): void;
 
   change(change: TableChange): void;
+}
+
+export type TableRecordValidator<IdType, RecordType> = (
+  value: RecordType,
+  id: IdType,
+  table: TableIF
+) => void; // throws
+export type TableIdValidator<IdType> = (id: IdType) => void; // throws
+
+export interface TableConfigIF<IdType, RecordType> {
+  validator?: TableRecordValidator<IdType, RecordType>;
+  idValidator?: TableIdValidator<IdType>;
+  values?: Records<IdType, RecordType>;
 }
 
 /**
@@ -75,7 +89,7 @@ export type TableRecordFieldMap<TableID = Scalar, TableValue = unknown> = Map<
 export const CrudEnum = {
   CRUD_ADD: 'CRUD_ADD',
   CRUD_CHANGE: 'CRUD_CHANGE',
-  //CRUD_UPSERT: 'CRUD_UPSERT',
+  CRUD_UPSERT: 'CRUD_UPSERT',
   // CRUD_DEFINE: 'CRUD_DEFINE',
   CRUD_DELETE: 'CRUD_DELETE',
 };
@@ -180,9 +194,11 @@ export interface DataChange {
 export interface ForestIF {
   tables: Map<TableName, TableIF>;
 
+  readonly time: number;
+
   has(name: TableName): boolean;
 
-  addTable(name: TableName, values: Map<unknown, unknown>): TableIF;
+  addTable(name: TableName, config?: TableConfigIF<any, any>): TableIF;
 
   change(changes: ChangeItem[]): boolean;
 

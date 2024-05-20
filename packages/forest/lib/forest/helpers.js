@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.isForestChange = exports.isTableChangeField = exports.isTableChangeBase = exports.isObj = void 0;
+exports.isForestChange = exports.isTableChangeValue = exports.isTableChangeField = exports.isTableChangeBase = exports.isObj = void 0;
 const walrus_1 = require("@wonderlandlabs/walrus");
 function isObj(x) {
     return walrus_1.type.describe(x, true) === walrus_1.TypeEnum.object;
@@ -28,12 +28,16 @@ function isTableChangeField(x) {
     if (!isTableChangeBase(x)) {
         return false;
     }
-    if (!('id' in x && 'field' in x && 'value' in x)) {
-        return false;
-    }
-    return true;
+    return 'id' in x && 'field' in x && 'value' in x;
 }
 exports.isTableChangeField = isTableChangeField;
+function isTableChangeValue(x) {
+    if (!isTableChangeBase(x)) {
+        return false;
+    }
+    return 'id' in x && 'value' in x;
+}
+exports.isTableChangeValue = isTableChangeValue;
 function isForestChange(x) {
     if (!isObj(x)) {
         return false;

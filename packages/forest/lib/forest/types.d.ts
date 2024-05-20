@@ -22,8 +22,16 @@ export interface TableIF<RecordIdentity = Scalar, RecordValue = unknown> {
     current: Records<RecordIdentity, RecordValue>;
     stack: Records<RecordIdentity, RecordValue>[];
     currentIndex: number;
+    validate: () => void;
     atTime(index: number): void;
     change(change: TableChange): void;
+}
+export type TableRecordValidator<IdType, RecordType> = (value: RecordType, id: IdType, table: TableIF) => void;
+export type TableIdValidator<IdType> = (id: IdType) => void;
+export interface TableConfigIF<IdType, RecordType> {
+    validator?: TableRecordValidator<IdType, RecordType>;
+    idValidator?: TableIdValidator<IdType>;
+    values?: Records<IdType, RecordType>;
 }
 /**
  * a collection of values either stored in a table or defined in a change.
@@ -59,6 +67,7 @@ export type TableRecordFieldMap<TableID = Scalar, TableValue = unknown> = Map<Ta
 export declare const CrudEnum: {
     CRUD_ADD: string;
     CRUD_CHANGE: string;
+    CRUD_UPSERT: string;
     CRUD_DELETE: string;
 };
 type CrudEnumKeys = keyof typeof CrudEnum;
@@ -128,8 +137,9 @@ export interface DataChange {
  */
 export interface ForestIF {
     tables: Map<TableName, TableIF>;
+    readonly time: number;
     has(name: TableName): boolean;
-    addTable(name: TableName, values: Map<unknown, unknown>): TableIF;
+    addTable(name: TableName, config?: TableConfigIF<any, any>): TableIF;
     change(changes: ChangeItem[]): boolean;
     log: DataChange[];
 }

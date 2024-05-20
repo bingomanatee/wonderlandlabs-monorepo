@@ -4,7 +4,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const Table_1 = __importDefault(require("./Table"));
-const helpers_1 = require("./helpers");
+const ChangeSet_1 = require("./ChangeSet");
 class Forest {
     constructor() {
         this.log = [];
@@ -17,11 +17,11 @@ class Forest {
     get time() {
         return this._time;
     }
-    addTable(name, values) {
+    addTable(name, config) {
         if (this.has(name)) {
             throw new Error('cannot add over existing table ' + name);
         }
-        const table = new Table_1.default(this, name, values);
+        const table = new Table_1.default(this, name, config);
         this._publicTables.set(name, table);
         return table;
     }
@@ -39,30 +39,15 @@ class Forest {
      */
     change(changes) {
         this._advanceTime();
-        const changeSet = new ChangeSet(this, this.time, changes);
+        const changeSet = new ChangeSet_1.ChangeSet(this, this.time, changes);
         this.log.push(changeSet);
         changeSet.perform();
+        this.tables.forEach((table) => {
+            if (table.currentIndex >= this.time) {
+                table.validate();
+            }
+        });
         return true;
     }
 }
 exports.default = Forest;
-class ChangeSet {
-    constructor(forest, time, changes) {
-        this.forest = forest;
-        this.time = time;
-        this.changes = changes;
-        this._changedTables = new Map();
-    }
-    perform() {
-        this.changes.forEach((change) => {
-            if ((0, helpers_1.isTableChangeBase)(change)) {
-                const table = this.forest.tables.get(change.table);
-                table.atTime(this.time);
-                table.change(change);
-            }
-            if ((0, helpers_1.isForestChange)(change)) {
-                throw new Error('not implemented');
-            }
-        });
-    }
-}

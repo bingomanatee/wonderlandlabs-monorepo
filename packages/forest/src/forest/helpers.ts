@@ -1,5 +1,10 @@
 import { type, TypeEnum } from '@wonderlandlabs/walrus';
-import { MultiTableChange, TableChangeBase, TableChangeField } from './types';
+import {
+  MultiTableChange,
+  TableChangeBase,
+  TableChangeField,
+  TableChangeValue,
+} from './types';
 
 type Obj = Record<string | number | symbol, unknown>;
 
@@ -29,10 +34,14 @@ export function isTableChangeField(x: unknown): x is TableChangeField {
   if (!isTableChangeBase(x)) {
     return false;
   }
-  if (!('id' in x && 'field' in x && 'value' in x)) {
+  return 'id' in x && 'field' in x && 'value' in x;
+}
+
+export function isTableChangeValue(x: unknown): x is TableChangeValue {
+  if (!isTableChangeBase(x)) {
     return false;
   }
-  return true;
+  return 'id' in x && 'value' in x;
 }
 
 export function isForestChange(x: unknown): x is MultiTableChange {

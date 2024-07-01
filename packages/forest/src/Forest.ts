@@ -1,97 +1,104 @@
-import {
-  BranchConfig,
-  BranchIF,
-  ForestId,
-  ForestIF,
-  ForestItemIF,
-  ForestItemTransactionalIF,
-  TransFn,
-  TransIF,
-} from './types';
-import Branch from './Branch';
-import { Trans } from './Trans';
-import { isBranchConfig, isTransactionalIF } from './helpers';
 
-export default class Forest implements ForestIF {
-  items: Map<ForestId, ForestItemTransactionalIF> = new Map();
+import type { ForestIF, LeafIF, LeafReq, TreeIF, TreeName, TreeChange, TreeChangeBase, TreeSet, LeafIdentityIF, Base, Branch, TreeChangeResponse } from "./types"
+import { isString } from "./helpers/isString";
+import { isTreeChangeIF } from './helpers/isTreeChangeIF';
+import { isLeafIdentityIF } from "./helpers/isLeafIdentityIF";
 
-  register(item: ForestItemTransactionalIF): void {
-    this.items.set(item.forestId, item);
-  }
-
-  createBranch(config: Partial<BranchConfig>, name?: string): BranchIF {
-    if (name) {
-      return this.createBranch({ ...config, name });
+class TreeClass implements TreeIF {
+    root: Branch<unknown, unknown> | undefined;
+    top: Base<unknown, unknown> | undefined;
+    get(key: unknown): LeafIF<unknown, unknown> {
+        throw new Error("Method not implemented.");
     }
-    if (!isBranchConfig(config)) {
-      console.warn('bad configuration', config);
-      throw new Error('bad configuration');
+    has(key: unknown): boolean {
+        throw new Error("Method not implemented.");
+    }
+    set(key: unknown, value: unknown): LeafIF<unknown, unknown> {
+        throw new Error("Method not implemented.");
+    }
+    async: boolean = false;
+    t: string;
+    change(c: TreeChangeBase<unknown, unknown>): TreeChangeResponse<unknown, unknown> {
+        throw new Error("Method not implemented.");
     }
 
-    const branch: BranchIF = new Branch(config, this);
-    this.register(branch); // redundant with branch constructor but why not
-    return branch;
-  }
+}
 
-  pending: TransIF[] = [];
-
-  trans(name: string, fn: TransFn) {
-    const trans = new Trans({ name, forest: this });
-    this.pending.push(trans);
-    console.log('--- starting trans:', name);
-    try {
-      fn(trans);
-      this.removeTrans(trans);
-      if (this.pending.length <= 0) {
-        console.log('committing trans:', name);
-        this.commit();
-      } else {
-        console.log(
-          'not committing ',
-          name,
-          this.pending.length,
-          'trans still in play'
-        );
-      }
-    } catch (err) {
-      console.log('redacting trans:', name, (err as Error).message);
-      trans.fail(err as Error); // will removeTrans
-      this.removeTrans(trans);
-      console.log(
-        '---- after redacting',
-        name,
-        ' state is',
-        Array.from(this.items.values()).map((i: ForestItemIF) =>
-          JSON.stringify(i.report())
-        )
-      );
-      console.log('surviving pending trans:', this.pending.length);
-      this.pending.forEach((t: TransIF) => {
-        console.log('surviving transaction:', t.name, t.status);
-      });
-      throw err;
+class Forest implements ForestIF {
+    delete(tree: string | LeafIF<unknown, unknown>, keys?: unknown) {
+        throw new Error("Method not implemented.");
     }
-  }
+    trees: Map<String, TreeIF> = new Map();
 
-  removeTrans(trans: TransIF) {
-    const index = this.pending.findIndex((t) => t.id === trans.id);
-    if (index >= 0) {
-      const rejects = this.pending.slice(index);
-      this.pending = this.pending.slice(0, index);
-      rejects.forEach((t) => {
-        this.items.forEach((item: ForestItemIF) => {
-          if (isTransactionalIF(item)) {
-            item.removeTempValues(t.id);
-          }
-        });
-      });
+    plantTree(t: TreeName, m: Map<unknown, unknown>, upsert?: boolean | undefined): TreeIF {
+        if (this.hasTree(t)) {
+            if (!upsert) {
+                throw new Error('cannot plant existing treer ' + t);
+            }
+        } else {
+            this.trees.set(t, new TreeClass(t, m));
+        }
+        return this.tree(t);
     }
-  }
+    get(t: TreeName | LeafIdentityIF, k?: unknown): LeafIF {
+        if (!isLeafIdentityIF(t)) {
+            return this.get({ t, k });
+        }
 
-  commit() {
-    this.items.forEach((item) => {
-      item.commit();
-    });
-    this.items.forEach((item) => item.flushTemp());
-  }
+        if (!this.hasTree(t.t)) {
+            throw new Error('forest:get -- cannot find tree ' + t.t);
+        }
+        const table = this.tree(t.t)!;
+
+        return table.get(t.k);
+    }
+    set(change: TreeSet | r[]) {
+        if (isTreeChangeIF(change)) {
+            const oneChange: TreeChangeBase = change as TreeChangeBase;
+            const changes: TreeChangeBase[] = [oneChange];
+            return this.change(changes);
+        }
+        return this.change(change);
+    }
+
+    private change(c: TreeChange[], t?: TreeName) {
+        const responess = [];
+
+        for (const change of c) {
+            const treeName = change.t || t;
+
+            if (!isString(treeName) || !this.hasTree(treeName)) {
+                throw new Error('change missing tree name');
+            }
+
+            const tree = this.tree(treeName)!;
+            responess.push(
+                tree.change(change)
+            );
+        }
+
+        return responess.flat();
+    }
+
+
+    hasValue(t: TreeName, k: unknown): boolean {
+        return this.hasOne({ t, k });
+    }
+    hasOne(r: LeafReq<unknown>): boolean {
+        if (!this.hasTree(r.t)) return false;
+
+        return this.tree(r.t)!.has(r.k);
+    }
+    hasAll(r: LeafReq<unknown>[]): boolean {
+        return r.every((req: LeafReq<unknown>) => { this.hasOne(req) });
+    }
+    hasTree(t: TreeName): boolean {
+        return this.trees.has(t);
+    }
+    tree(t: TreeName): TreeIF | undefined {
+        return this.trees.get(t);
+    }
+
+
+
 }

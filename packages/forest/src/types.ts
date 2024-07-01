@@ -1,169 +1,131 @@
-import { UpdateDir, TransStatus } from './constants';
-import { Observable, Observer, Subscription } from 'rxjs';
 
-export type Obj = Record<string, unknown>;
+export type TreeName = string;
 
-export type ForestId = string;
+// The reason a branch was added to a tree;
+export const BranchActionEnum = {
+    'set': Symbol('TREE_ACTION_GET'),
+    'del': Symbol('TREE_ACTION_DEL'),
+    'change': Symbol('TREE_ACTION_CHANGE'),
+    'action': Symbol('TREE_ACTION_CHANGE'),
+    'trans': Symbol('TREE_ACTION_CHANGE'),
+}
+type BranchActionEnumKeys = keyof typeof BranchActionEnum;
+export type BranchAction = typeof BranchActionEnum[BranchActionEnumKeys];
 
-type UpdateDirKeys = keyof typeof UpdateDir;
-export type UpdateDirType = typeof UpdateDir[UpdateDirKeys];
-type validateFn = (value: unknown, leaf: LeafIF) => void; // throws on custom validation error
-export type DoMethod = (...args: any[]) => void;
+// possible "ittermittent" value of a request; i.e., why a value may not be returned (yet);
+export const LeafValueEnum = {
+    'absent': Symbol('LEAF_VALUE_ABSENT'),
+    'pending': Symbol('LEAF_VALUE_ABSENT')
+}
+type LeafValueEnumKeys = keyof typeof LeafValueEnum;
+export type LeafValue<$V> = $V | typeof LeafValueEnum[LeafValueEnumKeys]
 
-type ForestItemConfig = {
-  type?: string;
-  validate?: validateFn;
-  test?: ForestItemTestFn;
+// The nature of an update;
+export const BranchChangeTypeEnum = {
+    'set': Symbol('BRANCH_CHANGE_SET'),
+    'change': Symbol('BRANCH_CHANGE_CHANGE'),
+    'sets': Symbol('BRANCH_CHANGE_SET'),
+    'changes': Symbol('BRANCH_CHANGE_CHANGE'),
+    'replace': Symbol('BRANCH_CHANGE_REPLACE')
+}
+type BranchChangeTypeEnumKeys = keyof typeof BranchChangeTypeEnum;
+export type BranchChangeType = typeof BranchChangeTypeEnum[BranchChangeTypeEnumKeys]
+
+const BranchTypeEnumValues: Symbol[] = Array.from(Object.values(BranchChangeTypeEnum));
+
+export function isBranchChangeType(arg: unknown): arg is BranchChangeType {
+    return typeof arg === 'symbol' && BranchTypeEnumValues.includes(arg);
+}
+
+// The nature of an update;
+export const BranchStatusEnum = {
+    'good': Symbol('BRANCH_STATUS_GOOD'),
+    'bad': Symbol('BRANCH_STATUS_BAD'),
+    'pending': Symbol('BRANCH_STATUS_PENDING'),
+}
+type BranchStausEnumKeys = keyof typeof BranchStatusEnum;
+export type BranchStatus = typeof BranchStatusEnum[BranchStausEnumKeys]
+
+export type LeafReq<$K> = {
+    k: $K | $K[];
+    t: TreeName; // the name of the Tree the leaf is from
+}
+
+// an identified element from a Tree. 
+export type LeafIF<$K = unknown, $V = unknown> {
+    v: LeafValue<$V>;
+    k: $K;
+    t: TreeName; // the name of the Tree the leaf is from
+}
+// the identity of a value; used to request values from Forests. 
+export type LeafIdentityIF<$K = unknown, $V = unknown> {
+    k: $K;
+    t: TreeName; // the name of the Tree the leaf is from
+}
+
+// a Base is an item that can get or set values. it is a "map on steroids"
+export interface Base<$K = unknown, $V = unknown> {
+    get(key: $K): LeafIF<$K, $V>;
+    has(key: $K): boolean;
+    set(key: $K, value: $V): LeafIF<$K, $V>;
+    async: boolean;
+    t: TreeName;
+    change(c: TreeChangeBase): TreeChangeResponse;
+}
+
+// one or more alterations to a sigle tree.
+//  Sometimes the tree name is stored at a higher context. other times its defined in the change. 
+export interface TreeChangeBase<$K = unknown, $V = unknown> {
+    type: BranchChangeType;
+    k?: $K | $K[];
+    v?: $V;
+    m?: Map<$K, $V>;
+    t?: TreeName;
+}
+
+export interface TreeSet<$K = unknown, $V = unknown> extends TreeChangeBase<$K, $V> { 
+    type: BranchChangeType = BranchChangeTypeEnum.set;
 };
 
-/* ------------------------ forest -------------------- */
+export interface TreeDel<$K = unknown, $V = unknown> extends TreeChangeBase<$K, $V> { }
+export interface TreeSets<$K = unknown, $V = unknown> extends TreeChangeBase<$K, $V> { }
+export interface TreeDels<$K = unknown, $V = unknown> extends TreeChangeBase<$K, $V> { }
 
+export type TreeChange<$K = unknown, $V = unknown> = TreeSet<$K, $V> | TreeDel<$K, $V> | TreeSets<$K, $V> | TreeDels<$K, $V>
+
+// a node on of a linked list that represents a change
+export interface Branch<$K = unknown, $V = unknown> extends Base<$K, $V> {
+    owner: TreeIF<$K, $V>;
+    cause: BranchAction;
+    status: BranchStatus;
+    next?: Branch<$K, $V>;
+    prev?: Branch<$K, $V>;
+}
+
+// a key/value collection
+export interface TreeIF<$K = unknown, $V = unknown> extends Base<$K, $V> {
+    root: Branch<$K, $V> | undefined;
+    top: Base<$K, $V> | undefined;
+}
+
+// feedback from a change attempt
+export interface TreeChangeResponse<$K = unknown, $V = unknown> {
+    t: TreeName;
+    status: BranchStatus;
+    change: TreeChange<$K, $V>;
+}
+
+// a connection of Trees. 
 export interface ForestIF {
-  createBranch(config: Partial<BranchConfig>, name?: string): BranchIF;
-
-  items: Map<ForestId, ForestItemTransactionalIF>;
-
-  register(item: ForestItemTransactionalIF): void;
-
-  trans(name: string, fn: TransFn): void;
-
-  removeTrans(trans: TransIF): void;
-
-  test?: ForestItemTestFn;
-  filter?: ForestItemFilterFn;
-  pending: TransIF[];
+    trees: Map<String, TreeIF>
+    plantTree(t: TreeName, m: Map<unknown, unknown>, upsert?: boolean): TreeIF; // creates a new tree; throws if existing unless upsert is true. 
+    // an existing tree ignores the second argument (map). 
+    get(t: TreeName | LeafIdentityIF, key?: unknown): LeafIF
+    set(change: TreeSet | TreeSet[]): TreeChangeResponse[];
+    delete(tree: TreeName | LeafIF, keys?: unknown | unknown[]): TreeChangeResponse[];
+    hasValue(t: TreeName, k: unknown): boolean;
+    hasOne(r: LeafReq<unknown>): boolean;
+    hasAll(r: LeafReq<unknown>[]): boolean;
+    hasTree(t: TreeName): boolean;
+    tree(t: TreeName): TreeIF | undefined;
 }
-
-export interface TypedForestIF<ValueType> extends ForestIF {
-  value: ValueType;
-}
-
-export interface TypedBranchIF<ValueType> extends BranchIF {
-  value: ValueType;
-}
-
-/* --------------- Leaf -------------------- */
-
-export interface LeafIF extends ForestItemIF {
-  branch: BranchIF;
-}
-
-export type LeafConfigDoMethod = (
-  state: LeafIF,
-  ...args: unknown[]
-) => unknown | void;
-
-export type LeafConfig = ForestItemConfig & {
-  $value?: unknown;
-  actions?: Record<string, LeafConfigDoMethod>;
-  strict?: boolean;
-  required?: boolean;
-};
-
-export type JsonObj = Obj;
-
-/* ----------------- ForestItem ---------------------- */
-
-export interface ForestItemIF {
-  name: string;
-  forest: ForestIF;
-  value: unknown;
-
-  observable: Observable<unknown>;
-
-  report(): JsonObj;
-
-  subscribe(observerOrNext?: SubscribeListener): Subscription;
-
-  validate(dir?: UpdateDirType): void; // throws if a target is not valid.
-
-  do: Record<string, DoMethod>;
-}
-
-export type SubscribeListener =
-  | Partial<Observer<unknown>>
-  | ((value: unknown) => void);
-
-export interface ForestItemTransactionalIF extends ForestItemIF {
-  forestId: ForestId;
-
-  pushTempValue(
-    value: unknown,
-    transId: TransID,
-    direction?: UpdateDirType
-  ): void;
-
-  flushTemp(): void;
-
-  commit(): void;
-
-  removeTempValues(id: TransID): void;
-}
-
-export type ForestItemTestFn = (value: unknown, target: ForestItemIF) => void;
-export type ForestItemFilterFn = (
-  value: unknown,
-  target: ForestItemIF
-) => unknown;
-
-/* --------------------- branches -------------------- */
-
-export type childKey = string | number;
-
-export interface BranchIF extends ForestItemTransactionalIF {
-  addChild(config: Partial<BranchConfig>, name: childKey): BranchIF;
-
-  addChildren(children: ChildConfigs): void;
-
-  child(name: childKey): ForestItemIF | undefined;
-
-  get(key: childKey): unknown;
-
-  hasChild(name: childKey): void;
-
-  leaves: Map<childKey, LeafIF>;
-
-  set(key: childKey, value: unknown): void;
-}
-
-export type BranchConfigDoMethod = (
-  state: BranchIF,
-  ...args: unknown[]
-) => unknown;
-
-export type BranchConfig = ForestItemConfig & {
-  $value: unknown;
-  actions?: Record<string, BranchConfigDoMethod>;
-  children?: Record<string, BranchConfig>;
-  filter?: ForestItemFilterFn;
-  leaves?: Record<string, LeafConfig>;
-  name: string;
-};
-
-export type ChildConfigs = Record<string, BranchConfig>;
-
-/* --------------- transactions -------------------- */
-
-type TransStatusKeys = keyof typeof TransStatus;
-export type TransStatusItem = typeof TransStatus[TransStatusKeys];
-export type TransID = string;
-
-export interface TransIF {
-  id: TransID;
-  name: string;
-  status: TransStatusItem;
-}
-
-export type TransFn = (trans: TransIF) => void;
-
-export type TransValue = {
-  id: TransID;
-  value: unknown;
-};
-
-/* ------------------ parent/child ----------------- */
-
-export type ChildData = {
-  child: ForestItemIF;
-  key: string;
-};

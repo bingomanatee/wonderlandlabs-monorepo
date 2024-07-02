@@ -1,98 +1,82 @@
-import { UpdateDir, TransStatus } from './constants';
-import { Observable, Observer, Subscription } from 'rxjs';
-export type Obj = Record<string, unknown>;
-export type ForestId = string;
-type UpdateDirKeys = keyof typeof UpdateDir;
-export type UpdateDirType = typeof UpdateDir[UpdateDirKeys];
-type validateFn = (value: unknown, leaf: LeafIF) => void;
-export type DoMethod = (...args: any[]) => void;
-type ForestItemConfig = {
-    type?: string;
-    validate?: validateFn;
-    test?: ForestItemTestFn;
+import { LeafValue, ChangeType, BranchAction, Status } from "./enums";
+export type TreeName = string;
+export type LeafReq<$K> = {
+    key: $K | $K[];
+    treeName: TreeName;
 };
-export interface ForestIF {
-    createBranch(config: Partial<BranchConfig>, name?: string): BranchIF;
-    items: Map<ForestId, ForestItemTransactionalIF>;
-    register(item: ForestItemTransactionalIF): void;
-    trans(name: string, fn: TransFn): void;
-    removeTrans(trans: TransIF): void;
-    test?: ForestItemTestFn;
-    filter?: ForestItemFilterFn;
-    pending: TransIF[];
-}
-export interface TypedForestIF<ValueType> extends ForestIF {
-    value: ValueType;
-}
-export interface TypedBranchIF<ValueType> extends BranchIF {
-    value: ValueType;
-}
-export interface LeafIF extends ForestItemIF {
-    branch: BranchIF;
-}
-export type LeafConfigDoMethod = (state: LeafIF, ...args: unknown[]) => unknown | void;
-export type LeafConfig = ForestItemConfig & {
-    $value?: unknown;
-    actions?: Record<string, LeafConfigDoMethod>;
-    strict?: boolean;
-    required?: boolean;
+export type LeafIF<$K = unknown, $V = unknown> = {
+    val: LeafValue<$V>;
+    key: $K;
+    treeName: TreeName;
+    hasValue: boolean;
 };
-export type JsonObj = Obj;
-export interface ForestItemIF {
-    name: string;
+export type LeafIdentityIF<$K = unknown> = {
+    key: $K;
+    treeName: TreeName;
+};
+export interface Base<$K = unknown, $V = unknown> {
+    get(key: $K): LeafIF<$K, $V>;
+    has(key: $K): boolean;
+    set(key: $K, val: $V): LeafIF<$K, $V>;
+    del(key: $K): LeafIF<$K, $V>;
+    async: boolean;
+    change(c: ChangeBase): ChangeResponse;
+}
+export interface ChangeBase<$K = unknown, $V = unknown> {
+    type: ChangeType;
+    key?: $K | $K[];
+    val?: $V;
+    data?: Map<$K, $V>;
+    treeName?: TreeName;
+}
+export interface ChangeSet<$K = unknown, $V = unknown> extends ChangeBase<$K, $V> {
+}
+export interface ChangeDel<$K = unknown, $V = unknown> extends ChangeBase<$K, $V> {
+}
+export interface ChangeSets<$K = unknown, $V = unknown> extends ChangeBase<$K, $V> {
+}
+export interface ChangeDels<$K = unknown, $V = unknown> extends ChangeBase<$K, $V> {
+}
+export type TreeChange<$K = unknown, $V = unknown> = ChangeSet<$K, $V> | ChangeDel<$K, $V> | ChangeSets<$K, $V> | ChangeDels<$K, $V>;
+export interface BranchIF<$K = unknown, $V = unknown> extends Base<$K, $V> {
+    tree: TreeIF<$K, $V>;
+    cause: BranchAction;
+    status: Status;
+    next?: BranchIF<$K, $V>;
+    prev?: BranchIF<$K, $V>;
+}
+export type BranchConfig = {
+    data?: Map<unknown, unknown>;
+    prev?: BranchIF;
+    cause: BranchAction;
+};
+export interface TreeIF<$K = unknown, $V = unknown> extends Base<$K, $V> {
+    treeName: TreeName;
+    root: BranchIF<$K, $V> | undefined;
+    top: Base<$K, $V> | undefined;
     forest: ForestIF;
-    value: unknown;
-    observable: Observable<unknown>;
-    report(): JsonObj;
-    subscribe(observerOrNext?: SubscribeListener): Subscription;
-    validate(dir?: UpdateDirType): void;
-    do: Record<string, DoMethod>;
+    status: Status;
 }
-export type SubscribeListener = Partial<Observer<unknown>> | ((value: unknown) => void);
-export interface ForestItemTransactionalIF extends ForestItemIF {
-    forestId: ForestId;
-    pushTempValue(value: unknown, transId: TransID, direction?: UpdateDirType): void;
-    flushTemp(): void;
-    commit(): void;
-    removeTempValues(id: TransID): void;
+export interface ChangeResponse<$K = unknown, $V = unknown> {
+    treeName: TreeName;
+    change: TreeChange<$K, $V>;
+    status: Status;
 }
-export type ForestItemTestFn = (value: unknown, target: ForestItemIF) => void;
-export type ForestItemFilterFn = (value: unknown, target: ForestItemIF) => unknown;
-export type childKey = string | number;
-export interface BranchIF extends ForestItemTransactionalIF {
-    addChild(config: Partial<BranchConfig>, name: childKey): BranchIF;
-    addChildren(children: ChildConfigs): void;
-    child(name: childKey): ForestItemIF | undefined;
-    get(key: childKey): unknown;
-    hasChild(name: childKey): void;
-    leaves: Map<childKey, LeafIF>;
-    set(key: childKey, value: unknown): void;
+export interface ForestIF {
+    trees: Map<String, TreeIF>;
+    treeFactory(t: TreeName, m: Map<unknown, unknown>, upsert?: boolean): TreeIF;
+    get(treeNameOrLeaf: TreeName | LeafIdentityIF, key?: unknown): LeafIF;
+    set(treeNameOrLeaf: TreeName | LeafIF, key?: unknown, val?: unknown): ChangeResponse;
+    delete(tree: TreeName | LeafIF, keys?: unknown | unknown[]): ChangeResponse;
+    hasKey(t: TreeName, k: unknown): boolean;
+    has(r: LeafReq<unknown>): boolean;
+    hasAll(r: LeafReq<unknown>[]): boolean;
+    hasTree(t: TreeName): boolean;
+    tree(t: TreeName): TreeIF | undefined;
 }
-export type BranchConfigDoMethod = (state: BranchIF, ...args: unknown[]) => unknown;
-export type BranchConfig = ForestItemConfig & {
-    $value: unknown;
-    actions?: Record<string, BranchConfigDoMethod>;
-    children?: Record<string, BranchConfig>;
-    filter?: ForestItemFilterFn;
-    leaves?: Record<string, LeafConfig>;
-    name: string;
+export type LeafParams = {
+    treeName: TreeName;
+    key: unknown;
+    val: unknown;
+    forest?: ForestIF;
 };
-export type ChildConfigs = Record<string, BranchConfig>;
-type TransStatusKeys = keyof typeof TransStatus;
-export type TransStatusItem = typeof TransStatus[TransStatusKeys];
-export type TransID = string;
-export interface TransIF {
-    id: TransID;
-    name: string;
-    status: TransStatusItem;
-}
-export type TransFn = (trans: TransIF) => void;
-export type TransValue = {
-    id: TransID;
-    value: unknown;
-};
-export type ChildData = {
-    child: ForestItemIF;
-    key: string;
-};
-export {};

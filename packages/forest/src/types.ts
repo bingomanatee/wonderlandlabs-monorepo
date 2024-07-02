@@ -1,131 +1,100 @@
+import { LeafValue, ChangeType, BranchAction, Status } from "./enums";
 
 export type TreeName = string;
 
-// The reason a branch was added to a tree;
-export const BranchActionEnum = {
-    'set': Symbol('TREE_ACTION_GET'),
-    'del': Symbol('TREE_ACTION_DEL'),
-    'change': Symbol('TREE_ACTION_CHANGE'),
-    'action': Symbol('TREE_ACTION_CHANGE'),
-    'trans': Symbol('TREE_ACTION_CHANGE'),
-}
-type BranchActionEnumKeys = keyof typeof BranchActionEnum;
-export type BranchAction = typeof BranchActionEnum[BranchActionEnumKeys];
-
-// possible "ittermittent" value of a request; i.e., why a value may not be returned (yet);
-export const LeafValueEnum = {
-    'absent': Symbol('LEAF_VALUE_ABSENT'),
-    'pending': Symbol('LEAF_VALUE_ABSENT')
-}
-type LeafValueEnumKeys = keyof typeof LeafValueEnum;
-export type LeafValue<$V> = $V | typeof LeafValueEnum[LeafValueEnumKeys]
-
-// The nature of an update;
-export const BranchChangeTypeEnum = {
-    'set': Symbol('BRANCH_CHANGE_SET'),
-    'change': Symbol('BRANCH_CHANGE_CHANGE'),
-    'sets': Symbol('BRANCH_CHANGE_SET'),
-    'changes': Symbol('BRANCH_CHANGE_CHANGE'),
-    'replace': Symbol('BRANCH_CHANGE_REPLACE')
-}
-type BranchChangeTypeEnumKeys = keyof typeof BranchChangeTypeEnum;
-export type BranchChangeType = typeof BranchChangeTypeEnum[BranchChangeTypeEnumKeys]
-
-const BranchTypeEnumValues: Symbol[] = Array.from(Object.values(BranchChangeTypeEnum));
-
-export function isBranchChangeType(arg: unknown): arg is BranchChangeType {
-    return typeof arg === 'symbol' && BranchTypeEnumValues.includes(arg);
-}
-
-// The nature of an update;
-export const BranchStatusEnum = {
-    'good': Symbol('BRANCH_STATUS_GOOD'),
-    'bad': Symbol('BRANCH_STATUS_BAD'),
-    'pending': Symbol('BRANCH_STATUS_PENDING'),
-}
-type BranchStausEnumKeys = keyof typeof BranchStatusEnum;
-export type BranchStatus = typeof BranchStatusEnum[BranchStausEnumKeys]
-
 export type LeafReq<$K> = {
-    k: $K | $K[];
-    t: TreeName; // the name of the Tree the leaf is from
+    key: $K | $K[];
+    treeName: TreeName; // the name of the Tree the leaf is from
 }
 
 // an identified element from a Tree. 
-export type LeafIF<$K = unknown, $V = unknown> {
-    v: LeafValue<$V>;
-    k: $K;
-    t: TreeName; // the name of the Tree the leaf is from
+export type LeafIF<$K = unknown, $V = unknown> = {
+    val: LeafValue<$V>;
+    key: $K;
+    treeName: TreeName; // the name of the Tree the leaf is from
+    hasValue: boolean
 }
 // the identity of a value; used to request values from Forests. 
-export type LeafIdentityIF<$K = unknown, $V = unknown> {
-    k: $K;
-    t: TreeName; // the name of the Tree the leaf is from
+export type LeafIdentityIF<$K = unknown> = {
+    key: $K;
+    treeName: TreeName; // the name of the Tree the leaf is from
 }
 
 // a Base is an item that can get or set values. it is a "map on steroids"
 export interface Base<$K = unknown, $V = unknown> {
     get(key: $K): LeafIF<$K, $V>;
     has(key: $K): boolean;
-    set(key: $K, value: $V): LeafIF<$K, $V>;
+    set(key: $K, val: $V): LeafIF<$K, $V>;
+    del(key: $K): LeafIF<$K, $V>;
     async: boolean;
-    t: TreeName;
-    change(c: TreeChangeBase): TreeChangeResponse;
+    change(c: ChangeBase): ChangeResponse;
 }
 
 // one or more alterations to a sigle tree.
 //  Sometimes the tree name is stored at a higher context. other times its defined in the change. 
-export interface TreeChangeBase<$K = unknown, $V = unknown> {
-    type: BranchChangeType;
-    k?: $K | $K[];
-    v?: $V;
-    m?: Map<$K, $V>;
-    t?: TreeName;
+export interface ChangeBase<$K = unknown, $V = unknown> {
+    type: ChangeType;
+    key?: $K | $K[];
+    val?: $V;
+    data?: Map<$K, $V>;
+    treeName?: TreeName;
 }
 
-export interface TreeSet<$K = unknown, $V = unknown> extends TreeChangeBase<$K, $V> { 
-    type: BranchChangeType = BranchChangeTypeEnum.set;
-};
+export interface ChangeSet<$K = unknown, $V = unknown> extends ChangeBase<$K, $V> { };
+export interface ChangeDel<$K = unknown, $V = unknown> extends ChangeBase<$K, $V> { }
+export interface ChangeSets<$K = unknown, $V = unknown> extends ChangeBase<$K, $V> { }
+export interface ChangeDels<$K = unknown, $V = unknown> extends ChangeBase<$K, $V> { }
 
-export interface TreeDel<$K = unknown, $V = unknown> extends TreeChangeBase<$K, $V> { }
-export interface TreeSets<$K = unknown, $V = unknown> extends TreeChangeBase<$K, $V> { }
-export interface TreeDels<$K = unknown, $V = unknown> extends TreeChangeBase<$K, $V> { }
-
-export type TreeChange<$K = unknown, $V = unknown> = TreeSet<$K, $V> | TreeDel<$K, $V> | TreeSets<$K, $V> | TreeDels<$K, $V>
+export type TreeChange<$K = unknown, $V = unknown> = ChangeSet<$K, $V> | ChangeDel<$K, $V> | ChangeSets<$K, $V> | ChangeDels<$K, $V>
 
 // a node on of a linked list that represents a change
-export interface Branch<$K = unknown, $V = unknown> extends Base<$K, $V> {
-    owner: TreeIF<$K, $V>;
+export interface BranchIF<$K = unknown, $V = unknown> extends Base<$K, $V> {
+    tree: TreeIF<$K, $V>;
     cause: BranchAction;
-    status: BranchStatus;
-    next?: Branch<$K, $V>;
-    prev?: Branch<$K, $V>;
+    status: Status;
+    next?: BranchIF<$K, $V>;
+    prev?: BranchIF<$K, $V>;
 }
 
+export type BranchConfig = {
+    data?: Map<unknown, unknown>,
+    prev?: BranchIF,
+    cause: BranchAction
+}
 // a key/value collection
 export interface TreeIF<$K = unknown, $V = unknown> extends Base<$K, $V> {
-    root: Branch<$K, $V> | undefined;
-    top: Base<$K, $V> | undefined;
+    treeName: TreeName,
+    root: BranchIF<$K, $V> | undefined; // linked list start
+    top: Base<$K, $V> | undefined; // linked list end
+    forest: ForestIF;
+    status: Status
 }
 
 // feedback from a change attempt
-export interface TreeChangeResponse<$K = unknown, $V = unknown> {
-    t: TreeName;
-    status: BranchStatus;
+export interface ChangeResponse<$K = unknown, $V = unknown> {
+    treeName: TreeName;
     change: TreeChange<$K, $V>;
+    status: Status;
 }
 
 // a connection of Trees. 
 export interface ForestIF {
     trees: Map<String, TreeIF>
-    plantTree(t: TreeName, m: Map<unknown, unknown>, upsert?: boolean): TreeIF; // creates a new tree; throws if existing unless upsert is true. 
+    treeFactory(t: TreeName, m: Map<unknown, unknown>, upsert?: boolean): TreeIF; // creates a new tree; throws if existing unless upsert is true. 
     // an existing tree ignores the second argument (map). 
-    get(t: TreeName | LeafIdentityIF, key?: unknown): LeafIF
-    set(change: TreeSet | TreeSet[]): TreeChangeResponse[];
-    delete(tree: TreeName | LeafIF, keys?: unknown | unknown[]): TreeChangeResponse[];
-    hasValue(t: TreeName, k: unknown): boolean;
-    hasOne(r: LeafReq<unknown>): boolean;
+    get(treeNameOrLeaf: TreeName | LeafIdentityIF, key?: unknown): LeafIF
+    set(treeNameOrLeaf: TreeName | LeafIF, key?: unknown, val?: unknown): ChangeResponse;
+    delete(tree: TreeName | LeafIF, keys?: unknown | unknown[]): ChangeResponse;
+    hasKey(t: TreeName, k: unknown): boolean;
+    has(r: LeafReq<unknown>): boolean;
     hasAll(r: LeafReq<unknown>[]): boolean;
     hasTree(t: TreeName): boolean;
     tree(t: TreeName): TreeIF | undefined;
+}
+
+export type LeafParams = {
+    treeName: TreeName,
+    key: unknown,
+    val: unknown,
+    forest?: ForestIF
 }

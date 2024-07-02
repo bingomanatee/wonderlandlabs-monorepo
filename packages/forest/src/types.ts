@@ -80,7 +80,7 @@ export interface ChangeResponse<$K = unknown, $V = unknown> {
 // a connection of Trees. 
 export interface ForestIF {
     trees: Map<String, TreeIF>
-    treeFactory(t: TreeName, m: Map<unknown, unknown>, upsert?: boolean): TreeIF; // creates a new tree; throws if existing unless upsert is true. 
+    addTree(params: TreeFactoryParams): TreeIF; // creates a new tree; throws if existing unless upsert is true. 
     // an existing tree ignores the second argument (map). 
     get(treeNameOrLeaf: TreeName | LeafIdentityIF, key?: unknown): LeafIF
     set(treeNameOrLeaf: TreeName | LeafIF, key?: unknown, val?: unknown): ChangeResponse;
@@ -97,4 +97,9 @@ export type LeafParams = {
     key: unknown,
     val: unknown,
     forest?: ForestIF
+}
+export type TreeFactoryParams = {
+    treeName: TreeName,
+    data?: Map<unknown, unknown>,
+    upsert?: boolean
 }

@@ -11,13 +11,26 @@ import { isTreeSet } from "./helpers/isTreeSet";
 import { isTreeDel } from "./helpers/isTreeDel";
 import { DELETED, NOT_FOUND } from "./constants";
 
+type TreeParams = {
+    treeName: TreeName,
+    forest: ForestIF,
+    data?: Map<unknown, unknown>
+}
 /**
  * Tree is a "table" of records; a key/value store. 
  */
 export class Tree implements TreeIF {
-    constructor(public forest: ForestIF, public treeName: TreeName, data?: Map<unknown, unknown>) {
+    constructor(params: TreeParams) {
+        const {
+             forest,  treeName, data
+        } = params;
+        this.forest = forest;
+        this.treeName = treeName;
         if (data) this.root = new Branch(this, { data, cause: BranchActionEnum.init });
     }
+
+    public forest: ForestIF;
+    treeName: TreeName;
     root: BranchIF | undefined;
     get top() {
         if (!this.root) return undefined;

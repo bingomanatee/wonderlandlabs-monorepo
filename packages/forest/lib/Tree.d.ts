@@ -1,11 +1,16 @@
 import type { LeafIF, TreeIF, ForestIF, TreeName, ChangeBase, BranchIF, ChangeResponse } from "./types";
+type TreeParams = {
+    treeName: TreeName;
+    forest: ForestIF;
+    data?: Map<unknown, unknown>;
+};
 /**
  * Tree is a "table" of records; a key/value store.
  */
 export declare class Tree implements TreeIF {
+    constructor(params: TreeParams);
     forest: ForestIF;
     treeName: TreeName;
-    constructor(forest: ForestIF, treeName: TreeName, data?: Map<unknown, unknown>);
     root: BranchIF | undefined;
     get top(): BranchIF<unknown, unknown> | undefined;
     get(key: unknown): LeafIF;
@@ -17,3 +22,4 @@ export declare class Tree implements TreeIF {
     async: boolean;
     change(c: ChangeBase): ChangeResponse;
 }
+export {};

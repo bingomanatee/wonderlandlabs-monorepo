@@ -2,7 +2,8 @@
 import type {
     ForestIF, LeafIF, LeafReq, TreeIF,
     TreeName, TreeChange, ChangeBase, ChangeSet, LeafIdentityIF,
-    ChangeResponse
+    ChangeResponse,
+    TreeFactoryParams
 } from "./types"
 import { isString } from "./helpers/isString";
 import { isChangeIF } from './helpers/isChangeIF';
@@ -11,6 +12,7 @@ import { Tree } from "./Tree";
 import { isLeafIF } from "./helpers/isLeafIF";
 import { DELETED } from "./constants";
 import { ChangeTypeEnum } from "./enums";
+
 
 export class Forest implements ForestIF {
     delete(treeName: TreeName | LeafIF, key?: unknown): ChangeResponse {
@@ -29,15 +31,22 @@ export class Forest implements ForestIF {
     }
     trees: Map<String, TreeIF> = new Map();
 
-    treeFactory(t: TreeName, m: Map<unknown, unknown>, upsert?: boolean | undefined): TreeIF {
-        if (this.hasTree(t)) {
+    addTree(params: TreeFactoryParams): TreeIF {
+
+        const { treeName, data, upsert } = params;
+
+        if (this.hasTree(treeName)) {
             if (!upsert) {
-                throw new Error('cannot plant existing treer ' + t);
+                throw new Error('cannot redefine existing treer ' + treeName);
             }
         } else {
-            this.trees.set(t, new Tree(this, t, m));
+            this.trees.set(treeName, new Tree({
+                forest: this,
+                treeName,
+                data
+            }));
         }
-        return this.tree(t)!;
+        return this.tree(treeName)!;
     }
     get(treeNameOrLeaf: TreeName | LeafIdentityIF, key?: unknown): LeafIF {
         if (!isLeafIdentityIF(treeNameOrLeaf)) {
@@ -67,17 +76,19 @@ export class Forest implements ForestIF {
         return this.set(treeNameOrLeaf.treeName, treeNameOrLeaf.key, treeNameOrLeaf.val);
     }
 
-    private change(c: TreeChange[], t?: TreeName) {
+    private change(c: TreeChange[], treeName?: TreeName) {
         const responess = [];
 
         for (const change of c) {
-            const treeName = change.treeName || t;
+            if (!change.treeName || treeName) throw new Error('change: requires treeName');
+            //@ts-ignore
+            const name: TreeName = change.treeName || treeName;
 
-            if (!isString(treeName) || !this.hasTree(treeName)) {
+            if (!isString(name) || !this.hasTree(name)) {
                 throw new Error('change missing tree name');
             }
 
-            const tree = this.tree(treeName)!;
+            const tree = this.tree(name)!;
             responess.push(
                 tree.change(change)
             );
@@ -87,8 +98,8 @@ export class Forest implements ForestIF {
     }
 
 
-    hasKey(t: TreeName, k: unknown): boolean {
-        return this.has({ treeName: t, key: k });
+    hasKey(treeName: TreeName, k: unknown): boolean {
+        return this.has({ treeName: treeName, key: k });
     }
     has(r: LeafReq<unknown>): boolean {
         if (!this.hasTree(r.treeName)) return false;
@@ -98,11 +109,11 @@ export class Forest implements ForestIF {
     hasAll(r: LeafReq<unknown>[]): boolean {
         return r.every((req: LeafReq<unknown>) => { this.has(req) });
     }
-    hasTree(t: TreeName): boolean {
-        return this.trees.has(t);
+    hasTree(treeName: TreeName): boolean {
+        return this.trees.has(treeName);
     }
-    tree(t: TreeName): TreeIF | undefined {
-        return this.trees.get(t);
+    tree(treeName: TreeName): TreeIF | undefined {
+        return this.trees.get(treeName);
     }
 
 

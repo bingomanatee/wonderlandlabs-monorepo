@@ -64,7 +64,7 @@ export interface ChangeResponse<$K = unknown, $V = unknown> {
 }
 export interface ForestIF {
     trees: Map<String, TreeIF>;
-    treeFactory(t: TreeName, m: Map<unknown, unknown>, upsert?: boolean): TreeIF;
+    addTree(params: TreeFactoryParams): TreeIF;
     get(treeNameOrLeaf: TreeName | LeafIdentityIF, key?: unknown): LeafIF;
     set(treeNameOrLeaf: TreeName | LeafIF, key?: unknown, val?: unknown): ChangeResponse;
     delete(tree: TreeName | LeafIF, keys?: unknown | unknown[]): ChangeResponse;
@@ -79,4 +79,9 @@ export type LeafParams = {
     key: unknown;
     val: unknown;
     forest?: ForestIF;
+};
+export type TreeFactoryParams = {
+    treeName: TreeName;
+    data?: Map<unknown, unknown>;
+    upsert?: boolean;
 };

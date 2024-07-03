@@ -1,12 +1,11 @@
 
 import type {
-    ForestIF, LeafIF, LeafReq, TreeIF,
-    TreeName, TreeChange, ChangeBase, ChangeSet, LeafIdentityIF,
-    ChangeResponse,
-    TreeFactoryParams
+    ForestIF, LeafIF, LeafIdentityIF, TreeIF,
+    TreeName, TreeChange,
+    ChangeResponse
 } from "./types"
+import type { TreeFactoryParams } from "./helpers/paramTypes";
 import { isString } from "./helpers/isString";
-import { isChangeIF } from './helpers/isChangeIF';
 import { isLeafIdentityIF } from "./helpers/isLeafIdentityIF";
 import { Tree } from "./Tree";
 import { isLeafIF } from "./helpers/isLeafIF";
@@ -56,9 +55,9 @@ export class Forest implements ForestIF {
         if (!this.hasTree(treeNameOrLeaf.treeName)) {
             throw new Error('forest:get -- cannot find tree ' + treeNameOrLeaf.treeName);
         }
-        const table = this.tree(treeNameOrLeaf.treeName)!;
+        const tree = this.tree(treeNameOrLeaf.treeName)!;
 
-        return table.get(treeNameOrLeaf.key);
+        return tree.leaf(treeNameOrLeaf.key);
     }
     set(treeNameOrLeaf: TreeName | LeafIF, key?: unknown, val?: unknown): ChangeResponse {
         if (!isLeafIF(treeNameOrLeaf)) {
@@ -68,6 +67,7 @@ export class Forest implements ForestIF {
             return {
                 treeName: treeNameOrLeaf,
                 change: {
+                    treeName: treeNameOrLeaf,
                     key, val, type: ChangeTypeEnum.set
                 },
                 status: tree.status
@@ -101,13 +101,13 @@ export class Forest implements ForestIF {
     hasKey(treeName: TreeName, k: unknown): boolean {
         return this.has({ treeName: treeName, key: k });
     }
-    has(r: LeafReq<unknown>): boolean {
+    has(r: LeafIdentityIF<unknown>): boolean {
         if (!this.hasTree(r.treeName)) return false;
 
         return this.tree(r.treeName)!.has(r.key);
     }
-    hasAll(r: LeafReq<unknown>[]): boolean {
-        return r.every((req: LeafReq<unknown>) => { this.has(req) });
+    hasAll(r: LeafIdentityIF<unknown>[]): boolean {
+        return r.every((req: LeafIdentityIF<unknown>) => { this.has(req) });
     }
     hasTree(treeName: TreeName): boolean {
         return this.trees.has(treeName);

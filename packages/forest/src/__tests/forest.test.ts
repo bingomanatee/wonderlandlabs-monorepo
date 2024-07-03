@@ -2,6 +2,17 @@ import { ForestIF, LeafIF } from '../types';
 //@ts-ignore
 import { Forest } from '../Forest';
 
+
+type UserType = { name: string, age: number };
+function bobAndSue() {
+    return (
+        new Map([
+            [100, { name: 'Bob', age: 20 }],
+            [200, { name: 'Sue', age: 30 }]
+        ])
+    )
+}
+
 describe('Forest', () => {
 
     // tests the existential ability for tree() to retrieve
@@ -47,7 +58,19 @@ describe('Forest', () => {
 
     describe('addTree', () => {
 
-        it('should add a ree with no map', () => {
+        it('should throw if it is asked to duplicate an existing tree', () => {
+
+            const f = new Forest();
+
+            f.addTree({ name: 'alpha', data: bobAndSue() });
+
+            expect((() => { f.addTree({ name: 'alpha' }) })).toThrow();
+
+            const firstTree = f.addTree({ name: 'alpha', upsert: true });
+            expect((firstTree.get(100) as UserType).name).toBe('Bob'); // the first tree with bob and sue is returned
+        })
+
+        it('should add a tree with no map', () => {
 
             const f = new Forest();
             f.addTree({ name: 'alpha' });
@@ -55,16 +78,12 @@ describe('Forest', () => {
             expect(f.get({ treeName: 'alpha', key: 100 }).hasValue).toBe(false);
 
         })
-        it('should add a ree with a map', () => {
+        it('should add a tree with a map', () => {
 
-            type UserType = { name: string, age: number };
 
             const f = new Forest();
             f.addTree({
-                name: 'alpha', data: new Map([
-                    [100, { name: 'Bob', age: 20 }],
-                    [200, { name: 'Sue', age: 30 }]
-                ])
+                name: 'alpha', data: bobAndSue()
             });
             expect(f.hasTree('alpha')).toBe(true);
 

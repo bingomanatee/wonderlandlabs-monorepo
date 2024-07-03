@@ -9,12 +9,13 @@ export declare class Branch implements BranchIF {
     status: Status;
     next?: BranchIF | undefined;
     prev?: BranchIF | undefined;
-    get(key: unknown): LeafIF;
+    leaf(key: unknown): LeafIF;
+    get(key: unknown): unknown;
     private leafFactory;
-    private push;
+    private addBranch;
     has(key: unknown): boolean;
-    set(key: unknown, val: unknown): LeafIF;
-    del(key: unknown): LeafIF<unknown, unknown>;
+    set(key: unknown, val: unknown): unknown;
+    del(key: unknown): void;
     async: boolean;
     change(c: ChangeBase<unknown, unknown>): ChangeResponse<unknown, unknown>;
 }

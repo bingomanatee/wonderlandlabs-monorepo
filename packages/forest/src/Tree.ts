@@ -1,6 +1,6 @@
 import type {
     LeafIF, TreeIF, ForestIF,
-    TreeName, ChangeBase, Base, BranchIF,
+    TreeName, ChangeBase, Data, BranchIF,
     ChangeResponse
 } from "./types";
 import { BranchAction, BranchActionEnum, StatusEnum } from "./enums";
@@ -22,15 +22,24 @@ type TreeParams = {
 export class Tree implements TreeIF {
     constructor(params: TreeParams) {
         const {
-             forest,  treeName, data
+            forest, treeName, data
         } = params;
         this.forest = forest;
-        this.treeName = treeName;
+        this.name = treeName;
         if (data) this.root = new Branch(this, { data, cause: BranchActionEnum.init });
     }
+    get branches() {
+        const out = [];
+        let current = this.root;
+        while (current) {
+            out.push(current);
+            current = current.next;
+        }
+        return out;
+    };
 
     public forest: ForestIF;
-    treeName: TreeName;
+    name: TreeName;
     root: BranchIF | undefined;
     get top() {
         if (!this.root) return undefined;
@@ -41,30 +50,44 @@ export class Tree implements TreeIF {
         }
         return b;
     }
-    get(key: unknown): LeafIF {
+
+    leaf(key: unknown): LeafIF {
         if (!this.root) {
-            return new Leaf({ treeName: this.treeName, key, val: NOT_FOUND });
+            return new Leaf({ treeName: this.name, key, val: NOT_FOUND });
         }
-        return this.root.get(key);
+        return this.root.leaf(key);
     }
+
+    get(key: unknown): unknown {
+        if (!this.root) {
+            return undefined;
+        }
+        return this.top?.get(key);
+    }
+
     has(key: unknown): boolean {
         if (!this.root) return false;
         return !!this.top?.has(key);
     }
 
-    private push(key: unknown, val: unknown, cause: BranchAction) {
-        if (this.root) {
-            return this.root.set(key, val)
+    private addBranch(key: unknown, val: unknown, cause: BranchAction) {
+        const next = new Branch(this, { data: mp(key, val), cause: BranchActionEnum.set });
+        if (this.top) {
+            next.prev = this.top;
+            return this.top.next = next;
+        } else {
+            this.root = new Branch(this, { data: mp(key, val), cause: BranchActionEnum.set });
         }
-        this.root = new Branch(this, { data: mp(key, val), cause: BranchActionEnum.set });
+        return next;
     }
-    set(key: unknown, val: unknown): LeafIF {
-        this.push(key, val, BranchActionEnum.set)
+
+    set(key: unknown, val: unknown): unknown {
+        this.addBranch(key, val, BranchActionEnum.set)
         return this.top!.get(key);
     }
 
     del(key: unknown) {
-        this.push(key, DELETED, BranchActionEnum.del);
+        this.addBranch(key, DELETED, BranchActionEnum.del);
         return this.top!.get(key);
     }
 
@@ -72,19 +95,18 @@ export class Tree implements TreeIF {
         return StatusEnum.good;
     }
 
-    async: boolean = false;
     change(c: ChangeBase): ChangeResponse {
         if (isTreeSet(c)) {
             this.set(c.key, c.val);
-            return { treeName: this.treeName, change: c, status: this.status };
-        }
-        if (isTreeDel(c)) {
+            return { treeName: this.name, change: c, status: this.status };
+        } else if (isTreeDel(c)) {
             //@ts-ignore
             this.del(c.key);
-            return { treeName: this.treeName, change: c, status: this.status };
+        } else {
+            //@TODO: more change types
+            throw new Error('not implemented')
         }
-        //@TODO: more change types
-        throw new Error('not implemented')
+        return { treeName: this.name, change: c, status: this.status };
     }
 
 }

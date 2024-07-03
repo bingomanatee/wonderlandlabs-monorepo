@@ -1,6 +1,7 @@
 import { NOT_FOUND } from "./constants";
 import { nf } from "./helpers";
-import { LeafIF, LeafParams } from "./types";
+import { LeafIF } from "./types";
+import { LeafParams } from "./helpers/paramTypes";
 
 export class Leaf implements LeafIF {
     constructor(params: LeafParams) {

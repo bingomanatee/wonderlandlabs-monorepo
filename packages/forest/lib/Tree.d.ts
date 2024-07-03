@@ -9,17 +9,18 @@ type TreeParams = {
  */
 export declare class Tree implements TreeIF {
     constructor(params: TreeParams);
+    get branches(): BranchIF<unknown, unknown>[];
     forest: ForestIF;
-    treeName: TreeName;
+    name: TreeName;
     root: BranchIF | undefined;
     get top(): BranchIF<unknown, unknown> | undefined;
-    get(key: unknown): LeafIF;
+    leaf(key: unknown): LeafIF;
+    get(key: unknown): unknown;
     has(key: unknown): boolean;
-    private push;
-    set(key: unknown, val: unknown): LeafIF;
-    del(key: unknown): LeafIF<unknown, unknown>;
+    private addBranch;
+    set(key: unknown, val: unknown): unknown;
+    del(key: unknown): unknown;
     get status(): symbol;
-    async: boolean;
     change(c: ChangeBase): ChangeResponse;
 }
 export {};

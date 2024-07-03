@@ -1,13 +1,9 @@
 import { LeafValue, ChangeType, BranchAction, Status } from "./enums";
+import { TreeFactoryParams } from "./helpers/paramTypes";
 
 export type TreeName = string;
 
-export type LeafReq<$K> = {
-    key: $K | $K[];
-    treeName: TreeName; // the name of the Tree the leaf is from
-}
-
-// an identified element from a Tree. 
+// a "decorated" value from a tree
 export type LeafIF<$K = unknown, $V = unknown> = {
     val: LeafValue<$V>;
     key: $K;
@@ -20,40 +16,44 @@ export type LeafIdentityIF<$K = unknown> = {
     treeName: TreeName; // the name of the Tree the leaf is from
 }
 
-// a Base is an item that can get or set values. it is a "map on steroids"
-export interface Base<$K = unknown, $V = unknown> {
-    get(key: $K): LeafIF<$K, $V>;
+// a Data is an item that can get or set values. it is a "map on steroids"'
+// currently the base for Branch and Tree
+
+export interface Data<$K = unknown, $V = unknown> {
+    // get and setLeaf are the same functionality as get and set,
+    // but they return leaves instead of the raw value. 
+    leaf(key: $K): LeafIF<$K, $V>;
+    get(key: $K): LeafValue<$V>;
     has(key: $K): boolean;
-    set(key: $K, val: $V): LeafIF<$K, $V>;
-    del(key: $K): LeafIF<$K, $V>;
-    async: boolean;
-    change(c: ChangeBase): ChangeResponse;
+    set(key: $K, val: $V): LeafValue<$V>;
+    del(key: $K): void;
+    change(change: TreeChange): ChangeResponse;
 }
 
-// one or more alterations to a sigle tree.
-//  Sometimes the tree name is stored at a higher context. other times its defined in the change. 
+// a wrapper for any possible action to a tree. 
 export interface ChangeBase<$K = unknown, $V = unknown> {
     type: ChangeType;
     key?: $K | $K[];
     val?: $V;
     data?: Map<$K, $V>;
-    treeName?: TreeName;
+    treeName: TreeName;
 }
 
-export interface ChangeSet<$K = unknown, $V = unknown> extends ChangeBase<$K, $V> { };
-export interface ChangeDel<$K = unknown, $V = unknown> extends ChangeBase<$K, $V> { }
-export interface ChangeSets<$K = unknown, $V = unknown> extends ChangeBase<$K, $V> { }
-export interface ChangeDels<$K = unknown, $V = unknown> extends ChangeBase<$K, $V> { }
-
+export interface ChangeSet<$K = unknown, $V = unknown> extends ChangeBase<$K, $V> { key: $K, val: $V };
+export interface ChangeDel<$K = unknown, $V = unknown> extends ChangeBase<$K, $V> {key: $K }
+export interface ChangeSets<$K = unknown, $V = unknown> extends ChangeBase<$K, $V> { }// @TODO
+export interface ChangeDels<$K = unknown, $V = unknown> extends ChangeBase<$K, $V> { }// @TODO
+//@TODO -- replace
 export type TreeChange<$K = unknown, $V = unknown> = ChangeSet<$K, $V> | ChangeDel<$K, $V> | ChangeSets<$K, $V> | ChangeDels<$K, $V>
 
 // a node on of a linked list that represents a change
-export interface BranchIF<$K = unknown, $V = unknown> extends Base<$K, $V> {
+export interface BranchIF<$K = unknown, $V = unknown> extends Data<$K, $V> {
     tree: TreeIF<$K, $V>;
     cause: BranchAction;
     status: Status;
     next?: BranchIF<$K, $V>;
     prev?: BranchIF<$K, $V>;
+    data: Map<$K, $V>;
 }
 
 export type BranchConfig = {
@@ -62,12 +62,13 @@ export type BranchConfig = {
     cause: BranchAction
 }
 // a key/value collection
-export interface TreeIF<$K = unknown, $V = unknown> extends Base<$K, $V> {
-    treeName: TreeName,
+export interface TreeIF<$K = unknown, $V = unknown> extends Data<$K, $V> {
+    name: TreeName,
     root: BranchIF<$K, $V> | undefined; // linked list start
-    top: Base<$K, $V> | undefined; // linked list end
+    top: Data<$K, $V> | undefined; // linked list end
     forest: ForestIF;
-    status: Status
+    status: Status;
+    readonly branches: BranchIF<$K, $V>[];
 }
 
 // feedback from a change attempt
@@ -86,20 +87,9 @@ export interface ForestIF {
     set(treeNameOrLeaf: TreeName | LeafIF, key?: unknown, val?: unknown): ChangeResponse;
     delete(tree: TreeName | LeafIF, keys?: unknown | unknown[]): ChangeResponse;
     hasKey(t: TreeName, k: unknown): boolean;
-    has(r: LeafReq<unknown>): boolean;
-    hasAll(r: LeafReq<unknown>[]): boolean;
+    has(r: LeafIdentityIF<unknown>): boolean;
+    hasAll(r: LeafIdentityIF<unknown>[]): boolean;
     hasTree(t: TreeName): boolean;
     tree(t: TreeName): TreeIF | undefined;
 }
 
-export type LeafParams = {
-    treeName: TreeName,
-    key: unknown,
-    val: unknown,
-    forest?: ForestIF
-}
-export type TreeFactoryParams = {
-    name: TreeName,
-    data?: Map<unknown, unknown>,
-    upsert?: boolean
-}

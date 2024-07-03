@@ -81,7 +81,7 @@ export type LeafParams = {
     forest?: ForestIF;
 };
 export type TreeFactoryParams = {
-    treeName: TreeName;
+    name: TreeName;
     data?: Map<unknown, unknown>;
     upsert?: boolean;
 };

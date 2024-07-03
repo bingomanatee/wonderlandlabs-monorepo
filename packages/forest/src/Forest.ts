@@ -33,7 +33,7 @@ export class Forest implements ForestIF {
 
     addTree(params: TreeFactoryParams): TreeIF {
 
-        const { treeName, data, upsert } = params;
+        const { name: treeName, data, upsert } = params;
 
         if (this.hasTree(treeName)) {
             if (!upsert) {

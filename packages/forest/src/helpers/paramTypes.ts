@@ -13,10 +13,14 @@ export type TreeFactoryParams = {
     name: TreeName;
     data?: Map<unknown, unknown>;
     upsert?: boolean;
-}; export type BranchConfig = {
+};
+
+
+export type BranchParams = {
     data?: Map<unknown, unknown>;
     prev?: BranchIF;
     cause: BranchAction;
+    causeID?: string;
 };
 
 

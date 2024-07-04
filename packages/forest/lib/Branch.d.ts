@@ -1,10 +1,11 @@
 import type { LeafIF, TreeIF, ChangeBase, BranchIF, ChangeResponse } from "./types";
-import type { BranchConfig } from "./helpers/paramTypes";
+import type { BranchParams } from "./helpers/paramTypes";
 import type { Status, BranchAction } from "./enums";
 export declare class Branch implements BranchIF {
     tree: TreeIF;
-    constructor(tree: TreeIF, config: BranchConfig);
+    constructor(tree: TreeIF, params: BranchParams);
     cache?: Map<unknown, unknown> | undefined;
+    readonly causeID?: string;
     /**
      * combine all active values from this branch downwards.
      * is intended to be called from a top branch.
@@ -13,9 +14,9 @@ export declare class Branch implements BranchIF {
     readonly id: number;
     values(list?: Map<unknown, unknown> | undefined): Map<unknown, unknown>;
     private _initData;
-    data: Map<unknown, unknown>;
-    cause: BranchAction;
-    status: Status;
+    readonly data: Map<unknown, unknown>;
+    readonly cause: BranchAction;
+    readonly status: Status;
     next?: BranchIF | undefined;
     prev?: BranchIF | undefined;
     leaf(key: unknown): LeafIF;

@@ -46,9 +46,10 @@ export interface ChangeResponse<$K = unknown, $V = unknown> {
 export interface BranchIF<$K = unknown, $V = unknown> extends Data<$K, $V> {
     readonly id: number;
     tree: TreeIF<$K, $V>;
-    cause: BranchAction;
+    readonly cause: BranchAction;
+    readonly causeId?: string;
     status: Status;
-    data: Map<$K, $V>;
+    readonly data: Map<$K, $V>;
     values(list?: Map<$K, $V>): Map<$K, $V>;
     next?: BranchIF<$K, $V>;
     prev?: BranchIF<$K, $V>;

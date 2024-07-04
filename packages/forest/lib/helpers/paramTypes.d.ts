@@ -12,10 +12,11 @@ export type TreeFactoryParams = {
     data?: Map<unknown, unknown>;
     upsert?: boolean;
 };
-export type BranchConfig = {
+export type BranchParams = {
     data?: Map<unknown, unknown>;
     prev?: BranchIF;
     cause: BranchAction;
+    causeID?: string;
 };
 export type ForestParams = {
     cacheInterval?: number;

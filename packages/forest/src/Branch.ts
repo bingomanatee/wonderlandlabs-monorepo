@@ -2,7 +2,7 @@ import type {
     LeafIF, TreeIF, ChangeBase, BranchIF,
     ChangeResponse
 } from "./types";
-import type { BranchConfig } from "./helpers/paramTypes";
+import type { BranchParams } from "./helpers/paramTypes";
 
 import type { Status, BranchAction } from "./enums";
 import { StatusEnum, BranchActionEnum, ChangeTypeEnum } from "./enums";
@@ -13,15 +13,17 @@ import { isTreeSet } from "./helpers/isTreeSet";
 import { isTreeDel } from "./helpers/isTreeDel";
 
 export class Branch implements BranchIF {
-    constructor(public tree: TreeIF, config: BranchConfig) {
-        this.cause = config.cause;
+    constructor(public tree: TreeIF, params: BranchParams) {
+        this.cause = params.cause;
+        if (params.causeID) this.causeID = params.causeID;
         this.status = StatusEnum.good;
-        this.data = this._initData(config);
-        if (config.prev) this.prev = config.prev;
+        this.data = this._initData(params);
+        if (params.prev) this.prev = params.prev;
         this.id = tree.forest.nextBranchId();
         //@TODO: validate.
     }
     cache?: Map<unknown, unknown> | undefined;
+    public readonly causeID?: string;
     /**
      * combine all active values from this branch downwards. 
      * is intended to be called from a top branch. 
@@ -77,17 +79,17 @@ export class Branch implements BranchIF {
     }
 
 
-    private _initData(config: BranchConfig) {
+    private _initData(config: BranchParams) {
         if (config.data) {
             return config.data;
         }
         return new Map();
     }
 
-    public data: Map<unknown, unknown>;
+    public readonly data: Map<unknown, unknown>;
 
-    cause: BranchAction;
-    status: Status;
+    public readonly cause: BranchAction;
+    public readonly status: Status;
     next?: BranchIF | undefined;
     prev?: BranchIF | undefined;
     leaf(key: unknown): LeafIF {

@@ -7,7 +7,7 @@ import type { BranchConfig } from "./helpers/paramTypes";
 import type { Status, BranchAction } from "./enums";
 import { StatusEnum, BranchActionEnum, ChangeTypeEnum } from "./enums";
 import { Leaf } from './Leaf';
-import { mp } from "./helpers";
+import { delToUndef, mp } from "./helpers";
 import { DELETED, NOT_FOUND } from "./constants";
 import { isTreeSet } from "./helpers/isTreeSet";
 import { isTreeDel } from "./helpers/isTreeDel";
@@ -20,6 +20,43 @@ export class Branch implements BranchIF {
         if (config.prev) this.prev = config.prev;
         this.id = tree.forest.nextBranchId();
         //@TODO: validate.
+    }
+    cache?: Map<unknown, unknown> | undefined;
+    /**
+     * combine all active values from this branch downwards. 
+     * is intended to be called from a top branch. 
+     */
+    mergedData(): Map<unknown, unknown> {
+        if (this.cache) {
+            return this.cache;
+        }
+        let start: BranchIF = this;
+
+        while (start) {
+            if (!start.prev) break;
+            if (start.cache) break;
+            start = start.prev;
+        }
+        if (!start) return new Map();
+
+        let merged = new Map(start.cache || start.data);
+
+        let next = start.next;
+
+        while (next) {
+            if (next.cache) {
+                merged = new Map(next.cache);
+            } else {
+                next.data.forEach((value, key) => {
+                    merged.set(key, value);
+                })
+            }
+
+            if (next === this) break;
+            next = next.next;
+        }
+
+        return merged;
     }
 
     readonly id: number;
@@ -62,12 +99,24 @@ export class Branch implements BranchIF {
         }
         return this.leafFactory(key, NOT_FOUND);
     }
+
+    /**
+     * 
+     * @param key {unknown}
+     * @returns unknown
+     */
     get(key: unknown): unknown {
         if (this.data.has(key)) {
-            return this.data.get(key);
+            return delToUndef(this.data.get(key));
+        }
+        if (this.cache) {
+            if (this.cache.has(key)) {
+                return delToUndef(this.cache.get(key));
+            }
+            return undefined;
         }
         if (this.prev) {
-            return this.prev.get(key);
+            return delToUndef(this.prev.get(key));
         }
         return undefined;
     }

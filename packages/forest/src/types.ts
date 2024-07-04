@@ -65,6 +65,8 @@ export interface BranchIF<$K = unknown, $V = unknown> extends Data<$K, $V> {
     values(list?: Map<$K, $V>): Map<$K, $V>
     next?: BranchIF<$K, $V>;
     prev?: BranchIF<$K, $V>;
+    cache?: Map<$K, $V>;
+    mergedData(): Map<$K, $V>;
 }
 
 // a key/value collection
@@ -76,7 +78,7 @@ export interface TreeIF<$K = unknown, $V = unknown> extends Data<$K, $V> {
     status: Status;
     readonly branches: BranchIF<$K, $V>[];
     values(): Map<$K, $V>;
-    
+
     clearValues(): BranchIF<$K, $V>[];
     readonly size: number;
 }
@@ -95,5 +97,6 @@ export interface ForestIF {
     hasTree(t: TreeName): boolean;
     tree(t: TreeName): TreeIF | undefined;
     nextBranchId(): number;
+    readonly cacheInterval: number;
 }
 

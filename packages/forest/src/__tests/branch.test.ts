@@ -20,22 +20,13 @@ describe('branches', () => {
             beta.set(4, 'four');
             beta.set(5, '5');
 
-            const alphaIDs = [4, 5];
-            let alphaBranch: BranchIF | undefined = alpha.root!;
+            const alphaIDs = [2, 3];
+            const alphaBranchIDs: number[] = alpha.branches.map((b: BranchIF) => b.id);
+            expect(alphaBranchIDs).toEqual(alphaIDs);
 
-            while (alphaBranch) {
-                expect(alphaBranch.id).toEqual(alphaIDs.shift());
-                alphaBranch = alphaBranch.next;
-            }
-
-            let betaIds = [2, 6, 7]
-            let betaBranch: BranchIF | undefined = beta.root;
-
-            while (betaBranch) {
-                expect(betaBranch.id).toEqual(betaIds.shift());
-                betaBranch = betaBranch.next;
-            }
-
+            let betaIDs = [1, 4, 5]
+            const betaBranchIDs = beta.branches.map((b: BranchIF) => b.id);
+            expect(betaBranchIDs).toEqual(betaIDs);
         });
 
         it('increments even if the branches are removed', () => {
@@ -55,7 +46,7 @@ describe('branches', () => {
             alpha.set(10, null);
 
             const ids = alpha.branches.map(b => b.id);
-            expect(ids).toEqual([7, 8, 9])
+            expect(ids).toEqual([5, 6, 7])
         })
     });
 });

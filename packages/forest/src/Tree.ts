@@ -32,13 +32,13 @@ export class Tree implements TreeIF {
         let keys = new Set();
         let branch = this.root;
 
-        while(branch) {
+        while (branch) {
             branch.data.forEach((_, k) => keys.add(k));
             branch = branch.next;
         }
         return keys.size;
     }
-    
+
     values(): Map<unknown, unknown> {
         if (!this.root) return new Map();
         return this.root.values();
@@ -50,7 +50,7 @@ export class Tree implements TreeIF {
         return removed;
     }
 
-    
+
     get branches() {
         const out = [];
         let current = this.root;
@@ -93,14 +93,40 @@ export class Tree implements TreeIF {
         return !!this.top?.has(key);
     }
 
+    /**
+     * If fhere is not a cache (summary) of data within (this.forest.cacheInterval) branches,
+     * append a summary of the data into next's cache. 
+     * 
+     * @param next {BranchIF}
+     */
+    private maybeCache(next: BranchIF) {
+        return;
+        let cacheDepth = 1;
+        let cacheNext: BranchIF = next;
+        while (cacheNext && cacheDepth < this.forest.cacheInterval) {
+            if (!cacheNext.prev) break;
+            cacheNext = cacheNext.prev!;
+            cacheDepth += 1;
+            if (cacheNext.cache) break;
+        }
+
+        if (cacheDepth >= this.forest.cacheInterval) {
+            // next.cache = next.mergedData();
+        }
+
+    }
+
     private addBranch(key: unknown, val: unknown, cause: BranchAction) {
         const next = new Branch(this, { data: mp(key, val), cause: BranchActionEnum.set });
         if (this.top) {
             next.prev = this.top;
-            return this.top.next = next;
+             this.top.next = next;
+           // this.maybeCache(next);
+            return next;
         } else {
-            this.root = new Branch(this, { data: mp(key, val), cause: BranchActionEnum.set });
+            this.root = next;
         }
+
         return next;
     }
 

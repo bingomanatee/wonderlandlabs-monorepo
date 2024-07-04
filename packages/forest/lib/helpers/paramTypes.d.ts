@@ -17,3 +17,6 @@ export type BranchConfig = {
     prev?: BranchIF;
     cause: BranchAction;
 };
+export type ForestParams = {
+    cacheInterval?: number;
+};

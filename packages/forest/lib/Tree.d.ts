@@ -20,6 +20,13 @@ export declare class Tree implements TreeIF {
     leaf(key: unknown): LeafIF;
     get(key: unknown): unknown;
     has(key: unknown): boolean;
+    /**
+     * If fhere is not a cache (summary) of data within (this.forest.cacheInterval) branches,
+     * append a summary of the data into next's cache.
+     *
+     * @param next {BranchIF}
+     */
+    private maybeCache;
     private addBranch;
     set(key: unknown, val: unknown): unknown;
     del(key: unknown): unknown;

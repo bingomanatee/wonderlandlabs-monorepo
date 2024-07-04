@@ -19,3 +19,7 @@ export type TreeFactoryParams = {
     cause: BranchAction;
 };
 
+
+export type ForestParams = {
+    cacheInterval?: number;
+}

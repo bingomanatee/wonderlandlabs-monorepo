@@ -4,7 +4,7 @@ import type {
     TreeName, TreeChange,
     ChangeResponse
 } from "./types"
-import type { TreeFactoryParams } from "./helpers/paramTypes";
+import type { ForestParams, TreeFactoryParams } from "./helpers/paramTypes";
 import { isString } from "./helpers/isString";
 import { isLeafIdentityIF } from "./helpers/isLeafIdentityIF";
 import { Tree } from "./Tree";
@@ -12,8 +12,16 @@ import { isLeafIF } from "./helpers/isLeafIF";
 import { DELETED } from "./constants";
 import { ChangeTypeEnum } from "./enums";
 
+const DEFAULT_CACHE_INTERVAL = 8;
 
 export class Forest implements ForestIF {
+
+    constructor(params?: ForestParams) {
+        this.cacheInterval = params?.cacheInterval || DEFAULT_CACHE_INTERVAL;
+    }
+
+    public  readonly cacheInterval;
+
     delete(treeName: TreeName | LeafIF, key?: unknown): ChangeResponse {
         if (isLeafIF(treeName)) {
             return this.delete(treeName.treeName, treeName.key);

@@ -15,3 +15,8 @@ export function nf(val: unknown) {
     if (val === undefined) return NOT_FOUND;
     return val;
 }
+
+export function delToUndef(val: unknown) {
+    if (val === DELETED) return undefined;
+    return val;
+}

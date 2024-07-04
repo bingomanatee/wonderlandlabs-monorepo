@@ -1,6 +1,8 @@
 import type { ForestIF, LeafIF, LeafIdentityIF, TreeIF, TreeName, ChangeResponse } from "./types";
-import type { TreeFactoryParams } from "./helpers/paramTypes";
+import type { ForestParams, TreeFactoryParams } from "./helpers/paramTypes";
 export declare class Forest implements ForestIF {
+    constructor(params?: ForestParams);
+    readonly cacheInterval: number;
     delete(treeName: TreeName | LeafIF, key?: unknown): ChangeResponse;
     trees: Map<String, TreeIF>;
     private _nextBranchId;

@@ -38,19 +38,21 @@ export interface ChangeSets<$K = unknown, $V = unknown> extends ChangeBase<$K, $
 export interface ChangeDels<$K = unknown, $V = unknown> extends ChangeBase<$K, $V> {
 }
 export type TreeChange<$K = unknown, $V = unknown> = ChangeSet<$K, $V> | ChangeDel<$K, $V> | ChangeSets<$K, $V> | ChangeDels<$K, $V>;
+export interface ChangeResponse<$K = unknown, $V = unknown> {
+    treeName: TreeName;
+    change: TreeChange<$K, $V>;
+    status: Status;
+}
 export interface BranchIF<$K = unknown, $V = unknown> extends Data<$K, $V> {
+    readonly id: number;
     tree: TreeIF<$K, $V>;
     cause: BranchAction;
     status: Status;
+    data: Map<$K, $V>;
+    values(list?: Map<$K, $V>): Map<$K, $V>;
     next?: BranchIF<$K, $V>;
     prev?: BranchIF<$K, $V>;
-    data: Map<$K, $V>;
 }
-export type BranchConfig = {
-    data?: Map<unknown, unknown>;
-    prev?: BranchIF;
-    cause: BranchAction;
-};
 export interface TreeIF<$K = unknown, $V = unknown> extends Data<$K, $V> {
     name: TreeName;
     root: BranchIF<$K, $V> | undefined;
@@ -58,11 +60,9 @@ export interface TreeIF<$K = unknown, $V = unknown> extends Data<$K, $V> {
     forest: ForestIF;
     status: Status;
     readonly branches: BranchIF<$K, $V>[];
-}
-export interface ChangeResponse<$K = unknown, $V = unknown> {
-    treeName: TreeName;
-    change: TreeChange<$K, $V>;
-    status: Status;
+    values(): Map<$K, $V>;
+    clearValues(): BranchIF<$K, $V>[];
+    readonly size: number;
 }
 export interface ForestIF {
     trees: Map<String, TreeIF>;
@@ -75,4 +75,5 @@ export interface ForestIF {
     hasAll(r: LeafIdentityIF<unknown>[]): boolean;
     hasTree(t: TreeName): boolean;
     tree(t: TreeName): TreeIF | undefined;
+    nextBranchId(): number;
 }

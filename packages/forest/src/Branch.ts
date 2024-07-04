@@ -1,7 +1,8 @@
 import type {
-    BranchConfig, LeafIF, TreeIF, ChangeBase, BranchIF,
+    LeafIF, TreeIF, ChangeBase, BranchIF,
     ChangeResponse
 } from "./types";
+import type { BranchConfig } from "./helpers/paramTypes";
 
 import type { Status, BranchAction } from "./enums";
 import { StatusEnum, BranchActionEnum, ChangeTypeEnum } from "./enums";
@@ -17,7 +18,25 @@ export class Branch implements BranchIF {
         this.status = StatusEnum.good;
         this.data = this._initData(config);
         if (config.prev) this.prev = config.prev;
+        this.id = tree.forest.nextBranchId();
         //@TODO: validate.
+    }
+
+    readonly id: number;
+
+    values(list?: Map<unknown, unknown> | undefined): Map<unknown, unknown> {
+        if (!list) {
+            list = new Map(this.data);
+        } else {
+            this.data.forEach((value, key) => {
+                list!.set(key, value);
+            });
+        }
+        if (this.next) {
+            return this.next.values(list);
+        }
+        return list;
+
     }
 
 

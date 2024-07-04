@@ -29,6 +29,14 @@ export class Forest implements ForestIF {
         }
     }
     trees: Map<String, TreeIF> = new Map();
+    private _nextBranchId = 1; // static?
+    nextBranchId(): number {
+        const id = this._nextBranchId;
+        this._nextBranchId += 1;
+        return id;
+    }
+
+
 
     addTree(params: TreeFactoryParams): TreeIF {
 

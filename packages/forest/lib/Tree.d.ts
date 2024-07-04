@@ -9,6 +9,9 @@ type TreeParams = {
  */
 export declare class Tree implements TreeIF {
     constructor(params: TreeParams);
+    get size(): number;
+    values(): Map<unknown, unknown>;
+    clearValues(): BranchIF<unknown, unknown>[];
     get branches(): BranchIF<unknown, unknown>[];
     forest: ForestIF;
     name: TreeName;

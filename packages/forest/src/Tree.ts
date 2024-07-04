@@ -28,6 +28,29 @@ export class Tree implements TreeIF {
         this.name = treeName;
         if (data) this.root = new Branch(this, { data, cause: BranchActionEnum.init });
     }
+    get size() {
+        let keys = new Set();
+        let branch = this.root;
+
+        while(branch) {
+            branch.data.forEach((_, k) => keys.add(k));
+            branch = branch.next;
+        }
+        return keys.size;
+    }
+    
+    values(): Map<unknown, unknown> {
+        if (!this.root) return new Map();
+        return this.root.values();
+    }
+
+    clearValues() {
+        const removed = this.branches;
+        this.root = undefined;
+        return removed;
+    }
+
+    
     get branches() {
         const out = [];
         let current = this.root;

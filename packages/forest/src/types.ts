@@ -40,27 +40,33 @@ export interface ChangeBase<$K = unknown, $V = unknown> {
 }
 
 export interface ChangeSet<$K = unknown, $V = unknown> extends ChangeBase<$K, $V> { key: $K, val: $V };
-export interface ChangeDel<$K = unknown, $V = unknown> extends ChangeBase<$K, $V> {key: $K }
+export interface ChangeDel<$K = unknown, $V = unknown> extends ChangeBase<$K, $V> { key: $K }
 export interface ChangeSets<$K = unknown, $V = unknown> extends ChangeBase<$K, $V> { }// @TODO
 export interface ChangeDels<$K = unknown, $V = unknown> extends ChangeBase<$K, $V> { }// @TODO
 //@TODO -- replace
 export type TreeChange<$K = unknown, $V = unknown> = ChangeSet<$K, $V> | ChangeDel<$K, $V> | ChangeSets<$K, $V> | ChangeDels<$K, $V>
 
+// feedback from a change attempt
+export interface ChangeResponse<$K = unknown, $V = unknown> {
+    treeName: TreeName;
+    change: TreeChange<$K, $V>;
+    status: Status;
+}
+
+// ------------ TOP LEVEL INTERFACES
+
 // a node on of a linked list that represents a change
 export interface BranchIF<$K = unknown, $V = unknown> extends Data<$K, $V> {
+    readonly id: number;
     tree: TreeIF<$K, $V>;
     cause: BranchAction;
     status: Status;
+    data: Map<$K, $V>;
+    values(list?: Map<$K, $V>): Map<$K, $V>
     next?: BranchIF<$K, $V>;
     prev?: BranchIF<$K, $V>;
-    data: Map<$K, $V>;
 }
 
-export type BranchConfig = {
-    data?: Map<unknown, unknown>,
-    prev?: BranchIF,
-    cause: BranchAction
-}
 // a key/value collection
 export interface TreeIF<$K = unknown, $V = unknown> extends Data<$K, $V> {
     name: TreeName,
@@ -69,13 +75,10 @@ export interface TreeIF<$K = unknown, $V = unknown> extends Data<$K, $V> {
     forest: ForestIF;
     status: Status;
     readonly branches: BranchIF<$K, $V>[];
-}
-
-// feedback from a change attempt
-export interface ChangeResponse<$K = unknown, $V = unknown> {
-    treeName: TreeName;
-    change: TreeChange<$K, $V>;
-    status: Status;
+    values(): Map<$K, $V>;
+    
+    clearValues(): BranchIF<$K, $V>[];
+    readonly size: number;
 }
 
 // a connection of Trees. 
@@ -91,5 +94,6 @@ export interface ForestIF {
     hasAll(r: LeafIdentityIF<unknown>[]): boolean;
     hasTree(t: TreeName): boolean;
     tree(t: TreeName): TreeIF | undefined;
+    nextBranchId(): number;
 }
 

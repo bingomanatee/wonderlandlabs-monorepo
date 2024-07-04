@@ -1,8 +1,11 @@
-import type { BranchConfig, LeafIF, TreeIF, ChangeBase, BranchIF, ChangeResponse } from "./types";
+import type { LeafIF, TreeIF, ChangeBase, BranchIF, ChangeResponse } from "./types";
+import type { BranchConfig } from "./helpers/paramTypes";
 import type { Status, BranchAction } from "./enums";
 export declare class Branch implements BranchIF {
     tree: TreeIF;
     constructor(tree: TreeIF, config: BranchConfig);
+    readonly id: number;
+    values(list?: Map<unknown, unknown> | undefined): Map<unknown, unknown>;
     private _initData;
     data: Map<unknown, unknown>;
     cause: BranchAction;

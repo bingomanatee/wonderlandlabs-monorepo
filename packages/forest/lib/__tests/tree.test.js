@@ -34,4 +34,9 @@ describe('tree', () => {
             expect(tree.get(400)).toEqual(bill);
         });
     });
+    describe('.size', () => {
+        const f = new Forest_1.Forest();
+        const alpha = f.addTree({ name: 'alpha', data: new Map([[1, null], [2, null], [3, null]]) });
+        expect(alpha.size).toBe;
+    });
 });

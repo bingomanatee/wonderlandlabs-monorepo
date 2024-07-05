@@ -1,16 +1,19 @@
 import type {
-  LeafIF, TreeIF, ChangeBase, BranchIF,
-  ChangeResponse
-} from './types';
-import type { BranchParams } from './helpers/paramTypes';
+  LeafIF,
+  TreeIF,
+  ChangeBase,
+  BranchIF,
+  ChangeResponse,
+} from "./types";
+import type { BranchParams } from "./helpers/paramTypes";
 
-import type { Status, BranchAction } from './helpers/enums';
-import { StatusEnum, BranchActionEnum, ChangeTypeEnum } from './helpers/enums';
-import { Leaf } from './Leaf';
-import { delToUndef, mp } from './helpers';
-import { DELETED, NOT_FOUND } from './constants';
-import { isTreeSet } from './helpers/isTreeSet';
-import { isTreeDel } from './helpers/isTreeDel';
+import type { Status, BranchAction } from "./helpers/enums";
+import { StatusEnum, BranchActionEnum, ChangeTypeEnum } from "./helpers/enums";
+import { Leaf } from "./Leaf";
+import { delToUndef, mp } from "./helpers";
+import { DELETED, NOT_FOUND } from "./constants";
+import { isTreeSet } from "./helpers/isTreeSet";
+import { isTreeDel } from "./helpers/isTreeDel";
 
 export function linkBranches(a?: BranchIF, b?: BranchIF) {
   if (a) {
@@ -22,21 +25,28 @@ export function linkBranches(a?: BranchIF, b?: BranchIF) {
 }
 
 export class Branch implements BranchIF {
-  constructor(public tree: TreeIF, params: BranchParams) {
+  constructor(
+    public tree: TreeIF,
+    params: BranchParams,
+  ) {
     this.cause = params.cause;
-    if (params.causeID) {this.causeID = params.causeID;}
-    this.status = ('status' in params) ? params.status! : StatusEnum.good;
+    if (params.causeID) {
+      this.causeID = params.causeID;
+    }
+    this.status = "status" in params ? params.status! : StatusEnum.good;
     this.data = this._initData(params);
-    if (params.prev) {this.prev = params.prev;}
+    if (params.prev) {
+      this.prev = params.prev;
+    }
     this.id = tree.forest.nextBranchId();
     //@TODO: validate.
   }
   readonly causeID?: string;
 
   /**
-     * remove all references in this node.
-     * assumes that extrenal references TO this node are adjusted elsewhere.
-     */
+   * remove all references in this node.
+   * assumes that extrenal references TO this node are adjusted elsewhere.
+   */
   destroy(): void {
     this.next = undefined;
     this.prev = undefined;
@@ -48,8 +58,8 @@ export class Branch implements BranchIF {
   }
 
   /**
-      * remove this branch from the list chain; link the next and prev branches to each other
-      */
+   * remove this branch from the list chain; link the next and prev branches to each other
+   */
 
   pop(): void {
     if (this == this.tree.root) {
@@ -74,9 +84,9 @@ export class Branch implements BranchIF {
   cache?: Map<unknown, unknown> | undefined;
 
   /**
-     * combine all active values from this branch downwards. 
-     * is intended to be called from a top branch. 
-     */
+   * combine all active values from this branch downwards.
+   * is intended to be called from a top branch.
+   */
   mergedData(): Map<unknown, unknown> {
     if (this.cache) {
       return this.cache;
@@ -84,11 +94,17 @@ export class Branch implements BranchIF {
     let start: BranchIF = this;
 
     while (start) {
-      if (!start.prev) {break;}
-      if (start.cache) {break;}
+      if (!start.prev) {
+        break;
+      }
+      if (start.cache) {
+        break;
+      }
       start = start.prev;
     }
-    if (!start) {return new Map();}
+    if (!start) {
+      return new Map();
+    }
 
     let merged = new Map(start.cache || start.data);
 
@@ -103,7 +119,9 @@ export class Branch implements BranchIF {
         });
       }
 
-      if (next === this) {break;}
+      if (next === this) {
+        break;
+      }
       next = next.next;
     }
 
@@ -113,13 +131,13 @@ export class Branch implements BranchIF {
   readonly id: number;
 
   /**
-     * 
-     * @param list values returns all data from this brandch and onwards;
-     * its assumed that the values call has been intialized from the root onwards.
-     * Some of the values may be the DELETED symbol. 
-     * 
-     * @returns Map<key, value>
-     */
+   *
+   * @param list values returns all data from this brandch and onwards;
+   * its assumed that the values call has been intialized from the root onwards.
+   * Some of the values may be the DELETED symbol.
+   *
+   * @returns Map<key, value>
+   */
   values(list?: Map<unknown, unknown> | undefined): Map<unknown, unknown> {
     if (this.cache) {
       list = new Map(this.cache);
@@ -128,13 +146,12 @@ export class Branch implements BranchIF {
         list = new Map(this.data);
       } else {
         this.data.forEach((value, key) => {
-                    list!.set(key, value);
+          list!.set(key, value);
         });
       }
     }
     return this.next ? this.next.values(list) : list;
   }
-
 
   private _initData(config: BranchParams) {
     if (config.data) {
@@ -160,10 +177,10 @@ export class Branch implements BranchIF {
   }
 
   /**
-     * 
-     * @param key {unknown}
-     * @returns unknown
-     */
+   *
+   * @param key {unknown}
+   * @returns unknown
+   */
   get(key: unknown): unknown {
     if (this.data.has(key)) {
       return delToUndef(this.data.get(key));
@@ -181,31 +198,34 @@ export class Branch implements BranchIF {
   }
 
   private leafFactory(k: unknown, v?: unknown) {
-    return new Leaf(
-      {
-        treeName: this.tree.name,
-        key: k,
-        val: v,
-        forest: this.tree.forest
-      });
+    return new Leaf({
+      treeName: this.tree.name,
+      key: k,
+      val: v,
+      forest: this.tree.forest,
+    });
   }
 
   private addBranch(key: unknown, val: unknown, cause: BranchAction): BranchIF {
     if (this.next) {
-      throw new Error('cannot push on a non-terminal branch');
+      throw new Error("cannot push on a non-terminal branch");
     }
     const next = new Branch(this.tree, {
       prev: this,
       data: mp(key, val),
-      cause: cause
+      cause: cause,
     });
     this.next = next;
     return next;
   }
 
   has(key: unknown): boolean {
-    if (this.data.has(key)) {return true;}
-    if (this.prev) {return this.prev.has(key);}
+    if (this.data.has(key)) {
+      return true;
+    }
+    if (this.prev) {
+      return this.prev.has(key);
+    }
     return false;
   }
 
@@ -214,9 +234,11 @@ export class Branch implements BranchIF {
   }
 
   public ensureCurrentScope() {
-
-    // check to see if there is an active, current scope in the forest. 
-    if (!this.forest.currentScope || this.forest.currentScope.status !== StatusEnum.pending) {
+    // check to see if there is an active, current scope in the forest.
+    if (
+      !this.forest.currentScope ||
+      this.forest.currentScope.status !== StatusEnum.pending
+    ) {
       return;
     }
 
@@ -238,7 +260,7 @@ export class Branch implements BranchIF {
       cause: currentScope.cause,
       status: currentScope.status,
       causeID: currentScope.scopeID,
-      prev: this
+      prev: this,
     });
 
     // register that scope in the ids set to prevent redundant ensurance
@@ -247,16 +269,20 @@ export class Branch implements BranchIF {
   }
 
   set(key: unknown, val: unknown): unknown {
-        this.tree.top!.ensureCurrentScope();
-        if (this.next) {return this.next.set(key, val);}
+    this.tree.top!.ensureCurrentScope();
+    if (this.next) {
+      return this.next.set(key, val);
+    }
 
-        this.addBranch(key, val, BranchActionEnum.set);
-        //@TODO: validate
-        return this.next!.get(key);
+    this.addBranch(key, val, BranchActionEnum.set);
+    //@TODO: validate
+    return this.next!.get(key);
   }
 
   del(key: unknown): void {
-    if (this.next) {return this.next.del(key);}
+    if (this.next) {
+      return this.next.del(key);
+    }
     this.addBranch(key, DELETED, ChangeTypeEnum.del);
   }
 
@@ -266,14 +292,13 @@ export class Branch implements BranchIF {
       this.set(c.key, c.val);
     } else if (isTreeDel(c)) {
       this.del(c.key);
-
     } else {
-      throw new Error('cannot implement change ' + c.type.toString());
+      throw new Error("cannot implement change " + c.type.toString());
     }
     return {
       treeName: c.treeName,
       change: c,
-      status: StatusEnum.good
+      status: StatusEnum.good,
     };
   }
 }

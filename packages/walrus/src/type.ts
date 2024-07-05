@@ -4,8 +4,8 @@ import {
   NumberEnumType,
   TypeEnum,
   TypeofEnum,
-} from './enums';
-import type { TypeEnumType, FormEnumType } from './enums';
+} from "./enums";
+import type { TypeEnumType, FormEnumType } from "./enums";
 
 type testFn = (value: any) => boolean;
 
@@ -14,7 +14,7 @@ export class TypeDef {
     public readonly type: TypeEnumType,
     public readonly form: FormEnumType,
     public readonly typeOf: TypeEnumType,
-    private test?: testFn
+    private test?: testFn,
   ) {}
 
   /**
@@ -22,7 +22,7 @@ export class TypeDef {
    */
   get family() {
     if (
-      [ FormEnum.scalar, FormEnum.void, FormEnum.function ].includes(this.form)
+      [FormEnum.scalar, FormEnum.void, FormEnum.function].includes(this.form)
     ) {
       return this.form;
     }
@@ -49,7 +49,7 @@ export const types: TypeDef[] = [
     TypeEnum.null,
     FormEnum.void,
     TypeofEnum.object,
-    (s) => s === null
+    (s) => s === null,
   ),
   new TypeDef(TypeEnum.boolean, FormEnum.scalar, TypeofEnum.boolean),
   new TypeDef(TypeEnum.string, FormEnum.scalar, TypeofEnum.string),
@@ -58,25 +58,25 @@ export const types: TypeDef[] = [
   new TypeDef(TypeEnum.symbol, FormEnum.scalar, TypeofEnum.symbol),
   new TypeDef(TypeEnum.function, FormEnum.function, TypeofEnum.function),
   new TypeDef(TypeEnum.array, FormEnum.array, TypeofEnum.object, (v) =>
-    Array.isArray(v)
+    Array.isArray(v),
   ),
   new TypeDef(
     TypeEnum.map,
     FormEnum.map,
     TypeofEnum.object,
-    (m) => m instanceof Map
+    (m) => m instanceof Map,
   ),
   new TypeDef(
     TypeEnum.set,
     FormEnum.set,
     TypeofEnum.object,
-    (s) => s instanceof Set
+    (s) => s instanceof Set,
   ),
   new TypeDef(
     TypeEnum.object,
     FormEnum.object,
     TypeofEnum.object,
-    (o) => o && typeof o === 'object'
+    (o) => o && typeof o === "object",
   ),
 ];
 
@@ -87,19 +87,19 @@ export function typeToForm(type: TypeEnumType): FormEnumType {
 
 export const describe = (
   value: any,
-  reflect: string | boolean = false
+  reflect: string | boolean = false,
 ): TypeDef | TypeEnumType | FormEnumType => {
   if (reflect) {
     const t: TypeDef = describe(value) as TypeDef;
-    if (typeof t === 'object') {
+    if (typeof t === "object") {
       if (reflect === true) {
         return t.type;
       }
       if (
-        reflect === 'type' ||
-        reflect === 'form' ||
-        reflect === 'typeOf' ||
-        reflect === 'family'
+        reflect === "type" ||
+        reflect === "form" ||
+        reflect === "typeOf" ||
+        reflect === "family"
       ) {
         return t[reflect];
       }
@@ -113,12 +113,12 @@ export const describe = (
       return def;
     }
   }
-  console.error('describe failure to analyze', value);
-  throw new Error('cannot analyze value');
+  console.error("describe failure to analyze", value);
+  throw new Error("cannot analyze value");
 };
 
 export const describeNumber = (value: any): NumberEnumType => {
-  if ([ 'number', 'bigint' ].includes(typeof value)) {
+  if (["number", "bigint"].includes(typeof value)) {
     if (Number.isFinite(value)) {
       if (Number.isInteger(value)) {
         return NumberEnum.integer;

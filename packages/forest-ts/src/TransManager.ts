@@ -1,13 +1,11 @@
-import { DoProps, TransHandlerIF, TreeIF } from './types';
-import { TransHandler } from './TransHandler';
-
+import { DoProps, TransHandlerIF, TreeIF } from "./types";
+import { TransHandler } from "./TransHandler";
 
 export default class TransManager {
   private pendingHandlers: TransHandlerIF[] = [];
   private nextHandlerId = 1;
 
-  constructor(public tree: TreeIF) {
-  }
+  constructor(public tree: TreeIF) {}
 
   public start(props?: DoProps): TransHandlerIF {
     const handler = new TransHandler(this, this.nextHandlerId, props);

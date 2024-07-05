@@ -1,28 +1,38 @@
-
 import type {
-  ForestIF, LeafIF, LeafIdentityIF, TreeIF,
-  TreeName, TreeChange,
+  ForestIF,
+  LeafIF,
+  LeafIdentityIF,
+  TreeIF,
+  TreeName,
+  TreeChange,
   ChangeResponse,
   ScopeIF,
-  ScopeFn
-} from './types';
-import type { ForestParams, ScopeParams, TreeFactoryParams } from './helpers/paramTypes';
-import { isString } from './helpers/isString';
-import { isLeafIdentityIF } from './helpers/isLeafIdentityIF';
-import { Tree } from './Tree';
-import { isLeafIF } from './helpers/isLeafIF';
-import { DELETED } from './constants';
-import { BranchAction, ChangeTypeEnum, StatusEnum } from './helpers/enums';
-import Scope from './Scope';
+  ScopeFn,
+} from "./types";
+import type {
+  ForestParams,
+  ScopeParams,
+  TreeFactoryParams,
+} from "./helpers/paramTypes";
+import { isString } from "./helpers/isString";
+import { isLeafIdentityIF } from "./helpers/isLeafIdentityIF";
+import { Tree } from "./Tree";
+import { isLeafIF } from "./helpers/isLeafIF";
+import { DELETED } from "./constants";
+import { BranchAction, ChangeTypeEnum, StatusEnum } from "./helpers/enums";
+import Scope from "./Scope";
 
 const DEFAULT_CACHE_INTERVAL = 8;
 
 function scopeError(scope: ScopeIF, err: Error, scopesRemoved: ScopeIF[]) {
-  return { ...err, scope: scope.scopeID, removed: scopesRemoved.map((s => s.scopeID)) };
+  return {
+    ...err,
+    scope: scope.scopeID,
+    removed: scopesRemoved.map((s) => s.scopeID),
+  };
 }
 
 export class Forest implements ForestIF {
-
   constructor(params?: ForestParams) {
     this.cacheInterval = params?.cacheInterval || DEFAULT_CACHE_INTERVAL;
   }
@@ -39,19 +49,21 @@ export class Forest implements ForestIF {
   // ---------------- TREE -----------------
   trees: Map<string, TreeIF> = new Map();
   addTree(params: TreeFactoryParams): TreeIF {
-
     const { name: treeName, data, upsert } = params;
 
     if (this.hasTree(treeName)) {
       if (!upsert) {
-        throw new Error('cannot redefine existing treer ' + treeName);
+        throw new Error("cannot redefine existing treer " + treeName);
       }
     } else {
-      this.trees.set(treeName, new Tree({
-        forest: this,
+      this.trees.set(
         treeName,
-        data
-      }));
+        new Tree({
+          forest: this,
+          treeName,
+          data,
+        }),
+      );
     }
     return this.tree(treeName)!;
   }
@@ -63,14 +75,19 @@ export class Forest implements ForestIF {
       return this.delete(treeName.treeName, treeName.key);
     }
     if (!this.hasTree(treeName)) {
-      throw new Error('cannot delete from ' + treeName + ': no tree found');
+      throw new Error("cannot delete from " + treeName + ": no tree found");
     }
-        this.tree(treeName)!.del(key!);
-        return {
-          treeName: treeName,
-          status: this.tree(treeName)!.status,
-          change: { key, val: DELETED, treeName: treeName, type: ChangeTypeEnum.del }
-        };
+    this.tree(treeName)!.del(key!);
+    return {
+      treeName: treeName,
+      status: this.tree(treeName)!.status,
+      change: {
+        key,
+        val: DELETED,
+        treeName: treeName,
+        type: ChangeTypeEnum.del,
+      },
+    };
   }
 
   get(treeNameOrLeaf: TreeName | LeafIdentityIF, key?: unknown): LeafIF {
@@ -79,46 +96,60 @@ export class Forest implements ForestIF {
     }
 
     if (!this.hasTree(treeNameOrLeaf.treeName)) {
-      throw new Error('forest:get -- cannot find tree ' + treeNameOrLeaf.treeName);
+      throw new Error(
+        "forest:get -- cannot find tree " + treeNameOrLeaf.treeName,
+      );
     }
     const tree = this.tree(treeNameOrLeaf.treeName)!;
 
     return tree.leaf(treeNameOrLeaf.key);
   }
 
-  set(treeNameOrLeaf: TreeName | LeafIF, key?: unknown, val?: unknown): ChangeResponse {
+  set(
+    treeNameOrLeaf: TreeName | LeafIF,
+    key?: unknown,
+    val?: unknown,
+  ): ChangeResponse {
     if (!isLeafIF(treeNameOrLeaf)) {
-      if (!this.hasTree(treeNameOrLeaf)) {throw new Error('cannot set - no tree ' + treeNameOrLeaf);}
+      if (!this.hasTree(treeNameOrLeaf)) {
+        throw new Error("cannot set - no tree " + treeNameOrLeaf);
+      }
       const tree = this.tree(treeNameOrLeaf)!;
       tree?.set(key, val);
       return {
         treeName: treeNameOrLeaf,
         change: {
           treeName: treeNameOrLeaf,
-          key, val, type: ChangeTypeEnum.set
+          key,
+          val,
+          type: ChangeTypeEnum.set,
         },
-        status: tree.status
+        status: tree.status,
       };
     }
-    return this.set(treeNameOrLeaf.treeName, treeNameOrLeaf.key, treeNameOrLeaf.val);
+    return this.set(
+      treeNameOrLeaf.treeName,
+      treeNameOrLeaf.key,
+      treeNameOrLeaf.val,
+    );
   }
 
   private change(c: TreeChange[], treeName?: TreeName) {
     const responess = [];
 
     for (const change of c) {
-      if (!change.treeName || treeName) {throw new Error('change: requires treeName');}
+      if (!change.treeName || treeName) {
+        throw new Error("change: requires treeName");
+      }
       //@ts-ignore
       const name: TreeName = change.treeName || treeName;
 
       if (!isString(name) || !this.hasTree(name)) {
-        throw new Error('change missing tree name');
+        throw new Error("change missing tree name");
       }
 
       const tree = this.tree(name)!;
-      responess.push(
-        tree.change(change)
-      );
+      responess.push(tree.change(change));
     }
 
     return responess.flat();
@@ -130,12 +161,16 @@ export class Forest implements ForestIF {
     return this.has({ treeName: treeName, key: k });
   }
   has(r: LeafIdentityIF<unknown>): boolean {
-    if (!this.hasTree(r.treeName)) {return false;}
+    if (!this.hasTree(r.treeName)) {
+      return false;
+    }
 
     return this.tree(r.treeName)!.has(r.key);
   }
   hasAll(r: LeafIdentityIF<unknown>[]): boolean {
-    return r.every((req: LeafIdentityIF<unknown>) => { this.has(req); });
+    return r.every((req: LeafIdentityIF<unknown>) => {
+      this.has(req);
+    });
   }
   hasTree(treeName: TreeName): boolean {
     return this.trees.has(treeName);
@@ -149,18 +184,20 @@ export class Forest implements ForestIF {
   private scopes: ScopeIF[] = [];
   private pruneScope(sc: ScopeIF) {
     const index = this.scopes.indexOf(sc);
-    if (index < 0) {throw new Error('cannot find scope to prune');}
+    if (index < 0) {
+      throw new Error("cannot find scope to prune");
+    }
     const scopesToClear = this.scopes.slice(index);
     this.scopes = this.scopes.slice(0, index);
 
     // prune currentScope and all subsequent scopes
-    scopesToClear.forEach((clearedScope) =>{
+    scopesToClear.forEach((clearedScope) => {
       clearedScope.inTrees.forEach((treeName: TreeName) => {
         try {
           const tree = this.tree(treeName);
           tree?.pruneScope(clearedScope.scopeID);
         } catch (err2) {
-          console.error('error removing scope', sc, err2);
+          console.error("error removing scope", sc, err2);
         }
       });
     });
@@ -171,19 +208,21 @@ export class Forest implements ForestIF {
     return this.scopes[this.scopes.length - 1];
   }
 
-  // for debugging; a list of all scopes that have finished - succeeedd OR failed. 
+  // for debugging; a list of all scopes that have finished - succeeedd OR failed.
   public completedScopes: ScopeIF[] = [];
   public maxCompletedScopes = 20; // cap the list for memory
   private archiveScope(sc: ScopeIF) {
     if (this.maxCompletedScopes > 0) {
       this.completedScopes.push(sc);
       if (this.completedScopes.length > this.maxCompletedScopes) {
-        this.completedScopes = this.completedScopes.slice(-this.maxCompletedScopes);
+        this.completedScopes = this.completedScopes.slice(
+          -this.maxCompletedScopes,
+        );
       }
     }
   }
 
-  transact(fn: ScopeFn, params: ScopeParams, ...args: never[]) {
+  transact(fn: ScopeFn, params: ScopeParams = {}, ...args: never[]) {
     const sc = new Scope(this, params);
     this.scopes.push(sc);
     let out;
@@ -217,11 +256,10 @@ export class Forest implements ForestIF {
         const tree = this.tree(treeName);
         tree?.endScope(sc.scopeID);
       } catch (err3) {
-        console.error('error ending scope', sc, err3);
+        console.error("error ending scope", sc, err3);
       }
     });
 
     return out;
   }
-
 }

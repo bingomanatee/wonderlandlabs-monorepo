@@ -1,16 +1,20 @@
-import { Observable, SubjectLike } from 'rxjs';
-import { Data } from '../types';
-import { JoinSchema, QueryDef, QueryDefJoin } from './types.query-and-join';
-import { LeafObj } from './types.leaf';
-import { CollectionIF, DataID, DataValidatorFn } from './types.coll-data-validators';
+import { Observable, SubjectLike } from "rxjs";
+import { Data } from "../types";
+import { JoinSchema, QueryDef, QueryDefJoin } from "./types.query-and-join";
+import { LeafObj } from "./types.leaf";
+import {
+  CollectionIF,
+  DataID,
+  DataValidatorFn,
+} from "./types.coll-data-validators";
 
 export type DoProps = {
-  name?: string,
-  args?: unknown[]
-}
+  name?: string;
+  args?: unknown[];
+};
 
 export interface TransManagerIF {
-  tree: TreeIF,
+  tree: TreeIF;
 
   start(props?: DoProps): TransHandlerIF;
 
@@ -18,34 +22,32 @@ export interface TransManagerIF {
 }
 
 export interface TransHandlerIF {
-
-  id: number,
+  id: number;
 
   complete(): void;
 
   fail(): void;
 
-  puts: UpdatePutMsg[]
+  puts: UpdatePutMsg[];
 }
 
 export type UpdateMsg = {
-  action: string,
-  collection?: string,
-  identity?: DataID,
-  value?: unknown,
-}
+  action: string;
+  collection?: string;
+  identity?: DataID;
+  value?: unknown;
+};
 export type UpdatePutMsg = UpdateMsg & {
-  action: 'put-data',
-  collection: string,
-  identity: DataID,
-  create: boolean,
-  prev: Data | undefined
-}
+  action: "put-data";
+  collection: string;
+  identity: DataID;
+  create: boolean;
+  prev: Data | undefined;
+};
 
 export type TransAction = (tree: TreeIF, ...rest: unknown[]) => unknown;
 
 export interface TreeIF {
-
   put(collection: string, value: Data): void;
 
   get(collection: string, id: any): any;
@@ -78,5 +80,8 @@ export interface TreeIF {
 
   revert(handlers: TransHandlerIF[]): void;
 
-  createSchemaValidator(definition: unknown, collection: CollectionIF) : DataValidatorFn | void
+  createSchemaValidator(
+    definition: unknown,
+    collection: CollectionIF,
+  ): DataValidatorFn | void;
 }

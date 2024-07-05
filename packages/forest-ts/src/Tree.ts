@@ -1,22 +1,22 @@
-import { c } from '@wonderlandlabs/collect';
-import { text } from '@wonderlandlabs/walrus';
+import { c } from "@wonderlandlabs/collect";
+import { text } from "@wonderlandlabs/walrus";
 
-import { sortBy } from 'lodash';
+import { sortBy } from "lodash";
 
-import CollectionClass from './CollectionClass';
-import { ErrorPlus } from './ErrorPlus';
-import { Leaf } from './Leaf';
-import { Subject, SubjectLike } from 'rxjs';
-import JoinIndex from './JoinIndex';
-import TransManager from './TransManager';
+import CollectionClass from "./CollectionClass";
+import { ErrorPlus } from "./ErrorPlus";
+import { Leaf } from "./Leaf";
+import { Subject, SubjectLike } from "rxjs";
+import JoinIndex from "./JoinIndex";
+import TransManager from "./TransManager";
 import {
   isQueryCollectionDefJoin,
   isQueryNamedDefJoin,
   JoinSchema,
   QueryDef,
-  QueryDefJoin
-} from './types/types.query-and-join';
-import { LeafObj } from './types/types.leaf';
+  QueryDefJoin,
+} from "./types/types.query-and-join";
+import { LeafObj } from "./types/types.leaf";
 import {
   BaseRecordFieldSchema,
   CollectionDef,
@@ -33,18 +33,18 @@ import {
   TransHandlerIF,
   TreeIF,
   UpdateMsg,
-  UpdatePutMsg
-} from './types';
-import { validateBaseFieldDef } from './utils/validateBaseFieldDef';
-import { isRecordFieldSchema } from './types/types.coll-data-validators';
+  UpdatePutMsg,
+} from "./types";
+import { validateBaseFieldDef } from "./utils/validateBaseFieldDef";
+import { isRecordFieldSchema } from "./types/types.coll-data-validators";
 
 function prefix(item: string | string[]): string[] {
-  if (typeof item === 'string') {
-    return prefix([ item ]);
+  if (typeof item === "string") {
+    return prefix([item]);
   }
 
   return item.map((str) => {
-    return text.addBefore(str, '$value.');
+    return text.addBefore(str, "$value.");
   });
 }
 
@@ -58,7 +58,10 @@ export class Tree implements TreeIF {
     joins?.forEach((join) => this.addJoin(join));
   }
 
-  public createSchemaValidator(definition: unknown, collection: CollectionIF): DataValidatorFn | void {
+  public createSchemaValidator(
+    definition: unknown,
+    collection: CollectionIF,
+  ): DataValidatorFn | void {
     if (!definition) {
       return;
     }
@@ -69,34 +72,48 @@ export class Tree implements TreeIF {
       if (definition.every(isRecordFieldSchema)) {
         return (value: unknown) => {
           if (!isData(value)) {
-            throw new ErrorPlus('collections only store objects.', { value: value, collection: collection });
+            throw new ErrorPlus("collections only store objects.", {
+              value: value,
+              collection: collection,
+            });
           }
           for (const field of definition) {
             const { name: key } = field;
-            validateBaseFieldDef(field as BaseRecordFieldSchema, key, value, collection);
+            validateBaseFieldDef(
+              field as BaseRecordFieldSchema,
+              key,
+              value,
+              collection,
+            );
           }
         };
       } else {
-        console.error(
-          '---- array of bad things:', definition
-        );
-        throw new ErrorPlus('bad array schema', { definition });
+        console.error("---- array of bad things:", definition);
+        throw new ErrorPlus("bad array schema", { definition });
       }
     }
     if (isFieldDefObj(definition)) {
       return (value: unknown) => {
         if (!isData(value)) {
-          throw new ErrorPlus('collections only store objects.', { value: value, collection: collection });
+          throw new ErrorPlus("collections only store objects.", {
+            value: value,
+            collection: collection,
+          });
         }
         for (const key of Object.keys(definition)) {
           const fieldDef: FieldDef = definition[key];
           if (isBaseRecordFieldSchema(fieldDef)) {
-            validateBaseFieldDef(fieldDef as BaseRecordFieldSchema, key, value, collection);
+            validateBaseFieldDef(
+              fieldDef as BaseRecordFieldSchema,
+              key,
+              value,
+              collection,
+            );
           }
         }
       };
     }
-    console.warn('cannot codify schema:', definition);
+    console.warn("cannot codify schema:", definition);
   }
 
   public $collections: Map<string, CollectionIF> = new Map();
@@ -105,19 +122,22 @@ export class Tree implements TreeIF {
 
   public addCollection(config: CollectionDef) {
     if (!config.name) {
-      throw new Error('addCollection requires name');
+      throw new Error("addCollection requires name");
     }
     if (this.hasCollection(config.name)) {
-      throw new Error('cannot redefine collection ' + config.name);
+      throw new Error("cannot redefine collection " + config.name);
     }
 
     const records = config.records ?? [];
     delete config.records;
 
-    this.$collections.set(config.name, new CollectionClass(this, config, records));
+    this.$collections.set(
+      config.name,
+      new CollectionClass(this, config, records),
+    );
     this.updates.next({
-      action: 'add-collection',
-      collection: config.name
+      action: "add-collection",
+      collection: config.name,
     });
   }
 
@@ -125,7 +145,10 @@ export class Tree implements TreeIF {
 
   public addJoin(join: JoinSchema) {
     if (this.joins.has(join.name)) {
-      throw new ErrorPlus('cannot redefine existing join ' + join.name, { join, tree: this });
+      throw new ErrorPlus("cannot redefine existing join " + join.name, {
+        join,
+        tree: this,
+      });
     }
     this.joins.set(join.name, join);
     this._indexes.set(join.name, new JoinIndex(this, join.name));
@@ -144,7 +167,7 @@ export class Tree implements TreeIF {
     }
     const handler = this.$_transManager.start(props);
     try {
-      const rest = (props?.args || []);
+      const rest = props?.args || [];
       const out = action(this, ...rest);
       handler.complete();
       return out;
@@ -156,7 +179,7 @@ export class Tree implements TreeIF {
 
   collection(name: string): CollectionIF {
     if (!this.$collections.has(name)) {
-      throw new ErrorPlus('cannot get collection', name);
+      throw new ErrorPlus("cannot get collection", name);
     }
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     return this.$collections.get(name)!;
@@ -168,8 +191,9 @@ export class Tree implements TreeIF {
 
   put(collection: string, value: any) {
     if (!this.$collections.has(collection)) {
-      throw new ErrorPlus('Tree.put: missing target collection', {
-        collection, value
+      throw new ErrorPlus("Tree.put: missing target collection", {
+        collection,
+        value,
       });
     }
     return this.collection(collection).put(value);
@@ -203,35 +227,44 @@ export class Tree implements TreeIF {
         let joinDef;
         if (isQueryNamedDefJoin(join)) {
           if (!this.joins.has(join.name)) {
-            throw new ErrorPlus('cannot find query join ' + join.name, join);
+            throw new ErrorPlus("cannot find query join " + join.name, join);
           }
           if (!this._indexes.has(join.name)) {
-            throw new ErrorPlus('no index for join ' + join.name, join);
+            throw new ErrorPlus("no index for join " + join.name, join);
           }
           joinDef = this.joins.get(join.name)!;
         } else if (isQueryCollectionDefJoin(join)) {
           const matches = this.findMatchingJoins(collection, join.collection);
           switch (matches.length) {
-          case 0:
-            throw new Error(`cannot find amy joins between ${collection} and ${join.collection}`);
-            break;
+            case 0:
+              throw new Error(
+                `cannot find amy joins between ${collection} and ${join.collection}`,
+              );
+              break;
 
-          case 1:
-            joinDef = matches[0];
-            break;
+            case 1:
+              joinDef = matches[0];
+              break;
 
-          default:
-            throw new ErrorPlus(`there are two or more joins between ${collection} and ${join.collection} -- you must name the specific join you want to use`,
-              query);
+            default:
+              throw new ErrorPlus(
+                `there are two or more joins between ${collection} and ${join.collection} -- you must name the specific join you want to use`,
+                query,
+              );
           }
         } else {
-          throw new ErrorPlus('join is not proper', join);
+          throw new ErrorPlus("join is not proper", join);
         }
         let index;
         try {
           index = this._indexes.get(joinDef.name)!;
         } catch (err) {
-          console.log('---- error getting index for ', joinDef, 'from join', join);
+          console.log(
+            "---- error getting index for ",
+            joinDef,
+            "from join",
+            join,
+          );
           throw err;
         }
 
@@ -241,10 +274,15 @@ export class Tree implements TreeIF {
           leaf.$joins[joinDef.name] = index.fromLeafsFor(id, join);
         }
         if (join.sorter) {
-          if (typeof join.sorter === 'function') {
-            leaf.$joins[joinDef.name] = leaf.$joins[joinDef.name].sort(join.sorter);
+          if (typeof join.sorter === "function") {
+            leaf.$joins[joinDef.name] = leaf.$joins[joinDef.name].sort(
+              join.sorter,
+            );
           } else {
-            leaf.$joins[joinDef.name] = sortBy(leaf.$joins[joinDef.name], prefix(join.sorter));
+            leaf.$joins[joinDef.name] = sortBy(
+              leaf.$joins[joinDef.name],
+              prefix(join.sorter),
+            );
           }
         }
       });
@@ -278,8 +316,8 @@ export class Tree implements TreeIF {
      * of the current one, revered by this process.
      *
      */
-    [ ...actions ].reverse().forEach((handler) => {
-      [ ...handler.puts ].reverse().forEach((p) => {
+    [...actions].reverse().forEach((handler) => {
+      [...handler.puts].reverse().forEach((p) => {
         this.unPut(p);
         collectionNames.add(p.collection);
       });
@@ -293,5 +331,4 @@ export class Tree implements TreeIF {
       this.collection(cName as string)?.finishRevert();
     });
   }
-
 }

@@ -1,1 +1,42 @@
-"use strict";Object.defineProperty(exports,"__esModule",{value:!0}),exports.isQueryDefJoin=exports.isQueryCollectionDefJoin=exports.isQueryNamedDefJoin=exports.isJoinObj=exports.isNonEmptyString=void 0;const walrus_1=require("@wonderlandlabs/walrus");function isNonEmptyString(e){return!("string"!=typeof e||!e)}function isJoinObj(e){return walrus_1.type.describe(e,!0)===walrus_1.TypeEnum.object&&(!e.joins||Array.isArray(e.joins))}function isQueryNamedDefJoin(e){return walrus_1.type.describe(e,!0)===walrus_1.TypeEnum.object&&"name"in e&&"string"==typeof e.name&&isJoinObj(e)}function isQueryCollectionDefJoin(e){return walrus_1.type.describe(e,!0)===walrus_1.TypeEnum.object&&"collection"in e&&"string"==typeof e.collection&&isJoinObj(e)}function isQueryDefJoin(e){return isQueryNamedDefJoin(e)||isQueryCollectionDefJoin(e)}exports.isNonEmptyString=isNonEmptyString,exports.isJoinObj=isJoinObj,exports.isQueryNamedDefJoin=isQueryNamedDefJoin,exports.isQueryCollectionDefJoin=isQueryCollectionDefJoin,exports.isQueryDefJoin=isQueryDefJoin;
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: !0 }),
+  (exports.isQueryDefJoin =
+    exports.isQueryCollectionDefJoin =
+    exports.isQueryNamedDefJoin =
+    exports.isJoinObj =
+    exports.isNonEmptyString =
+      void 0);
+const walrus_1 = require("@wonderlandlabs/walrus");
+function isNonEmptyString(e) {
+  return !("string" != typeof e || !e);
+}
+function isJoinObj(e) {
+  return (
+    walrus_1.type.describe(e, !0) === walrus_1.TypeEnum.object &&
+    (!e.joins || Array.isArray(e.joins))
+  );
+}
+function isQueryNamedDefJoin(e) {
+  return (
+    walrus_1.type.describe(e, !0) === walrus_1.TypeEnum.object &&
+    "name" in e &&
+    "string" == typeof e.name &&
+    isJoinObj(e)
+  );
+}
+function isQueryCollectionDefJoin(e) {
+  return (
+    walrus_1.type.describe(e, !0) === walrus_1.TypeEnum.object &&
+    "collection" in e &&
+    "string" == typeof e.collection &&
+    isJoinObj(e)
+  );
+}
+function isQueryDefJoin(e) {
+  return isQueryNamedDefJoin(e) || isQueryCollectionDefJoin(e);
+}
+(exports.isNonEmptyString = isNonEmptyString),
+  (exports.isJoinObj = isJoinObj),
+  (exports.isQueryNamedDefJoin = isQueryNamedDefJoin),
+  (exports.isQueryCollectionDefJoin = isQueryCollectionDefJoin),
+  (exports.isQueryDefJoin = isQueryDefJoin);

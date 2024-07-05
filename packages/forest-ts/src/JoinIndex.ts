@@ -1,25 +1,38 @@
-import { Tree } from './Tree';
-import { ErrorPlus } from './ErrorPlus';
-import { CollectionIF, Data, DataID, JoinSchema, QueryDefJoin, UpdateMsg } from './types';
-import { c } from '@wonderlandlabs/collect';
+import { Tree } from "./Tree";
+import { ErrorPlus } from "./ErrorPlus";
+import {
+  CollectionIF,
+  Data,
+  DataID,
+  JoinSchema,
+  QueryDefJoin,
+  UpdateMsg,
+} from "./types";
+import { c } from "@wonderlandlabs/collect";
 
 function upsertIntoMap(m: Map<any, any>, key: any, value: any) {
   if (m.has(key)) {
     m.get(key).push(value);
   } else {
-    m.set(key, [ value ]);
+    m.set(key, [value]);
   }
 }
 
 export default class JoinIndex {
-  constructor(public tree: Tree, public joinName: string) {
+  constructor(
+    public tree: Tree,
+    public joinName: string,
+  ) {
     const self = this;
     this.tree.updates.subscribe({
       next(msg: UpdateMsg) {
-        if (self.join.to === msg.collection || self.join.from === msg.collection) {
+        if (
+          self.join.to === msg.collection ||
+          self.join.from === msg.collection
+        ) {
           self.clearCache();
         }
-      }
+      },
     });
   }
 
@@ -32,7 +45,7 @@ export default class JoinIndex {
   get join(): JoinSchema {
     const schema = this.tree.joins.get(this.joinName);
     if (!schema) {
-      throw new ErrorPlus('missing join schema', this);
+      throw new ErrorPlus("missing join schema", this);
     }
     return schema;
     //@TODO: validate
@@ -50,7 +63,7 @@ export default class JoinIndex {
   get fromColl(): CollectionIF {
     const coll = this.tree.collection(this.join.from);
     if (!coll) {
-      throw new ErrorPlus('cannot find from collection', this);
+      throw new ErrorPlus("cannot find from collection", this);
     }
     return coll;
   }
@@ -58,12 +71,13 @@ export default class JoinIndex {
   get toColl() {
     const coll = this.tree.collection(this.join.to);
     if (!coll) {
-      throw new ErrorPlus('cannot find from collection', this);
+      throw new ErrorPlus("cannot find from collection", this);
     }
     return coll;
   }
 
-  private generateFromFieldToToField() { // generate in the case where both fromField and toField exist.
+  private generateFromFieldToToField() {
+    // generate in the case where both fromField and toField exist.
     const { join, fromColl, toColl } = this;
     const { fromField, toField } = join;
 
@@ -115,7 +129,7 @@ export default class JoinIndex {
       if (!(fromField && fromField in fromData)) {
         return;
       }
-      const toId : DataID = fromData[fromField] as DataID;
+      const toId: DataID = fromData[fromField] as DataID;
 
       if (toColl.has(toId)) {
         this._index(fromIdentity, toId);
@@ -130,7 +144,7 @@ export default class JoinIndex {
       if (!toField || !(toField in toData)) {
         return;
       }
-      const fromId : DataID = toData[toField] as DataID;
+      const fromId: DataID = toData[toField] as DataID;
       if (fromColl.has(fromId)) {
         this._index(fromId, toIdentity);
       }
@@ -155,7 +169,9 @@ export default class JoinIndex {
     }
     const toIndexes = this.toIndex.get(id)!;
 
-    return toIndexes.map((fromId: any) => this.tree.leaf(this.join.from, fromId, join));
+    return toIndexes.map((fromId: any) =>
+      this.tree.leaf(this.join.from, fromId, join),
+    );
   }
 
   fromLeafsFor(id: any, join?: QueryDefJoin) {
@@ -166,6 +182,8 @@ export default class JoinIndex {
       return [];
     }
     const fromIndexes = this.fromIndex.get(id)!;
-    return fromIndexes.map((toId: any) => this.tree.leaf(this.join.to, toId, join));
+    return fromIndexes.map((toId: any) =>
+      this.tree.leaf(this.join.to, toId, join),
+    );
   }
 }

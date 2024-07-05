@@ -1,15 +1,25 @@
-import { BaseRecordFieldSchema, CollectionIF, Data, isDataValidatorFn } from '../types/types.coll-data-validators';
-import { ErrorPlus } from '../ErrorPlus';
-import { type } from '@wonderlandlabs/walrus';
+import {
+  BaseRecordFieldSchema,
+  CollectionIF,
+  Data,
+  isDataValidatorFn,
+} from "../types/types.coll-data-validators";
+import { ErrorPlus } from "../ErrorPlus";
+import { type } from "@wonderlandlabs/walrus";
 
-export function validateBaseFieldDef(baseFieldDef: BaseRecordFieldSchema, key: string, value: Data, collection: CollectionIF) {
+export function validateBaseFieldDef(
+  baseFieldDef: BaseRecordFieldSchema,
+  key: string,
+  value: Data,
+  collection: CollectionIF,
+) {
   if (!(key in value)) {
     // handle missing values
     if (!baseFieldDef.optional) {
-      throw new ErrorPlus('missing required field ' + key, {
+      throw new ErrorPlus("missing required field " + key, {
         collection,
         key,
-        value
+        value,
       });
     }
   } else {
@@ -22,7 +32,7 @@ export function validateBaseFieldDef(baseFieldDef: BaseRecordFieldSchema, key: s
     if (baseFieldDef.type) {
       const fieldType = type.describe(fieldValue, true);
       if (fieldType !== baseFieldDef.type) {
-        throw new ErrorPlus('type mismatch:' + key, {
+        throw new ErrorPlus("type mismatch:" + key, {
           key,
           expected: baseFieldDef.type,
           actual: fieldType,

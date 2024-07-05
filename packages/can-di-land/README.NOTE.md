@@ -13,12 +13,12 @@ definition into a more rigorously tested system.
 
 To be concrete -- some fo the components present were:
 
-* the **data** component - essentially an RxDB database using Dexie as a local store.
-* the **message** component - emitted notifications and presented modal dialogs
-* the **interaction** component - handled mouse/keyboard input
-* the **loader** component - handled tracking whether all needed resources were available, /  
+- the **data** component - essentially an RxDB database using Dexie as a local store.
+- the **message** component - emitted notifications and presented modal dialogs
+- the **interaction** component - handled mouse/keyboard input
+- the **loader** component - handled tracking whether all needed resources were available, /  
   and locked the system while a save was taking place
-* the **configuration** component - handled taking in user options and broadcasting them to  /
+- the **configuration** component - handled taking in user options and broadcasting them to /
   other components to change the behavior of the application
 
 The configuration component was dependent on the data component, as was the loader.

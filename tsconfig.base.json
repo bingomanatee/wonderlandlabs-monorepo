@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-  "strict": true,
+    "strict": true,
     "strictNullChecks": true,
     "esModuleInterop": true,
     "emitDecoratorMetadata": true,
@@ -10,5 +10,5 @@
     "sourceMap": true,
     "jsx": "react-jsx",
     "moduleResolution": "node"
-}
+  }
 }

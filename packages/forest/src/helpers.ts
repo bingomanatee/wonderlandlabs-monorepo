@@ -1,5 +1,4 @@
-import { DELETED, NOT_FOUND } from './constants';
-
+import { DELETED, NOT_FOUND } from "./constants";
 
 export function mp(...args: unknown[]): Map<unknown, unknown> {
   const e: [unknown, unknown][] = [];
@@ -11,12 +10,18 @@ export function mp(...args: unknown[]): Map<unknown, unknown> {
 }
 
 export function nf(val: unknown) {
-  if (val === DELETED) {return NOT_FOUND;}
-  if (val === undefined) {return NOT_FOUND;}
+  if (val === DELETED) {
+    return NOT_FOUND;
+  }
+  if (val === undefined) {
+    return NOT_FOUND;
+  }
   return val;
 }
 
 export function delToUndef(val: unknown) {
-  if (val === DELETED) {return undefined;}
+  if (val === DELETED) {
+    return undefined;
+  }
   return val;
 }

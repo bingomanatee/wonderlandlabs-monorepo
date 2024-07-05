@@ -1,7 +1,15 @@
-import { map, Observer, Subscription } from 'rxjs';
-import { c } from '@wonderlandlabs/collect';
-import { TreeIF, QueryDef, isLeafJSON, LeafObj, LeafObjJSONJoins, DataID, Data } from './types';
-import { idStr } from './utils';
+import { map, Observer, Subscription } from "rxjs";
+import { c } from "@wonderlandlabs/collect";
+import {
+  TreeIF,
+  QueryDef,
+  isLeafJSON,
+  LeafObj,
+  LeafObjJSONJoins,
+  DataID,
+  Data,
+} from "./types";
+import { idStr } from "./utils";
 
 /**
  * a leaf is a dynamic _reference_ ("pointer") to a record.
@@ -12,22 +20,17 @@ export class Leaf implements LeafObj {
   constructor(
     private $tree: TreeIF,
     public $collection: string, // should be collectionName maybe?
-    public $identity: DataID
-  ) {
-  }
+    public $identity: DataID,
+  ) {}
 
   $subscribe(observer: Observer<LeafObj>): Subscription {
     return this.$query({})
-      .pipe(
-        map(([ leaf ]: LeafObj[]) => leaf)
-      )
+      .pipe(map(([leaf]: LeafObj[]) => leaf))
       .subscribe(observer);
   }
 
   $query(queryDef: Partial<QueryDef>) {
-    return this.$getCollection.query(
-      { ...queryDef, identity: this.$identity }
-    );
+    return this.$getCollection.query({ ...queryDef, identity: this.$identity });
   }
 
   get $getCollection() {
@@ -36,7 +39,9 @@ export class Leaf implements LeafObj {
 
   get $value(): Data {
     if (!this.$exists) {
-      throw new Error(`the record ${idStr(this.$identity)} has been removed from ${this.$collection}`);
+      throw new Error(
+        `the record ${idStr(this.$identity)} has been removed from ${this.$collection}`,
+      );
     }
     return this.$getCollection.get(this.$identity)!;
   }
@@ -66,10 +71,12 @@ export class Leaf implements LeafObj {
       value: this.$value,
       identity: this.$identity,
       collection: this.$collection,
-      joins: joins
+      joins: joins,
     };
     c(this.$joins).forEach((leafs: LeafObj[], identity) => {
-      out.joins[identity] = leafs.map((leaf) => leaf.toJSON()).filter(isLeafJSON);
+      out.joins[identity] = leafs
+        .map((leaf) => leaf.toJSON())
+        .filter(isLeafJSON);
     });
     return out;
   }

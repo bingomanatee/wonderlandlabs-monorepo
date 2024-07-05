@@ -1,33 +1,37 @@
-import { isNonEmptyString } from '../types';
-import { Observer, Subscription } from 'rxjs';
-import { Data, DataID } from './types.coll-data-validators';
+import { isNonEmptyString } from "../types";
+import { Observer, Subscription } from "rxjs";
+import { Data, DataID } from "./types.coll-data-validators";
 
 export type LeafObjJSONJoins = Record<string, LeafObjJSON[]>;
 
 export type LeafObjJSONAbsent = {
-  collection: string,
-  identity: DataID,
-  $exists: boolean,
-}
+  collection: string;
+  identity: DataID;
+  $exists: boolean;
+};
 
 export type LeafObjJSON = {
-  value: Data,
-  collection: string,
-  identity: DataID,
-  joins?: LeafObjJSONJoins
-}
+  value: Data;
+  collection: string;
+  identity: DataID;
+  joins?: LeafObjJSONJoins;
+};
 
 export function isLeafJSON(a: unknown): a is LeafObjJSON {
-  return !!(a && typeof a === 'object') && ('collection' in a && isNonEmptyString(a.collection)) &&
-    ('identity' in a);
+  return (
+    !!(a && typeof a === "object") &&
+    "collection" in a &&
+    isNonEmptyString(a.collection) &&
+    "identity" in a
+  );
 }
 
 export interface LeafObj {
-  $value: Data
-  $identity: DataID
-  $collection: string
+  $value: Data;
+  $identity: DataID;
+  $collection: string;
 
-  toJSON(): LeafObjJSON | LeafObjJSONAbsent
+  toJSON(): LeafObjJSON | LeafObjJSONAbsent;
 
   $subscribe(observer: Observer<LeafObj>): Subscription;
 }

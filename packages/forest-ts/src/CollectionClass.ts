@@ -7,19 +7,19 @@ import {
   RecordMap,
   RecordFieldSchema,
   TreeIF,
-  UpdatePutMsg
-} from './types';
-import { TypeEnumType } from '@wonderlandlabs/walrus/dist/enums';
-import { ErrorPlus } from './ErrorPlus';
-import { TypeEnum } from '@wonderlandlabs/walrus';
-import { BehaviorSubject, distinctUntilChanged, map, takeWhile } from 'rxjs';
+  UpdatePutMsg,
+} from "./types";
+import { TypeEnumType } from "@wonderlandlabs/walrus/dist/enums";
+import { ErrorPlus } from "./ErrorPlus";
+import { TypeEnum } from "@wonderlandlabs/walrus";
+import { BehaviorSubject, distinctUntilChanged, map, takeWhile } from "rxjs";
 
-import { c } from '@wonderlandlabs/collect';
-import { compareMaps, validateField } from './utils';
-import { CollectionIF } from './types';
+import { c } from "@wonderlandlabs/collect";
+import { compareMaps, validateField } from "./utils";
+import { CollectionIF } from "./types";
 
 function asTypeEnum(value: string | TypeEnumType): TypeEnumType {
-  if (typeof value === 'string' && value in TypeEnum) {
+  if (typeof value === "string" && value in TypeEnum) {
     // @ts-expect-error extracting from TypeEnum falsely is TS error
     return TypeEnum[value];
   }
@@ -36,11 +36,18 @@ const NAME_TEST = /^[a-z\-_$0-9]+$/;
  * in which only one record exists in the collection.
  */
 export default class CollectionClass implements CollectionIF {
-  constructor(public tree: TreeIF, public config: CollectionDef, records?: Data[]) {
+  constructor(
+    public tree: TreeIF,
+    public config: CollectionDef,
+    records?: Data[],
+  ) {
     this._validateConfig();
 
     if (config.schema) {
-      const schemaValidator = this.tree.createSchemaValidator(config.schema, this);
+      const schemaValidator = this.tree.createSchemaValidator(
+        config.schema,
+        this,
+      );
       if (schemaValidator) {
         this._schemaValidator = schemaValidator;
       }
@@ -60,7 +67,7 @@ export default class CollectionClass implements CollectionIF {
 
     this.subject.subscribe(() => {
       this.tree.updates.next({
-        action: 'update-collection',
+        action: "update-collection",
         collection: this.name,
       });
     });
@@ -92,11 +99,19 @@ export default class CollectionClass implements CollectionIF {
   private _validateConfig() {
     const identity = this.config.identity;
     if (!identity) {
-      throw new ErrorPlus('collection config missing identity', this.config);
+      throw new ErrorPlus("collection config missing identity", this.config);
     }
 
-    if (!(this.config.name && typeof this.config.name === 'string' && NAME_TEST.test(this.config.name))) {
-      throw new ErrorPlus('collections must have non-empty name (string, snake_case)');
+    if (
+      !(
+        this.config.name &&
+        typeof this.config.name === "string" &&
+        NAME_TEST.test(this.config.name)
+      )
+    ) {
+      throw new ErrorPlus(
+        "collections must have non-empty name (string, snake_case)",
+      );
     }
   }
 
@@ -140,13 +155,16 @@ export default class CollectionClass implements CollectionIF {
   }
 
   public identityOf(value: Data): DataID {
-    if (typeof this.config.identity === 'string') {
+    if (typeof this.config.identity === "string") {
       return value[this.config.identity] as DataID;
     }
-    if (typeof this.config.identity === 'function') {
+    if (typeof this.config.identity === "function") {
       return this.config.identity(value, this);
     }
-    throw new ErrorPlus('config identity is not valid', { config: this.config, collection: this });
+    throw new ErrorPlus("config identity is not valid", {
+      config: this.config,
+      collection: this,
+    });
   }
 
   /**
@@ -157,10 +175,10 @@ export default class CollectionClass implements CollectionIF {
     const next = new Map(this.values);
     const id = this.identityOf(value);
     this.tree.updates.next({
-      action: 'put-data',
+      action: "put-data",
       collection: this.name,
       identity: id,
-      value
+      value,
     });
 
     next.set(id, value);
@@ -179,25 +197,26 @@ export default class CollectionClass implements CollectionIF {
   }
 
   query(query: Partial<QueryDef>) {
-    if (query.collection && (query.collection !== this.name)) {
-      throw new ErrorPlus(`cannot query ${this.name}with query for ${query.collection}`, query);
+    if (query.collection && query.collection !== this.name) {
+      throw new ErrorPlus(
+        `cannot query ${this.name}with query for ${query.collection}`,
+        query,
+      );
     }
 
     const self = this;
     const cQuery = { collection: this.name, ...query };
     if (cQuery.identity) {
-      return this.subject
-        .pipe(
-          takeWhile((values) => values.has(query.identity!)),
-          distinctUntilChanged((map1, map2) => compareMaps(map1, map2, cQuery)),
-          map(() => self._fetch(cQuery)
-          ),
-        );
+      return this.subject.pipe(
+        takeWhile((values) => values.has(query.identity!)),
+        distinctUntilChanged((map1, map2) => compareMaps(map1, map2, cQuery)),
+        map(() => self._fetch(cQuery)),
+      );
     }
 
     return this.subject.pipe(
       distinctUntilChanged((map1, map2) => compareMaps(map1, map2, cQuery)),
-      map(() => this._fetch(cQuery))
+      map(() => this._fetch(cQuery)),
     );
   }
 
@@ -207,9 +226,11 @@ export default class CollectionClass implements CollectionIF {
       if (!this.has(query.identity)) {
         return [];
       }
-      return [ this.tree.leaf(this.name, query.identity, localQuery) ];
+      return [this.tree.leaf(this.name, query.identity, localQuery)];
     }
-    return Array.from(this.values.keys()).map((key) => this.tree.leaf(this.name, key, localQuery));
+    return Array.from(this.values.keys()).map((key) =>
+      this.tree.leaf(this.name, key, localQuery),
+    );
   }
 
   has(identity: DataID) {
@@ -217,10 +238,12 @@ export default class CollectionClass implements CollectionIF {
   }
 
   fetch(query: Partial<QueryDef>) {
-    if (query.collection && (query.collection !== this.name)) {
-      throw new ErrorPlus(`cannot query ${this.name}with query for ${query.collection}`, query);
+    if (query.collection && query.collection !== this.name) {
+      throw new ErrorPlus(
+        `cannot query ${this.name}with query for ${query.collection}`,
+        query,
+      );
     }
     return this._fetch(query);
   }
-
 }

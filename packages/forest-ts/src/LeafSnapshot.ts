@@ -1,10 +1,11 @@
-import { Data, DataID, LeafObj, TreeIF } from './types';
-import { Subscription } from 'rxjs';
+import { Data, DataID, LeafObj, TreeIF } from "./types";
+import { Subscription } from "rxjs";
 
 export default class LeafSnapshot implements LeafObj {
   public $value: Data;
 
-  constructor(private $tree: TreeIF,
+  constructor(
+    private $tree: TreeIF,
     public $collection: string,
     public $identity: DataID,
   ) {
@@ -15,12 +16,12 @@ export default class LeafSnapshot implements LeafObj {
     return {
       value: this.$value,
       collection: this.$collection,
-      identity: this.$identity
+      identity: this.$identity,
     };
   }
 
   $subscribe() {
-    throw new Error('LeafSnapshot does not imlplement $subscribe');
+    throw new Error("LeafSnapshot does not imlplement $subscribe");
     return new Subscription();
   }
 

@@ -1,2 +1,2 @@
-import { LeafIdentityIF } from '../types';
+import { LeafIdentityIF } from "../types";
 export declare function isLeafIdentityIF(a: unknown): a is LeafIdentityIF;

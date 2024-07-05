@@ -1,6 +1,6 @@
-import { BranchIF } from "../types";
-import { BranchAction, Status } from "./enums";
-import { TreeName, ForestIF } from "./../types";
+import { BranchIF } from '../types';
+import { BranchAction, Status } from './enums';
+import { TreeName, ForestIF } from './../types';
 export type LeafParams = {
     treeName: TreeName;
     key: unknown;
@@ -21,4 +21,11 @@ export type BranchParams = {
 };
 export type ForestParams = {
     cacheInterval?: number;
+};
+export type ScopeParams = {
+    causeID: string;
+    name?: string;
+    cause?: BranchAction;
+    status?: Status;
+    async: boolean;
 };

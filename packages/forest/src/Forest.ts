@@ -12,10 +12,14 @@ import { isLeafIdentityIF } from './helpers/isLeafIdentityIF';
 import { Tree } from './Tree';
 import { isLeafIF } from './helpers/isLeafIF';
 import { DELETED } from './constants';
-import { BranchAction, ChangeTypeEnum } from './helpers/enums';
+import { BranchAction, ChangeTypeEnum, StatusEnum } from './helpers/enums';
 import Scope from './Scope';
 
 const DEFAULT_CACHE_INTERVAL = 8;
+
+function scopeError(scope: ScopeIF, err: Error, scopesRemoved: ScopeIF[]) {
+  return { ...err, scope: scope.scopeID, removed: scopesRemoved.map((s => s.scopeID)) };
+}
 
 export class Forest implements ForestIF {
 
@@ -146,29 +150,78 @@ export class Forest implements ForestIF {
   private pruneScope(sc: ScopeIF) {
     const index = this.scopes.indexOf(sc);
     if (index < 0) {throw new Error('cannot find scope to prune');}
+    const scopesToClear = this.scopes.slice(index);
     this.scopes = this.scopes.slice(0, index);
-  }
 
-
-  transact(fn: ScopeFn, params: ScopeParams, ...args: any[]) {
-    const sc = new Scope(this, params);
-    this.scopes.push(sc);
-    try {
-      fn(this, ...args);
-    } catch (err) {
-      sc.error = err as Error;
-      this.pruneScope(sc);
-      sc.inTrees.forEach((treeName: TreeName) => {
+    // prune currentScope and all subsequent scopes
+    scopesToClear.forEach((clearedScope) =>{
+      clearedScope.inTrees.forEach((treeName: TreeName) => {
         try {
           const tree = this.tree(treeName);
-          tree?.pruneScope(sc.scopeID);
+          tree?.pruneScope(clearedScope.scopeID);
         } catch (err2) {
           console.error('error removing scope', sc, err2);
         }
       });
-    }
-
+    });
+    return scopesToClear;
   }
 
+  public get currentScope() {
+    return this.scopes[this.scopes.length - 1];
+  }
+
+  // for debugging; a list of all scopes that have finished - succeeedd OR failed. 
+  public completedScopes: ScopeIF[] = [];
+  public maxCompletedScopes = 20; // cap the list for memory
+  private archiveScope(sc: ScopeIF) {
+    if (this.maxCompletedScopes > 0) {
+      this.completedScopes.push(sc);
+      if (this.completedScopes.length > this.maxCompletedScopes) {
+        this.completedScopes = this.completedScopes.slice(-this.maxCompletedScopes);
+      }
+    }
+  }
+
+  transact(fn: ScopeFn, params: ScopeParams, ...args: never[]) {
+    const sc = new Scope(this, params);
+    this.scopes.push(sc);
+    let out;
+
+    // attempt to run the function (sync) with the scope in play
+    try {
+      out = fn(this, ...args);
+    } catch (err) {
+      sc.error = err as Error;
+      // remove the scope AND ALL SUBSEQUENT SCOPES from the currentScopes;
+      const scopesRemoved = this.pruneScope(sc);
+      sc.status = StatusEnum.bad;
+      // record the scope in the completedScopes for debugging;
+      this.archiveScope(sc);
+      throw scopeError(sc, err as Error, scopesRemoved);
+      // throwing - if not caught will cascade and eventually, take ALL pending scopes down.
+    }
+
+    sc.status = StatusEnum.good;
+    // record the scope in the completedScopes for debugging;
+    this.archiveScope(sc);
+
+    /*    
+      on a successful run, remove the scope from all trees.
+      note: if this is successful, by definition,
+       any internal scopes were successful and have completed. 
+       So, this should be the last scope on the stack. 
+     */
+    sc.inTrees.forEach((treeName: TreeName) => {
+      try {
+        const tree = this.tree(treeName);
+        tree?.endScope(sc.scopeID);
+      } catch (err3) {
+        console.error('error ending scope', sc, err3);
+      }
+    });
+
+    return out;
+  }
 
 }

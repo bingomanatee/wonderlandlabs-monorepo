@@ -1,5 +1,5 @@
-import { LeafValue, ChangeType, BranchAction, Status } from "./helpers/enums";
-import { ScopeParams, TreeFactoryParams } from "./helpers/paramTypes";
+import { LeafValue, ChangeType, BranchAction, Status } from './helpers/enums';
+import { ScopeParams, TreeFactoryParams } from './helpers/paramTypes';
 
 export type TreeName = string;
 
@@ -39,10 +39,10 @@ export interface ChangeBase<$K = unknown, $V = unknown> {
     treeName: TreeName;
 }
 
-export interface ChangeSet<$K = unknown, $V = unknown> extends ChangeBase<$K, $V> { key: $K, val: $V };
+export interface ChangeSet<$K = unknown, $V = unknown> extends ChangeBase<$K, $V> { key: $K, val: $V }
 export interface ChangeDel<$K = unknown, $V = unknown> extends ChangeBase<$K, $V> { key: $K }
-export interface ChangeSets<$K = unknown, $V = unknown> extends ChangeBase<$K, $V> { }// @TODO
-export interface ChangeDels<$K = unknown, $V = unknown> extends ChangeBase<$K, $V> { }// @TODO
+export type ChangeSets<$K = unknown, $V = unknown> = ChangeBase<$K, $V>// @TODO
+export type ChangeDels<$K = unknown, $V = unknown> = ChangeBase<$K, $V>// @TODO
 //@TODO -- replace
 export type TreeChange<$K = unknown, $V = unknown> = ChangeSet<$K, $V> | ChangeDel<$K, $V> | ChangeSets<$K, $V> | ChangeDels<$K, $V>
 
@@ -112,7 +112,7 @@ export type ScopeFn = (forest: ForestIF, ...args: any) => any;
 export interface ForestIF {
     nextBranchId(): number;
     readonly cacheInterval: number;
-    trees: Map<String, TreeIF>
+    trees: Map<TreeName, TreeIF>
     tree(t: TreeName): TreeIF | undefined;
     addTree(params: TreeFactoryParams): TreeIF; // creates a new tree; throws if existing unless upsert is true. 
     // an existing tree ignores the second argument (map). 
@@ -124,6 +124,6 @@ export interface ForestIF {
     hasAll(r: LeafIdentityIF<unknown>[]): boolean;
     hasTree(t: TreeName): boolean;
     currentScope?: ScopeIF;
-    transact(fn: ScopeFn, params: ScopeParams, ...args: any): any;
+    transact(fn: ScopeFn, params: ScopeParams, ...args: never): unknown;
 }
 

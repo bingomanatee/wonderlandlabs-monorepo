@@ -15,7 +15,7 @@ describe('branches', () => {
             const alphaIDs = [2, 3];
             const alphaBranchIDs = alpha.branches.map((b) => b.id);
             expect(alphaBranchIDs).toEqual(alphaIDs);
-            let betaIDs = [1, 4, 5];
+            const betaIDs = [1, 4, 5];
             const betaBranchIDs = beta.branches.map((b) => b.id);
             expect(betaBranchIDs).toEqual(betaIDs);
         });

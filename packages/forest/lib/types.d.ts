@@ -1,5 +1,5 @@
-import { LeafValue, ChangeType, BranchAction, Status } from "./helpers/enums";
-import { TreeFactoryParams } from "./helpers/paramTypes";
+import { LeafValue, ChangeType, BranchAction, Status } from './helpers/enums';
+import { ScopeParams, TreeFactoryParams } from './helpers/paramTypes';
 export type TreeName = string;
 export type LeafIF<$K = unknown, $V = unknown> = {
     val: LeafValue<$V>;
@@ -33,10 +33,8 @@ export interface ChangeSet<$K = unknown, $V = unknown> extends ChangeBase<$K, $V
 export interface ChangeDel<$K = unknown, $V = unknown> extends ChangeBase<$K, $V> {
     key: $K;
 }
-export interface ChangeSets<$K = unknown, $V = unknown> extends ChangeBase<$K, $V> {
-}
-export interface ChangeDels<$K = unknown, $V = unknown> extends ChangeBase<$K, $V> {
-}
+export type ChangeSets<$K = unknown, $V = unknown> = ChangeBase<$K, $V>;
+export type ChangeDels<$K = unknown, $V = unknown> = ChangeBase<$K, $V>;
 export type TreeChange<$K = unknown, $V = unknown> = ChangeSet<$K, $V> | ChangeDel<$K, $V> | ChangeSets<$K, $V> | ChangeDels<$K, $V>;
 export interface ChangeResponse<$K = unknown, $V = unknown> {
     treeName: TreeName;
@@ -49,15 +47,17 @@ export interface ChangeResponse<$K = unknown, $V = unknown> {
  */
 export interface ScopeIF {
     readonly id: number;
-    causeID: string;
+    scopeID: string;
     name?: string;
     cause: BranchAction;
     status: Status;
     async: boolean;
+    inTrees: Set<TreeName>;
+    error?: Error;
 }
 export interface BranchIF<$K = unknown, $V = unknown> extends Data<$K, $V> {
-    readonly id: number;
     tree: TreeIF<$K, $V>;
+    readonly id: number;
     readonly cause: BranchAction;
     readonly causeID?: string;
     status: Status;
@@ -86,18 +86,20 @@ export interface TreeIF<$K = unknown, $V = unknown> extends Data<$K, $V> {
     endScope(scopeID: string): void;
     pruneScope(scopeID: string): void;
 }
+export type ScopeFn = (forest: ForestIF, ...args: any) => any;
 export interface ForestIF {
-    trees: Map<String, TreeIF>;
     nextBranchId(): number;
     readonly cacheInterval: number;
+    trees: Map<TreeName, TreeIF>;
     tree(t: TreeName): TreeIF | undefined;
     addTree(params: TreeFactoryParams): TreeIF;
+    get(treeNameOrLeaf: TreeName | LeafIdentityIF, key?: unknown): LeafIF;
+    set(treeNameOrLeaf: TreeName | LeafIF, key?: unknown, val?: unknown): ChangeResponse;
     delete(tree: TreeName | LeafIF, keys?: unknown | unknown[]): ChangeResponse;
     hasKey(t: TreeName, k: unknown): boolean;
     has(r: LeafIdentityIF<unknown>): boolean;
     hasAll(r: LeafIdentityIF<unknown>[]): boolean;
     hasTree(t: TreeName): boolean;
-    get(treeNameOrLeaf: TreeName | LeafIdentityIF, key?: unknown): LeafIF;
-    set(treeNameOrLeaf: TreeName | LeafIF, key?: unknown, val?: unknown): ChangeResponse;
     currentScope?: ScopeIF;
+    transact(fn: ScopeFn, params: ScopeParams, ...args: never): unknown;
 }

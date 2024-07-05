@@ -24,7 +24,7 @@ export declare const ChangeTypeEnum: {
 };
 type ChangeTypeEnumKeys = keyof typeof ChangeTypeEnum;
 export type ChangeType = (typeof ChangeTypeEnum)[ChangeTypeEnumKeys];
-export declare const ChangeTypeEnumValues: Symbol[];
+export declare const ChangeTypeEnumValues: symbol[];
 export declare const StatusEnum: {
     good: symbol;
     bad: symbol;

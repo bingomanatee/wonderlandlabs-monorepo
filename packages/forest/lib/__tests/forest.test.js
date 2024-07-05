@@ -59,12 +59,14 @@ describe('Forest', () => {
             });
             expect(f.hasTree('alpha')).toBe(true);
             const bobResponse = f.get({ treeName: 'alpha', key: 100 });
-            if (typeof bobResponse.val === 'symbol')
+            if (typeof bobResponse.val === 'symbol') {
                 throw new Error('Bob not found');
+            }
             expect(bobResponse.val.name).toBe('Bob');
             const sueResponse = f.get({ treeName: 'alpha', key: 200 });
-            if (typeof sueResponse.val === 'symbol')
+            if (typeof sueResponse.val === 'symbol') {
                 throw new Error('Sue not found');
+            }
             expect(sueResponse.val.age).toBe(30);
         });
     });

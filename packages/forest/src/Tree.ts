@@ -8,7 +8,7 @@ import type {
   BranchIF,
   ChangeResponse,
 } from "./types";
-import { BranchAction, BranchActionEnum, StatusEnum } from "./helpers/enums";
+import { Action, Aciion_s, Status_s } from "./helpers/enums";
 import { Branch } from "./Branch";
 import { Leaf } from "./Leaf";
 import { mp } from "./helpers";
@@ -29,8 +29,7 @@ export class Tree implements TreeIF {
     const { forest, treeName, data } = params;
     this.forest = forest;
     this.name = treeName;
-    if (data)
-      this.root = new Branch(this, { data, cause: BranchActionEnum.init });
+    if (data) this.root = new Branch(this, { data, cause: Aciion_s.init });
   }
   activeScopeCauseIDs: Set<string> = new Set();
 
@@ -128,31 +127,37 @@ export class Tree implements TreeIF {
    *
    * @param next {BranchIF}
    */
-  private maybeCache(next: BranchIF) {
-    return;
-    let cacheDepth = 1;
-    let cacheNext: BranchIF = next;
-    while (cacheNext && cacheDepth < this.forest.cacheInterval) {
-      if (!cacheNext.prev) break;
-      cacheNext = cacheNext.prev!;
-      cacheDepth += 1;
-      if (cacheNext.cache) break;
-    }
+  private maybeCache() {
+    const top = this.top;
+    if (!top) return;
 
-    if (cacheDepth >= this.forest.cacheInterval) {
-      // next.cache = next.mergedData();
+    if (this.count(this.forest.cacheInterval) >= this.forest.cacheInterval) {
+      top.cache = top.mergedData();
     }
+    // to garbage collect erace previous caches unless they are behind a scope.
+    top.prev?.clearCache();
   }
 
-  private addBranch(key: unknown, val: unknown, cause: BranchAction) {
+  public count(stopAt = -1) {
+    let c = 0;
+    let n = this.top;
+    while (n) {
+      c += 1;
+      n = n.prev;
+      if (stopAt >= 0 && c >= stopAt) break;
+    }
+    return c;
+  }
+
+  private addBranch(key: unknown, val: unknown, cause: Action) {
     const next = new Branch(this, {
       data: mp(key, val),
-      cause: BranchActionEnum.set,
+      cause: Aciion_s.set,
     });
     if (this.top) {
       next.prev = this.top;
       this.top.next = next;
-      // this.maybeCache(next);
+      this.maybeCache();
       return next;
     } else {
       this.root = next;
@@ -162,17 +167,17 @@ export class Tree implements TreeIF {
   }
 
   set(key: unknown, val: unknown): unknown {
-    this.addBranch(key, val, BranchActionEnum.set);
+    this.addBranch(key, val, Aciion_s.set);
     return this.top!.get(key);
   }
 
   del(key: unknown) {
-    this.addBranch(key, DELETED, BranchActionEnum.del);
+    this.addBranch(key, DELETED, Aciion_s.del);
     return this.top!.get(key);
   }
 
   get status() {
-    return StatusEnum.good;
+    return Status_s.good;
   }
 
   change(c: ChangeBase): ChangeResponse {

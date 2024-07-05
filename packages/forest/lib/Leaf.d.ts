@@ -5,9 +5,9 @@ import { LeafParams } from "./helpers/paramTypes";
  * and the name of the tree it came from. It is a readonly/transient value.
  */
 export declare class Leaf implements LeafIF {
-  constructor(params: LeafParams);
-  readonly val: unknown;
-  readonly key: unknown;
-  readonly treeName: string;
-  get hasValue(): boolean;
+    constructor(params: LeafParams);
+    readonly val: unknown;
+    readonly key: unknown;
+    readonly treeName: string;
+    get hasValue(): boolean;
 }

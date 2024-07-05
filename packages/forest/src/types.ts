@@ -1,4 +1,4 @@
-import { LeafValue, ChangeType, BranchAction, Status } from "./helpers/enums";
+import { LeafValue, Change, Action, Status } from "./helpers/enums";
 import { ScopeParams, TreeFactoryParams } from "./helpers/paramTypes";
 
 export type TreeName = string;
@@ -32,7 +32,7 @@ export interface Data<$K = unknown, $V = unknown> {
 
 // a wrapper for any possible action to a tree.
 export interface ChangeBase<$K = unknown, $V = unknown> {
-  type: ChangeType;
+  type: Change;
   key?: $K | $K[];
   val?: $V;
   data?: Map<$K, $V>;
@@ -74,7 +74,7 @@ export interface ScopeIF {
   readonly id: number;
   scopeID: string;
   name?: string;
-  cause: BranchAction;
+  cause: Action;
   status: Status;
   async: boolean;
   inTrees: Set<TreeName>;
@@ -85,7 +85,7 @@ export interface ScopeIF {
 export interface BranchIF<$K = unknown, $V = unknown> extends Data<$K, $V> {
   tree: TreeIF<$K, $V>;
   readonly id: number;
-  readonly cause: BranchAction;
+  readonly cause: Action;
   readonly causeID?: string;
   status: Status;
   readonly data: Map<$K, $V>;
@@ -95,6 +95,8 @@ export interface BranchIF<$K = unknown, $V = unknown> extends Data<$K, $V> {
   cache?: Map<$K, $V>;
   mergedData(): Map<$K, $V>;
   ensureCurrentScope(): void;
+  clearCache(ignoreScopes?: boolean): void; // removes cache here and in all previous branches;
+  // unless true is passed will not cascade past scopes.
   pop(): void;
   prune(): void;
   destroy(): void;
@@ -109,7 +111,7 @@ export interface TreeIF<$K = unknown, $V = unknown> extends Data<$K, $V> {
   status: Status;
   readonly branches: BranchIF<$K, $V>[];
   values(): Map<$K, $V>;
-
+  count(stopAt?: number): number;
   clearValues(): BranchIF<$K, $V>[];
   readonly size: number;
   activeScopeCauseIDs: Set<string>;
@@ -131,7 +133,7 @@ export interface ForestIF {
   set(
     treeNameOrLeaf: TreeName | LeafIF,
     key?: unknown,
-    val?: unknown,
+    val?: unknown
   ): ChangeResponse;
   delete(tree: TreeName | LeafIF, keys?: unknown | unknown[]): ChangeResponse;
   hasKey(t: TreeName, k: unknown): boolean;

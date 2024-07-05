@@ -1,5 +1,5 @@
 import { BranchIF } from "../types";
-import { BranchAction, Status } from "./enums";
+import { Action, Status } from "./enums";
 import { TreeName, ForestIF } from "./../types";
 
 export type LeafParams = {
@@ -18,7 +18,7 @@ export type BranchParams = {
   data?: Map<unknown, unknown>;
   prev?: BranchIF;
   status?: Status;
-  cause: BranchAction;
+  cause: Action;
   causeID?: string;
 };
 
@@ -29,7 +29,7 @@ export type ForestParams = {
 export type ScopeParams = {
   scopeID?: string;
   name?: string;
-  cause?: BranchAction;
+  cause?: Action;
   status?: Status;
   async?: boolean;
 };

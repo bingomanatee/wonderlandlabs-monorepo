@@ -19,7 +19,7 @@ import { isLeafIdentityIF } from "./helpers/isLeafIdentityIF";
 import { Tree } from "./Tree";
 import { isLeafIF } from "./helpers/isLeafIF";
 import { DELETED } from "./constants";
-import { BranchAction, ChangeTypeEnum, StatusEnum } from "./helpers/enums";
+import { Action, Change_s, Status_s } from "./helpers/enums";
 import Scope from "./Scope";
 
 const DEFAULT_CACHE_INTERVAL = 8;
@@ -62,7 +62,7 @@ export class Forest implements ForestIF {
           forest: this,
           treeName,
           data,
-        }),
+        })
       );
     }
     return this.tree(treeName)!;
@@ -85,7 +85,7 @@ export class Forest implements ForestIF {
         key,
         val: DELETED,
         treeName: treeName,
-        type: ChangeTypeEnum.del,
+        type: Change_s.del,
       },
     };
   }
@@ -97,7 +97,7 @@ export class Forest implements ForestIF {
 
     if (!this.hasTree(treeNameOrLeaf.treeName)) {
       throw new Error(
-        "forest:get -- cannot find tree " + treeNameOrLeaf.treeName,
+        "forest:get -- cannot find tree " + treeNameOrLeaf.treeName
       );
     }
     const tree = this.tree(treeNameOrLeaf.treeName)!;
@@ -108,7 +108,7 @@ export class Forest implements ForestIF {
   set(
     treeNameOrLeaf: TreeName | LeafIF,
     key?: unknown,
-    val?: unknown,
+    val?: unknown
   ): ChangeResponse {
     if (!isLeafIF(treeNameOrLeaf)) {
       if (!this.hasTree(treeNameOrLeaf)) {
@@ -122,7 +122,7 @@ export class Forest implements ForestIF {
           treeName: treeNameOrLeaf,
           key,
           val,
-          type: ChangeTypeEnum.set,
+          type: Change_s.set,
         },
         status: tree.status,
       };
@@ -130,7 +130,7 @@ export class Forest implements ForestIF {
     return this.set(
       treeNameOrLeaf.treeName,
       treeNameOrLeaf.key,
-      treeNameOrLeaf.val,
+      treeNameOrLeaf.val
     );
   }
 
@@ -216,7 +216,7 @@ export class Forest implements ForestIF {
       this.completedScopes.push(sc);
       if (this.completedScopes.length > this.maxCompletedScopes) {
         this.completedScopes = this.completedScopes.slice(
-          -this.maxCompletedScopes,
+          -this.maxCompletedScopes
         );
       }
     }
@@ -234,14 +234,14 @@ export class Forest implements ForestIF {
       sc.error = err as Error;
       // remove the scope AND ALL SUBSEQUENT SCOPES from the currentScopes;
       const scopesRemoved = this.pruneScope(sc);
-      sc.status = StatusEnum.bad;
+      sc.status = Status_s.bad;
       // record the scope in the completedScopes for debugging;
       this.archiveScope(sc);
       throw scopeError(sc, err as Error, scopesRemoved);
       // throwing - if not caught will cascade and eventually, take ALL pending scopes down.
     }
 
-    sc.status = StatusEnum.good;
+    sc.status = Status_s.good;
     // record the scope in the completedScopes for debugging;
     this.archiveScope(sc);
 

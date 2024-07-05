@@ -7,8 +7,8 @@ import type {
 } from "./types";
 import type { BranchParams } from "./helpers/paramTypes";
 
-import type { Status, BranchAction } from "./helpers/enums";
-import { StatusEnum, BranchActionEnum, ChangeTypeEnum } from "./helpers/enums";
+import type { Status, Action } from "./helpers/enums";
+import { Status_s, Aciion_s, Change_s } from "./helpers/enums";
 import { Leaf } from "./Leaf";
 import { delToUndef, mp } from "./helpers";
 import { DELETED, NOT_FOUND } from "./constants";
@@ -25,21 +25,26 @@ export function linkBranches(a?: BranchIF, b?: BranchIF) {
 }
 
 export class Branch implements BranchIF {
-  constructor(
-    public tree: TreeIF,
-    params: BranchParams,
-  ) {
+  constructor(public tree: TreeIF, params: BranchParams) {
     this.cause = params.cause;
     if (params.causeID) {
       this.causeID = params.causeID;
     }
-    this.status = "status" in params ? params.status! : StatusEnum.good;
+    this.status = "status" in params ? params.status! : Status_s.good;
     this.data = this._initData(params);
     if (params.prev) {
       this.prev = params.prev;
     }
     this.id = tree.forest.nextBranchId();
     //@TODO: validate.
+  }
+  clearCache(ignoreScopes: boolean): void {
+    if (this.cause === Aciion_s.trans && !ignoreScopes) {
+      return;
+    }
+    this.cache?.clear();
+    this.cache = undefined;
+    this.prev?.clearCache(!!ignoreScopes);
   }
   readonly causeID?: string;
 
@@ -162,7 +167,7 @@ export class Branch implements BranchIF {
 
   public readonly data: Map<unknown, unknown>;
 
-  public readonly cause: BranchAction;
+  public readonly cause: Action;
   public readonly status: Status;
   next?: BranchIF | undefined;
   prev?: BranchIF | undefined;
@@ -206,7 +211,7 @@ export class Branch implements BranchIF {
     });
   }
 
-  private addBranch(key: unknown, val: unknown, cause: BranchAction): BranchIF {
+  private addBranch(key: unknown, val: unknown, cause: Action): BranchIF {
     if (this.next) {
       throw new Error("cannot push on a non-terminal branch");
     }
@@ -237,7 +242,7 @@ export class Branch implements BranchIF {
     // check to see if there is an active, current scope in the forest.
     if (
       !this.forest.currentScope ||
-      this.forest.currentScope.status !== StatusEnum.pending
+      this.forest.currentScope.status !== Status_s.pending
     ) {
       return;
     }
@@ -274,7 +279,7 @@ export class Branch implements BranchIF {
       return this.next.set(key, val);
     }
 
-    this.addBranch(key, val, BranchActionEnum.set);
+    this.addBranch(key, val, Aciion_s.set);
     //@TODO: validate
     return this.next!.get(key);
   }
@@ -283,7 +288,7 @@ export class Branch implements BranchIF {
     if (this.next) {
       return this.next.del(key);
     }
-    this.addBranch(key, DELETED, ChangeTypeEnum.del);
+    this.addBranch(key, DELETED, Change_s.del);
   }
 
   async = false;
@@ -298,7 +303,7 @@ export class Branch implements BranchIF {
     return {
       treeName: c.treeName,
       change: c,
-      status: StatusEnum.good,
+      status: Status_s.good,
     };
   }
 }

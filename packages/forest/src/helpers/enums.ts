@@ -1,6 +1,6 @@
 // The reason a branch was added to a tree;
 
-export const BranchActionEnum = {
+export const Aciion_s = {
   init: Symbol("TREE_ACTION_INIT"),
   set: Symbol("TREE_ACTION_GET"),
   del: Symbol("TREE_ACTION_DEL"),
@@ -8,19 +8,19 @@ export const BranchActionEnum = {
   action: Symbol("TREE_ACTION_CHANGE"),
   trans: Symbol("TREE_ACTION_CHANGE"),
 };
-type BranchActionEnumKeys = keyof typeof BranchActionEnum;
-export type BranchAction = (typeof BranchActionEnum)[BranchActionEnumKeys];
+type ActionEnumKeys = keyof typeof Aciion_s;
+export type Action = typeof Aciion_s[ActionEnumKeys];
 // possible "ittermittent" value of a request; i.e., why a value may not be returned (yet);
 
-export const LeafValueEnum = {
+export const LeafValue_s = {
   absent: Symbol("LEAF_VALUE_ABSENT"),
   pending: Symbol("LEAF_VALUE_ABSENT"),
 };
-type LeafValueEnumKeys = keyof typeof LeafValueEnum;
-export type LeafValue<$V> = $V | (typeof LeafValueEnum)[LeafValueEnumKeys];
+type LeafValueEnumKeys = keyof typeof LeafValue_s;
+export type LeafValue<$V> = $V | typeof LeafValue_s[LeafValueEnumKeys];
 // The nature of an update;
 
-export const ChangeTypeEnum = {
+export const Change_s = {
   set: Symbol("BRANCH_CHANGE_SET"),
   del: Symbol("BRANCH_CHANGE_DEL"),
   change: Symbol("BRANCH_CHANGE_CHANGE"),
@@ -28,18 +28,18 @@ export const ChangeTypeEnum = {
   changes: Symbol("BRANCH_CHANGE_CHANGE"),
   replace: Symbol("BRANCH_CHANGE_REPLACE"),
 };
-type ChangeTypeEnumKeys = keyof typeof ChangeTypeEnum;
-export type ChangeType = (typeof ChangeTypeEnum)[ChangeTypeEnumKeys];
+type ChangeKeys = keyof typeof Change_s;
+export type Change = typeof Change_s[ChangeKeys];
 export const ChangeTypeEnumValues: symbol[] = Array.from(
-  Object.values(ChangeTypeEnum),
+  Object.values(Change_s)
 );
 
 // The nature of an update;
 
-export const StatusEnum = {
+export const Status_s = {
   good: Symbol("BRANCH_STATUS_GOOD"),
   bad: Symbol("BRANCH_STATUS_BAD"),
   pending: Symbol("BRANCH_STATUS_PENDING"),
 };
-type StatusEnumKeys = keyof typeof StatusEnum;
-export type Status = (typeof StatusEnum)[StatusEnumKeys];
+type StatusKeys = keyof typeof Status_s;
+export type Status = typeof Status_s[StatusKeys];

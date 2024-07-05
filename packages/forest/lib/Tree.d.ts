@@ -9,6 +9,9 @@ type TreeParams = {
  */
 export declare class Tree implements TreeIF {
     constructor(params: TreeParams);
+    activeScopeCauseIDs: Set<string>;
+    endScope(scopeID: string): void;
+    pruneScope(scopeID: string): void;
     get size(): number;
     values(): Map<unknown, unknown>;
     clearValues(): BranchIF<unknown, unknown>[];

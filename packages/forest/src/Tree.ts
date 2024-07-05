@@ -3,7 +3,7 @@ import type {
     TreeName, ChangeBase, Data, BranchIF,
     ChangeResponse
 } from "./types";
-import { BranchAction, BranchActionEnum, StatusEnum } from "./enums";
+import { BranchAction, BranchActionEnum, StatusEnum } from "./helpers/enums";
 import { Branch } from "./Branch";
 import { Leaf } from "./Leaf";
 import { mp } from "./helpers";
@@ -28,6 +28,31 @@ export class Tree implements TreeIF {
         this.name = treeName;
         if (data) this.root = new Branch(this, { data, cause: BranchActionEnum.init });
     }
+    activeScopeCauseIDs: Set<string> = new Set();
+
+    endScope(scopeID: string): void {
+        let br: BranchIF | undefined = this.top;
+
+        while (br) {
+            if (br.causeID === scopeID) {
+                br.pop();
+                break;
+            }
+            br = br.next;
+        }
+        this.activeScopeCauseIDs.delete(scopeID);
+    }
+    pruneScope(scopeID: string): void {
+        let br: BranchIF | undefined = this.top;
+
+        while (br) {
+            if (br.causeID === scopeID) {
+                br.prune();
+                break;
+            }
+            br = br.next;
+        }
+        this.activeScopeCauseIDs.delete(scopeID);    }
     get size() {
         let keys = new Set();
         let branch = this.root;
@@ -68,7 +93,7 @@ export class Tree implements TreeIF {
         if (!this.root) return undefined;
         let b = this.root;
         while (b) {
-            if (!b.next) return b;
+            if (!b.next) break;
             b = b.next;
         }
         return b;
@@ -120,8 +145,8 @@ export class Tree implements TreeIF {
         const next = new Branch(this, { data: mp(key, val), cause: BranchActionEnum.set });
         if (this.top) {
             next.prev = this.top;
-             this.top.next = next;
-           // this.maybeCache(next);
+            this.top.next = next;
+            // this.maybeCache(next);
             return next;
         } else {
             this.root = next;

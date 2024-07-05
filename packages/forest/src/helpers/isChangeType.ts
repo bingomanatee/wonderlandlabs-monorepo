@@ -1,4 +1,4 @@
-import { ChangeType, ChangeTypeEnumValues } from "../enums";
+import { ChangeType, ChangeTypeEnumValues } from "./enums";
 
 
 export function isChangeType(arg: unknown): arg is ChangeType {

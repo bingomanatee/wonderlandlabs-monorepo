@@ -1,4 +1,4 @@
-import { LeafValue, ChangeType, BranchAction, Status } from "./enums";
+import { LeafValue, ChangeType, BranchAction, Status } from "./helpers/enums";
 import { TreeFactoryParams } from "./helpers/paramTypes";
 
 export type TreeName = string;
@@ -54,13 +54,26 @@ export interface ChangeResponse<$K = unknown, $V = unknown> {
 }
 
 // ------------ TOP LEVEL INTERFACES
+/**
+ * tranactions require a bundle of activity that are pending while their activity is in play.
+ * When a transaction error is recieved, all sets that occured after the transaction are cancelled. 
+ */
+
+export interface ScopeIF {
+    readonly id: number;
+    causeID: string;
+    name?: string;
+    cause: BranchAction;
+    status: Status;
+    async: boolean;
+}
 
 // a node on of a linked list that represents a change
 export interface BranchIF<$K = unknown, $V = unknown> extends Data<$K, $V> {
     readonly id: number;
     tree: TreeIF<$K, $V>;
     readonly cause: BranchAction;
-    readonly causeId?: string;
+    readonly causeID?: string;
     status: Status;
     readonly data: Map<$K, $V>;
     values(list?: Map<$K, $V>): Map<$K, $V>
@@ -68,13 +81,17 @@ export interface BranchIF<$K = unknown, $V = unknown> extends Data<$K, $V> {
     prev?: BranchIF<$K, $V>;
     cache?: Map<$K, $V>;
     mergedData(): Map<$K, $V>;
+    ensureCurrentScope(): void;
+    pop(): void;
+    prune(): void;
+    destroy(): void;
 }
 
 // a key/value collection
 export interface TreeIF<$K = unknown, $V = unknown> extends Data<$K, $V> {
     name: TreeName,
     root: BranchIF<$K, $V> | undefined; // linked list start
-    top: Data<$K, $V> | undefined; // linked list end
+    top: BranchIF<$K, $V> | undefined; // linked list end
     forest: ForestIF;
     status: Status;
     readonly branches: BranchIF<$K, $V>[];
@@ -82,22 +99,26 @@ export interface TreeIF<$K = unknown, $V = unknown> extends Data<$K, $V> {
 
     clearValues(): BranchIF<$K, $V>[];
     readonly size: number;
+    activeScopeCauseIDs: Set<string>;
+    endScope(scopeID: string): void;
+    pruneScope(scopeID: string): void;
 }
 
 // a connection of Trees. 
 export interface ForestIF {
     trees: Map<String, TreeIF>
+    nextBranchId(): number;
+    readonly cacheInterval: number;
+    tree(t: TreeName): TreeIF | undefined;
     addTree(params: TreeFactoryParams): TreeIF; // creates a new tree; throws if existing unless upsert is true. 
     // an existing tree ignores the second argument (map). 
-    get(treeNameOrLeaf: TreeName | LeafIdentityIF, key?: unknown): LeafIF
-    set(treeNameOrLeaf: TreeName | LeafIF, key?: unknown, val?: unknown): ChangeResponse;
     delete(tree: TreeName | LeafIF, keys?: unknown | unknown[]): ChangeResponse;
     hasKey(t: TreeName, k: unknown): boolean;
     has(r: LeafIdentityIF<unknown>): boolean;
     hasAll(r: LeafIdentityIF<unknown>[]): boolean;
     hasTree(t: TreeName): boolean;
-    tree(t: TreeName): TreeIF | undefined;
-    nextBranchId(): number;
-    readonly cacheInterval: number;
+    get(treeNameOrLeaf: TreeName | LeafIdentityIF, key?: unknown): LeafIF
+    set(treeNameOrLeaf: TreeName | LeafIF, key?: unknown, val?: unknown): ChangeResponse;
+    currentScope?: ScopeIF;
 }
 

@@ -10,7 +10,7 @@ import { isLeafIdentityIF } from "./helpers/isLeafIdentityIF";
 import { Tree } from "./Tree";
 import { isLeafIF } from "./helpers/isLeafIF";
 import { DELETED } from "./constants";
-import { ChangeTypeEnum } from "./enums";
+import { ChangeTypeEnum } from "./helpers/enums";
 
 const DEFAULT_CACHE_INTERVAL = 8;
 
@@ -20,7 +20,7 @@ export class Forest implements ForestIF {
         this.cacheInterval = params?.cacheInterval || DEFAULT_CACHE_INTERVAL;
     }
 
-    public  readonly cacheInterval;
+    public readonly cacheInterval;
 
     delete(treeName: TreeName | LeafIF, key?: unknown): ChangeResponse {
         if (isLeafIF(treeName)) {

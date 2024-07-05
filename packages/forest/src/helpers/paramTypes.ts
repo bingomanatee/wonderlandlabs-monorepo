@@ -1,5 +1,5 @@
 import { BranchIF } from "../types";
-import { BranchAction } from "../enums";
+import { BranchAction, Status } from "./enums";
 import { TreeName, ForestIF } from "./../types";
 
 
@@ -19,6 +19,7 @@ export type TreeFactoryParams = {
 export type BranchParams = {
     data?: Map<unknown, unknown>;
     prev?: BranchIF;
+    status?: Status;
     cause: BranchAction;
     causeID?: string;
 };

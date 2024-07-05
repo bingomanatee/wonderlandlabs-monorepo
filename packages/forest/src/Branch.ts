@@ -4,26 +4,75 @@ import type {
 } from "./types";
 import type { BranchParams } from "./helpers/paramTypes";
 
-import type { Status, BranchAction } from "./enums";
-import { StatusEnum, BranchActionEnum, ChangeTypeEnum } from "./enums";
+import type { Status, BranchAction } from "./helpers/enums";
+import { StatusEnum, BranchActionEnum, ChangeTypeEnum } from "./helpers/enums";
 import { Leaf } from './Leaf';
 import { delToUndef, mp } from "./helpers";
 import { DELETED, NOT_FOUND } from "./constants";
 import { isTreeSet } from "./helpers/isTreeSet";
 import { isTreeDel } from "./helpers/isTreeDel";
 
+export function linkBranches(a?: BranchIF, b?: BranchIF) {
+    if (a) {
+        a.next = b;
+    }
+    if (b) {
+        b.prev = a;
+    }
+}
+
 export class Branch implements BranchIF {
     constructor(public tree: TreeIF, params: BranchParams) {
         this.cause = params.cause;
         if (params.causeID) this.causeID = params.causeID;
-        this.status = StatusEnum.good;
+        this.status = ('status' in params) ? params.status! : StatusEnum.good;
         this.data = this._initData(params);
         if (params.prev) this.prev = params.prev;
         this.id = tree.forest.nextBranchId();
         //@TODO: validate.
     }
+    readonly causeID?: string;
+
+    /**
+     * remove all references in this node.
+     * assumes that extrenal references TO this node are adjusted elsewhere.
+     */
+    destroy(): void {
+        this.next = undefined;
+        this.prev = undefined;
+        this.data.clear();
+        this.cache?.clear();
+        if (this.causeID && this.tree.activeScopeCauseIDs.has(this.causeID)) {
+            this.tree.activeScopeCauseIDs.delete(this.causeID);
+        }
+    }
+
+    /**
+      * remove this branch from the list chain; link the next and prev branches to each other
+      */
+
+    pop(): void {
+        if (this == this.tree.root) {
+            this.tree.root = this.next;
+        }
+        linkBranches(this.prev, this.next);
+        this.destroy();
+    }
+
+    prune(): void {
+        if (this == this.tree.root) {
+            this.tree.root = undefined;
+        }
+        let toDestroy: BranchIF | undefined = this;
+        let next;
+        while (toDestroy) {
+            next = toDestroy.next;
+            toDestroy.destroy();
+            toDestroy = next;
+        }
+    }
     cache?: Map<unknown, unknown> | undefined;
-    public readonly causeID?: string;
+
     /**
      * combine all active values from this branch downwards. 
      * is intended to be called from a top branch. 
@@ -63,19 +112,27 @@ export class Branch implements BranchIF {
 
     readonly id: number;
 
+    /**
+     * 
+     * @param list values returns all data from this brandch and onwards;
+     * its assumed that the values call has been intialized from the root onwards.
+     * Some of the values may be the DELETED symbol. 
+     * 
+     * @returns Map<key, value>
+     */
     values(list?: Map<unknown, unknown> | undefined): Map<unknown, unknown> {
-        if (!list) {
-            list = new Map(this.data);
+        if (this.cache) {
+            list = new Map(this.cache);
         } else {
-            this.data.forEach((value, key) => {
-                list!.set(key, value);
-            });
+            if (!list) {
+                list = new Map(this.data);
+            } else {
+                this.data.forEach((value, key) => {
+                    list!.set(key, value);
+                });
+            }
         }
-        if (this.next) {
-            return this.next.values(list);
-        }
-        return list;
-
+        return this.next ? this.next.values(list) : list;
     }
 
 
@@ -151,8 +208,47 @@ export class Branch implements BranchIF {
         if (this.prev) return this.prev.has(key);
         return false;
     }
+
+    get forest() {
+        return this.tree.forest;
+    }
+
+    public ensureCurrentScope() {
+
+        // check to see if there is an active, current scope in the forest. 
+        if (!this.forest.currentScope || this.forest.currentScope.status !== StatusEnum.pending) {
+            return;
+        }
+
+        // check to see if thie active scope has been ensured already
+        if (this.tree.activeScopeCauseIDs.has(this.forest.currentScope.causeID)) {
+            return;
+        }
+
+        // ensure the currentScope will be asserted over the topmost branch
+        if (this.tree.top !== this.tree.top) {
+            return this.tree.top?.ensureCurrentScope();
+        }
+
+        const { currentScope } = this.forest;
+
+        // add a branch describing the current scope
+
+        this.next = new Branch(this.tree, {
+            cause: currentScope.cause,
+            status: currentScope.status,
+            causeID: currentScope.causeID,
+            prev: this
+        })
+
+        // register that scope in the ids set to prevent redundant ensurance
+        this.tree.activeScopeCauseIDs.add(currentScope.causeID)
+    }
+
     set(key: unknown, val: unknown): unknown {
+        this.tree.top!.ensureCurrentScope();
         if (this.next) return this.next.set(key, val);
+
         this.addBranch(key, val, BranchActionEnum.set);
         //@TODO: validate
         return this.next!.get(key);

@@ -27,4 +27,11 @@ export type BranchParams = {
 
 export type ForestParams = {
     cacheInterval?: number;
-}
+}export type ScopeParams = {
+    causeID: string;
+    name?: string;
+    cause?: BranchAction;
+    status?: Status;
+    async: boolean;
+};
+

@@ -1,5 +1,5 @@
 import { LeafValue, ChangeType, BranchAction, Status } from "./helpers/enums";
-import { TreeFactoryParams } from "./helpers/paramTypes";
+import { ScopeParams, TreeFactoryParams } from "./helpers/paramTypes";
 
 export type TreeName = string;
 
@@ -61,17 +61,19 @@ export interface ChangeResponse<$K = unknown, $V = unknown> {
 
 export interface ScopeIF {
     readonly id: number;
-    causeID: string;
+    scopeID: string;
     name?: string;
     cause: BranchAction;
     status: Status;
     async: boolean;
+    inTrees: Set<TreeName>;
+    error?: Error;
 }
 
 // a node on of a linked list that represents a change
 export interface BranchIF<$K = unknown, $V = unknown> extends Data<$K, $V> {
-    readonly id: number;
     tree: TreeIF<$K, $V>;
+    readonly id: number;
     readonly cause: BranchAction;
     readonly causeID?: string;
     status: Status;
@@ -104,21 +106,24 @@ export interface TreeIF<$K = unknown, $V = unknown> extends Data<$K, $V> {
     pruneScope(scopeID: string): void;
 }
 
+export type ScopeFn = (forest: ForestIF, ...args: any) => any;
+
 // a connection of Trees. 
 export interface ForestIF {
-    trees: Map<String, TreeIF>
     nextBranchId(): number;
     readonly cacheInterval: number;
+    trees: Map<String, TreeIF>
     tree(t: TreeName): TreeIF | undefined;
     addTree(params: TreeFactoryParams): TreeIF; // creates a new tree; throws if existing unless upsert is true. 
     // an existing tree ignores the second argument (map). 
+    get(treeNameOrLeaf: TreeName | LeafIdentityIF, key?: unknown): LeafIF
+    set(treeNameOrLeaf: TreeName | LeafIF, key?: unknown, val?: unknown): ChangeResponse;
     delete(tree: TreeName | LeafIF, keys?: unknown | unknown[]): ChangeResponse;
     hasKey(t: TreeName, k: unknown): boolean;
     has(r: LeafIdentityIF<unknown>): boolean;
     hasAll(r: LeafIdentityIF<unknown>[]): boolean;
     hasTree(t: TreeName): boolean;
-    get(treeNameOrLeaf: TreeName | LeafIdentityIF, key?: unknown): LeafIF
-    set(treeNameOrLeaf: TreeName | LeafIF, key?: unknown, val?: unknown): ChangeResponse;
     currentScope?: ScopeIF;
+    transact(fn: ScopeFn, params: ScopeParams, ...args: any): any;
 }
 

@@ -25,3 +25,14 @@ export function delToUndef(val: unknown) {
   }
   return val;
 }
+
+export function withoutDeletes(m: Map<unknown, unknown>) {
+
+  const out = new Map(m);
+  m.forEach((v, k) =>{
+    if (v === DELETED || v === NOT_FOUND) {
+      out.delete(k);
+    }
+  })
+  return out;
+}

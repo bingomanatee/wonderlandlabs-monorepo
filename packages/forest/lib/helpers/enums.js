@@ -4,7 +4,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.Status_s = exports.ChangeTypeEnumValues = exports.Change_s = exports.LeafValue_s = exports.Aciion_s = void 0;
 exports.Aciion_s = {
     init: Symbol("ACTION_INIT"),
-    set: Symbol("ACTION_GET"),
+    set: Symbol("ACTION_SET"),
     del: Symbol("ACTION_DEL"),
     change: Symbol("ACTION_CHANGE"),
     action: Symbol("ACTION_CHANGE"),

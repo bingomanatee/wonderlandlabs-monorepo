@@ -234,6 +234,7 @@ export class Forest implements ForestIF {
       sc.error = err as Error;
       // remove the scope AND ALL SUBSEQUENT SCOPES from the currentScopes;
       const scopesRemoved = this.pruneScope(sc);
+
       sc.status = Status_s.bad;
       // record the scope in the completedScopes for debugging;
       this.archiveScope(sc);

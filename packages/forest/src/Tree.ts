@@ -9,7 +9,7 @@ import type {
   ChangeResponse,
 } from "./types";
 import { Action, Aciion_s as Action_s, Status_s } from "./helpers/enums";
-import { Branch } from "./Branch";
+import { Branch, linkBranches } from "./Branch";
 import { Leaf } from "./Leaf";
 import { mp } from "./helpers";
 import { isTreeSet } from "./helpers/isTreeSet";
@@ -46,13 +46,16 @@ export class Tree implements TreeIF {
     this.activeScopeCauseIDs.delete(scopeID);
   }
   pruneScope(scopeID: string): void {
-    let br: BranchIF | undefined = this.top;
+    let br: BranchIF | undefined = this.root;
 
+    let pruned = false;
     while (br) {
       if (br.causeID === scopeID) {
         br.prune();
+        pruned = true;
         break;
       }
+
       br = br.next;
     }
     this.activeScopeCauseIDs.delete(scopeID);
@@ -165,10 +168,8 @@ export class Tree implements TreeIF {
       cause: Action_s.set,
     });
     if (this.top) {
-      next.prev = this.top;
-      this.top.next = next;
+      linkBranches(this.top, next);
       this.maybeCache();
-      return next;
     } else {
       this.root = next;
     }
@@ -176,13 +177,39 @@ export class Tree implements TreeIF {
     return next;
   }
 
+  private pushCurrentScope() {
+    if (
+      !this.forest.currentScope ||
+      this.forest.currentScope.inTrees.has(this.name)
+    ) {
+      return;
+    }
+    this.forest.currentScope?.inTrees.add(this.name);
+    const transBranch = new Branch(this, {
+      cause: Action_s.trans,
+      causeID: this.forest.currentScope.scopeID,
+    });
+    if (this.top) {
+      linkBranches(this.top, transBranch);
+    } else {
+      this.root = transBranch;
+    }
+  }
+
   set(key: unknown, val: unknown): unknown {
+    if (this.forest.currentScope) {
+      this.pushCurrentScope();
+    }
     this.addBranch(key, val, Action_s.set);
     return this.top!.get(key);
   }
 
   del(key: unknown) {
+    if (this.forest.currentScope) {
+      this.pushCurrentScope();
+    }
     this.addBranch(key, DELETED, Action_s.del);
+
     return this.top!.get(key);
   }
 

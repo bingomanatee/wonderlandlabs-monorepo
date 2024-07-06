@@ -32,6 +32,7 @@ export declare class Tree implements TreeIF {
     private maybeCache;
     count(stopAt?: number): number;
     private addBranch;
+    private pushCurrentScope;
     set(key: unknown, val: unknown): unknown;
     del(key: unknown): unknown;
     get status(): symbol;

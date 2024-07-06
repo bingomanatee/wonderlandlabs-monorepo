@@ -45,27 +45,53 @@ function summarizeSales(f: ForestIF) {
     totalReturns += saleData.returns;
   });
 
-  f.set(SALES_SUMMARIES_TREE_NAME, `${firstDate}...${lastDate}`, {
-    totalSales,
-    totalReturns,
-  });
+  f.set(
+    SALES_SUMMARIES_TREE_NAME,
+    `${firstDate}...${lastDate}`,
+    new SalesData(totalSales, totalReturns)
+  );
 }
 
 describe("transact/Scope", () => {
-  it("should not blow up", () => {
+  it("should allow a successful transact scope to complete", () => {
     const f = new Forest();
     f.addTree({ name: "sales", data: makeLogs() });
 
     f.transact(summarizeSales);
 
-    // console.log('sales summaries:', f.tree(SALES_SUMMARIES_TREE_NAME)!.values());
     expect(f.tree(SALES_SUMMARIES_TREE_NAME)?.values()).toEqual(
       new Map([
-        [
-          "Thu Jan 01 2026...Fri May 01 2026",
-          { totalSales: 56100, totalReturns: 4420 },
-        ],
+        ["Thu Jan 01 2026...Fri May 01 2026", new SalesData(56100, 4420)],
       ])
     );
+  });
+
+  it("should reset any changes made during a broken transact fn", () => {
+    const f = new Forest();
+    f.addTree({ name: "sales", data: makeLogs() });
+
+    expect(() => {
+      f.transact((f) => {
+        const sales = f.tree("sales")!;
+
+        sales.del("Sun Mar 01 2026");
+        sales.set("Sun Jan 01 2027", new SalesData(1000, 4000));
+        sales.branches.forEach((branch) => {
+          console.log('---- branch', branch.id, branch.data, branch.cause.toString(), branch.causeID);
+        })
+        throw new Error("boom");
+      });
+    }).toThrow();
+
+    const initialValues = makeLogs();
+
+    const currentValues = f.tree("sales")?.values();
+    console.log(
+      "--- currentValues are ",
+      currentValues,
+      "newValues:",
+      initialValues
+    );
+    expect(currentValues).toEqual(initialValues);
   });
 });

@@ -2,7 +2,7 @@
 
 export const Aciion_s = {
   init: Symbol("ACTION_INIT"),
-  set: Symbol("ACTION_GET"),
+  set: Symbol("ACTION_SET"),
   del: Symbol("ACTION_DEL"),
   change: Symbol("ACTION_CHANGE"),
   action: Symbol("ACTION_CHANGE"),

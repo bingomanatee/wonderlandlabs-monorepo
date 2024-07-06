@@ -78,16 +78,21 @@ export class Branch implements BranchIF {
   }
 
   prune(): void {
-    if (this == this.tree.root) {
-      this.tree.root = undefined;
+    let { tree, prev, next } = this;
+
+    if (this == tree.root) {
+      tree.root = undefined;
+    }
+    if (prev) {
+      prev.next = undefined;
     }
     let toDestroy: BranchIF | undefined = this;
-    let next;
     while (toDestroy) {
       next = toDestroy.next;
       toDestroy.destroy();
       toDestroy = next;
     }
+
   }
   cache?: Map<unknown, unknown> | undefined;
 

@@ -14,7 +14,7 @@ export type LeafIdentityIF<$K = unknown> = {
 export interface Data<$K = unknown, $V = unknown> {
     leaf(key: $K): LeafIF<$K, $V>;
     get(key: $K): LeafValue<$V>;
-    has(key: $K): boolean;
+    has(key: $K, local?: boolean): boolean;
     set(key: $K, val: $V): LeafValue<$V>;
     del(key: $K): void;
     change(change: TreeChange): ChangeResponse;

@@ -39,7 +39,7 @@ This is analogous to a Database with Tables and indexed rows.
 Trees are formally defined as having a single type of key and value. (<$K,$V>); however given the fact that Forests contain many trees and its impossible
 to know what the key / value type of a tree is given its name, the k/v type retuned by `tree(name)` is unknown; you must use `as` to enforece a more specifically typed tree.
 
-## Transactional
+## Transactional Integrity
 
 Transactions create "batches" of changes that either SUCCEED or FAIL as a group. This means that any failures of specific changes bring all the changes following the opening of the transaction to a halt. Similarly the contained changes are all considered "atomic" - when a transcation is completed they are all "squashed" into a single changeset (per table).
 
@@ -94,16 +94,168 @@ Forest uses a key/value/map driven heirarchy,
   but trees can bey identified/as'ed into a Generic pattern.. `myTree: TreeIF<keyType, valueType> = myForest.tree('name') as TreeIF<keyType, valueType>`. 
 * Values can be basic property values (heterogeneus) or records (homogenous). No assumption is made about the depth of a tree. 
 
+Another common structure is a _Leaf_. Leaves are "annotated records" of a value with props `{keyName, key, val}`. 
+
+You can set key/values on Forest instances, or their trees. 
+```
+myForest.set('sales', '2016/01/01', {sales: 10000, returns: 50});
+// or 
+myForest.set({treeName: 'sales', key: '2016/01/01', val: {sales: 10000, returns: 50}});
+// or
+myForest.tree('sales').set('2016/01/01', {sales: 10000, returns: 50})
+```
+
+Likewise, you can get or set from Forests or Trees:
+
+```
+console.log(myForest.get('sales', '2016/01/01'));
+// or 
+console.log(myForest.tree('sales').get('2016/01/01'));
+```
+all of these calls will have the same output, `{sales: 10000, returns: 50}`.
+
+### Calling actions on branches directly
+
+You can even call it on branches - but you will get a Leaf rather than a raw value. Note - don't rely on this in production
+as this is an internal convenience and may change later. 
+
+```
+myForest.tree('sales').top.set('2016/01/01',{sales: 10000, returns: 50} ) 
+console.log(myForest.tree('sales').top.get('2016/01/01')); 
+// output --- {tree: 'sales', key: '2016/01/01', val: {sales: 10000, returns: 50}}
+```
+
+note - while setting _any_ branch will automaticlally append a new branch to the end of top, calling `get(key)` on 
+a branch will only look at its own values and any in previous branches - it won't look forward for values. 
+
+## TMI (1) Referntial integrity 
+
+Forest makes no promise regarding referential integrity of its values; only that they will be __equivalent__ to what was passed in.
+eg., the prototype chain probably won't be preserved. (its possible Immer will be added at some point to drive that point home.).
+
+At this point there is also no guarantee that values _WON'T_ be referentially identical to their input, either.
+
+At some point input filtering will be an optional feature in which case you can be guaranteed that referntial integrity
+won't be preerved (depeding on the nature of your filter function). 
+
+# Public API
+
+While there are many methods you _can_ call on Forests and Trees, here are the ones you _should_ call:
+
+```
+// a key/value collection
+export interface TreeIF<$K = unknown, $V = unknown> extends Data<$K, $V> {
+  name: TreeName;
+  forest: ForestIF;
+  status: Status;
+  values(): Map<$K, $V>;
+  count(stopAt?: number): number;
+  clearValues(): BranchIF<$K, $V>[]; // removes ALL data from the tree. 
+  readonly size: number; // the number of records stored in the data -- INCLUDING DELETED REFERENCES.
+}
+
+export type ScopeFn = (forest: ForestIF, ...args: any) => any;
+
+// a connection of Trees.
+export interface ForestIF {
+  readonly cacheInterval: number;
+  trees: Map<TreeName, TreeIF>;
+  tree(t: TreeName): TreeIF | undefined;
+  addTree(params: TreeFactoryParams): TreeIF; // creates a new tree; throws if existing unless upsert is true.
+  // an existing tree ignores the second argument (map).
+  get(treeNameOrLeaf: TreeName | LeafIdentityIF, key?: unknown): LeafIF;
+  set( // accepts name, key, value OR {tableName, key, val}
+    treeNameOrLeaf: TreeName | LeafIF,
+    key?: unknown,
+    val?: unknown
+  ): ChangeResponse;
+  delete(tree: TreeName | LeafIF, keys?: unknown | unknown[]): ChangeResponse;
+  hasKey(t: TreeName, k: unknown): boolean;
+  has(r: LeafIdentityIF<unknown>): boolean;
+  hasAll(r: LeafIdentityIF<unknown>[]): boolean;
+  hasTree(t: TreeName): boolean;
+  transact(fn: ScopeFn, params?: ScopeParams, ...args: never): unknown; // performs an "all or nothing" set of operations; 
+  // any thrown (uncaught) errors resets the tree(s) to the state they were at before the transaction stared. 
+}
+```
+
+## TMI(2): caching and garbage collection
+
 Internally tree data is maintained in a Branch. Each branch has a data map which overrides/annotates the previous one. thus, each `myTree.set(k, v)` call creates a branch which journals that action. 
 
 When you call `myTree.get(k)`, the journal is traversed most recent to last recent until a value is found for that key. 
 For efficiency a cache can be asserted at any branch contaiing all previous values, to impprove retrieval time. Once a branch
 with a cache is found, the cache is trusted and no further parent branches are polled. 
 
-## TMI: caching and garbage collection
-
 Forest by default will cache every eight branches. You can manually lower the cacheInterval when you configure forest by passing it as a constructor parameter. (todo: tree-level config for cacheInterval). You can even set it to 0 to create rolling
 caches for each branch, 
 
 Caches can of course get pretty heavy after a while. However, every time you create a cache, it will clear out caches above it, 
 so a tree will never have more than one cached branch -- unless it has a transaction(scope); cache-clearing is blocked by a scope, so that you're not constantly destroying/recreatig caches when scopes are active. But clearing out the last transaction should garbage-collect caches below the last one. 
+
+### The Tradeoffs
+
+If you don't cache, writing becomes MUCH faster - you never transport values from the root to any branches' cache. The 
+cost for that is every _get_ (read) becomes a loop through the data. If the data is distributed eqsully along all branches it will be `On/2`, with n being the numver of branches. If most of the data is in the root it will be nearly `On`. 
+
+You can manually cache at any point by calling `myTree.top?.cache = myTree.top?.mergedData()`. You can even clear out all branches by calling 
+```
+const data = myTree.top?.mergedData() || new Map(); 
+myTree,root.prune();
+ myTree.root = new Branch({
+    data
+})
+```
+__*DO NOT DO THIS INSIDE A TRANSACTION*__ or you may lose all your data. 
+
+But it is probably better to let Forest handle the read/write optimization on its own timeline. Practically speaking, the same
+data is likely to get set and get a lot, which will make it retrieve relatively fast. 
+
+## TMI (3) - atomic actions 
+
+Each branch is atomic. If it is inside a scope (transaction) the transaction is considered atomic, 
+effectively containing the set of all changes that follow it (including those in sub-scopes). 
+
+There is no limit to the number of key/values that can be changed, deleted or added by a branch; you can replace _one_, _all_ or _none_ 
+of the keys within the branches' data. 
+
+* If the action type is `Action_s.replace` then _all_ the data in the tree is replaced by the branches' data; 
+* If the action type is `Action_s.clear` then _all_ the data in the tree is _erased_ by the branch. 
+
+(the "replace" functionality has not been implemented yet). 
+
+## WARNING: DO NOT EDIT BRANCHES
+
+You should only maipulate trees through the public APIs - otherwise things can get wierd. Forest is extremely write-once - manipulation 
+of the data maps is guaranteed to make things ... really wierd. 
+
+# Roadmap
+
+## MVP 
+
+0. user defined actions
+1. filters
+2. validation
+3. RxJS subscription
+3.1 React hooks
+
+## Power Features
+4. Graph queries / indexing
+5. "Active record" ORM system
+6. schema
+7. Object based trees
+8. Single-tree "Basic mode"
+11. Selector subscription
+11.2 Documentation and Sample Site
+11.3 Rxjs as a devDependency
+
+## Miracle Features
+9. Asynchronous branching and resolution -- "Back to the future" / virtualized forests and trees
+12. variable-depth trees (single-value, multi-dimensional data trees)
+13. GraphQL integration
+14. FQL - forest query language for scripted actions
+15. Storage IO, serialization/deserialization
+16. Immer integration perhaps as a "utility pack"
+17. Arbitrary publishing pipeline, perhaps with events/listeners for sub-actions
+18. Google toolbar
+19. Web Workers

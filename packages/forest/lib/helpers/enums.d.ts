@@ -5,6 +5,7 @@ export declare const Aciion_s: {
     change: symbol;
     action: symbol;
     trans: symbol;
+    clear: symbol;
 };
 type ActionEnumKeys = keyof typeof Aciion_s;
 export type Action = typeof Aciion_s[ActionEnumKeys];

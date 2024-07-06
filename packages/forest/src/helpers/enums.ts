@@ -1,12 +1,13 @@
 // The reason a branch was added to a tree;
 
 export const Aciion_s = {
-  init: Symbol("TREE_ACTION_INIT"),
-  set: Symbol("TREE_ACTION_GET"),
-  del: Symbol("TREE_ACTION_DEL"),
-  change: Symbol("TREE_ACTION_CHANGE"),
-  action: Symbol("TREE_ACTION_CHANGE"),
-  trans: Symbol("TREE_ACTION_CHANGE"),
+  init: Symbol("ACTION_INIT"),
+  set: Symbol("ACTION_GET"),
+  del: Symbol("ACTION_DEL"),
+  change: Symbol("ACTION_CHANGE"),
+  action: Symbol("ACTION_CHANGE"),
+  trans: Symbol("ACTION_CHANGE"),
+  clear: Symbol("ACTION_CLEAR"),
 };
 type ActionEnumKeys = keyof typeof Aciion_s;
 export type Action = typeof Aciion_s[ActionEnumKeys];
@@ -21,12 +22,12 @@ export type LeafValue<$V> = $V | typeof LeafValue_s[LeafValueEnumKeys];
 // The nature of an update;
 
 export const Change_s = {
-  set: Symbol("BRANCH_CHANGE_SET"),
-  del: Symbol("BRANCH_CHANGE_DEL"),
-  change: Symbol("BRANCH_CHANGE_CHANGE"),
-  sets: Symbol("BRANCH_CHANGE_SET"),
-  changes: Symbol("BRANCH_CHANGE_CHANGE"),
-  replace: Symbol("BRANCH_CHANGE_REPLACE"),
+  set: Symbol("CHANGE_SET"),
+  del: Symbol("CHANGE_DEL"),
+  change: Symbol("CHANGE_CHANGE"),
+  sets: Symbol("CHANGE_SET"),
+  changes: Symbol("CHANGE_CHANGE"),
+  replace: Symbol("CHANGE_REPLACE"),
 };
 type ChangeKeys = keyof typeof Change_s;
 export type Change = typeof Change_s[ChangeKeys];

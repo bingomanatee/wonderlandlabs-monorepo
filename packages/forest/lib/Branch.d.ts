@@ -2,6 +2,9 @@ import type { LeafIF, TreeIF, ChangeBase, BranchIF, ChangeResponse } from "./typ
 import type { BranchParams } from "./helpers/paramTypes";
 import type { Status, Action } from "./helpers/enums";
 export declare function linkBranches(a?: BranchIF, b?: BranchIF): void;
+/**
+ * TODO: compress sets of the same value at some point to reduce branch size.
+ */
 export declare class Branch implements BranchIF {
     tree: TreeIF;
     constructor(tree: TreeIF, params: BranchParams);
@@ -41,14 +44,15 @@ export declare class Branch implements BranchIF {
     prev?: BranchIF | undefined;
     leaf(key: unknown): LeafIF;
     /**
-     *
+     * get PRESUMES that it has either been called from the top node,
+     * or it is a recursive count from the top node.
      * @param key {unknown}
      * @returns unknown
      */
     get(key: unknown): unknown;
     private leafFactory;
     private addBranch;
-    has(key: unknown): boolean;
+    has(key: unknown, local?: boolean): boolean;
     get forest(): import("./types").ForestIF;
     ensureCurrentScope(): void;
     set(key: unknown, val: unknown): unknown;

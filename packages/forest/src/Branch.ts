@@ -24,6 +24,9 @@ export function linkBranches(a?: BranchIF, b?: BranchIF) {
   }
 }
 
+/**
+ * TODO: compress sets of the same value at some point to reduce branch size.
+ */
 export class Branch implements BranchIF {
   constructor(public tree: TreeIF, params: BranchParams) {
     this.cause = params.cause;
@@ -182,7 +185,8 @@ export class Branch implements BranchIF {
   }
 
   /**
-   *
+   * get PRESUMES that it has either been called from the top node,
+   * or it is a recursive count from the top node.
    * @param key {unknown}
    * @returns unknown
    */
@@ -196,8 +200,16 @@ export class Branch implements BranchIF {
       }
       return undefined;
     }
-    if (this.prev) {
-      return delToUndef(this.prev.get(key));
+    let branch = this.prev;
+    // rather than recurse we iterate backwards to limit call depth
+    while (branch) {
+      if (branch.has(key, true)) {
+        return branch.get(key);
+      }
+      if (branch.cache) {
+        return undefined;
+      }
+      branch = branch.prev;
     }
     return undefined;
   }
@@ -224,13 +236,11 @@ export class Branch implements BranchIF {
     return next;
   }
 
-  has(key: unknown): boolean {
-    if (this.data.has(key)) {
-      return true;
-    }
-    if (this.prev) {
-      return this.prev.has(key);
-    }
+  has(key: unknown, local?: boolean): boolean {
+    if (this.cache?.has(key)) return true;
+    if (this.data.has(key)) return true;
+    if (local) return false;
+    if (this.prev) return this.prev.has(key);
     return false;
   }
 
@@ -274,14 +284,10 @@ export class Branch implements BranchIF {
   }
 
   set(key: unknown, val: unknown): unknown {
-    this.tree.top!.ensureCurrentScope();
-    if (this.next) {
-      return this.next.set(key, val);
-    }
-
-    this.addBranch(key, val, Aciion_s.set);
-    //@TODO: validate
-    return this.next!.get(key);
+    const top = this.tree.top;
+    if (this !== top) return top?.set(key, val);
+    this!.ensureCurrentScope();
+    return this.addBranch(key, val, Aciion_s.set).leaf(key);
   }
 
   del(key: unknown): void {

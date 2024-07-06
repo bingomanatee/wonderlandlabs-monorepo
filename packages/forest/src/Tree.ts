@@ -8,7 +8,7 @@ import type {
   BranchIF,
   ChangeResponse,
 } from "./types";
-import { Action, Aciion_s, Status_s } from "./helpers/enums";
+import { Action, Aciion_s as Action_s, Status_s } from "./helpers/enums";
 import { Branch } from "./Branch";
 import { Leaf } from "./Leaf";
 import { mp } from "./helpers";
@@ -29,7 +29,7 @@ export class Tree implements TreeIF {
     const { forest, treeName, data } = params;
     this.forest = forest;
     this.name = treeName;
-    if (data) this.root = new Branch(this, { data, cause: Aciion_s.init });
+    if (data) this.root = new Branch(this, { data, cause: Action_s.init });
   }
   activeScopeCauseIDs: Set<string> = new Set();
 
@@ -57,6 +57,7 @@ export class Tree implements TreeIF {
     }
     this.activeScopeCauseIDs.delete(scopeID);
   }
+  // the number of unique keys in the data - INCLUDING DELETED REXORDS
   get size() {
     let keys = new Set();
     let branch = this.root;
@@ -74,6 +75,15 @@ export class Tree implements TreeIF {
   }
 
   clearValues() {
+    if (!this.root) return [];
+    if (this.forest.currentScope) {
+      const clearBranch = new Branch(this, {
+        cause: Action_s.clear,
+      });
+      this.top!.next = clearBranch;
+      clearBranch.cache = new Map(); // block any downward reading of values -- "cloaking" the values with an empty map.
+      return [];
+    }
     const removed = this.branches;
     this.root = undefined;
     return removed;
@@ -152,7 +162,7 @@ export class Tree implements TreeIF {
   private addBranch(key: unknown, val: unknown, cause: Action) {
     const next = new Branch(this, {
       data: mp(key, val),
-      cause: Aciion_s.set,
+      cause: Action_s.set,
     });
     if (this.top) {
       next.prev = this.top;
@@ -167,12 +177,12 @@ export class Tree implements TreeIF {
   }
 
   set(key: unknown, val: unknown): unknown {
-    this.addBranch(key, val, Aciion_s.set);
+    this.addBranch(key, val, Action_s.set);
     return this.top!.get(key);
   }
 
   del(key: unknown) {
-    this.addBranch(key, DELETED, Aciion_s.del);
+    this.addBranch(key, DELETED, Action_s.del);
     return this.top!.get(key);
   }
 

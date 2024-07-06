@@ -24,7 +24,7 @@ export interface Data<$K = unknown, $V = unknown> {
   // but they return leaves instead of the raw value.
   leaf(key: $K): LeafIF<$K, $V>;
   get(key: $K): LeafValue<$V>;
-  has(key: $K): boolean;
+  has(key: $K, local?: boolean): boolean;
   set(key: $K, val: $V): LeafValue<$V>;
   del(key: $K): void;
   change(change: TreeChange): ChangeResponse;
@@ -112,8 +112,8 @@ export interface TreeIF<$K = unknown, $V = unknown> extends Data<$K, $V> {
   readonly branches: BranchIF<$K, $V>[];
   values(): Map<$K, $V>;
   count(stopAt?: number): number;
-  clearValues(): BranchIF<$K, $V>[];
-  readonly size: number;
+  clearValues(): BranchIF<$K, $V>[]; // removes all values in the table. (a "virtual removal" inside scopes)
+  readonly size: number; // the count of values in the tree -- INCLUDING DELETED VALUES.
   activeScopeCauseIDs: Set<string>;
   endScope(scopeID: string): void;
   pruneScope(scopeID: string): void;

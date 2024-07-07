@@ -1,19 +1,17 @@
-import type { LeafIF, TreeIF, ForestIF, TreeName, ChangeBase, BranchIF, ChangeResponse } from "./types";
-type TreeParams = {
-    treeName: TreeName;
-    forest: ForestIF;
-    data?: Map<unknown, unknown>;
-};
+import type { LeafIF, TreeIF, ForestIF, TreeName, ChangeBase, BranchIF, ChangeResponse, TreeData } from "./types";
+import { DataType } from "./helpers/enums";
+import { TreeParams } from "./helpers/paramTypes";
 /**
  * Tree is a "table" of records; a key/value store.
  */
 export declare class Tree implements TreeIF {
     constructor(params: TreeParams);
+    dataType: DataType;
     activeScopeCauseIDs: Set<string>;
     endScope(scopeID: string): void;
     pruneScope(scopeID: string): void;
     get size(): number;
-    values(): Map<unknown, unknown>;
+    values(): TreeData<unknown, unknown>;
     clearValues(): BranchIF<unknown, unknown>[];
     get branches(): BranchIF<unknown, unknown>[];
     forest: ForestIF;
@@ -31,11 +29,9 @@ export declare class Tree implements TreeIF {
      */
     private maybeCache;
     count(stopAt?: number): number;
-    private addBranch;
     private pushCurrentScope;
-    set(key: unknown, val: unknown): unknown;
-    del(key: unknown): unknown;
+    set(key: unknown, val: unknown): void;
+    del(key: unknown): void;
     get status(): symbol;
     change(c: ChangeBase): ChangeResponse;
 }
-export {};

@@ -4,33 +4,37 @@ import type {
   ForestIF,
   TreeName,
   ChangeBase,
-  Data,
   BranchIF,
   ChangeResponse,
+  TreeData,
 } from "./types";
-import { Action, Aciion_s as Action_s, Status_s } from "./helpers/enums";
-import { Branch, linkBranches } from "./Branch";
+import {
+  Action,
+  Action_s as Action_s,
+  DataType,
+  DataType_s,
+  Status_s,
+} from "./helpers/enums";
+import { BranchMap, linkBranches } from "./BranchMap";
 import { Leaf } from "./Leaf";
 import { mp } from "./helpers";
 import { isTreeSet } from "./helpers/isTreeSet";
 import { isTreeDel } from "./helpers/isTreeDel";
 import { DELETED, NOT_FOUND } from "./constants";
+import { TreeParams } from "./helpers/paramTypes";
 
-type TreeParams = {
-  treeName: TreeName;
-  forest: ForestIF;
-  data?: Map<unknown, unknown>;
-};
 /**
  * Tree is a "table" of records; a key/value store.
  */
 export class Tree implements TreeIF {
   constructor(params: TreeParams) {
-    const { forest, treeName, data } = params;
+    const { forest, name: treeName, data } = params;
     this.forest = forest;
     this.name = treeName;
-    if (data) this.root = new Branch(this, { data, cause: Action_s.init });
+    this.dataType = params.dataType || DataType_s.map;
+    if (data) this.root = new BranchMap(this, { data, cause: Action_s.init });
   }
+  dataType: DataType;
   activeScopeCauseIDs: Set<string> = new Set();
 
   endScope(scopeID: string): void {
@@ -66,21 +70,33 @@ export class Tree implements TreeIF {
     let branch = this.root;
 
     while (branch) {
-      branch.data.forEach((_, k) => keys.add(k));
+      branch.forEach((_, k) => keys.add(k));
       branch = branch.next;
     }
     return keys.size;
   }
 
-  values(): Map<unknown, unknown> {
-    if (!this.root) return new Map();
-    return this.root.values();
+  values(): TreeData<unknown, unknown> {
+    switch (this.dataType) {
+      case DataType_s.map:
+        if (!this.root) return new Map();
+        return this.root.values() as Map<unknown, unknown>;
+        break;
+
+      case DataType_s.object:
+        if (!this.root) return {};
+        return this.root.values() as Record<string, unknown>;
+        break;
+
+      default:
+        throw new Error("cannot manage type");
+    }
   }
 
   clearValues() {
     if (!this.root) return [];
     if (this.forest.currentScope) {
-      const clearBranch = new Branch(this, {
+      const clearBranch = new BranchMap(this, {
         cause: Action_s.clear,
       });
       this.top!.next = clearBranch;
@@ -162,21 +178,6 @@ export class Tree implements TreeIF {
     return c;
   }
 
-  private addBranch(key: unknown, val: unknown, cause: Action) {
-    const next = new Branch(this, {
-      data: mp(key, val),
-      cause: Action_s.set,
-    });
-    if (this.top) {
-      linkBranches(this.top, next);
-      this.maybeCache();
-    } else {
-      this.root = next;
-    }
-
-    return next;
-  }
-
   private pushCurrentScope() {
     if (
       !this.forest.currentScope ||
@@ -185,7 +186,7 @@ export class Tree implements TreeIF {
       return;
     }
     this.forest.currentScope?.inTrees.add(this.name);
-    const transBranch = new Branch(this, {
+    const transBranch = new BranchMap(this, {
       cause: Action_s.trans,
       causeID: this.forest.currentScope.scopeID,
     });
@@ -196,21 +197,37 @@ export class Tree implements TreeIF {
     }
   }
 
-  set(key: unknown, val: unknown): unknown {
+  set(key: unknown, val: unknown) {
     if (this.forest.currentScope) {
       this.pushCurrentScope();
     }
-    this.addBranch(key, val, Action_s.set);
-    return this.top!.get(key);
+
+    if (!this.root) {
+      switch (this.dataType) {
+        case DataType_s.map:
+          this.root = new BranchMap(this, {
+            data: new Map([[key, val]]),
+            cause: Action_s.set,
+          });
+          break;
+
+        case DataType_s.object:
+          throw new Error("not implemented");
+          break;
+
+        default:
+          throw new Error("bad dataType");
+      }
+    } else this.top?.set(key, val);
   }
 
   del(key: unknown) {
+    if (!this.root || !this.top?.has(key)) return;
+
     if (this.forest.currentScope) {
       this.pushCurrentScope();
     }
-    this.addBranch(key, DELETED, Action_s.del);
-
-    return this.top!.get(key);
+    return this.top?.del(key);
   }
 
   get status() {

@@ -1,8 +1,8 @@
 "use strict";
 // The reason a branch was added to a tree;
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.Status_s = exports.ChangeTypeEnumValues = exports.Change_s = exports.LeafValue_s = exports.Aciion_s = void 0;
-exports.Aciion_s = {
+exports.DataType_s = exports.Status_s = exports.ChangeTypeEnumValues = exports.Change_s = exports.LeafValue_s = exports.Action_s = void 0;
+exports.Action_s = {
     init: Symbol("ACTION_INIT"),
     set: Symbol("ACTION_SET"),
     del: Symbol("ACTION_DEL"),
@@ -31,4 +31,9 @@ exports.Status_s = {
     good: Symbol("BRANCH_STATUS_GOOD"),
     bad: Symbol("BRANCH_STATUS_BAD"),
     pending: Symbol("BRANCH_STATUS_PENDING"),
+};
+// The nature of an update;
+exports.DataType_s = {
+    map: Symbol("DATA_TYPE_MAP"),
+    object: Symbol('DATA_TYPE_OBJECT')
 };

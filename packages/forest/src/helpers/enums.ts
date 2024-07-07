@@ -1,6 +1,6 @@
 // The reason a branch was added to a tree;
 
-export const Aciion_s = {
+export const Action_s = {
   init: Symbol("ACTION_INIT"),
   set: Symbol("ACTION_SET"),
   del: Symbol("ACTION_DEL"),
@@ -9,8 +9,8 @@ export const Aciion_s = {
   trans: Symbol("ACTION_CHANGE"),
   clear: Symbol("ACTION_CLEAR"),
 };
-type ActionEnumKeys = keyof typeof Aciion_s;
-export type Action = typeof Aciion_s[ActionEnumKeys];
+type ActionEnumKeys = keyof typeof Action_s;
+export type Action = typeof Action_s[ActionEnumKeys];
 // possible "ittermittent" value of a request; i.e., why a value may not be returned (yet);
 
 export const LeafValue_s = {
@@ -44,3 +44,12 @@ export const Status_s = {
 };
 type StatusKeys = keyof typeof Status_s;
 export type Status = typeof Status_s[StatusKeys];
+
+// The nature of an update;
+
+export const DataType_s = {
+  map: Symbol("DATA_TYPE_MAP"),
+  object: Symbol('DATA_TYPE_OBJECT')
+};
+type DataTypeKeys = keyof typeof DataType_s;
+export type DataType = typeof DataType_s[DataTypeKeys];

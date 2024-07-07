@@ -1,5 +1,5 @@
 import { BranchIF } from "../types";
-import { Action, Status } from "./enums";
+import { Action, DataType, Status } from "./enums";
 import { TreeName, ForestIF } from "./../types";
 
 export type LeafParams = {
@@ -8,11 +8,20 @@ export type LeafParams = {
   val: unknown;
   forest?: ForestIF;
 };
-export type TreeFactoryParams = {
-  name: TreeName;
+
+type TreeParamsBase = {
   data?: Map<unknown, unknown>;
-  upsert?: boolean;
+  dataType?: DataType;
+  name: TreeName;
 };
+
+export type AddTreeParams = {
+  upsert?: boolean;
+} & TreeParamsBase;
+
+export type TreeParams = {
+  forest: ForestIF;
+} & TreeParamsBase;
 
 export type BranchParams = {
   data?: Map<unknown, unknown>;

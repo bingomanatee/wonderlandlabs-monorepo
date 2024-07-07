@@ -1,4 +1,4 @@
-export declare const Aciion_s: {
+export declare const Action_s: {
     init: symbol;
     set: symbol;
     del: symbol;
@@ -7,8 +7,8 @@ export declare const Aciion_s: {
     trans: symbol;
     clear: symbol;
 };
-type ActionEnumKeys = keyof typeof Aciion_s;
-export type Action = typeof Aciion_s[ActionEnumKeys];
+type ActionEnumKeys = keyof typeof Action_s;
+export type Action = typeof Action_s[ActionEnumKeys];
 export declare const LeafValue_s: {
     absent: symbol;
     pending: symbol;
@@ -33,4 +33,10 @@ export declare const Status_s: {
 };
 type StatusKeys = keyof typeof Status_s;
 export type Status = typeof Status_s[StatusKeys];
+export declare const DataType_s: {
+    map: symbol;
+    object: symbol;
+};
+type DataTypeKeys = keyof typeof DataType_s;
+export type DataType = typeof DataType_s[DataTypeKeys];
 export {};

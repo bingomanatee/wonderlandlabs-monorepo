@@ -4,16 +4,19 @@ import type {
   ChangeBase,
   BranchIF,
   ChangeResponse,
+  BranchMapIF,
+  IterFn,
 } from "./types";
 import type { BranchParams } from "./helpers/paramTypes";
 
 import type { Status, Action } from "./helpers/enums";
-import { Status_s, Aciion_s, Change_s } from "./helpers/enums";
+import { Status_s, Action_s, Change_s, DataType_s } from "./helpers/enums";
 import { Leaf } from "./Leaf";
 import { delToUndef, mp } from "./helpers";
 import { DELETED, NOT_FOUND } from "./constants";
 import { isTreeSet } from "./helpers/isTreeSet";
 import { isTreeDel } from "./helpers/isTreeDel";
+import { BranchBase } from "./BranchBase";
 
 export function linkBranches(a?: BranchIF, b?: BranchIF) {
   if (a) {
@@ -27,29 +30,27 @@ export function linkBranches(a?: BranchIF, b?: BranchIF) {
 /**
  * TODO: compress sets of the same value at some point to reduce branch size.
  */
-export class Branch implements BranchIF {
-  constructor(public tree: TreeIF, params: BranchParams) {
-    this.cause = params.cause;
-    if (params.causeID) {
-      this.causeID = params.causeID;
-    }
-    this.status = "status" in params ? params.status! : Status_s.good;
+export class BranchMap extends BranchBase implements BranchMapIF {
+  constructor(tree: TreeIF, params: BranchParams) {
+    super(tree, params);
     this.data = this._initData(params);
     if (params.prev) {
-      this.prev = params.prev;
+      this.prev = params.prev as BranchMapIF;
     }
-    this.id = tree.forest.nextBranchId();
     //@TODO: validate.
   }
-  clearCache(ignoreScopes: boolean): void {
-    if (this.cause === Aciion_s.trans && !ignoreScopes) {
-      return;
+  forEach(fn: IterFn): void {
+    let stop = false;
+    let stopFn = () => (stop = true);
+    if (this.tree.dataType === DataType_s.map) {
+      for (const [key, val] of this.data as Map<unknown, unknown>) {
+        fn(val, key, stopFn);
+        if (stop) break;
+      }
+    } else {
+      throw new Error("bad data for BranchMap");
     }
-    this.cache?.clear();
-    this.cache = undefined;
-    this.prev?.clearCache(!!ignoreScopes);
   }
-  readonly causeID?: string;
 
   /**
    * remove all references in this node.
@@ -65,35 +66,6 @@ export class Branch implements BranchIF {
     }
   }
 
-  /**
-   * remove this branch from the list chain; link the next and prev branches to each other
-   */
-
-  pop(): void {
-    if (this == this.tree.root) {
-      this.tree.root = this.next;
-    }
-    linkBranches(this.prev, this.next);
-    this.destroy();
-  }
-
-  prune(): void {
-    let { tree, prev, next } = this;
-
-    if (this == tree.root) {
-      tree.root = undefined;
-    }
-    if (prev) {
-      prev.next = undefined;
-    }
-    let toDestroy: BranchIF | undefined = this;
-    while (toDestroy) {
-      next = toDestroy.next;
-      toDestroy.destroy();
-      toDestroy = next;
-    }
-
-  }
   cache?: Map<unknown, unknown> | undefined;
 
   /**
@@ -104,7 +76,7 @@ export class Branch implements BranchIF {
     if (this.cache) {
       return this.cache;
     }
-    let start: BranchIF = this;
+    let start: BranchMapIF | undefined = this;
 
     while (start) {
       if (!start.prev) {
@@ -127,7 +99,7 @@ export class Branch implements BranchIF {
       if (next.cache) {
         merged = new Map(next.cache);
       } else {
-        next.data.forEach((value, key) => {
+        next.forEach((value, key) => {
           merged.set(key, value);
         });
       }
@@ -140,8 +112,6 @@ export class Branch implements BranchIF {
 
     return merged;
   }
-
-  readonly id: number;
 
   /**
    *
@@ -166,7 +136,7 @@ export class Branch implements BranchIF {
     return this.next ? this.next.values(list) : list;
   }
 
-  private _initData(config: BranchParams) {
+  protected _initData(config: BranchParams) {
     if (config.data) {
       return config.data;
     }
@@ -175,18 +145,15 @@ export class Branch implements BranchIF {
 
   public readonly data: Map<unknown, unknown>;
 
-  public readonly cause: Action;
-  public readonly status: Status;
-  next?: BranchIF | undefined;
-  prev?: BranchIF | undefined;
+  next?: BranchMapIF | undefined;
+  prev?: BranchMapIF | undefined;
+
   leaf(key: unknown): LeafIF {
-    if (this.data.has(key)) {
-      return this.leafFactory(key, this.data.get(key));
-    }
-    if (this.prev) {
-      return this.prev.leaf(key);
-    }
-    return this.leafFactory(key, NOT_FOUND);
+    return new Leaf({
+      key,
+      val: this.get(key),
+      treeName: this.tree.name,
+    });
   }
 
   /**
@@ -219,28 +186,6 @@ export class Branch implements BranchIF {
     return undefined;
   }
 
-  private leafFactory(k: unknown, v?: unknown) {
-    return new Leaf({
-      treeName: this.tree.name,
-      key: k,
-      val: v,
-      forest: this.tree.forest,
-    });
-  }
-
-  private addBranch(key: unknown, val: unknown, cause: Action): BranchIF {
-    if (this.next) {
-      throw new Error("cannot push on a non-terminal branch");
-    }
-    const next = new Branch(this.tree, {
-      prev: this,
-      data: mp(key, val),
-      cause: cause,
-    });
-    this.next = next;
-    return next;
-  }
-
   has(key: unknown, local?: boolean): boolean {
     if (this.cache?.has(key)) return true;
     if (this.data.has(key)) return true;
@@ -251,6 +196,10 @@ export class Branch implements BranchIF {
 
   get forest() {
     return this.tree.forest;
+  }
+
+  make(params: BranchParams) {
+    return new BranchMap(this.tree, params);
   }
 
   public ensureCurrentScope() {
@@ -276,7 +225,7 @@ export class Branch implements BranchIF {
 
     // add a branch describing the current scope
 
-    this.next = new Branch(this.tree, {
+    this.next = new BranchMap(this.tree, {
       cause: currentScope.cause,
       status: currentScope.status,
       causeID: currentScope.scopeID,
@@ -292,17 +241,24 @@ export class Branch implements BranchIF {
     const top = this.tree.top;
     if (this !== top) return top?.set(key, val);
     this!.ensureCurrentScope();
-    return this.addBranch(key, val, Aciion_s.set).leaf(key);
+    const branch: BranchMapIF = this.make({
+      data: new Map([[key, val]]),
+      cause: Action_s.set,
+    }) as BranchMapIF;
+    this.push(branch);
   }
 
   del(key: unknown): void {
     if (this.next) {
       return this.next.del(key);
     }
-    this.addBranch(key, DELETED, Change_s.del);
+    const branch = this.make({
+      data: new Map([[key, DELETED]]),
+      cause: Action_s.del,
+    });
+    this.push(branch);
   }
 
-  async = false;
   change(c: ChangeBase<unknown, unknown>): ChangeResponse<unknown, unknown> {
     if (isTreeSet(c)) {
       this.set(c.key, c.val);

@@ -1,5 +1,5 @@
-import { LeafValue, Change, Action, Status } from "./helpers/enums";
-import { ScopeParams, TreeFactoryParams } from "./helpers/paramTypes";
+import { LeafValue, Change, Action, Status, DataType } from "./helpers/enums";
+import { ScopeParams, AddTreeParams, BranchParams } from "./helpers/paramTypes";
 export type TreeName = string;
 export type LeafIF<$K = unknown, $V = unknown> = {
     val: LeafValue<$V>;
@@ -15,7 +15,7 @@ export interface Data<$K = unknown, $V = unknown> {
     leaf(key: $K): LeafIF<$K, $V>;
     get(key: $K): LeafValue<$V>;
     has(key: $K, local?: boolean): boolean;
-    set(key: $K, val: $V): LeafValue<$V>;
+    set(key: $K, val: $V): void;
     del(key: $K): void;
     change(change: TreeChange): ChangeResponse;
 }
@@ -55,32 +55,47 @@ export interface ScopeIF {
     inTrees: Set<TreeName>;
     error?: Error;
 }
+export type TreeData<$K = unknown, $V = unknown> = Map<$K, $V> | Record<string, $V>;
+export type IterFn = (val: unknown, key: unknown, stop: () => void) => void;
 export interface BranchIF<$K = unknown, $V = unknown> extends Data<$K, $V> {
     tree: TreeIF<$K, $V>;
     readonly id: number;
     readonly cause: Action;
     readonly causeID?: string;
     status: Status;
-    readonly data: Map<$K, $V>;
-    values(list?: Map<$K, $V>): Map<$K, $V>;
+    readonly data: any;
+    values(list?: TreeData<$K, $V>): any;
+    mergedData(): any;
+    cache?: any;
     next?: BranchIF<$K, $V>;
     prev?: BranchIF<$K, $V>;
-    cache?: Map<$K, $V>;
-    mergedData(): Map<$K, $V>;
+    make(params: BranchParams): BranchIF<$K, $V>;
     ensureCurrentScope(): void;
     clearCache(ignoreScopes?: boolean): void;
     pop(): void;
     prune(): void;
+    push(branch: BranchIF): void;
     destroy(): void;
+    forEach(fn: IterFn): void;
+}
+export interface BranchMapIF<$K = unknown, $V = unknown> extends BranchIF {
+    readonly data: Map<$K, $V>;
+    values(list?: Map<$K, $V>): Map<$K, $V>;
+    mergedData(): Map<$K, $V>;
+    cache?: Map<$K, $V>;
+    next?: BranchMapIF<$K, $V>;
+    prev?: BranchMapIF<$K, $V>;
+    make(params: BranchParams): BranchMapIF<$K, $V>;
 }
 export interface TreeIF<$K = unknown, $V = unknown> extends Data<$K, $V> {
     name: TreeName;
     root: BranchIF<$K, $V> | undefined;
     top: BranchIF<$K, $V> | undefined;
     forest: ForestIF;
+    readonly dataType: DataType;
     status: Status;
     readonly branches: BranchIF<$K, $V>[];
-    values(): Map<$K, $V>;
+    values(): TreeData<$K, $V>;
     count(stopAt?: number): number;
     clearValues(): BranchIF<$K, $V>[];
     readonly size: number;
@@ -94,7 +109,7 @@ export interface ForestIF {
     readonly cacheInterval: number;
     trees: Map<TreeName, TreeIF>;
     tree(t: TreeName): TreeIF | undefined;
-    addTree(params: TreeFactoryParams): TreeIF;
+    addTree(params: AddTreeParams): TreeIF;
     get(treeNameOrLeaf: TreeName | LeafIdentityIF, key?: unknown): LeafIF;
     set(treeNameOrLeaf: TreeName | LeafIF, key?: unknown, val?: unknown): ChangeResponse;
     delete(tree: TreeName | LeafIF, keys?: unknown | unknown[]): ChangeResponse;

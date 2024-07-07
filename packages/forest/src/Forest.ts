@@ -12,7 +12,7 @@ import type {
 import type {
   ForestParams,
   ScopeParams,
-  TreeFactoryParams,
+  AddTreeParams,
 } from "./helpers/paramTypes";
 import { isString } from "./helpers/isString";
 import { isLeafIdentityIF } from "./helpers/isLeafIdentityIF";
@@ -48,7 +48,7 @@ export class Forest implements ForestIF {
 
   // ---------------- TREE -----------------
   trees: Map<string, TreeIF> = new Map();
-  addTree(params: TreeFactoryParams): TreeIF {
+  addTree(params: AddTreeParams): TreeIF {
     const { name: treeName, data, upsert } = params;
 
     if (this.hasTree(treeName)) {
@@ -60,7 +60,7 @@ export class Forest implements ForestIF {
         treeName,
         new Tree({
           forest: this,
-          treeName,
+          name: treeName,
           data,
         })
       );

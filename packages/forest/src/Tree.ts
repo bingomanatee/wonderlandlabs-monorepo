@@ -18,10 +18,11 @@ import {
 import { BranchMap, linkBranches } from "./BranchMap";
 import { Leaf } from "./Leaf";
 import { mp } from "./helpers";
-import { isTreeSet } from "./helpers/isTreeSet";
+import { isTreeSet } from "./helpers/isChangeSet";
 import { isTreeDel } from "./helpers/isTreeDel";
 import { DELETED, NOT_FOUND } from "./constants";
-import { TreeParams } from "./helpers/paramTypes";
+import { BranchParams, TreeParams } from "./helpers/paramTypes";
+import { BranchObj } from "./BranchObj";
 
 /**
  * Tree is a "table" of records; a key/value store.
@@ -32,10 +33,30 @@ export class Tree implements TreeIF {
     this.forest = forest;
     this.name = treeName;
     this.dataType = params.dataType || DataType_s.map;
-    if (data) this.root = new BranchMap(this, { data, cause: Action_s.init });
+    if (data)
+      this.root = this.makeBranch({ data: params.data, cause: Action_s.init });
   }
   dataType: DataType;
   activeScopeCauseIDs: Set<string> = new Set();
+
+  private makeBranch(params: BranchParams) {
+    let branch: BranchIF;
+
+    if (this.dataType === DataType_s.map) {
+      if (params.data && !(params.data instanceof Map)) {
+        throw new Error("bad data param(map)");
+      }
+      branch = new BranchMap(this, params);
+    } else if (this.dataType === DataType_s.object) {
+      if (params.data && !(typeof params.data === "object")) {
+        throw new Error("bad data param(obj)");
+      }
+      branch = new BranchObj(this, params);
+    } else {
+      throw new Error("cannot type tree " + this.name);
+    }
+    return branch;
+  }
 
   endScope(scopeID: string): void {
     let br: BranchIF | undefined = this.top;
@@ -80,12 +101,12 @@ export class Tree implements TreeIF {
     switch (this.dataType) {
       case DataType_s.map:
         if (!this.root) return new Map();
-        return this.root.values() as Map<unknown, unknown>;
+        return (this.root as BranchMap).values() as Map<unknown, unknown>;
         break;
 
       case DataType_s.object:
         if (!this.root) return {};
-        return this.root.values() as Record<string, unknown>;
+        return (this.root as BranchObj).values() as Record<string, unknown>;
         break;
 
       default:
@@ -161,7 +182,7 @@ export class Tree implements TreeIF {
     if (!top) return;
 
     if (this.count(this.forest.cacheInterval) >= this.forest.cacheInterval) {
-      top.cache = top.mergedData();
+      top.cache = top.mergeData();
     }
     // to garbage collect erace previous caches unless they are behind a scope.
     top.prev?.clearCache();

@@ -10,6 +10,7 @@ import type { Status, Action } from "./helpers/enums";
 export declare abstract class BranchBase implements BranchIF {
     tree: TreeIF;
     constructor(tree: TreeIF, params: BranchParams);
+    mergeData(): void;
     values(list?: TreeData<unknown, unknown> | undefined): TreeData<unknown, unknown>;
     mergedData(): TreeData<unknown, unknown>;
     cache?: TreeData<unknown, unknown> | undefined;
@@ -18,7 +19,6 @@ export declare abstract class BranchBase implements BranchIF {
     get(key: unknown): unknown;
     make(parmas: BranchParams): BranchIF;
     set(key: unknown, val: unknown): unknown;
-    protected _initData(params: BranchParams): void;
     del(key: unknown): void;
     data: TreeData;
     protected get dataType(): symbol;

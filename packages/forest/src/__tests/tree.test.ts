@@ -1,4 +1,5 @@
 import { Forest } from "../Forest";
+import { BranchMapIF } from "../types";
 
 type UserType = { name: string; age: number };
 function bobAndSue() {
@@ -36,7 +37,7 @@ describe("tree", () => {
 
       expect(tree.get(400)).toEqual(bill);
 
-      const branches = tree.branches;
+      const branches = tree.branches as BranchMapIF[];
       expect(branches.length).toBe(2);
       expect(branches[0].data).toEqual(bobAndSue());
       expect(branches[1].data).toEqual(new Map([[400, bill]]));

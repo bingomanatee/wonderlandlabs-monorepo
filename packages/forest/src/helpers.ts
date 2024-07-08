@@ -1,4 +1,5 @@
 import { DELETED, NOT_FOUND } from "./constants";
+import { isBranchIF } from "./helpers/isBranchIF";
 import type { BranchIF } from "./types";
 
 export function mp(...args: unknown[]): Map<unknown, unknown> {
@@ -43,4 +44,19 @@ export function linkBranches(a?: BranchIF, b?: BranchIF) {
   if (b) {
     b.prev = a;
   }
+}
+
+/**
+ * finds a branch meeting qualifications starting from and including the first param.
+ */
+export function findPrevBranch(
+  start: BranchIF,
+  test: (b: BranchIF) => boolean
+) {
+  let out: BranchIF | undefined = start;
+  while (out) {
+    if (test(out)) return out;
+    out = out.prev;
+  }
+  return undefined;
 }

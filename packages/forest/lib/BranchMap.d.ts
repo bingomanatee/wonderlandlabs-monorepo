@@ -7,7 +7,11 @@ export declare function linkBranches(a?: BranchIF, b?: BranchIF): void;
  */
 export declare class BranchMap extends BranchBase implements BranchMapIF {
     constructor(tree: TreeIF, params: BranchParams);
+    get next$(): BranchMapIF | undefined;
+    get prev$(): BranchMapIF | undefined;
     forEach(fn: IterFn): void;
+    protected get root(): BranchMapIF | undefined;
+    protected get top(): BranchMapIF | undefined;
     /**
      * remove all references in this node.
      * assumes that extrenal references TO this node are adjusted elsewhere.
@@ -21,10 +25,9 @@ export declare class BranchMap extends BranchBase implements BranchMapIF {
     mergedData(): Map<unknown, unknown>;
     /**
      *
-     * @param list values returns all data from this brandch and onwards;
-     * its assumed that the values call has been intialized from the root onwards.
-     * Some of the values may be the DELETED symbol.
+     * @param list {GenObj};
      *
+     * acumulate values from this and further branches and all subsequent branches
      * @returns Map<key, value>
      */
     values(list?: Map<unknown, unknown> | undefined): Map<unknown, unknown>;
@@ -42,7 +45,7 @@ export declare class BranchMap extends BranchBase implements BranchMapIF {
     get(key: unknown): unknown;
     has(key: unknown, local?: boolean): boolean;
     get forest(): import("./types").ForestIF;
-    make(params: BranchParams): BranchMap;
+    make$(params: BranchParams): BranchMap;
     ensureCurrentScope(): void;
     set(key: unknown, val: unknown): unknown;
     del(key: unknown): void;

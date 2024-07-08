@@ -6,6 +6,8 @@ import type {
   ChangeResponse,
   BranchMapIF,
   IterFn,
+  GenObj,
+  BranchObjIF,
 } from "./types";
 import type { BranchParams } from "./helpers/paramTypes";
 
@@ -17,64 +19,54 @@ import { DELETED, NOT_FOUND } from "./constants";
 import { isTreeSet } from "./helpers/isChangeSet";
 import { isTreeDel } from "./helpers/isTreeDel";
 import { BranchBase } from "./BranchBase";
+import { isObj } from "./helpers/isObj";
 
-export function linkBranches(a?: BranchIF, b?: BranchIF) {
-  if (a) {
-    a.next = b;
-  }
-  if (b) {
-    b.prev = a;
+function destroyObj(obj?: GenObj) {
+  if (!isObj(obj)) return;
+
+  for (const key of Object.keys(obj)) {
+    delete obj[key];
   }
 }
 
 /**
  * TODO: compress sets of the same value at some point to reduce branch size.
  */
-export class BranchMap extends BranchBase implements BranchMapIF {
+export class BranchObj extends BranchBase implements BranchObjIF {
   constructor(tree: TreeIF, params: BranchParams) {
     super(tree, params);
     this.data = this._initData(params);
     if (params.prev) {
-      this.prev = params.prev as BranchMapIF;
+      this.prev$ = params.prev as BranchObjIF;
     }
     //@TODO: validate.
   }
-
-  get next$(): BranchMapIF | undefined {
-    if (!this.next) return undefined;
-    return this.next as BranchMapIF;
-  }
-  get prev$(): BranchMapIF | undefined {
-    if (!this.prev) return undefined;
-    return this.prev as BranchMapIF;
-  }
-
   forEach(fn: IterFn): void {
     let stop = false;
     let stopFn = () => (stop = true);
+    const keys = Object.keys(this.data);
     if (this.tree.dataType === DataType_s.map) {
-      for (const [key, val] of this.data as Map<unknown, unknown>) {
-        fn(val, key, stopFn);
+      for (const key of keys) {
+        fn(this.data[key], key, stopFn);
         if (stop) break;
       }
     } else {
       throw new Error("bad data for BranchMap");
     }
   }
-
-  protected get root(): BranchMapIF | undefined {
+  protected get root(): BranchObjIF | undefined {
     if (!this.tree?.root) {
       console.warn("branch has a tree without a root, or no tree");
       return undefined;
     }
-    return this.tree.root as BranchMapIF;
+    return this.tree.root as BranchObjIF;
   }
-  protected get top(): BranchMapIF | undefined {
+  protected get top(): BranchObjIF | undefined {
     if (!this.tree?.top) {
       console.warn("branch has a tree without a root, or no tree");
       return undefined;
     }
-    return this.tree.top as BranchMapIF;
+    return this.tree.top as BranchObjIF;
   }
 
   /**
@@ -84,30 +76,28 @@ export class BranchMap extends BranchBase implements BranchMapIF {
   destroy(): void {
     this.next = undefined;
     this.prev = undefined;
-    this.data.clear();
-    this.cache?.clear();
+    destroyObj(this.data);
+    destroyObj(this.cache);
     if (this.causeID && this.tree.activeScopeCauseIDs.has(this.causeID)) {
       this.tree.activeScopeCauseIDs.delete(this.causeID);
     }
   }
 
-  cache?: Map<unknown, unknown> | undefined;
+  cache?: GenObj | undefined;
 
   /**
-   * combine all active values from this branch downwards.
-   * is intended to be called from a top branch.
+   * return the tree's current accumulated data.
    */
-  mergedData(): Map<unknown, unknown> {
+  mergedData$(): GenObj {
     // note - top and root must be true if this has a tree
     //@ts-ignore
     if (this !== this.top) return this.top!.mergedData();
 
     // first process - find the first node with a cache -- if any exist
     const lastCachedBranch = findPrevBranch(
-      this,
+      this as BranchIF,
       (b: BranchIF) => b.cache
-    ) as BranchMapIF;
-
+    ) as BranchObjIF;
     if (lastCachedBranch) {
       /**
        * if there is a cached branch AND it has no subseuqent brnanches return the cache.
@@ -115,29 +105,28 @@ export class BranchMap extends BranchBase implements BranchMapIF {
        */
       return lastCachedBranch.next$
         ? lastCachedBranch.next$.values(lastCachedBranch.cache)
-        : new Map(lastCachedBranch.cache);
+        : { ...lastCachedBranch.cache };
     } else {
-      // in the absence of a cache, build the values up from an empty map starting with root
-      return this.root!.values(new Map());
+      // in the absence of a cache, build the values up from an empty obj starting with root
+      return this.root!.values({});
     }
   }
 
   /**
    *
-   * @param list {GenObj};
+   * @param list {GenObj}
    *
    * acumulate values from this and further branches and all subsequent branches
-   * @returns Map<key, value>
+   * @returns GenObj
    */
-  values(list?: Map<unknown, unknown> | undefined): Map<unknown, unknown> {
-    let branch: BranchMapIF | undefined = this;
-    let out = list || new Map();
+  values(list?: GenObj): GenObj {
+    let branch: BranchObjIF | undefined = this;
+    let out = list || {};
     while (branch) {
       if (branch.cache) {
         out = branch.cache;
       } else {
-        out = new Map(out);
-        branch.data.forEach((v, k) => out?.set(k, v));
+        out = { ...out, ...branch.data };
       }
       branch = branch.next$;
     }
@@ -146,20 +135,32 @@ export class BranchMap extends BranchBase implements BranchMapIF {
 
   protected _initData(config: BranchParams) {
     if (config.data) {
-      if (!(config.data instanceof Map)) {
-        throw new Error("BranchMap: data must be a Map");
+      if (typeof config.data !== "object") {
+        throw new Error("BranchObj: data must be obj");
       }
       return config.data;
     }
     return new Map();
   }
 
-  public readonly data: Map<unknown, unknown>;
+  public readonly data: GenObj;
 
-  next?: BranchMapIF | undefined;
-  prev?: BranchMapIF | undefined;
+  get next$(): BranchObjIF | undefined {
+    if (!this.next) return undefined;
+    return this.next as BranchObjIF;
+  }
+  set next$(branch: BranchObjIF) {
+    this.next = branch ? (branch as BranchIF) : undefined;
+  }
 
-  leaf(key: unknown): LeafIF {
+  get prev$(): BranchObjIF | undefined {
+    if (!this.prev) return undefined;
+    return this.prev as BranchObjIF;
+  }
+  set prev$(branch: BranchObjIF) {
+    this.prev = branch ? (branch as BranchIF) : undefined;
+  }
+  leaf$(key: string): LeafIF {
     return new Leaf({
       key,
       val: this.get(key),
@@ -173,13 +174,13 @@ export class BranchMap extends BranchBase implements BranchMapIF {
    * @param key {unknown}
    * @returns unknown
    */
-  get(key: unknown): unknown {
-    if (this.data.has(key)) {
-      return delToUndef(this.data.get(key));
+  get(key: string): unknown {
+    if (key in this.data) {
+      return delToUndef(this.data[key]);
     }
     if (this.cache) {
-      if (this.cache.has(key)) {
-        return delToUndef(this.cache.get(key));
+      if (key in this.cache) {
+        return delToUndef(this.cache[key]);
       }
       return undefined;
     }
@@ -190,16 +191,17 @@ export class BranchMap extends BranchBase implements BranchMapIF {
         return branch.get(key);
       }
       if (branch.cache) {
+        // if a cached branch doesn't have value presume all prev branches don't either.
         return undefined;
       }
-      branch = branch.prev$;
+      branch = branch.prev;
     }
     return undefined;
   }
 
-  has(key: unknown, local?: boolean): boolean {
-    if (this.cache?.has(key)) return true;
-    if (this.data.has(key)) return true;
+  has(key: string, local?: boolean): boolean {
+    if (this.cache && key in this.cache) return true;
+    if (key in this.data) return true;
     if (local) return false;
     if (this.prev) return this.prev.has(key);
     return false;
@@ -210,7 +212,7 @@ export class BranchMap extends BranchBase implements BranchMapIF {
   }
 
   make$(params: BranchParams) {
-    return new BranchMap(this.tree, params);
+    return new BranchObj(this.tree, params) as BranchObjIF;
   }
 
   public ensureCurrentScope() {
@@ -236,7 +238,7 @@ export class BranchMap extends BranchBase implements BranchMapIF {
 
     // add a branch describing the current scope
 
-    this.next = new BranchMap(this.tree, {
+    this.next$ = this.make$({
       cause: currentScope.cause,
       status: currentScope.status,
       causeID: currentScope.scopeID,
@@ -248,23 +250,23 @@ export class BranchMap extends BranchBase implements BranchMapIF {
     currentScope.inTrees.add(this.tree.name);
   }
 
-  set(key: unknown, val: unknown): unknown {
+  set(key: string, val: unknown): unknown {
     const top = this.tree.top;
     if (this !== top) return top?.set(key, val);
     this!.ensureCurrentScope();
-    const branch: BranchMapIF = this.make$({
-      data: new Map([[key, val]]),
+    const branch = this.make$({
+      data: { [key]: val },
       cause: Action_s.set,
     });
     this.push(branch);
   }
 
-  del(key: unknown): void {
-    if (this.next) {
-      return this.next.del(key);
+  del(key: string): void {
+    if (this.next$) {
+      return this.next$.del(key);
     }
     const branch = this.make$({
-      data: new Map([[key, DELETED]]),
+      data: { [key]: DELETED },
       cause: Action_s.del,
     });
     this.push(branch);
@@ -272,9 +274,9 @@ export class BranchMap extends BranchBase implements BranchMapIF {
 
   change(c: ChangeBase<unknown, unknown>): ChangeResponse<unknown, unknown> {
     if (isTreeSet(c)) {
-      this.set(c.key, c.val);
+      this.set(c.key as string, c.val);
     } else if (isTreeDel(c)) {
-      this.del(c.key);
+      this.del(c.key as string);
     } else {
       throw new Error("cannot implement change " + c.type.toString());
     }

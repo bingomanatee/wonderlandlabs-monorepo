@@ -60,7 +60,8 @@ describe("transact/Scope", () => {
                 sales.del("Sun Mar 01 2026");
                 sales.set("Sun Jan 01 2027", new SalesData(1000, 4000));
                 sales.branches.forEach((branch) => {
-                    console.log('---- branch', branch.id, branch.data, branch.cause.toString(), branch.causeID);
+                    const branchMap = branch;
+                    console.log("---- branch", branchMap.id, branchMap.data, branchMap.cause.toString(), branchMap.causeID);
                 });
                 throw new Error("boom");
             });

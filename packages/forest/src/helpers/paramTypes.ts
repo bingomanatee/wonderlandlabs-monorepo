@@ -10,7 +10,7 @@ export type LeafParams = {
 };
 
 type TreeParamsBase = {
-  data?: Map<unknown, unknown>;
+  data?: any;
   dataType?: DataType;
   name: TreeName;
 };
@@ -24,7 +24,7 @@ export type TreeParams = {
 } & TreeParamsBase;
 
 export type BranchParams = {
-  data?: Map<unknown, unknown>;
+  data?: any;
   prev?: BranchIF;
   status?: Status;
   cause: Action;

@@ -1,5 +1,5 @@
 import { Forest } from "../Forest";
-import { ForestIF } from "../types";
+import { BranchMapIF, ForestIF } from "../types";
 
 type SalesDataIF = {
   sales: number;
@@ -77,8 +77,15 @@ describe("transact/Scope", () => {
         sales.del("Sun Mar 01 2026");
         sales.set("Sun Jan 01 2027", new SalesData(1000, 4000));
         sales.branches.forEach((branch) => {
-          console.log('---- branch', branch.id, branch.data, branch.cause.toString(), branch.causeID);
-        })
+          const branchMap = branch as BranchMapIF;
+          console.log(
+            "---- branch",
+            branchMap.id,
+            branchMap.data,
+            branchMap.cause.toString(),
+            branchMap.causeID
+          );
+        });
         throw new Error("boom");
       });
     }).toThrow();

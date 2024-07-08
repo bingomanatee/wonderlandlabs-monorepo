@@ -15,7 +15,7 @@ import { Status_s, Action_s, Change_s, DataType_s } from "./helpers/enums";
 import { Leaf } from "./Leaf";
 import { delToUndef, linkBranches, mp } from "./helpers";
 import { DELETED, NOT_FOUND } from "./constants";
-import { isTreeSet } from "./helpers/isTreeSet";
+import { isTreeSet } from "./helpers/isChangeSet";
 import { isTreeDel } from "./helpers/isTreeDel";
 
 function destroyChain(branch?: BranchIF) {
@@ -37,7 +37,9 @@ export abstract class BranchBase implements BranchIF {
     this.cause = cause;
     this.causeID = causeID;
     this.status = "status" in params ? params.status! : Status_s.good;
-    this._initData(params);
+  }
+  mergeData() {
+    throw new Error("Method not implemented.");
   }
 
   values(
@@ -72,13 +74,6 @@ export abstract class BranchBase implements BranchIF {
     throw new Error("not implemented");
   }
 
-  protected _initData(params: BranchParams) {
-    if (this.dataType === DataType_s.map) {
-      this.data = params.data || new Map();
-    } else if (this.dataType === DataType_s.object) {
-      this.data = params.data || {};
-    }
-  }
   del(key: unknown): void {
     throw new Error("not implemented");
   }

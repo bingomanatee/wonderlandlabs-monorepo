@@ -16,10 +16,12 @@ export type LeafIdentityIF<$K = unknown> = {
   treeName: TreeName; // the name of the Tree the leaf is from
 };
 
+export type GenObj = Record<string, unknown>;
+
 // a Data is an item that can get or set values. it is a "map on steroids"'
 // currently the base for Branch and Tree
 
-export interface Data<$K = unknown, $V = unknown> {
+export interface DataIF<$K = unknown, $V = unknown> {
   // get and setLeaf are the same functionality as get and set,
   // but they return leaves instead of the raw value.
   leaf(key: $K): LeafIF<$K, $V>;
@@ -88,22 +90,18 @@ export type TreeData<$K = unknown, $V = unknown> =
 export type IterFn = (val: unknown, key: unknown, stop: () => void) => void;
 
 // a node on of a linked list that represents a change
-export interface BranchIF<$K = unknown, $V = unknown> extends Data<$K, $V> {
-  tree: TreeIF<$K, $V>;
+export interface BranchIF extends DataIF {
+  tree: TreeIF;
   readonly id: number;
   readonly cause: Action;
   readonly causeID?: string;
   status: Status;
 
-  readonly data: any;
-  values(list?: TreeData<$K, $V>): any;
-  mergedData(): any;
   cache?: any;
 
-  next?: BranchIF<$K, $V>;
-  prev?: BranchIF<$K, $V>;
-
-  make(params: BranchParams): BranchIF<$K, $V>;
+  next?: BranchIF;
+  prev?: BranchIF;
+  mergeData(): any;
   ensureCurrentScope(): void;
   clearCache(ignoreScopes?: boolean): void;
 
@@ -121,23 +119,35 @@ export interface BranchMapIF<$K = unknown, $V = unknown> extends BranchIF {
   values(list?: Map<$K, $V>): Map<$K, $V>;
   mergedData(): Map<$K, $V>;
   cache?: Map<$K, $V>;
-  next?: BranchMapIF<$K, $V>;
-  prev?: BranchMapIF<$K, $V>;
-  make(params: BranchParams): BranchMapIF<$K, $V>;
+  next$?: BranchMapIF<$K, $V>;
+  prev$?: BranchMapIF<$K, $V>;
+  make$(params: BranchParams): BranchMapIF<$K, $V>;
+}
+
+export interface BranchObjIF extends BranchIF {
+  readonly data: GenObj;
+  values(list?: GenObj): GenObj;
+  mergedData$(): GenObj;
+  cache?: GenObj;
+  get(key: string): unknown;
+  leaf$(key: string): LeafIF;
+  next$?: BranchObjIF;
+  prev$?: BranchObjIF;
+  make$(params: BranchParams): BranchObjIF;
 }
 
 // a key/value collection
-export interface TreeIF<$K = unknown, $V = unknown> extends Data<$K, $V> {
+export interface TreeIF extends DataIF {
   name: TreeName;
-  root: BranchIF<$K, $V> | undefined; // linked list start
-  top: BranchIF<$K, $V> | undefined; // linked list end
+  root: BranchIF | undefined; // linked list start
+  top: BranchIF | undefined; // linked list end
   forest: ForestIF;
   readonly dataType: DataType;
   status: Status;
-  readonly branches: BranchIF<$K, $V>[];
-  values(): TreeData<$K, $V>;
+  readonly branches: BranchIF[];
+  values(): TreeData;
   count(stopAt?: number): number;
-  clearValues(): BranchIF<$K, $V>[]; // removes all values in the table. (a "virtual removal" inside scopes)
+  clearValues(): BranchIF[]; // removes all values in the table. (a "virtual removal" inside scopes)
   readonly size: number; // the count of values in the tree -- INCLUDING DELETED VALUES.
   activeScopeCauseIDs: Set<string>;
   endScope(scopeID: string): void;

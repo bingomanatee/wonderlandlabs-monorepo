@@ -10,7 +10,7 @@ function bobAndSue() {
   ]);
 }
 
-describe("Forest", () => {
+describe("Forest.map", () => {
   // tests the existential ability for tree() to retrieve
   // and that it can retrieve (undefiend) without breaking
   describe(".tree()", () => {

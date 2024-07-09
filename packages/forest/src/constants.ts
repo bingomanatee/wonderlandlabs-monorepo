@@ -1,2 +1,3 @@
-export const NOT_FOUND = Symbol("not found");
-export const DELETED = Symbol("deleted");
+
+
+export const ACTION_NAME_INITIALIZER = '---- INITIALIZER ---';

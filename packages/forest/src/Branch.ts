@@ -1,108 +1,79 @@
-import type {
-  RefIF,
-  TreeIF,
-  ChangeBase,
-  BranchIF,
-  ChangeResponse,
-  BranchMapIF,
-  IterFn,
-  TreeData,
-  LeafIF,
-} from "./types";
-import type { BranchParams, TreeParams } from "./helpers/paramTypes";
+import { ActionIF, BranchIF, TreeIF } from "./types";
 
-import type { Status, Action } from "./helpers/enums";
-import { Status_s, Action_s, Change_s, DataType_s } from "./helpers/enums";
-import { Ref } from "./Ref";
-import { delToUndef, linkBranches, mp } from "./helpers";
-import { DELETED, NOT_FOUND } from "./constants";
-import { isTreeSet } from "./helpers/isChangeSet";
-import { isTreeDel } from "./helpers/isTreeDel";
+const CACHE_UNSET = Symbol("CACHE_UNSET");
 
-function destroyChain(branch?: BranchIF) {
-  if (!branch) return;
-  destroyChain(branch.next);
-  branch.destroy();
+function join(b1: BranchIF | undefined, b2: BranchIF | undefined) {
+  if (b1) b1.next = b2;
+  if (b2) b2.prev = b1;
 }
 
-/**
- * this is a pure base branch; all concrete implementations
- * have specific methods related to I/O of theier data types.
- * So any methods about reading/making data values are delegated to
- * implementing classes.
- */
 export class Branch implements BranchIF {
-  constructor(public tree: TreeIF, params: BranchParams) {
-    const { cause, causeID } = params;
-    this.id = tree.forest.nextBranchId();
-    this.cause = cause;
-    this.causeID = causeID;
-    this.status = "status" in params ? params.status! : Status_s.good;
-    this.leaf = this.tree.makeBranchData(this, params);
+  constructor(
+    public tree: TreeIF,
+    public action: ActionIF,
+    public data?: unknown // @TODO: maybe private?
+  ) {
+    this.isAlive = true;
   }
-  leaf: LeafIF;
-  readonly id: number;
-  readonly causeID?: string;
-  //@ts-ignore
-  public ref: BranchDataIF;
-  public readonly cause: Action;
-  public readonly status: Status;
-  next?: BranchIF | undefined;
+  isAlive: boolean;
+
+  private _cache: unknown = CACHE_UNSET;
+  get value(): unknown {
+    if (!this.isAlive) return undefined;
+
+    if (this.action.cacheable) {
+      if (this._cache == CACHE_UNSET) {
+        this._cache = this.action.delta(this, this.data);
+      }
+      return this._cache;
+    }
+    return this.action.delta(this, this.data);
+  }
+
   prev?: BranchIF | undefined;
+  next?: BranchIF | undefined;
 
-  protected get dataType() {
-    return this.tree.dataType;
-  }
-
-  /**
-   * remove all references in this node.
-   * assumes that extrenal references TO this node are adjusted elsewhere.
-   */
-  destroy(): void {
-    this.next = undefined;
-    this.prev = undefined;
-
-    if (this.causeID && this.tree.activeScopeCauseIDs.has(this.causeID)) {
-      this.tree.activeScopeCauseIDs.delete(this.causeID);
-    }
-    this.leaf.destroy();
-  }
-
-  /**
-   * remove this branch from the list chain; link the next and prev branches to each other
-   */
-
-  pop(): void {
-    if (this === this.tree.root) {
-      this.tree.root = this.next;
+  push(branch: BranchIF): void {
+    if (this.next) {
+      this.next.push(branch);
     } else {
-      linkBranches(this.prev, this.next);
+      join(this, branch);
     }
-    this.destroy();
+  }
+  popMe(): BranchIF {
+    if (!this.isAlive) throw new Error("cannot pop a dead branch");
+
+    join(this.prev, this.next);
+    this.prev = undefined;
+    this.next = undefined;
+    this.isAlive = false;
+    return this;
+  }
+  cutMe(): BranchIF {
+    if (!this.isAlive) throw new Error("cannot cut a dead branch");
+    if (this.prev) {
+      this.prev.next = undefined;
+      this.prev = undefined;
+    }
+    return this;
+  }
+  destroy(): void {
+    if (!this.isAlive) {
+      throw new Error("cannot destory a dead branch");
+    }
+    this.popMe();
+    this._cache = CACHE_UNSET;
+    //@ts-expect-error
+    this.tree = undefined;
   }
 
-  push(branch: BranchIF) {
-    if (!branch) return;
-    linkBranches(branch, this.next);
-    linkBranches(this, branch);
+  public get isTop(): boolean {
+    if (!this.isAlive) return false;
+    return !this.next;
   }
 
-  prune(): void {
-    let { tree, prev } = this;
-
-    let nextBranch: BranchIF | undefined = this.next;
-
-    if (this === tree.root) {
-      tree.root = undefined;
-    }
-    if (prev) {
-      prev.next = undefined;
-    }
-    destroyChain(this);
-  }
-
-  //------------- helper shortcuts
-  get forest() {
-    return this.tree.forest;
+  public get isRoot(): boolean {
+    if (!this.isAlive) return false;
+    return this === this.tree.root;
   }
 }

@@ -1,28 +1,26 @@
 import type {
-  LeafIF,
+  RefIF,
   TreeIF,
   ForestIF,
   TreeName,
   ChangeBase,
   BranchIF,
   ChangeResponse,
-  TreeData,
+  LeafIF,
 } from "./types";
 import {
-  Action,
   Action_s as Action_s,
   DataType,
   DataType_s,
   Status_s,
 } from "./helpers/enums";
-import { BranchMap, linkBranches } from "./BranchMap";
-import { Leaf } from "./Leaf";
-import { mp } from "./helpers";
+import { Ref } from "./Ref";
+import { linkBranches, mp } from "./helpers";
 import { isTreeSet } from "./helpers/isChangeSet";
 import { isTreeDel } from "./helpers/isTreeDel";
-import { DELETED, NOT_FOUND } from "./constants";
+import { NOT_FOUND } from "./constants";
 import { BranchParams, TreeParams } from "./helpers/paramTypes";
-import { BranchObj } from "./BranchObj";
+import { Branch } from "./Branch";
 
 /**
  * Tree is a "table" of records; a key/value store.
@@ -36,28 +34,28 @@ export class Tree implements TreeIF {
     if (data)
       this.root = this.makeBranch({ data: params.data, cause: Action_s.init });
   }
+
+  public forest: ForestIF;
+  name: TreeName;
   dataType: DataType;
+  root: BranchIF | undefined;
+
+  makeBranchData(tree: BranchIF, params: BranchParams): LeafIF {
+    throw new Error("Method not implemented.");
+  }
+  destroy(): void {
+    throw new Error("Method not implemented.");
+  }
   activeScopeCauseIDs: Set<string> = new Set();
 
-  private makeBranch(params: BranchParams) {
-    let branch: BranchIF;
-
-    if (this.dataType === DataType_s.map) {
-      if (params.data && !(params.data instanceof Map)) {
-        throw new Error("bad data param(map)");
-      }
-      branch = new BranchMap(this, params);
-    } else if (this.dataType === DataType_s.object) {
-      if (params.data && !(typeof params.data === "object")) {
-        throw new Error("bad data param(obj)");
-      }
-      branch = new BranchObj(this, params);
-    } else {
-      throw new Error("cannot type tree " + this.name);
-    }
-    return branch;
+  makeBranch(params: BranchParams) {
+    return new Branch(this, params);
   }
 
+  /**
+   * complete a successful scope.
+   * @param scopeID {string}
+   */
   endScope(scopeID: string): void {
     let br: BranchIF | undefined = this.top;
 
@@ -70,6 +68,10 @@ export class Tree implements TreeIF {
     }
     this.activeScopeCauseIDs.delete(scopeID);
   }
+  /**
+   * destroy a failed scope
+   * @param scopeID {string}
+   */
   pruneScope(scopeID: string): void {
     let br: BranchIF | undefined = this.root;
 
@@ -87,46 +89,45 @@ export class Tree implements TreeIF {
   }
   // the number of unique keys in the data - INCLUDING DELETED REXORDS
   get size() {
-    let keys = new Set();
-    let branch = this.root;
+    let branch: BranchIF | undefined = this.outerBranch();
+    if (!branch) return 0;
+    let keySet = new Set(branch?.leaf.keys);
+    branch?.leaf.deletedKeys.forEach((dk) => keySet.delete(dk));
+    branch = branch?.next;
 
     while (branch) {
-      branch.forEach((_, k) => keys.add(k));
+      branch.leaf.keys.forEach((k) => keySet.add(k));
+      branch.leaf.deletedKeys.forEach((dk) => keySet.delete(dk));
       branch = branch.next;
     }
-    return keys.size;
+    return keySet.size;
   }
 
-  values(): TreeData<unknown, unknown> {
-    switch (this.dataType) {
-      case DataType_s.map:
-        if (!this.root) return new Map();
-        return (this.root as BranchMap).values() as Map<unknown, unknown>;
-        break;
-
-      case DataType_s.object:
-        if (!this.root) return {};
-        return (this.root as BranchObj).values() as Record<string, unknown>;
-        break;
-
-      default:
-        throw new Error("cannot manage type");
+  /**
+   *
+   * @returns {BranchIF} the most recent summary -- or the root of the tree.
+   * A tree with no root will return undefined.
+   */
+  outerBranch(): BranchIF | undefined {
+    if (!this.root) return undefined;
+    let outer = this.top;
+    while (outer) {
+      if (outer.cause === Action_s.summary) return outer;
+      if (!outer.prev) return outer;
+      outer = outer.prev;
     }
+    return outer;
   }
 
-  clearValues() {
-    if (!this.root) return [];
-    if (this.forest.currentScope) {
-      const clearBranch = new BranchMap(this, {
-        cause: Action_s.clear,
-      });
-      this.top!.next = clearBranch;
-      clearBranch.cache = new Map(); // block any downward reading of values -- "cloaking" the values with an empty map.
-      return [];
-    }
-    const removed = this.branches;
-    this.root = undefined;
-    return removed;
+  /**
+   * a user request to erase all values. 
+   */
+  clear() {
+    if (!this.top) return;
+    this.top.push(new Branch(this, {
+      cause: Action_s.clear;
+      data: undefined;
+    }))
   }
 
   get branches() {
@@ -139,9 +140,6 @@ export class Tree implements TreeIF {
     return out;
   }
 
-  public forest: ForestIF;
-  name: TreeName;
-  root: BranchIF | undefined;
   get top() {
     if (!this.root) return undefined;
     let b = this.root;
@@ -152,23 +150,19 @@ export class Tree implements TreeIF {
     return b;
   }
 
-  leaf(key: unknown): LeafIF {
-    if (!this.root) {
-      return new Leaf({ treeName: this.name, key, val: NOT_FOUND });
-    }
-    return this.root.leaf(key);
+  ref(key: unknown): RefIF {
+    return this.top?.leaf?.ref(key) ||  new Ref({treeName: this.name, key, val: NOT_FOUND})
   }
 
   get(key: unknown): unknown {
     if (!this.root) {
       return undefined;
     }
-    return this.top?.get(key);
+    return this.top?.leaf?.get(key);
   }
 
   has(key: unknown): boolean {
-    if (!this.root) return false;
-    return !!this.top?.has(key);
+    return this.top?.leaf?.has(key) || false;
   }
 
   /**
@@ -178,19 +172,13 @@ export class Tree implements TreeIF {
    * @param next {BranchIF}
    */
   private maybeCache() {
-    const top = this.top;
-    if (!top) return;
-
-    if (this.count(this.forest.cacheInterval) >= this.forest.cacheInterval) {
-      top.cache = top.mergeData();
-    }
-    // to garbage collect erace previous caches unless they are behind a scope.
-    top.prev?.clearCache();
+    throw new Error('not implemented');
   }
 
   public count(stopAt = -1) {
+    if (!this.top) return 0;
     let c = 0;
-    let n = this.top;
+    let n: BranchIF | undefined = this.top;
     while (n) {
       c += 1;
       n = n.prev;
@@ -207,7 +195,7 @@ export class Tree implements TreeIF {
       return;
     }
     this.forest.currentScope?.inTrees.add(this.name);
-    const transBranch = new BranchMap(this, {
+    const transBranch = new Branch(this, {
       cause: Action_s.trans,
       causeID: this.forest.currentScope.scopeID,
     });
@@ -222,33 +210,21 @@ export class Tree implements TreeIF {
     if (this.forest.currentScope) {
       this.pushCurrentScope();
     }
-
-    if (!this.root) {
-      switch (this.dataType) {
-        case DataType_s.map:
-          this.root = new BranchMap(this, {
-            data: new Map([[key, val]]),
-            cause: Action_s.set,
-          });
-          break;
-
-        case DataType_s.object:
-          throw new Error("not implemented");
-          break;
-
-        default:
-          throw new Error("bad dataType");
-      }
-    } else this.top?.set(key, val);
+    const setBranch = this.makeBranch({
+      cause: Action_s.set, 
+      data: {key, val}
+    })
+    if (!this.root) this.root = setBranch;
+    else this.top?.push(setBranch);
   }
 
   del(key: unknown) {
-    if (!this.root || !this.top?.has(key)) return;
+    if (!this.root || !this.top?.leaf.has(key)) return;
 
     if (this.forest.currentScope) {
       this.pushCurrentScope();
     }
-    return this.top?.del(key);
+    return this.top?.leaf.del(key);
   }
 
   get status() {

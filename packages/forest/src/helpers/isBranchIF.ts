@@ -1,4 +1,4 @@
-import { DataIF, ForestIF, LeafIdentityIF, TreeIF } from "../types";
+import { DataIF, ForestIF, RefIdentityIF, TreeIF } from "../types";
 import { isObj } from "./isObj";
 import { isString } from "./isString";
 
@@ -32,7 +32,7 @@ export function isTreeIF(a: unknown): a is TreeIF {
   return "name" in o && "forest" in o && isDataIF(o) && isForestIF(o.forest);
 }
 
-export function isBranchIF(a: unknown): a is LeafIdentityIF {
+export function isBranchIF(a: unknown): a is RefIdentityIF {
   if (!isObj(a)) {
     return false;
   }

@@ -1,4 +1,4 @@
-import { ForestIF, LeafIF } from "../types";
+import { ForestIF, RefIF } from "../types";
 //@ts-ignore
 import { Forest } from "../Forest";
 import { DataType_s } from "../helpers/enums";

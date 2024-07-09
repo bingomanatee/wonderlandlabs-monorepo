@@ -1,17 +1,23 @@
-import { LeafValue, Change, Action, Status, DataType } from "./helpers/enums";
+import {
+  LeafValue as RefValue,
+  Change,
+  Action,
+  Status,
+  DataType,
+} from "./helpers/enums";
 import { ScopeParams, AddTreeParams, BranchParams } from "./helpers/paramTypes";
 
 export type TreeName = string;
 
 // a "decorated" value from a tree
-export type LeafIF<$K = unknown, $V = unknown> = {
-  val: LeafValue<$V>;
+export type RefIF<$K = unknown, $V = unknown> = {
+  val: RefValue<$V>;
   key: $K;
   treeName: TreeName; // the name of the Tree the leaf is from
   hasValue: boolean;
 };
 // the identity of a value; used to request values from Forests.
-export type LeafIdentityIF<$K = unknown> = {
+export type RefIdentityIF<$K = unknown> = {
   key: $K;
   treeName: TreeName; // the name of the Tree the leaf is from
 };
@@ -21,17 +27,28 @@ export type GenObj = Record<string, unknown>;
 // a Data is an item that can get or set values. it is a "map on steroids"'
 // currently the base for Branch and Tree
 
-export interface DataIF<$K = unknown, $V = unknown> {
-  // get and setLeaf are the same functionality as get and set,
-  // but they return leaves instead of the raw value.
-  leaf(key: $K): LeafIF<$K, $V>;
-  get(key: $K): LeafValue<$V>;
-  has(key: $K, local?: boolean): boolean;
-  set(key: $K, val: $V): void;
-  del(key: $K): void;
-  change(change: TreeChange): ChangeResponse;
+export interface DataIF {
+  ref(key: unknown): RefIF;
+  get(key: unknown): unknown;
+  has(key: unknown, local?: boolean): boolean;
+  set(key: unknown, val: unknown): void;
+  del(key: unknown): void;
+  ref(key: unknown): RefIF;
+  clear(): void; // removes all values in the table. (a "virtual removal" inside scopes)
 }
 
+/**
+ * a "Leaf" is the part of a branch that deals with actual content.
+ */
+export interface LeafIF extends DataIF {
+  branch: BranchIF;
+  mergeInto(defaultVal: unknown): unknown; // returns a value updated with the values in this leaf.
+  value: unknown;
+  type: DataType;
+  destroy(): void;
+  keys: any[];
+  deletedKeys: any[];
+}
 // a wrapper for any possible action to a tree.
 export interface ChangeBase<$K = unknown, $V = unknown> {
   type: Change;
@@ -90,50 +107,23 @@ export type TreeData<$K = unknown, $V = unknown> =
 export type IterFn = (val: unknown, key: unknown, stop: () => void) => void;
 
 // a node on of a linked list that represents a change
-export interface BranchIF extends DataIF {
-  tree: TreeIF;
+export interface BranchIF {
   readonly id: number;
   readonly cause: Action;
   readonly causeID?: string;
   status: Status;
 
-  cache?: any;
-
+  tree: TreeIF;
+  leaf: LeafIF;
   next?: BranchIF;
   prev?: BranchIF;
-  mergeData(): any;
-  ensureCurrentScope(): void;
-  clearCache(ignoreScopes?: boolean): void;
 
-  /* removes cache here and in all previous branches;
-  unless true is passed will stop at scopes. */
+  // ---------- BRANCH OPERATIONS --------------
+
   pop(): void;
   prune(): void;
   push(branch: BranchIF): void;
-  destroy(): void;
-  forEach(fn: IterFn): void;
-}
-
-export interface BranchMapIF<$K = unknown, $V = unknown> extends BranchIF {
-  readonly data: Map<$K, $V>;
-  values(list?: Map<$K, $V>): Map<$K, $V>;
-  mergedData(): Map<$K, $V>;
-  cache?: Map<$K, $V>;
-  next$?: BranchMapIF<$K, $V>;
-  prev$?: BranchMapIF<$K, $V>;
-  make$(params: BranchParams): BranchMapIF<$K, $V>;
-}
-
-export interface BranchObjIF extends BranchIF {
-  readonly data: GenObj;
-  values(list?: GenObj): GenObj;
-  mergedData$(): GenObj;
-  cache?: GenObj;
-  get(key: string): unknown;
-  leaf$(key: string): LeafIF;
-  next$?: BranchObjIF;
-  prev$?: BranchObjIF;
-  make$(params: BranchParams): BranchObjIF;
+  destroy(): void; // pops and destroys its leaf
 }
 
 // a key/value collection
@@ -145,13 +135,14 @@ export interface TreeIF extends DataIF {
   readonly dataType: DataType;
   status: Status;
   readonly branches: BranchIF[];
-  values(): TreeData;
   count(stopAt?: number): number;
-  clearValues(): BranchIF[]; // removes all values in the table. (a "virtual removal" inside scopes)
   readonly size: number; // the count of values in the tree -- INCLUDING DELETED VALUES.
   activeScopeCauseIDs: Set<string>;
   endScope(scopeID: string): void;
   pruneScope(scopeID: string): void;
+  makeBranchData(tree: BranchIF, params: BranchParams): LeafIF;
+  outerBranch(): BranchIF | undefined;
+  makeBranch(params: BranchParams): BranchIF;
 }
 
 export type ScopeFn = (forest: ForestIF, ...args: any) => any;
@@ -164,16 +155,16 @@ export interface ForestIF {
   tree(t: TreeName): TreeIF | undefined;
   addTree(params: AddTreeParams): TreeIF; // creates a new tree; throws if existing unless upsert is true.
   // an existing tree ignores the second argument (map).
-  get(treeNameOrLeaf: TreeName | LeafIdentityIF, key?: unknown): LeafIF;
+  get(treeNameOrLeaf: TreeName | RefIdentityIF, key?: unknown): RefIF;
   set(
-    treeNameOrLeaf: TreeName | LeafIF,
+    treeNameOrLeaf: TreeName | RefIF,
     key?: unknown,
     val?: unknown
   ): ChangeResponse;
-  delete(tree: TreeName | LeafIF, keys?: unknown | unknown[]): ChangeResponse;
+  delete(tree: TreeName | RefIF, keys?: unknown | unknown[]): ChangeResponse;
   hasKey(t: TreeName, k: unknown): boolean;
-  has(r: LeafIdentityIF<unknown>): boolean;
-  hasAll(r: LeafIdentityIF<unknown>[]): boolean;
+  has(r: RefIdentityIF<unknown>): boolean;
+  hasAll(r: RefIdentityIF<unknown>[]): boolean;
   hasTree(t: TreeName): boolean;
   currentScope?: ScopeIF;
   transact(fn: ScopeFn, params?: ScopeParams, ...args: never): unknown;

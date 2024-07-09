@@ -1,8 +1,8 @@
-import { LeafIdentityIF } from "../types";
+import { RefIdentityIF } from "../types";
 import { isObj } from "./isObj";
 import { isString } from "./isString";
 
-export function isLeafIdentityIF(a: unknown): a is LeafIdentityIF {
+export function isLeafIdentityIF(a: unknown): a is RefIdentityIF {
   if (!isObj(a)) {
     return false;
   }

@@ -8,6 +8,7 @@ export const Action_s = {
   action: Symbol("ACTION_CHANGE"),
   trans: Symbol("ACTION_CHANGE"),
   clear: Symbol("ACTION_CLEAR"),
+  summary: Symbol("ACTION_SUMMARY");
 };
 type ActionEnumKeys = keyof typeof Action_s;
 export type Action = typeof Action_s[ActionEnumKeys];

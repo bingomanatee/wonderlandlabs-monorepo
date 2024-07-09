@@ -1,4 +1,4 @@
-import { ForestIF, LeafIF } from "../types";
+import { ForestIF, RefIF } from "../types";
 //@ts-ignore
 import { Forest } from "../Forest";
 
@@ -74,7 +74,7 @@ describe("Forest.map", () => {
       });
       expect(f.hasTree("alpha")).toBe(true);
 
-      const bobResponse = f.get({ treeName: "alpha", key: 100 }) as LeafIF<
+      const bobResponse = f.get({ treeName: "alpha", key: 100 }) as RefIF<
         number,
         UserType
       >;
@@ -82,7 +82,7 @@ describe("Forest.map", () => {
         throw new Error("Bob not found");
       }
       expect(bobResponse.val.name).toBe("Bob");
-      const sueResponse = f.get({ treeName: "alpha", key: 200 }) as LeafIF<
+      const sueResponse = f.get({ treeName: "alpha", key: 200 }) as RefIF<
         number,
         UserType
       >;

@@ -2,7 +2,9 @@ import { BranchIF } from "../types";
 import { Action, DataType, Status } from "./enums";
 import { TreeName, ForestIF } from "./../types";
 
-export type LeafParams = {
+export type Mappy = Map<unknown, unknown>;
+
+export type RefParams = {
   treeName: TreeName;
   key: unknown;
   val: unknown;

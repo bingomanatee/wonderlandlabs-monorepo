@@ -1,7 +1,7 @@
 import type {
   ForestIF,
-  LeafIF,
-  LeafIdentityIF,
+  RefIF,
+  RefIdentityIF,
   TreeIF,
   TreeName,
   TreeChange,
@@ -70,7 +70,7 @@ export class Forest implements ForestIF {
 
   // --------------- ACTIONS -----------------
 
-  delete(treeName: TreeName | LeafIF, key?: unknown): ChangeResponse {
+  delete(treeName: TreeName | RefIF, key?: unknown): ChangeResponse {
     if (isLeafIF(treeName)) {
       return this.delete(treeName.treeName, treeName.key);
     }
@@ -90,7 +90,7 @@ export class Forest implements ForestIF {
     };
   }
 
-  get(treeNameOrLeaf: TreeName | LeafIdentityIF, key?: unknown): LeafIF {
+  get(treeNameOrLeaf: TreeName | RefIdentityIF, key?: unknown): RefIF {
     if (!isLeafIdentityIF(treeNameOrLeaf)) {
       return this.get({ treeName: treeNameOrLeaf, key: key });
     }
@@ -102,11 +102,11 @@ export class Forest implements ForestIF {
     }
     const tree = this.tree(treeNameOrLeaf.treeName)!;
 
-    return tree.leaf(treeNameOrLeaf.key);
+    return tree.ref(treeNameOrLeaf.key);
   }
 
   set(
-    treeNameOrLeaf: TreeName | LeafIF,
+    treeNameOrLeaf: TreeName | RefIF,
     key?: unknown,
     val?: unknown
   ): ChangeResponse {
@@ -160,15 +160,15 @@ export class Forest implements ForestIF {
   hasKey(treeName: TreeName, k: unknown): boolean {
     return this.has({ treeName: treeName, key: k });
   }
-  has(r: LeafIdentityIF<unknown>): boolean {
+  has(r: RefIdentityIF<unknown>): boolean {
     if (!this.hasTree(r.treeName)) {
       return false;
     }
 
     return this.tree(r.treeName)!.has(r.key);
   }
-  hasAll(r: LeafIdentityIF<unknown>[]): boolean {
-    return r.every((req: LeafIdentityIF<unknown>) => {
+  hasAll(r: RefIdentityIF<unknown>[]): boolean {
+    return r.every((req: RefIdentityIF<unknown>) => {
       this.has(req);
     });
   }

@@ -18,9 +18,9 @@ describe("tree", () => {
 
       const tree = f.tree("users")!;
 
-      expect(tree.leaf(100).hasValue).toBe(true);
-      expect(tree.leaf(200).hasValue).toBe(true);
-      expect(tree.leaf(300).hasValue).toBe(false);
+      expect(tree.ref(100).hasValue).toBe(true);
+      expect(tree.ref(200).hasValue).toBe(true);
+      expect(tree.ref(300).hasValue).toBe(false);
     });
   });
 

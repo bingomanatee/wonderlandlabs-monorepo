@@ -1,17 +1,14 @@
-import { ActionIF, BranchIF, TreeIF } from "./types";
+import { join } from "./join";
+import { ActionIF, BranchIF, GenObj, TreeIF } from "./types";
 
 const CACHE_UNSET = Symbol("CACHE_UNSET");
-
-function join(b1: BranchIF | undefined, b2: BranchIF | undefined) {
-  if (b1) b1.next = b2;
-  if (b2) b2.prev = b1;
-}
 
 export class Branch implements BranchIF {
   constructor(
     public tree: TreeIF,
     public action: ActionIF,
-    public data?: unknown // @TODO: maybe private?
+    public data?: unknown, // @TODO: maybe private?
+    public options?: GenObj
   ) {
     this.isAlive = true;
   }
@@ -19,7 +16,8 @@ export class Branch implements BranchIF {
 
   private _cache: unknown = CACHE_UNSET;
   get value(): unknown {
-    if (!this.isAlive) return undefined;
+    if (!this.isAlive) throw new Error("cannot get value from dead branch");
+    // console.log("calling value from branch", this);
 
     if (this.action.cacheable) {
       if (this._cache == CACHE_UNSET) {
@@ -27,7 +25,7 @@ export class Branch implements BranchIF {
       }
       return this._cache;
     }
-    return this.action.delta(this, this.data);
+    return this.action.delta(this, this.data, this.options);
   }
 
   prev?: BranchIF | undefined;

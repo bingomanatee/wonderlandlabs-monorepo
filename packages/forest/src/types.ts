@@ -12,19 +12,14 @@ export interface DataEngineIF {
 }
 
 export type TreeSeed = {
-  initialValue?: unknown;
+  val?: unknown;
   dataEngine: DataEngineName;
 };
 
 export interface ActionIF {
   name: ActionName;
   cacheable?: boolean;
-  generator(
-    tree: TreeIF,
-    value?: unknown,
-    options?: GenObj
-  ): BranchIF | undefined; //  to produce a branch for this action
-  delta(branch: BranchIF, modifier?: unknown): unknown; // how to derive a value for a given branch
+  delta(branch: BranchIF, modifier?: unknown, options?: GenObj): unknown; // how to derive a value for a given branch
 }
 
 export interface BranchIF {
@@ -53,6 +48,6 @@ export interface TreeIF {
 }
 
 export interface ForestIF {
-  tree(name: TreeName, seed?: TreeSeed): TreeIF | undefined;
+  tree(name: TreeName, seed?: TreeSeed): TreeIF;
   dataEngine(nameOrEngine: DataEngineName | DataEngineIF): DataEngineIF;
 }

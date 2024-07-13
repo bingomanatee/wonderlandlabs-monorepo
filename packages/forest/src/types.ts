@@ -3,13 +3,20 @@ export type TreeName = string;
 export type ActionName = string;
 export type GenObj = Record<string, unknown>;
 
+export function isObj(a: unknown): a is object {
+  return !!(a && typeof a === "object");
+}
+
 export type ActionMap = Map<ActionName, ActionIF>;
 
+export type DataEngineValidatorFn = (data: unknown) => boolean;
 export interface DataEngineIF {
   name: DataEngineName;
-  valitator?: (data: unknown) => boolean;
+  validator?: DataEngineValidatorFn;
   actions: ActionMap;
 }
+
+export type KeyVal = { key: unknown; val: unknown };
 
 export type TreeSeed = {
   val?: unknown;

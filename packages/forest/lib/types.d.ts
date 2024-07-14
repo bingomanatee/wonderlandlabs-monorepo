@@ -2,12 +2,18 @@ export type DataEngineName = string;
 export type TreeName = string;
 export type ActionName = string;
 export type GenObj = Record<string, unknown>;
+export declare function isObj(a: unknown): a is object;
 export type ActionMap = Map<ActionName, ActionIF>;
+export type DataEngineValidatorFn = (data: unknown) => boolean;
 export interface DataEngineIF {
     name: DataEngineName;
-    valitator?: (data: unknown) => boolean;
+    validator?: DataEngineValidatorFn;
     actions: ActionMap;
 }
+export type KeyVal = {
+    key: unknown;
+    val: unknown;
+};
 export type TreeSeed = {
     val?: unknown;
     dataEngine: DataEngineName;
@@ -40,7 +46,13 @@ export interface TreeIF {
     readonly value: unknown;
     do(name: ActionName, value?: unknown, options?: GenObj): BranchIF;
 }
+export type EngineFactory = (tree: TreeIF) => DataEngineIF;
+export type DataEngineFactory = {
+    name: string;
+    factory: EngineFactory;
+};
+export declare function isDataEngineFactory(a: unknown): a is DataEngineFactory;
 export interface ForestIF {
     tree(name: TreeName, seed?: TreeSeed): TreeIF;
-    dataEngine(nameOrEngine: DataEngineName | DataEngineIF): DataEngineIF;
+    dataEngine(nameOrEngine: DataEngineName | DataEngineIF | DataEngineFactory, tree?: TreeIF): DataEngineIF;
 }

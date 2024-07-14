@@ -9,28 +9,21 @@ import {
 } from "../../types";
 import DataEngine from "./DataEngine";
 import {
-  DataEngineAction,
   DataEngineMap,
   DelVal,
   isMultiDel,
   isSingleDel,
 } from "./dataEngineTypes";
-import {
-  DistMapManifestDel,
-  DistMapManifestSet,
-  DistributedMap,
-} from "./DistributedMap";
 
 function setActionFactory(engine: DataEngineIF): ActionIF {
-  const action: DataEngineAction = {
+  const action: ActionIF = {
     name: "set",
     cacheable: true,
-    delta: function (branch: BranchIF, modifier: KeyVal): unknown {
-      return new DistributedMap(branch, { set: modifier });
-    },
-    map(map: DataEngineMap, target: DistributedMap) {
-      const manifest = target.manifest as DistMapManifestSet;
-      const { key, val } = manifest.set;
+    delta: function (branch: BranchIF, manifest: KeyVal): unknown {
+      const map = branch.prev
+        ? new Map(branch.prev!.value as DataEngineMap)
+        : new Map();
+      const { key, val } = manifest;
       if (val === DELETED) {
         map.delete(key);
       } else {
@@ -38,36 +31,19 @@ function setActionFactory(engine: DataEngineIF): ActionIF {
       }
       return map;
     },
-
-    get(searchKey: unknown, target: DistributedMap) {
-      const manifest = target.manifest as DistMapManifestSet;
-      const { key, val } = manifest.set;
-      if (key === searchKey) {
-        if (val === DELETED) {
-          return undefined;
-        }
-        return val;
-      }
-      if (target.prevData) {
-        return target.prevData.get(searchKey);
-      }
-      return undefined;
-    }
   };
   return action as ActionIF;
 }
 
 function deleteActionFactory(engine: DataEngineIF): ActionIF {
-  const action: DataEngineAction = {
+  const action: ActionIF = {
     name: "delete",
     cacheable: true,
-    delta: function (branch: BranchIF, modifier: DelVal) {
-      return new DistributedMap(branch, { del: modifier });
-    },
-    map(prevMap: DataEngineMap, target: DistributedMap) {
-      let map = new Map(prevMap);
-      const manifest = target.manifest as DistMapManifestDel;
-      const { del } = manifest;
+    delta: function (branch: BranchIF, del: DelVal) {
+      const map = branch.prev
+        ? new Map(branch.prev!.value as DataEngineMap)
+        : new Map();
+
       if (isSingleDel(del)) {
         map.delete(del.delKey);
       } else if (isMultiDel(del)) {
@@ -75,37 +51,22 @@ function deleteActionFactory(engine: DataEngineIF): ActionIF {
       }
       return map;
     },
-    get(searchKey: unknown, target: DistributedMap) {
-      const manifest = target.manifest as DistMapManifestDel;
-      const { del } = manifest;
-      if (isSingleDel(del)) {
-        if (del.delKey === searchKey) return undefined;
-      } else if (isMultiDel(del)) {
-        if (del.delKeys.includes(searchKey)) {
-          return undefined;
-        }
-      }
-      if (target.prevData) {
-        return target.prevData.get(searchKey);
-      }
-      return undefined;
-    }
   };
   return action as ActionIF;
 }
 
 function patchEngineFactory(engine: DataEngineIF): ActionIF {
-  const action: DataEngineAction = {
-    name: 'patch',
+  const action: ActionIF = {
+    name: "patch",
+    cacheable: true,
     delta(branch, modifier, options) {
-      
-    },
-    map(prevMap: DataEngineMap, target: DistributedMap) {
-      const map = new Map(prevMap);
-      const manifest = target.manifest as DataEngineMap;
+      const map = branch.prev
+        ? new Map(branch.prev!.value as DataEngineMap)
+        : new Map();
+      const manifest = modifier as DataEngineMap;
       manifest.forEach((val, key) => {
         if (val === DELETED) {
-            map.delete(key);
+          map.delete(key);
         } else {
           map.set(key, val);
         }
@@ -113,28 +74,34 @@ function patchEngineFactory(engine: DataEngineIF): ActionIF {
 
       return map;
     },
-    get(searchKey: unknown, target: DistributedMap) {
-      const manifest = target.manifest as DataEngineMap;
-      if (manifest.has(searchKey)) {
-        const val = manifest.get(searchKey);
-        if (val === DELETED) return undefined;
-        return val;
-      }
-      if (target.prevData) {
-        return target.prevData.get(searchKey);
-      }
-      return undefined;
-    }
+  };
 
-  }
+  return action;
+}
+function replaceActionFactory(engine: DataEngineIF): ActionIF {
+  const action: ActionIF = {
+    name: "replace",
+    cacheable: true,
+    delta(
+      branch,
+      modifier: DataEngineMap | Iterable<[unknown, unknown]>,
+      options
+    ) {
+      return new Map(modifier);
+    },
+  };
 
-  return action as ActionIF
+  return action;
 }
 
-export const dataEngineDistMap = (tree: TreeIF): DataEngineIF => {
-  const engine = new DataEngine("distMap");
-  engine.addAction(setActionFactory(engine));
-  engine.addAction(deleteActionFactory(engine));
-  engine.addAction(patchEngineFactory(engine));
-  return engine;
+export const dataEngineDistMap = {
+  name: "distMap",
+  factory(tree: TreeIF): DataEngineIF {
+    const engine = new DataEngine("distMap");
+    engine.addAction(setActionFactory(engine));
+    engine.addAction(deleteActionFactory(engine));
+    engine.addAction(patchEngineFactory(engine));
+    engine.addAction(replaceActionFactory(engine));
+    return engine;
+  },
 };

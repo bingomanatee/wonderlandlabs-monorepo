@@ -1,1 +1,1 @@
-Object.defineProperty(exports,"__esModule",{value:!0});
+function isObj(t){return!(!t||"object"!=typeof t)}function isDataEngineFactory(t){return!!isObj(t)&&"name"in t&&"factory"in t&&"string"==typeof t.name&&"function"==typeof t.factory}Object.defineProperty(exports,"__esModule",{value:!0}),exports.isObj=isObj,exports.isDataEngineFactory=isDataEngineFactory;

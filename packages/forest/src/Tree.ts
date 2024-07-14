@@ -25,6 +25,7 @@ export class Tree implements TreeIF {
   constructor(public forest: ForestIF, name: TreeName, seed: TreeSeed) {
     this.dataEngine = seed.dataEngine;
     // console.log("--- new tree", name, "seed", seed);
+    console.log("engine for", this.dataEngine, "is", this.engine);
 
     if (this.engine.actions.has(ACTION_NAME_INITIALIZER)) {
       const action = this.engine.actions.get(ACTION_NAME_INITIALIZER)!;
@@ -45,8 +46,13 @@ export class Tree implements TreeIF {
     return b;
   }
   dataEngine: string;
+
+  private _engine?: DataEngineIF;
   get engine(): DataEngineIF {
-    return this.forest.dataEngine(this.dataEngine);
+    if (!this._engine){
+      this._engine = this.forest.dataEngine(this.dataEngine, this);
+    }
+    return this._engine;
   }
   get value() {
     return this.top.value;

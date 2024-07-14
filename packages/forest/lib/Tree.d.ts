@@ -5,6 +5,7 @@ export declare class Tree implements TreeIF {
     root: BranchIF;
     get top(): BranchIF;
     dataEngine: string;
+    private _engine?;
     get engine(): DataEngineIF;
     get value(): unknown;
     do(name: ActionName, value?: unknown, options?: GenObj): BranchIF;

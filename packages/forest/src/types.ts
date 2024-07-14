@@ -54,7 +54,25 @@ export interface TreeIF {
   do(name: ActionName, value?: unknown, options?: GenObj): BranchIF;
 }
 
+export type EngineFactory = (tree: TreeIF) => DataEngineIF;
+
+export type DataEngineFactory = {
+  name: string;
+  factory: EngineFactory;
+};
+
+export function isDataEngineFactory(a: unknown): a is DataEngineFactory {
+  if (!isObj(a)) return false;
+  return (
+    "name" in a &&
+    "factory" in a &&
+    typeof a.name === "string" &&
+    typeof a.factory === "function"
+  );
+}
+
 export interface ForestIF {
   tree(name: TreeName, seed?: TreeSeed): TreeIF;
-  dataEngine(nameOrEngine: DataEngineName | DataEngineIF): DataEngineIF;
+  dataEngine(nameOrEngine: DataEngineName | DataEngineIF | DataEngineFactory, tree?: TreeIF): DataEngineIF;
 }
+

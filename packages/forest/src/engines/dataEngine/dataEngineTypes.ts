@@ -1,5 +1,4 @@
-import { ActionIF, isObj } from "../../types";
-import { DistributedMap } from "./DistributedMap";
+import { ActionIF, isObj, KeyVal } from "../../types";
 
 export type SingleDel = { delKey: unknown };
 export type MultiDel = { delKeys: unknown[] };
@@ -14,13 +13,25 @@ export function isSingleDel(a: unknown): a is SingleDel {
 
 export type DelVal = SingleDel | MultiDel;
 
-export function isDel(a): a is DelVal {
+export function isDel(a: unknown): a is DelVal {
   return isSingleDel(a) || isMultiDel(a);
 }
 
 export type DataEngineMap = Map<unknown, unknown>;
 
-export type DataEngineAction = ActionIF & {
-  map(map: DataEngineMap, forTarget: DistributedMap): DataEngineMap;
-  get(key: unknown, forTarget: DistributedMap): unknown | undefined;
-};
+export type DistMapManifestSet = {
+    set: KeyVal;
+  };
+  
+  export type DistMapManifestDel = {
+    del: DelVal;
+  };
+  
+  export type DistMapManifestPatch = {
+    patch?: DataEngineMap;
+  };
+  export type DistMapManifest =
+    | DistMapManifestSet
+    | DistMapManifestPatch
+    | DistMapManifestDel;
+  

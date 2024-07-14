@@ -3,6 +3,7 @@ import { ACTION_NAME_INITIALIZER } from "../constants";
 import { ActionIF, BranchIF, DataEngineIF, TreeSeed } from "../types";
 import { Branch } from "../Branch";
 import Forest from "../Forest";
+import { dataEngineBasic } from "../engines/dataEngine/dataEngineBasic";
 
 const fibInitializer: ActionIF = {
   name: ACTION_NAME_INITIALIZER,
@@ -35,7 +36,18 @@ const fibEngine: DataEngineIF = {
 
 describe("Tree", () => {
   describe("basic series", () => {
-    it("should allow the value to be replaces", () => {});
+    it("should allow the value to be replaced", () => {
+      const f = new Forest([dataEngineBasic]);
+console.log('forest basic engine', f)
+      const tree = f.tree("alpha", {
+        dataEngine: "basic",
+        val: 100,
+      });
+
+      expect(tree.value).toBe(100);
+      tree.do("set", 200);
+      expect(tree.value).toBe(200);
+    });
   });
   describe("fibonacci series", () => {
     describe("initial value", () => {

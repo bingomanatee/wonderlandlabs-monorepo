@@ -21,8 +21,9 @@ export type TreeSeed = {
 export interface ActionIF {
     name: ActionName;
     cacheable?: boolean;
-    delta(branch: BranchIF, modifier?: unknown, options?: GenObj): unknown;
+    delta(branch: BranchIF, ...args: ActionDeltaArgs): unknown;
 }
+export type ActionDeltaArgs = unknown[];
 export interface BranchIF {
     readonly value: unknown;
     prev?: BranchIF;
@@ -35,10 +36,11 @@ export interface BranchIF {
     destroy(): void;
     isTop: boolean;
     isRoot: boolean;
-    data?: unknown;
+    data?: ActionDeltaArgs;
     isAlive: boolean;
 }
 export interface TreeIF {
+    name: TreeName;
     root: BranchIF;
     top: BranchIF;
     readonly dataEngine: DataEngineName;

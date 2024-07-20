@@ -1,9 +1,11 @@
 import { DELETED } from "../../constants";
 import {
+  ActionDeltaArgs,
   ActionIF,
   BranchIF,
   DataEngineIF,
   GenObj,
+  isObj,
   KeyVal,
   TreeIF,
 } from "../../types";
@@ -11,24 +13,39 @@ import DataEngine from "./DataEngine";
 import {
   DataEngineMap,
   DelVal,
+  isDel,
   isMultiDel,
   isSingleDel,
 } from "./dataEngineTypes";
+
+function isKeyVal(a: unknown): a is KeyVal {
+  return isObj(a) && "key" in a && "val" in a;
+}
 
 function setActionFactory(engine: DataEngineIF): ActionIF {
   const action: ActionIF = {
     name: "set",
     cacheable: true,
-    delta: function (branch: BranchIF, manifest: KeyVal): unknown {
+    delta: function (branch: BranchIF, args: ActionDeltaArgs): unknown {
       const map = branch.prev
         ? new Map(branch.prev!.value as DataEngineMap)
         : new Map();
-      const { key, val } = manifest;
-      if (val === DELETED) {
-        map.delete(key);
+      const [a, b] = args;
+      if (args.length == 1 && isKeyVal(a)) {
+        const { key, val } = a;
+        if (val === DELETED) {
+          map.delete(key);
+        } else {
+          map.set(key, val);
+        }
       } else {
-        map.set(key, val);
+        if (b === DELETED) {
+          map.delete(a);
+        } else {
+          map.set(a, b);
+        }
       }
+
       return map;
     },
   };
@@ -39,16 +56,26 @@ function deleteActionFactory(engine: DataEngineIF): ActionIF {
   const action: ActionIF = {
     name: "delete",
     cacheable: true,
-    delta: function (branch: BranchIF, del: DelVal) {
+    delta: function (branch: BranchIF, keys: ActionDeltaArgs) {
       const map = branch.prev
         ? new Map(branch.prev!.value as DataEngineMap)
         : new Map();
-
-      if (isSingleDel(del)) {
-        map.delete(del.delKey);
-      } else if (isMultiDel(del)) {
-        del.delKeys.forEach((key) => map.delete(key));
+      const [first] = keys;
+      if (isDel(first)) {
+        if (isSingleDel(first)) {
+          map.delete(first.delKey);
+        }
+        if (isMultiDel(first)) {
+          for (const key of first.delKeys) {
+            map.delete(key);
+          }
+        }
+      } else {
+        for (const key of keys) {
+          map.delete(key);
+        }
       }
+
       return map;
     },
   };
@@ -59,12 +86,13 @@ function patchEngineFactory(engine: DataEngineIF): ActionIF {
   const action: ActionIF = {
     name: "patch",
     cacheable: true,
-    delta(branch, modifier, options) {
+    delta(branch, args: ActionDeltaArgs) {
       const map = branch.prev
         ? new Map(branch.prev!.value as DataEngineMap)
         : new Map();
-      const manifest = modifier as DataEngineMap;
-      manifest.forEach((val, key) => {
+
+      const [manifest] = args;
+      (manifest as DataEngineMap).forEach((val, key) => {
         if (val === DELETED) {
           map.delete(key);
         } else {
@@ -82,12 +110,9 @@ function replaceActionFactory(engine: DataEngineIF): ActionIF {
   const action: ActionIF = {
     name: "replace",
     cacheable: true,
-    delta(
-      branch,
-      modifier: DataEngineMap | Iterable<[unknown, unknown]>,
-      options
-    ) {
-      return new Map(modifier);
+    delta(branch, args: ActionDeltaArgs) {
+      const [seed] = args;
+      return new Map(seed as DataEngineMap | Iterable<[unknown, unknown]>);
     },
   };
 

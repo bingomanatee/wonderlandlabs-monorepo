@@ -1,5 +1,6 @@
+import { ACTION_NAME_INITIALIZER } from "./constants";
 import { join } from "./join";
-import { ActionIF, BranchIF, GenObj, TreeIF } from "./types";
+import { ActionDeltaArgs, ActionIF, BranchIF, GenObj, TreeIF } from "./types";
 
 const CACHE_UNSET = Symbol("CACHE_UNSET");
 
@@ -7,8 +8,7 @@ export class Branch implements BranchIF {
   constructor(
     public tree: TreeIF,
     public action: ActionIF,
-    public data?: unknown, // @TODO: maybe private?
-    public options?: GenObj
+    public data?: ActionDeltaArgs // @TODO: maybe private?
   ) {
     this.isAlive = true;
   }
@@ -25,7 +25,11 @@ export class Branch implements BranchIF {
       }
       return this._cache;
     }
-    return this.action.delta(this, this.data, this.options);
+
+    // if (this.action.name === ACTION_NAME_INITIALIZER) {
+    //   console.log(this.tree.dataEngine, "value:get with", this.data);
+    // }
+    return this.action.delta(this, this.data);
   }
 
   prev?: BranchIF | undefined;

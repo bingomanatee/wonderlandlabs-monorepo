@@ -8,7 +8,8 @@ const DataEngine_1 = __importDefault(require("./DataEngine"));
 const replaceAction = {
     name: "set",
     delta(_, val) {
-        return val;
+        console.log("basic: set", val);
+        return val[0];
     },
 };
 exports.dataEngineBasic = {

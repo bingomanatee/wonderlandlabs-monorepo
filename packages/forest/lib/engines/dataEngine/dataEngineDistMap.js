@@ -5,22 +5,37 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.dataEngineDistMap = void 0;
 const constants_1 = require("../../constants");
+const types_1 = require("../../types");
 const DataEngine_1 = __importDefault(require("./DataEngine"));
 const dataEngineTypes_1 = require("./dataEngineTypes");
+function isKeyVal(a) {
+    return (0, types_1.isObj)(a) && "key" in a && "val" in a;
+}
 function setActionFactory(engine) {
     const action = {
         name: "set",
         cacheable: true,
-        delta: function (branch, manifest) {
+        delta: function (branch, args) {
             const map = branch.prev
                 ? new Map(branch.prev.value)
                 : new Map();
-            const { key, val } = manifest;
-            if (val === constants_1.DELETED) {
-                map.delete(key);
+            const [a, b] = args;
+            if (args.length == 1 && isKeyVal(a)) {
+                const { key, val } = a;
+                if (val === constants_1.DELETED) {
+                    map.delete(key);
+                }
+                else {
+                    map.set(key, val);
+                }
             }
             else {
-                map.set(key, val);
+                if (b === constants_1.DELETED) {
+                    map.delete(a);
+                }
+                else {
+                    map.set(a, b);
+                }
             }
             return map;
         },
@@ -31,15 +46,25 @@ function deleteActionFactory(engine) {
     const action = {
         name: "delete",
         cacheable: true,
-        delta: function (branch, del) {
+        delta: function (branch, keys) {
             const map = branch.prev
                 ? new Map(branch.prev.value)
                 : new Map();
-            if ((0, dataEngineTypes_1.isSingleDel)(del)) {
-                map.delete(del.delKey);
+            const [first] = keys;
+            if ((0, dataEngineTypes_1.isDel)(first)) {
+                if ((0, dataEngineTypes_1.isSingleDel)(first)) {
+                    map.delete(first.delKey);
+                }
+                if ((0, dataEngineTypes_1.isMultiDel)(first)) {
+                    for (const key of first.delKeys) {
+                        map.delete(key);
+                    }
+                }
             }
-            else if ((0, dataEngineTypes_1.isMultiDel)(del)) {
-                del.delKeys.forEach((key) => map.delete(key));
+            else {
+                for (const key of keys) {
+                    map.delete(key);
+                }
             }
             return map;
         },
@@ -50,11 +75,11 @@ function patchEngineFactory(engine) {
     const action = {
         name: "patch",
         cacheable: true,
-        delta(branch, modifier, options) {
+        delta(branch, args) {
             const map = branch.prev
                 ? new Map(branch.prev.value)
                 : new Map();
-            const manifest = modifier;
+            const [manifest] = args;
             manifest.forEach((val, key) => {
                 if (val === constants_1.DELETED) {
                     map.delete(key);
@@ -72,8 +97,9 @@ function replaceActionFactory(engine) {
     const action = {
         name: "replace",
         cacheable: true,
-        delta(branch, modifier, options) {
-            return new Map(modifier);
+        delta(branch, args) {
+            const [seed] = args;
+            return new Map(seed);
         },
     };
     return action;

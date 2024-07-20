@@ -26,9 +26,10 @@ export type TreeSeed = {
 export interface ActionIF {
   name: ActionName;
   cacheable?: boolean;
-  delta(branch: BranchIF, modifier?: unknown, options?: GenObj): unknown; // how to derive a value for a given branch
+  delta(branch: BranchIF, ...args: ActionDeltaArgs): unknown; // how to derive a value for a given branch
 }
 
+export type ActionDeltaArgs = unknown[];
 export interface BranchIF {
   readonly value: unknown;
   prev?: BranchIF;
@@ -41,11 +42,12 @@ export interface BranchIF {
   destroy(): void;
   isTop: boolean;
   isRoot: boolean;
-  data?: unknown;
+  data?: ActionDeltaArgs;
   isAlive: boolean;
 }
 
 export interface TreeIF {
+  name: TreeName;
   root: BranchIF;
   top: BranchIF;
   readonly dataEngine: DataEngineName;
@@ -73,6 +75,8 @@ export function isDataEngineFactory(a: unknown): a is DataEngineFactory {
 
 export interface ForestIF {
   tree(name: TreeName, seed?: TreeSeed): TreeIF;
-  dataEngine(nameOrEngine: DataEngineName | DataEngineIF | DataEngineFactory, tree?: TreeIF): DataEngineIF;
+  dataEngine(
+    nameOrEngine: DataEngineName | DataEngineIF | DataEngineFactory,
+    tree?: TreeIF
+  ): DataEngineIF;
 }
-

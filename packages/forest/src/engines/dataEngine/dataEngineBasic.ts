@@ -1,13 +1,20 @@
 import { Branch } from "../../Branch";
 import { ACTION_NAME_INITIALIZER } from "../../constants";
-import { ActionIF, BranchIF, DataEngineIF, TreeIF } from "../../types";
+import {
+  ActionDeltaArgs,
+  ActionIF,
+  BranchIF,
+  DataEngineIF,
+  TreeIF,
+} from "../../types";
 import { initializer } from "../actions/initializer";
 import DataEngine from "./DataEngine";
 
 const replaceAction: ActionIF = {
   name: "set",
-  delta(_, val) {
-    return val;
+  delta(_, val: ActionDeltaArgs) {
+    console.log("basic: set", val);
+    return val[0];
   },
 };
 

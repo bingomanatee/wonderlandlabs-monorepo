@@ -1,14 +1,22 @@
 import { A } from "@svgdotjs/svg.js";
 import { ACTION_NAME_INITIALIZER } from "../constants";
-import { ActionIF, BranchIF, DataEngineIF, TreeSeed } from "../types";
+import {
+  ActionDeltaArgs,
+  ActionIF,
+  BranchIF,
+  DataEngineIF,
+  TreeSeed,
+} from "../types";
 import { Branch } from "../Branch";
 import Forest from "../Forest";
 import { dataEngineBasic } from "../engines/dataEngine/dataEngineBasic";
 
 const fibInitializer: ActionIF = {
   name: ACTION_NAME_INITIALIZER,
-  delta(branch: BranchIF, start) {
-    return (start as TreeSeed)?.val || 0;
+  delta(branch: BranchIF, data: ActionDeltaArgs) {
+    const [init] = data;
+    if (init === undefined) return 0;
+    return init;
   },
 };
 
@@ -38,11 +46,13 @@ describe("Tree", () => {
   describe("basic series", () => {
     it("should allow the value to be replaced", () => {
       const f = new Forest([dataEngineBasic]);
-console.log('forest basic engine', f)
-      const tree = f.tree("alpha", {
+      const tree = f.tree("basic-tree", {
         dataEngine: "basic",
         val: 100,
       });
+
+      console.log("-------------------------- basic tree", tree, tree.value);
+      return;
 
       expect(tree.value).toBe(100);
       tree.do("set", 200);

@@ -1,11 +1,9 @@
-import { ActionIF, BranchIF, GenObj, TreeIF } from "./types";
+import { ActionDeltaArgs, ActionIF, BranchIF, TreeIF } from "./types";
 export declare class Branch implements BranchIF {
     tree: TreeIF;
     action: ActionIF;
-    data?: unknown | undefined;
-    options?: GenObj | undefined;
-    constructor(tree: TreeIF, action: ActionIF, data?: unknown | undefined, // @TODO: maybe private?
-    options?: GenObj | undefined);
+    data?: ActionDeltaArgs | undefined;
+    constructor(tree: TreeIF, action: ActionIF, data?: ActionDeltaArgs | undefined);
     isAlive: boolean;
     private _cache;
     get value(): unknown;

@@ -1,6 +1,7 @@
-import { ActionName, BranchIF, DataEngineIF, ForestIF, GenObj, TreeIF, TreeName, TreeSeed } from "./types";
+import { ActionName, BranchIF, DataEngineIF, ForestIF, TreeIF, TreeName, TreeSeed } from "./types";
 export declare class Tree implements TreeIF {
     forest: ForestIF;
+    name: TreeName;
     constructor(forest: ForestIF, name: TreeName, seed: TreeSeed);
     root: BranchIF;
     get top(): BranchIF;
@@ -8,5 +9,5 @@ export declare class Tree implements TreeIF {
     private _engine?;
     get engine(): DataEngineIF;
     get value(): unknown;
-    do(name: ActionName, value?: unknown, options?: GenObj): BranchIF;
+    do(name: ActionName, ...args: unknown[]): BranchIF;
 }

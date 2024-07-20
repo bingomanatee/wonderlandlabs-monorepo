@@ -1,12 +1,12 @@
 import { A } from "@svgdotjs/svg.js";
 import { ACTION_NAME_INITIALIZER } from "./constants";
 import {
+  ActionDeltaArgs,
   ActionIF,
   ActionName,
   BranchIF,
   DataEngineIF,
   ForestIF,
-  GenObj,
   TreeIF,
   TreeName,
   TreeSeed,
@@ -16,25 +16,20 @@ import { join } from "./join";
 
 const DEFAULT_INITIALIZER: ActionIF = {
   name: "DEFAULT_INITIALIZER",
-  delta: function (_, modifier?: unknown): unknown {
-    return (modifier as TreeSeed).val;
+  delta: function (_, args: ActionDeltaArgs): unknown {
+    return args[0];
   },
 };
 
 export class Tree implements TreeIF {
-  constructor(public forest: ForestIF, name: TreeName, seed: TreeSeed) {
+  constructor(public forest: ForestIF, public name: TreeName, seed: TreeSeed) {
     this.dataEngine = seed.dataEngine;
-    // console.log("--- new tree", name, "seed", seed);
-    console.log("engine for", this.dataEngine, "is", this.engine);
-
-    if (this.engine.actions.has(ACTION_NAME_INITIALIZER)) {
-      const action = this.engine.actions.get(ACTION_NAME_INITIALIZER)!;
-      //  console.info("--- using aciton intiailizer", action);
-      this.root = new Branch(this, action, seed);
-    } else {
-      this.root = new Branch(this, DEFAULT_INITIALIZER, seed);
-      // console.log("---- tree initial root is ", this.root);
-    }
+    const init = [seed.val];
+    console.log(seed.dataEngine, "init is ", init);
+    const action = this.engine.actions.has(ACTION_NAME_INITIALIZER)
+      ? this.engine.actions.get(ACTION_NAME_INITIALIZER)!
+      : DEFAULT_INITIALIZER;
+    this.root = new Branch(this, action, init);
   }
   root: BranchIF;
   public get top(): BranchIF {
@@ -49,7 +44,7 @@ export class Tree implements TreeIF {
 
   private _engine?: DataEngineIF;
   get engine(): DataEngineIF {
-    if (!this._engine){
+    if (!this._engine) {
       this._engine = this.forest.dataEngine(this.dataEngine, this);
     }
     return this._engine;
@@ -57,13 +52,13 @@ export class Tree implements TreeIF {
   get value() {
     return this.top.value;
   }
-  do(name: ActionName, value?: unknown, options?: GenObj): BranchIF {
+  do(name: ActionName, ...args: unknown[]): BranchIF {
     const action = this.engine.actions.get(name);
     if (!action)
       throw new Error(
         "engine " + this.dataEngine + " does not have an action " + name
       );
-    let next = new Branch(this, action, value, options);
+    let next = new Branch(this, action, args);
     join(this.top, next);
     return next;
   }

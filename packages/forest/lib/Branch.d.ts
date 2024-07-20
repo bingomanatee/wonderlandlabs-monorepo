@@ -5,6 +5,7 @@ export declare class Branch implements BranchIF {
     data?: ActionDeltaArgs | undefined;
     constructor(tree: TreeIF, action: ActionIF, data?: ActionDeltaArgs | undefined);
     isAlive: boolean;
+    readonly id: number;
     private _cache;
     get value(): unknown;
     prev?: BranchIF | undefined;

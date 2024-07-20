@@ -18,9 +18,12 @@ export interface DataEngineIF {
 
 export type KeyVal = { key: unknown; val: unknown };
 
+export type TreeValidator = (tree: TreeIF) => void; // throws if invalid
+
 export type TreeSeed = {
   val?: unknown;
   dataEngine: DataEngineName;
+  validator?: TreeValidator;
 };
 
 export interface ActionIF {
@@ -32,6 +35,7 @@ export interface ActionIF {
 export type ActionDeltaArgs = unknown[];
 export interface BranchIF {
   readonly value: unknown;
+  id: number;
   prev?: BranchIF;
   next?: BranchIF;
   tree: TreeIF;
@@ -53,7 +57,9 @@ export interface TreeIF {
   readonly dataEngine: DataEngineName;
   readonly forest: ForestIF;
   readonly value: unknown;
-  do(name: ActionName, value?: unknown, options?: GenObj): BranchIF;
+  do(name: ActionName, ...args: ActionDeltaArgs): unknown;
+  validate(): void;
+  trim(id: number): BranchIF | undefined;
 }
 
 export type EngineFactory = (tree: TreeIF) => DataEngineIF;
@@ -73,10 +79,13 @@ export function isDataEngineFactory(a: unknown): a is DataEngineFactory {
   );
 }
 
+export type TransactFn = () => unknown;
 export interface ForestIF {
   tree(name: TreeName, seed?: TreeSeed): TreeIF;
+  nextID: number;
   dataEngine(
     nameOrEngine: DataEngineName | DataEngineIF | DataEngineFactory,
     tree?: TreeIF
   ): DataEngineIF;
+  transact(fn: TransactFn ): unknown;
 }

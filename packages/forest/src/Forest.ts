@@ -6,7 +6,7 @@ import {
   EngineFactory,
   ForestIF,
   isDataEngineFactory,
-  isObj,
+  TransactFn,
   TreeIF,
   TreeName,
   TreeSeed,
@@ -51,6 +51,25 @@ export default class Forest implements ForestIF {
       const engine = nameOrEngine as DataEngineIF;
       this.engines.set(nameOrEngine.name, engine);
       return engine;
+    }
+  }
+
+  private _nextID = 0;
+
+  public get nextID() {
+    this._nextID += 1;
+    return this._nextID;
+  }
+
+  public transact(fn: TransactFn) {
+    const transId = this.nextID;
+    try {
+      let out = fn();
+
+      return out;
+    } catch (err) {
+      this.trees.forEach((tree) => tree.trim(transId));
+      throw err;
     }
   }
 }

@@ -1,4 +1,4 @@
-import { DataEngineFactory, DataEngineIF, DataEngineName, ForestIF, TreeIF, TreeName, TreeSeed } from "./types";
+import { DataEngineFactory, DataEngineIF, DataEngineName, ForestIF, TransactFn, TreeIF, TreeName, TreeSeed } from "./types";
 type EngineArgs = DataEngineName | DataEngineIF | DataEngineFactory;
 export default class Forest implements ForestIF {
     constructor(engines: EngineArgs[]);
@@ -6,5 +6,8 @@ export default class Forest implements ForestIF {
     private engines;
     tree(name: TreeName, seed?: TreeSeed): TreeIF;
     dataEngine(nameOrEngine: EngineArgs, tree?: TreeIF): DataEngineIF;
+    private _nextID;
+    get nextID(): number;
+    transact(fn: TransactFn): unknown;
 }
 export {};

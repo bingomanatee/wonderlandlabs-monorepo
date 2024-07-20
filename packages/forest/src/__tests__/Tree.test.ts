@@ -51,9 +51,6 @@ describe("Tree", () => {
         val: 100,
       });
 
-      console.log("-------------------------- basic tree", tree, tree.value);
-      return;
-
       expect(tree.value).toBe(100);
       tree.do("set", 200);
       expect(tree.value).toBe(200);

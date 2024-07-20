@@ -10,6 +10,8 @@ import {
   TreeIF,
   TreeName,
   TreeSeed,
+  TransactFn,
+  TreeValidator,
 } from "./types";
 import { Branch } from "./Branch";
 import { join } from "./join";
@@ -25,12 +27,13 @@ export class Tree implements TreeIF {
   constructor(public forest: ForestIF, public name: TreeName, seed: TreeSeed) {
     this.dataEngine = seed.dataEngine;
     const init = [seed.val];
-    console.log(seed.dataEngine, "init is ", init);
+    if (seed.validator) this.validator = seed.validator;
     const action = this.engine.actions.has(ACTION_NAME_INITIALIZER)
       ? this.engine.actions.get(ACTION_NAME_INITIALIZER)!
       : DEFAULT_INITIALIZER;
     this.root = new Branch(this, action, init);
   }
+  private validator?: TreeValidator;
   root: BranchIF;
   public get top(): BranchIF {
     let b = this.root;
@@ -52,14 +55,41 @@ export class Tree implements TreeIF {
   get value() {
     return this.top.value;
   }
-  do(name: ActionName, ...args: unknown[]): BranchIF {
+
+  public validate() {
+    if (this.validator) {
+      this.validator(this);
+    }
+  }
+
+  do(name: ActionName, ...args: unknown[]) {
     const action = this.engine.actions.get(name);
-    if (!action)
-      throw new Error(
-        "engine " + this.dataEngine + " does not have an action " + name
-      );
-    let next = new Branch(this, action, args);
-    join(this.top, next);
-    return next;
+    return this.forest.transact(() => {
+      if (!action)
+        throw new Error(
+          "engine " + this.dataEngine + " does not have an action " + name
+        );
+      let next: BranchIF = new Branch(this, action, args);
+      join(this.top, next);
+      this.validate();
+      return next.value;
+    });
+  }
+
+  trim(id: number) {
+    if (this.top.id < id) return undefined;
+    let last = this.top;
+    while (last.id > id) {
+      if (!last.prev) {
+        last.cutMe();
+        // a branchless tree - should not happen.
+        return last;
+      }
+      if (last.prev.id < id) {
+        last.cutMe();
+        return last;
+      }
+      last = last.prev;
+    }
   }
 }

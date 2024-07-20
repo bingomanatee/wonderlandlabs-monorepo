@@ -11,8 +11,11 @@ export class Branch implements BranchIF {
     public data?: ActionDeltaArgs // @TODO: maybe private?
   ) {
     this.isAlive = true;
+    this.id = tree.forest.nextID;
   }
+
   isAlive: boolean;
+  public readonly id: number;
 
   private _cache: unknown = CACHE_UNSET;
   get value(): unknown {
@@ -26,9 +29,6 @@ export class Branch implements BranchIF {
       return this._cache;
     }
 
-    // if (this.action.name === ACTION_NAME_INITIALIZER) {
-    //   console.log(this.tree.dataEngine, "value:get with", this.data);
-    // }
     return this.action.delta(this, this.data);
   }
 

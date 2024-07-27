@@ -1,19 +1,25 @@
 import Forest from "../../Forest";
 
-import { dataEngineDistMap } from "../../engines/dataEngine/dataEngineMap";
+import { dataEngineMap } from "../../engines/dataEngine/dataEngineMap";
 import { GenericMap } from "../../engines/dataEngine/dataEngineTypes";
+import { MapSrc } from "../../types";
 
-const FOO_BAR = [
+const FOO_BAR: Map<any, any> = new Map([
   ["foo", "vey"],
   ["bar", 200],
-];
+] as MapSrc);
+
+const NEW_DATA: Map<unknown, unknown> = new Map([
+  ["foo", "vey"],
+  ["bar", 300],
+] as MapSrc);
 
 describe("DistMap", () => {
   describe("set", () => {
     it("should allow you to set individual values", () => {
-      const f = new Forest([dataEngineDistMap]);
+      const f = new Forest([dataEngineMap]);
       const pips = f.tree("pips", {
-        dataEngine: "map",
+        engineName: "map",
         val: new Map(),
       });
       expect((pips.value as Map<unknown, unknown>).has("foo")).toBeFalsy();
@@ -23,9 +29,9 @@ describe("DistMap", () => {
     });
 
     it("should allow you to set reset values", () => {
-      const f = new Forest([dataEngineDistMap]);
+      const f = new Forest([dataEngineMap]);
       const pips = f.tree("pips", {
-        dataEngine: "map",
+        engineName: "map",
         val: new Map([["foo", "vey"]]),
       });
       expect((pips.value as Map<unknown, unknown>).has("foo")).toBeTruthy();
@@ -38,9 +44,9 @@ describe("DistMap", () => {
   });
 
   describe("delete", () => {
-    const f = new Forest([dataEngineDistMap]);
+    const f = new Forest([dataEngineMap]);
     const pips = f.tree("pips", {
-      dataEngine: "map",
+      engineName: "map",
       // @ts-ignore
       val: new Map([
         ["foo", "vey"],
@@ -60,9 +66,9 @@ describe("DistMap", () => {
 
   describe("patch", () => {
     it("should allow a patch", () => {
-      const f = new Forest([dataEngineDistMap]);
+      const f = new Forest([dataEngineMap]);
       const pips = f.tree("pips", {
-        dataEngine: "map",
+        engineName: "map",
         // @ts-ignore
         val: new Map(FOO_BAR) as GenericMap,
       });
@@ -72,23 +78,48 @@ describe("DistMap", () => {
         ["vey", "foo"],
       ]);
 
-      const ex = new Map<unknown, unknown>([
-        ["foo", "vey"],
-        ["bar", 300],
-        ["vey", "foo"],
-      ]);
-      //@ts-ignore
-      expect(pips.value).toEqual(ex);
+      expect(pips.value).toEqual(
+        new Map([
+          ["foo", "vey"],
+          ["bar", 300],
+          ["vey", "foo"],
+        ] as MapSrc)
+      );
 
       pips.acts.set("vey", 400);
 
-      const ex2 = new Map<unknown, unknown>([
-        ["foo", "vey"],
-        ["bar", 300],
-        ["vey", 400],
-      ]);
+      expect(pips.value).toEqual(
+        new Map<unknown, unknown>([
+          ["foo", "vey"],
+          ["bar", 300],
+          ["vey", 400],
+        ] as MapSrc)
+      );
+    });
+  });
+
+  describe("replace", () => {
+    it("should allow a replace", () => {
+      const f = new Forest([dataEngineMap]);
+      const pips = f.tree("pips", {
+        engineName: "map",
+        // @ts-ignore
+        val: new Map(FOO_BAR) as GenericMap,
+      });
+
+      pips.acts.replace(NEW_DATA);
+
+      expect(pips.value).toEqual(NEW_DATA);
+
+      pips.acts.set("vey", 400);
       //@ts-ignore
-      expect(pips.value).toEqual(ex2);
+      expect(pips.value).toEqual(
+        new Map<unknown, unknown>([
+          ["foo", "vey"],
+          ["bar", 300],
+          ["vey", 400],
+        ])
+      );
     });
   });
 });

@@ -11,7 +11,7 @@ describe("Forest", () => {
     it("should define a tree if seeded", () => {
       const f = new Forest([dataEngineBasic]);
       const t = f.tree("foo", {
-        dataEngine: "basic",
+        engineName: "basic",
         val: "bar",
       });
 

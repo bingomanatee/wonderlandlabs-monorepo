@@ -2,6 +2,7 @@ export type DataEngineName = string;
 export type TreeName = string;
 export type ActionName = string;
 export type GenObj = Record<string, unknown>;
+export type MapSrc<k = unknown, v = unknown> = [k, v][];
 
 export function isObj(a: unknown): a is object {
   return !!(a && typeof a === "object");
@@ -37,7 +38,7 @@ export type TreeValidator = (tree: TreeIF) => void; // throws if invalid
 
 export type TreeSeed = {
   val?: unknown;
-  dataEngine: DataEngineName;
+  engineName: DataEngineName;
   validator?: TreeValidator;
 };
 
@@ -93,7 +94,7 @@ export interface TreeIF {
   do(name: ActionName, ...args: ActionDeltaArgs): unknown;
   validate(): void;
   trim(id: number, errorId: number): BranchIF | undefined;
-  trimmed: DiscardedBranchIF[]
+  trimmed: DiscardedBranchIF[];
 }
 
 export type EngineFactory = (tree: TreeIF) => DataEngineIF;

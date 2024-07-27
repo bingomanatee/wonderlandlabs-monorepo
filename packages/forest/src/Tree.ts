@@ -27,7 +27,7 @@ const DEFAULT_INITIALIZER: ActionIF = {
 
 export class Tree implements TreeIF {
   constructor(public forest: ForestIF, public name: TreeName, seed: TreeSeed) {
-    this.dataEngine = seed.dataEngine;
+    this.dataEngine = seed.engineName;
     const init = [seed.val];
     if (seed.validator) this.validator = seed.validator;
     const action = this.engine.actions.has(ACTION_NAME_INITIALIZER)
@@ -63,7 +63,7 @@ export class Tree implements TreeIF {
 
   public validate() {
     if (this.engine.validator) {
-        this.engine.validator(this.value, this);
+      this.engine.validator(this.value, this);
     }
     if (this.validator) {
       this.validator(this);

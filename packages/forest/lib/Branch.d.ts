@@ -16,7 +16,7 @@ export declare class Branch implements BranchIF {
     next?: BranchIF | undefined;
     push(branch: BranchIF): void;
     popMe(): BranchIF;
-    cutMe(): BranchIF;
+    cutMe(errorId: number): BranchIF;
     destroy(): void;
     get isTop(): boolean;
     get isRoot(): boolean;

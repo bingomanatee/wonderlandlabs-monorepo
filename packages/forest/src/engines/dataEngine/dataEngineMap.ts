@@ -125,7 +125,7 @@ function replaceActionFactory(engine: DataEngineIF): ActionIF {
   return action;
 }
 
-export const dataEngineDistMap = {
+export const dataEngineMap = {
   name: "map",
   factory(tree: TreeIF): DataEngineIF {
     const engine = new DataEngine("map", {

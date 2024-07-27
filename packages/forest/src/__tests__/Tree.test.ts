@@ -47,7 +47,7 @@ describe("Tree", () => {
     it("should allow the value to be replaced", () => {
       const f = new Forest([dataEngineBasic]);
       const tree = f.tree("basic-tree", {
-        dataEngine: "basic",
+        engineName: "basic",
         val: 100,
       });
 
@@ -60,13 +60,13 @@ describe("Tree", () => {
     describe("initial value", () => {
       it("should have the intial value determined by its initializer", () => {
         const f = new Forest([fibEngine]);
-        const t = f.tree("fromZero", { dataEngine: "fib" });
+        const t = f.tree("fromZero", { engineName: "fib" });
         expect(t.value).toBe(0);
       });
 
       it("should allow a value to be seeded", () => {
         const f = new Forest([fibEngine]);
-        const t = f.tree("from100", { dataEngine: "fib", val: 100 });
+        const t = f.tree("from100", { engineName: "fib", val: 100 });
         expect(t.value).toBe(100);
       });
     });
@@ -74,7 +74,7 @@ describe("Tree", () => {
     describe("next values", () => {
       it("should increase by the fibonacci scale", () => {
         const f = new Forest([fibEngine]);
-        const t = f.tree("fromZero", { dataEngine: "fib" });
+        const t = f.tree("fromZero", { engineName: "fib" });
         t.do("next");
         expect(t.value).toBe(1);
         t.do("next");
@@ -93,7 +93,7 @@ describe("Tree", () => {
 
       it("should increase based on the seed", () => {
         const f = new Forest([fibEngine]);
-        const t = f.tree("from100", { dataEngine: "fib", val: 100 });
+        const t = f.tree("from100", { engineName: "fib", val: 100 });
         t.do("next");
         expect(t.value).toBe(100);
         t.do("next");
@@ -110,7 +110,7 @@ describe("Tree", () => {
 
       it("should increase based on a negative seed", () => {
         const f = new Forest([fibEngine]);
-        const t = f.tree("fromNeg1", { dataEngine: "fib", val: -1 });
+        const t = f.tree("fromNeg1", { engineName: "fib", val: -1 });
 
         expect(t.value).toBe(-1);
         t.do("next");

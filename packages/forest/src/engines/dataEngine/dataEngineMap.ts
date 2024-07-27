@@ -1,4 +1,4 @@
-import { DELETED } from "../../constants";
+import { CACHE_TOP_ONLY, DELETED } from "../../constants";
 import {
   ActionDeltaArgs,
   ActionIF,
@@ -11,7 +11,7 @@ import {
 } from "../../types";
 import DataEngine from "./DataEngine";
 import {
-  DataEngineMap,
+  GenericMap,
   DelVal,
   isDel,
   isMultiDel,
@@ -28,7 +28,7 @@ function setActionFactory(engine: DataEngineIF): ActionIF {
     cacheable: true,
     delta: function (branch: BranchIF, args: ActionDeltaArgs): unknown {
       const map = branch.prev
-        ? new Map(branch.prev!.value as DataEngineMap)
+        ? new Map(branch.prev!.value as GenericMap)
         : new Map();
       const [a, b] = args;
       if (args.length == 1 && isKeyVal(a)) {
@@ -58,7 +58,7 @@ function deleteActionFactory(engine: DataEngineIF): ActionIF {
     cacheable: true,
     delta: function (branch: BranchIF, keys: ActionDeltaArgs) {
       const map = branch.prev
-        ? new Map(branch.prev!.value as DataEngineMap)
+        ? new Map(branch.prev!.value as GenericMap)
         : new Map();
       const [first] = keys;
       if (isDel(first)) {
@@ -88,11 +88,17 @@ function patchEngineFactory(engine: DataEngineIF): ActionIF {
     cacheable: true,
     delta(branch, args: ActionDeltaArgs) {
       const map = branch.prev
-        ? new Map(branch.prev!.value as DataEngineMap)
+        ? new Map(branch.prev!.value as GenericMap)
         : new Map();
 
       const [manifest] = args;
-      (manifest as DataEngineMap).forEach((val, key) => {
+
+      if (!(Array.isArray(manifest) || manifest instanceof Map)) {
+        throw new Error("bad patch argument");
+      }
+
+      const next = Array.isArray(manifest) ? new Map(manifest) : manifest;
+      (next as GenericMap).forEach((val, key) => {
         if (val === DELETED) {
           map.delete(key);
         } else {
@@ -112,7 +118,7 @@ function replaceActionFactory(engine: DataEngineIF): ActionIF {
     cacheable: true,
     delta(branch, args: ActionDeltaArgs) {
       const [seed] = args;
-      return new Map(seed as DataEngineMap | Iterable<[unknown, unknown]>);
+      return new Map(seed as GenericMap | Iterable<[unknown, unknown]>);
     },
   };
 
@@ -120,9 +126,17 @@ function replaceActionFactory(engine: DataEngineIF): ActionIF {
 }
 
 export const dataEngineDistMap = {
-  name: "distMap",
+  name: "map",
   factory(tree: TreeIF): DataEngineIF {
-    const engine = new DataEngine("distMap");
+    const engine = new DataEngine("map", {
+      cacheable: CACHE_TOP_ONLY,
+      validator(value) {
+        if (!(value instanceof Map)) {
+          throw new Error("DataEngineIF must be a map");
+        }
+        return false;
+      },
+    });
     engine.addAction(setActionFactory(engine));
     engine.addAction(deleteActionFactory(engine));
     engine.addAction(patchEngineFactory(engine));

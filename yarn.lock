@@ -2632,6 +2632,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/node@npm:^20.14.11":
+  version: 20.14.11
+  resolution: "@types/node@npm:20.14.11"
+  dependencies:
+    undici-types: "npm:~5.26.4"
+  checksum: 10c0/5306becc0ff41d81b1e31524bd376e958d0741d1ce892dffd586b9ae0cb6553c62b0d62abd16da8bea6b9a2c17572d360450535d7c073794b0cef9cb4e39691e
+  languageName: node
+  linkType: hard
+
 "@types/normalize-package-data@npm:^2.4.0":
   version: 2.4.4
   resolution: "@types/normalize-package-data@npm:2.4.4"
@@ -2949,8 +2958,10 @@ __metadata:
     "@babel/preset-env": "npm:^7.24.3"
     "@types/jest": "npm:^29.5.12"
     "@types/lodash.isequal": "npm:^4.5.6"
+    "@types/node": "npm:^20.14.11"
     "@types/uuid": "npm:^9.0.3"
     "@wonderlandlabs/collect": "npm:^1.0.2"
+    "@wonderlandlabs/styler": "npm:0.0.8"
     "@wonderlandlabs/walrus": "workspace:^"
     babel-jest: "npm:^29.7.0"
     jest: "npm:^29.7.0"
@@ -2963,6 +2974,15 @@ __metadata:
     uuid: "npm:^9.0.1"
   languageName: unknown
   linkType: soft
+
+"@wonderlandlabs/styler@npm:0.0.8":
+  version: 0.0.8
+  resolution: "@wonderlandlabs/styler@npm:0.0.8"
+  dependencies:
+    lodash-es: "npm:^4.17.21"
+  checksum: 10c0/2cf66ed8de115f8ba67e307f9e9f129bde6aac93f770a81c48b0ac87c3070acabd08c650bf73b87b5ce6c09888846e8394950c128cf48533629cdf14e83c19b5
+  languageName: node
+  linkType: hard
 
 "@wonderlandlabs/walrus@npm:^0.0.2":
   version: 0.0.2
@@ -6638,6 +6658,13 @@ __metadata:
   dependencies:
     p-locate: "npm:^5.0.0"
   checksum: 10c0/d3972ab70dfe58ce620e64265f90162d247e87159b6126b01314dd67be43d50e96a50b517bce2d9452a79409c7614054c277b5232377de50416564a77ac7aad3
+  languageName: node
+  linkType: hard
+
+"lodash-es@npm:^4.17.21":
+  version: 4.17.21
+  resolution: "lodash-es@npm:4.17.21"
+  checksum: 10c0/fb407355f7e6cd523a9383e76e6b455321f0f153a6c9625e21a8827d10c54c2a2341bd2ae8d034358b60e07325e1330c14c224ff582d04612a46a4f0479ff2f2
   languageName: node
   linkType: hard
 

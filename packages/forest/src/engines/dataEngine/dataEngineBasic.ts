@@ -13,7 +13,6 @@ import DataEngine from "./DataEngine";
 const replaceAction: ActionIF = {
   name: "set",
   delta(_, val: ActionDeltaArgs) {
-    console.log("basic: set", val);
     return val[0];
   },
 };

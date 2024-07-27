@@ -1,1 +1,1 @@
-Object.defineProperty(exports,"__esModule",{value:!0}),exports.DELETED=exports.ACTION_NAME_INITIALIZER=void 0,exports.ACTION_NAME_INITIALIZER="---- INITIALIZER ---",exports.DELETED=Symbol("deleted");
+Object.defineProperty(exports,"__esModule",{value:!0}),exports.CACHE_TOP_ONLY=exports.DELETED=exports.ACTION_NAME_INITIALIZER=void 0,exports.ACTION_NAME_INITIALIZER="---- INITIALIZER ---",exports.DELETED=Symbol("deleted"),exports.CACHE_TOP_ONLY=Symbol("cache-top-only");

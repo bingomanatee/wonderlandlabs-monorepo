@@ -16,8 +16,7 @@ describe("Forest", () => {
       });
 
       expect(t).toBeTruthy();
-      console.log("--- basic --- root", t.root, 'value ', t.value);
-      // expect(t.value).toBe("bar");
+      expect(t.value).toBe("bar");
     });
   });
 });

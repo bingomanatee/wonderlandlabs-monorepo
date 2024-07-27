@@ -1,4 +1,4 @@
-import { ActionName, BranchIF, DataEngineIF, ForestIF, TreeIF, TreeName, TreeSeed } from "./types";
+import { ActionName, BranchIF, DataEngineIF, ForestIF, TreeIF, TreeName, TreeSeed, Acts } from "./types";
 export declare class Tree implements TreeIF {
     forest: ForestIF;
     name: TreeName;
@@ -12,5 +12,7 @@ export declare class Tree implements TreeIF {
     get value(): unknown;
     validate(): void;
     do(name: ActionName, ...args: unknown[]): unknown;
+    readonly acts: Acts;
+    private initActs;
     trim(id: number): BranchIF | undefined;
 }

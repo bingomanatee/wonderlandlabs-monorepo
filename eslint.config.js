@@ -1,4 +1,4 @@
-module.exports = {
+module.exports = [{
   root: true,
   env: { browser: true, es2020: true },
   extends: [
@@ -6,7 +6,7 @@ module.exports = {
     "plugin:@typescript-eslint/recommended",
     "plugin:prettier/recommended",
   ],
-  ignorePatterns: ["dist", ".eslintrc.js", "node_modules", "lib", "coverage"],
+  ignores: ["dist", ".eslintrc.js", "node_modules", "lib", "coverage"],
   parser: "@typescript-eslint/parser",
   plugins: [],
   rules: {
@@ -30,4 +30,4 @@ module.exports = {
       },
     ],
   },
-};
+}];

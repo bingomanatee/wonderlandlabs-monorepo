@@ -4,11 +4,13 @@ export type ActionName = string;
 export type GenObj = Record<string, unknown>;
 export declare function isObj(a: unknown): a is object;
 export type ActionMap = Map<ActionName, ActionIF>;
-export type DataEngineValidatorFn = (data: unknown) => boolean;
+export declare function isDataEngineValidatorFn(data: unknown): data is DataEngineValidatorFn;
+export type DataEngineValidatorFn = (data: unknown, tree: TreeIF) => boolean;
+export declare function isDataEngineIF(a: unknown): a is DataEngineIF;
 export interface DataEngineIF {
     name: DataEngineName;
-    validator?: DataEngineValidatorFn;
     actions: ActionMap;
+    validator?: DataEngineValidatorFn;
 }
 export type KeyVal = {
     key: unknown;
@@ -20,9 +22,10 @@ export type TreeSeed = {
     dataEngine: DataEngineName;
     validator?: TreeValidator;
 };
+export type Cacheable = boolean | symbol;
 export interface ActionIF {
     name: ActionName;
-    cacheable?: boolean;
+    cacheable?: Cacheable;
     delta(branch: BranchIF, ...args: ActionDeltaArgs): unknown;
 }
 export type ActionDeltaArgs = unknown[];
@@ -41,11 +44,16 @@ export interface BranchIF {
     isRoot: boolean;
     data?: ActionDeltaArgs;
     isAlive: boolean;
+    clearPrevCache(clear?: boolean): void;
+    isCached: boolean;
 }
+export type ActFn = (...args: ActionDeltaArgs) => unknown;
+export type Acts = Record<string, ActFn>;
 export interface TreeIF {
     name: TreeName;
     root: BranchIF;
     top: BranchIF;
+    acts: Acts;
     readonly dataEngine: DataEngineName;
     readonly forest: ForestIF;
     readonly value: unknown;
@@ -59,10 +67,12 @@ export type DataEngineFactory = {
     factory: EngineFactory;
 };
 export declare function isDataEngineFactory(a: unknown): a is DataEngineFactory;
-export type TransactFn = () => unknown;
+export type TransactFn = (transId: number) => unknown;
 export interface ForestIF {
     tree(name: TreeName, seed?: TreeSeed): TreeIF;
     nextID: number;
     dataEngine(nameOrEngine: DataEngineName | DataEngineIF | DataEngineFactory, tree?: TreeIF): DataEngineIF;
     transact(fn: TransactFn): unknown;
 }
+export type ATIDs = Set<number>;
+export type ActionFactory = (engine: DataEngineIF) => ActionIF;

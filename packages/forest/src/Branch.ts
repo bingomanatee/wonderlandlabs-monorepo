@@ -1,4 +1,4 @@
-import { ACTION_NAME_INITIALIZER } from "./constants";
+import { ACTION_NAME_INITIALIZER, CACHE_TOP_ONLY } from "./constants";
 import { join } from "./join";
 import { ActionDeltaArgs, ActionIF, BranchIF, GenObj, TreeIF } from "./types";
 
@@ -15,6 +15,7 @@ export class Branch implements BranchIF {
   }
 
   isAlive: boolean;
+  isCached = false;
   public readonly id: number;
 
   private _cache: unknown = CACHE_UNSET;
@@ -23,13 +24,42 @@ export class Branch implements BranchIF {
     // console.log("calling value from branch", this);
 
     if (this.action.cacheable) {
-      if (this._cache == CACHE_UNSET) {
-        this._cache = this.action.delta(this, this.data);
+      if (!this.isCached) {
+        if (this.action.cacheable === CACHE_TOP_ONLY) {
+          if (this === this.tree.top) {
+            this.setCache();
+            return this._cache;
+          }
+        } else {
+          this.setCache();
+          return this._cache;
+        }
+      } else {
+        return this._cache;
       }
-      return this._cache;
     }
 
     return this.action.delta(this, this.data);
+  }
+
+  private setCache() {
+    this._cache = this.action.delta(this, this.data);
+    this.isCached = true;
+    if (this.action.cacheable === CACHE_TOP_ONLY) {
+      this.clearPrevCache();
+    }
+  }
+
+  clearCache(){
+    this._cache = undefined;
+    this.isCached = false;
+  }
+
+  clearPrevCache(clear = false) {
+    if (clear) {
+      this.clearCache();
+    }
+    this.prev?.clearPrevCache(true);
   }
 
   prev?: BranchIF | undefined;

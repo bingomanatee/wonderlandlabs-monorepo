@@ -9,11 +9,26 @@ export function isObj(a: unknown): a is object {
 
 export type ActionMap = Map<ActionName, ActionIF>;
 
-export type DataEngineValidatorFn = (data: unknown) => boolean;
+export function isDataEngineValidatorFn(
+  data: unknown
+): data is DataEngineValidatorFn {
+  return typeof data === "function";
+}
+export type DataEngineValidatorFn = (data: unknown, tree: TreeIF) => boolean;
+export function isDataEngineIF(a: unknown): a is DataEngineIF {
+  if (!(isObj(a) && "name" in a && a.name && typeof a.name === "string")) {
+    return false;
+  }
+  if (!(!("validator" in a) || isDataEngineValidatorFn(a.validator))) {
+    return false;
+  }
+  return true;
+}
+
 export interface DataEngineIF {
   name: DataEngineName;
-  validator?: DataEngineValidatorFn;
   actions: ActionMap;
+  validator?: DataEngineValidatorFn;
 }
 
 export type KeyVal = { key: unknown; val: unknown };
@@ -26,9 +41,10 @@ export type TreeSeed = {
   validator?: TreeValidator;
 };
 
+export type Cacheable = boolean | symbol;
 export interface ActionIF {
   name: ActionName;
-  cacheable?: boolean;
+  cacheable?: Cacheable;
   delta(branch: BranchIF, ...args: ActionDeltaArgs): unknown; // how to derive a value for a given branch
 }
 
@@ -48,12 +64,17 @@ export interface BranchIF {
   isRoot: boolean;
   data?: ActionDeltaArgs;
   isAlive: boolean;
+  clearPrevCache(clear?: boolean): void;
+  isCached: boolean;
 }
 
+export type ActFn = (...args: ActionDeltaArgs) => unknown;
+export type Acts = Record<string, ActFn>;
 export interface TreeIF {
   name: TreeName;
   root: BranchIF;
   top: BranchIF;
+  acts: Acts;
   readonly dataEngine: DataEngineName;
   readonly forest: ForestIF;
   readonly value: unknown;
@@ -79,7 +100,7 @@ export function isDataEngineFactory(a: unknown): a is DataEngineFactory {
   );
 }
 
-export type TransactFn = () => unknown;
+export type TransactFn = (transId: number) => unknown;
 export interface ForestIF {
   tree(name: TreeName, seed?: TreeSeed): TreeIF;
   nextID: number;
@@ -87,5 +108,8 @@ export interface ForestIF {
     nameOrEngine: DataEngineName | DataEngineIF | DataEngineFactory,
     tree?: TreeIF
   ): DataEngineIF;
-  transact(fn: TransactFn ): unknown;
+  transact(fn: TransactFn): unknown;
 }
+
+export type ATIDs = Set<number>;
+export type ActionFactory = (engine: DataEngineIF) => ActionIF;

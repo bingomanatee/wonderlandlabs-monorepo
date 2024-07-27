@@ -17,21 +17,20 @@ export function isDel(a: unknown): a is DelVal {
   return isSingleDel(a) || isMultiDel(a);
 }
 
-export type DataEngineMap = Map<unknown, unknown>;
+export type GenericMap = Map<unknown, unknown>;
 
 export type DistMapManifestSet = {
-    set: KeyVal;
-  };
-  
-  export type DistMapManifestDel = {
-    del: DelVal;
-  };
-  
-  export type DistMapManifestPatch = {
-    patch?: DataEngineMap;
-  };
-  export type DistMapManifest =
-    | DistMapManifestSet
-    | DistMapManifestPatch
-    | DistMapManifestDel;
-  
+  set: KeyVal;
+};
+
+export type DistMapManifestDel = {
+  del: DelVal;
+};
+
+export type DistMapManifestPatch = {
+  patch?: GenericMap;
+};
+export type DistMapManifest =
+  | DistMapManifestSet
+  | DistMapManifestPatch
+  | DistMapManifestDel;

@@ -12,6 +12,7 @@ import {
   TreeSeed,
   TransactFn,
   TreeValidator,
+  Acts,
 } from "./types";
 import { Branch } from "./Branch";
 import { join } from "./join";
@@ -32,6 +33,8 @@ export class Tree implements TreeIF {
       ? this.engine.actions.get(ACTION_NAME_INITIALIZER)!
       : DEFAULT_INITIALIZER;
     this.root = new Branch(this, action, init);
+
+    this.acts = this.initActs();
   }
   private validator?: TreeValidator;
   root: BranchIF;
@@ -57,6 +60,9 @@ export class Tree implements TreeIF {
   }
 
   public validate() {
+    if (this.engine.validator) {
+        this.engine.validator(this.value, this);
+    }
     if (this.validator) {
       this.validator(this);
     }
@@ -74,6 +80,16 @@ export class Tree implements TreeIF {
       this.validate();
       return next.value;
     });
+  }
+
+  public readonly acts: Acts = {};
+  private initActs() {
+    let newActs: Acts = {};
+
+    this.engine.actions.forEach((action, name) => {
+      newActs[name] = (...args: ActionDeltaArgs) => this.do(name, ...args);
+    });
+    return newActs;
   }
 
   trim(id: number) {

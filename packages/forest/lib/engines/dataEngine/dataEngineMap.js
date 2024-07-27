@@ -80,7 +80,11 @@ function patchEngineFactory(engine) {
                 ? new Map(branch.prev.value)
                 : new Map();
             const [manifest] = args;
-            manifest.forEach((val, key) => {
+            if (!(Array.isArray(manifest) || manifest instanceof Map)) {
+                throw new Error("bad patch argument");
+            }
+            const next = Array.isArray(manifest) ? new Map(manifest) : manifest;
+            next.forEach((val, key) => {
                 if (val === constants_1.DELETED) {
                     map.delete(key);
                 }
@@ -107,7 +111,15 @@ function replaceActionFactory(engine) {
 exports.dataEngineDistMap = {
     name: "map",
     factory(tree) {
-        const engine = new DataEngine_1.default("map");
+        const engine = new DataEngine_1.default("map", {
+            cacheable: constants_1.CACHE_TOP_ONLY,
+            validator(value) {
+                if (!(value instanceof Map)) {
+                    throw new Error("DataEngineIF must be a map");
+                }
+                return false;
+            },
+        });
         engine.addAction(setActionFactory(engine));
         engine.addAction(deleteActionFactory(engine));
         engine.addAction(patchEngineFactory(engine));

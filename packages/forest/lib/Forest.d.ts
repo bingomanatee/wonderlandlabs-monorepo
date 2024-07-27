@@ -1,13 +1,17 @@
-import { DataEngineFactory, DataEngineIF, DataEngineName, ForestIF, TransactFn, TreeIF, TreeName, TreeSeed } from "./types";
-type EngineArgs = DataEngineName | DataEngineIF | DataEngineFactory;
+import { BehaviorSubject } from "rxjs";
+import { ATIDs, DataEngineFactory, DataEngineIF, DataEngineName, ForestIF, TransactFn, TreeIF, TreeName, TreeSeed } from "./types";
+export type DataEngineFactoryOrEngine = DataEngineIF | DataEngineFactory;
+type EngineArgs = DataEngineName | DataEngineFactoryOrEngine;
 export default class Forest implements ForestIF {
-    constructor(engines: EngineArgs[]);
+    constructor(engines: DataEngineFactoryOrEngine[]);
     private trees;
     private engines;
     tree(name: TreeName, seed?: TreeSeed): TreeIF;
     dataEngine(nameOrEngine: EngineArgs, tree?: TreeIF): DataEngineIF;
     private _nextID;
     get nextID(): number;
+    activeTransactionIds: BehaviorSubject<ATIDs>;
+    private changeActiveTransactionIDs;
     transact(fn: TransactFn): unknown;
 }
 export {};

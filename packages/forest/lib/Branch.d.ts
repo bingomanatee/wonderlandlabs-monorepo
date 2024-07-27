@@ -5,9 +5,13 @@ export declare class Branch implements BranchIF {
     data?: ActionDeltaArgs | undefined;
     constructor(tree: TreeIF, action: ActionIF, data?: ActionDeltaArgs | undefined);
     isAlive: boolean;
+    isCached: boolean;
     readonly id: number;
     private _cache;
     get value(): unknown;
+    private setCache;
+    clearCache(): void;
+    clearPrevCache(clear?: boolean): void;
     prev?: BranchIF | undefined;
     next?: BranchIF | undefined;
     push(branch: BranchIF): void;

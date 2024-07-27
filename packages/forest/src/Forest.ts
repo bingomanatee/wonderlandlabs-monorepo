@@ -5,6 +5,7 @@ import {
   DataEngineFactory,
   DataEngineIF,
   DataEngineName,
+  DoErrorIF,
   EngineFactory,
   ForestIF,
   isDataEngineFactory,
@@ -24,6 +25,16 @@ function isDataEngineFn(a: unknown): a is DataEngineFn {
   return typeof a === "function";
 }
 
+function errorMessage(err: unknown){ 
+  if (err instanceof Error) {
+    return err.message;
+  }
+  if (typeof err === 'string') {
+    return err;
+  }
+  return '-- unknown error --';
+}
+
 export default class Forest implements ForestIF {
   constructor(engines: DataEngineFactoryOrEngine[]) {
     engines.forEach((e) => {
@@ -36,7 +47,7 @@ export default class Forest implements ForestIF {
       }
     });
   }
-
+  readonly errors: DoErrorIF[] = [];
   private trees: Map<TreeName, TreeIF> = new Map();
   private engines: Map<DataEngineName, DataEngineIF | EngineFactory> =
     new Map();
@@ -106,10 +117,13 @@ export default class Forest implements ForestIF {
       });
       return out;
     } catch (err) {
+      const errorId = this.nextID;
+      const message = errorMessage(err);
+      this.errors.push({id: errorId, message});
       this.changeActiveTransactionIDs((set) => {
         set.delete(transId);
       });
-      this.trees.forEach((tree) => tree.trim(transId));
+      this.trees.forEach((tree) => tree.trim(transId, errorId));
       throw err;
     }
   }

@@ -1,7 +1,7 @@
-import Forest from "../Forest";
+import Forest from "../../Forest";
 
-import { dataEngineDistMap } from "../engines/dataEngine/dataEngineMap";
-import { GenericMap } from "../engines/dataEngine/dataEngineTypes";
+import { dataEngineDistMap } from "../../engines/dataEngine/dataEngineMap";
+import { GenericMap } from "../../engines/dataEngine/dataEngineTypes";
 
 const FOO_BAR = [
   ["foo", "vey"],

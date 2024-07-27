@@ -81,12 +81,18 @@ export class Branch implements BranchIF {
     this.isAlive = false;
     return this;
   }
-  cutMe(): BranchIF {
+  cutMe(errorId :number): BranchIF {
     if (!this.isAlive) throw new Error("cannot cut a dead branch");
     if (this.prev) {
-      this.prev.next = undefined;
+      this.prev.next = this.next;
       this.prev = undefined;
     }
+    this.tree.trimmed.push({
+       id: this.id, 
+       action: this.action.name,
+       data: this.data,
+       errorId
+    })
     return this;
   }
   destroy(): void {

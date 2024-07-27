@@ -13,6 +13,7 @@ import {
   TransactFn,
   TreeValidator,
   Acts,
+  DiscardedBranchIF,
 } from "./types";
 import { Branch } from "./Branch";
 import { join } from "./join";
@@ -36,6 +37,7 @@ export class Tree implements TreeIF {
 
     this.acts = this.initActs();
   }
+  readonly trimmed: DiscardedBranchIF[] = [];
   private validator?: TreeValidator;
   root: BranchIF;
   public get top(): BranchIF {
@@ -92,20 +94,20 @@ export class Tree implements TreeIF {
     return newActs;
   }
 
-  trim(id: number) {
+  trim(id: number, errorId: number) {
     if (this.top.id < id) return undefined;
     let last = this.top;
     while (last.id > id) {
       if (!last.prev) {
-        last.cutMe();
+        last.cutMe(errorId);
         // a branchless tree - should not happen.
         return last;
       }
       if (last.prev.id < id) {
-        last.cutMe();
+        last.cutMe(errorId);
         return last;
       }
-      last = last.prev;
+      last = this.top;
     }
   }
 }

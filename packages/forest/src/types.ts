@@ -58,7 +58,7 @@ export interface BranchIF {
   action: ActionIF;
   push(branch: BranchIF): void;
   popMe(): BranchIF;
-  cutMe(): BranchIF;
+  cutMe(errorId: number): BranchIF;
   destroy(): void;
   isTop: boolean;
   isRoot: boolean;
@@ -66,6 +66,18 @@ export interface BranchIF {
   isAlive: boolean;
   clearPrevCache(clear?: boolean): void;
   isCached: boolean;
+}
+
+export interface DiscardedBranchIF {
+  id: number;
+  action: string;
+  data?: ActionDeltaArgs;
+  errorId: number;
+}
+
+export interface DoErrorIF {
+  id: number;
+  message: string;
 }
 
 export type ActFn = (...args: ActionDeltaArgs) => unknown;
@@ -80,7 +92,8 @@ export interface TreeIF {
   readonly value: unknown;
   do(name: ActionName, ...args: ActionDeltaArgs): unknown;
   validate(): void;
-  trim(id: number): BranchIF | undefined;
+  trim(id: number, errorId: number): BranchIF | undefined;
+  trimmed: DiscardedBranchIF[]
 }
 
 export type EngineFactory = (tree: TreeIF) => DataEngineIF;
@@ -109,6 +122,7 @@ export interface ForestIF {
     tree?: TreeIF
   ): DataEngineIF;
   transact(fn: TransactFn): unknown;
+  errors: DoErrorIF[];
 }
 
 export type ATIDs = Set<number>;

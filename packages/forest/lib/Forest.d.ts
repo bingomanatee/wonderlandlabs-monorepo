@@ -1,6 +1,6 @@
 import { BehaviorSubject } from "rxjs";
-import { ATIDs, DataEngineFactory, EngineIF, EngineName, TransactionErrorIF, ForestIF, TransactFn, TreeIF, TreeName, TreeSeed } from "./types";
-export type DataEngineFactoryOrEngine = EngineIF | DataEngineFactory;
+import { ATIDs, EngineFactory, EngineIF, EngineName, TransactionErrorIF, ForestIF, TransactFn, TreeIF, TreeName, TreeSeed } from "./types";
+export type DataEngineFactoryOrEngine = EngineIF | EngineFactory;
 type EngineArgs = EngineName | DataEngineFactoryOrEngine;
 export default class Forest implements ForestIF {
     constructor(engines: DataEngineFactoryOrEngine[]);

@@ -2,13 +2,13 @@ import { BehaviorSubject } from "rxjs";
 import { Tree } from "./Tree";
 import {
   ATIDs,
-  DataEngineFactory,
+  EngineFactory,
   EngineIF,
   EngineName,
   TransactionErrorIF,
-  EngineFactory,
+  EngineFactoryFn,
   ForestIF,
-  isDataEngineFactory,
+  isEngineFactory,
   isEngineIF,
   TransactFn,
   TreeIF,
@@ -18,7 +18,7 @@ import {
 import { errorMessage } from "./helpers";
 import { ValidatorError } from "./ValidatorError";
 
-export type DataEngineFactoryOrEngine = EngineIF | DataEngineFactory;
+export type DataEngineFactoryOrEngine = EngineIF | EngineFactory;
 type EngineArgs = EngineName | DataEngineFactoryOrEngine;
 
 type DataEngineFn = (tree: TreeIF) => EngineIF;
@@ -30,7 +30,7 @@ function isDataEngineFn(a: unknown): a is DataEngineFn {
 export default class Forest implements ForestIF {
   constructor(engines: DataEngineFactoryOrEngine[]) {
     engines.forEach((e) => {
-      if (isDataEngineFactory(e)) {
+      if (isEngineFactory(e)) {
         this.engines.set(e.name, e.factory);
       } else if (isEngineIF(e)) {
         this.engines.set(e.name, e);
@@ -41,7 +41,7 @@ export default class Forest implements ForestIF {
   }
   readonly errors: TransactionErrorIF[] = [];
   private trees: Map<TreeName, TreeIF> = new Map();
-  private engines: Map<EngineName, EngineIF | EngineFactory> = new Map();
+  private engines: Map<EngineName, EngineIF | EngineFactoryFn> = new Map();
 
   tree(name: TreeName, seed?: TreeSeed): TreeIF {
     if (!seed) {
@@ -67,7 +67,7 @@ export default class Forest implements ForestIF {
         return engine;
       }
       throw new Error("strange engine for " + nameOrEngine);
-    } else if (isDataEngineFactory(nameOrEngine)) {
+    } else if (isEngineFactory(nameOrEngine)) {
       if (!tree) {
         throw new Error("dataEngine(<string>, <tree>) requires a tree arg");
       }
@@ -108,8 +108,10 @@ export default class Forest implements ForestIF {
       });
       return out;
     } catch (err) {
-      const validator = err instanceof ValidatorError ? err.name : "transact error";
-      const mutation = err instanceof ValidatorError ? err.mutation : "transact error";
+      const validator =
+        err instanceof ValidatorError ? err.name : "transact error";
+      const mutation =
+        err instanceof ValidatorError ? err.mutation : "transact error";
       const errorId = this.nextID;
       this.errors.push({
         id: errorId,

@@ -37,13 +37,14 @@ export class Tree implements TreeIF {
       ? this.engine.actions.get(ACTION_NAME_INITIALIZER)!
       : DEFAULT_INITIALIZER;
     this.root = new Branch(this, action, init);
-
+    this.engineInput = seed.engineInput;
     this.mut = this.makeMut();
     this.mutValidators = seed.mutatorValidators || [];
   }
   readonly trimmed: DiscardedBranchIF[] = [];
   private validators?: TreeValidator[];
   private mutValidators: MutationValidatorIF[];
+  public engineInput?: unknown;
 
   root: BranchIF;
   public get top(): BranchIF {
@@ -81,7 +82,7 @@ export class Tree implements TreeIF {
   }
 
   mutate(name: MutatorName, ...input: unknown[]) {
-    // mutation validators validate input - so they execute before a new branch is created. 
+    // mutation validators validate input - so they execute before a new branch is created.
     this.mutValidators.forEach((val: MutationValidatorIF) => {
       try {
         if (val.onlyFor) {

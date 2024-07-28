@@ -27,6 +27,7 @@ export type TreeValidator = (tree: TreeIF) => false | void;
 export type TreeSeed = {
     val?: unknown;
     engineName: EngineName;
+    engineInput?: unknown;
     validators?: TreeValidator[];
     mutatorValidators?: MutationValidatorIF[];
 };
@@ -77,22 +78,25 @@ export interface TreeIF {
     readonly engineName: EngineName;
     readonly forest: ForestIF;
     readonly value: unknown;
+    readonly engineInput?: unknown;
     mutate(name: MutatorName, ...args: MutatorArgs): unknown;
     validate(): void;
     trim(id: number, errorId: number): BranchIF | undefined;
     trimmed: DiscardedBranchIF[];
 }
-export type EngineFactory = (tree: TreeIF) => EngineIF;
-export type DataEngineFactory = {
+export declare function isTreeIF(a: unknown): a is TreeIF;
+export type GenFun = () => unknown;
+export type EngineFactoryFn = (tree: TreeIF) => EngineIF;
+export type EngineFactory = {
     name: string;
-    factory: EngineFactory;
+    factory: EngineFactoryFn;
 };
-export declare function isDataEngineFactory(a: unknown): a is DataEngineFactory;
+export declare function isEngineFactory(a: unknown): a is EngineFactory;
 export type TransactFn = (transId: number) => unknown;
 export interface ForestIF {
     tree(name: TreeName, seed?: TreeSeed): TreeIF;
     nextID: number;
-    engine(nameOrEngine: EngineName | EngineIF | DataEngineFactory, tree?: TreeIF): EngineIF;
+    engine(nameOrEngine: EngineName | EngineIF | EngineFactory, tree?: TreeIF): EngineIF;
     transact(fn: TransactFn): unknown;
     errors: TransactionErrorIF[];
 }

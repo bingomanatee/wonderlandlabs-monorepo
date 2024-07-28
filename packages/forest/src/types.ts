@@ -35,7 +35,7 @@ export interface EngineIF {
 export type MutationValidatorFn = (
   input: unknown[],
   tree: TreeIF,
-  name: string,
+  name: string
 ) => void;
 
 export interface MutationValidatorIF {
@@ -51,6 +51,7 @@ export type TreeValidator = (tree: TreeIF) => false | void; // throws if invalid
 export type TreeSeed = {
   val?: unknown;
   engineName: EngineName;
+  engineInput?: unknown;
   validators?: TreeValidator[];
   mutatorValidators?: MutationValidatorIF[];
 };
@@ -106,20 +107,32 @@ export interface TreeIF {
   readonly engineName: EngineName;
   readonly forest: ForestIF;
   readonly value: unknown;
+  readonly engineInput?: unknown;
   mutate(name: MutatorName, ...args: MutatorArgs): unknown;
   validate(): void;
   trim(id: number, errorId: number): BranchIF | undefined;
   trimmed: DiscardedBranchIF[];
 }
 
-export type EngineFactory = (tree: TreeIF) => EngineIF;
+export function isTreeIF(a: unknown): a is TreeIF {
+  if (!isObj(a)) return false;
+  const o = a as GenObj;
+  if (!["name", "root", "top", "mut", "engineName"].every((key) => key in o)) {
+    return false;
+  }
+  return true;
+}
 
-export type DataEngineFactory = {
+export type GenFun = () => unknown;
+
+export type EngineFactoryFn = (tree: TreeIF) => EngineIF;
+
+export type EngineFactory = {
   name: string;
-  factory: EngineFactory;
+  factory: EngineFactoryFn;
 };
 
-export function isDataEngineFactory(a: unknown): a is DataEngineFactory {
+export function isEngineFactory(a: unknown): a is EngineFactory {
   if (!isObj(a)) return false;
   return (
     "name" in a &&
@@ -134,7 +147,7 @@ export interface ForestIF {
   tree(name: TreeName, seed?: TreeSeed): TreeIF;
   nextID: number;
   engine(
-    nameOrEngine: EngineName | EngineIF | DataEngineFactory,
+    nameOrEngine: EngineName | EngineIF | EngineFactory,
     tree?: TreeIF
   ): EngineIF;
   transact(fn: TransactFn): unknown;

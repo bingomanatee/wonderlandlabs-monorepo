@@ -6,6 +6,7 @@ export declare class Tree implements TreeIF {
     readonly trimmed: DiscardedBranchIF[];
     private validators?;
     private mutValidators;
+    engineInput?: unknown;
     root: BranchIF;
     get top(): BranchIF;
     engineName: string;

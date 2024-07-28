@@ -1,32 +1,32 @@
-import { CACHE_TOP_ONLY, DELETED } from "../../constants";
+import { CACHE_TOP_ONLY, DELETED } from "../constants";
 import {
-  ActionDeltaArgs,
-  ActionIF,
+  MutatorArgs,
+  MutatorIF,
   BranchIF,
-  DataEngineIF,
+  EngineIF,
   GenObj,
   isObj,
   KeyVal,
   TreeIF,
-} from "../../types";
-import DataEngine from "./DataEngine";
+} from "../types";
+import DataEngine from "./Engine";
 import {
   GenericMap,
   DelVal,
   isDel,
   isMultiDel,
   isSingleDel,
-} from "./dataEngineTypes";
+} from "./engineTypes";
 
 function isKeyVal(a: unknown): a is KeyVal {
   return isObj(a) && "key" in a && "val" in a;
 }
 
-function setActionFactory(engine: DataEngineIF): ActionIF {
-  const action: ActionIF = {
+function setActionFactory(engine: EngineIF): MutatorIF {
+  const action: MutatorIF = {
     name: "set",
     cacheable: true,
-    delta: function (branch: BranchIF, args: ActionDeltaArgs): unknown {
+    mutator: function (branch: BranchIF, args: MutatorArgs): unknown {
       const map = branch.prev
         ? new Map(branch.prev!.value as GenericMap)
         : new Map();
@@ -49,14 +49,14 @@ function setActionFactory(engine: DataEngineIF): ActionIF {
       return map;
     },
   };
-  return action as ActionIF;
+  return action as MutatorIF;
 }
 
-function deleteActionFactory(engine: DataEngineIF): ActionIF {
-  const action: ActionIF = {
+function deleteActionFactory(engine: EngineIF): MutatorIF {
+  const action: MutatorIF = {
     name: "delete",
     cacheable: true,
-    delta: function (branch: BranchIF, keys: ActionDeltaArgs) {
+    mutator: function (branch: BranchIF, keys: MutatorArgs) {
       const map = branch.prev
         ? new Map(branch.prev!.value as GenericMap)
         : new Map();
@@ -79,14 +79,14 @@ function deleteActionFactory(engine: DataEngineIF): ActionIF {
       return map;
     },
   };
-  return action as ActionIF;
+  return action as MutatorIF;
 }
 
-function patchEngineFactory(engine: DataEngineIF): ActionIF {
-  const action: ActionIF = {
+function patchEngineFactory(engine: EngineIF): MutatorIF {
+  const action: MutatorIF = {
     name: "patch",
     cacheable: true,
-    delta(branch, args: ActionDeltaArgs) {
+    mutator(branch, args: MutatorArgs) {
       const map = branch.prev
         ? new Map(branch.prev!.value as GenericMap)
         : new Map();
@@ -112,11 +112,11 @@ function patchEngineFactory(engine: DataEngineIF): ActionIF {
 
   return action;
 }
-function replaceActionFactory(engine: DataEngineIF): ActionIF {
-  const action: ActionIF = {
+function replaceActionFactory(engine: EngineIF): MutatorIF {
+  const action: MutatorIF = {
     name: "replace",
     cacheable: true,
-    delta(branch, args: ActionDeltaArgs) {
+    mutator(branch, args: MutatorArgs) {
       const [seed] = args;
       return new Map(seed as GenericMap | Iterable<[unknown, unknown]>);
     },
@@ -125,12 +125,12 @@ function replaceActionFactory(engine: DataEngineIF): ActionIF {
   return action;
 }
 
-export const dataEngineMap = {
+export const engineMap = {
   name: "map",
-  factory(tree: TreeIF): DataEngineIF {
+  factory(tree: TreeIF): EngineIF {
     const engine = new DataEngine("map", {
       cacheable: CACHE_TOP_ONLY,
-      validator(value) {
+      validator(value: unknown) {
         if (!(value instanceof Map)) {
           throw new Error("DataEngineIF must be a map");
         }

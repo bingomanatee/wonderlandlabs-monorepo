@@ -1,0 +1,1 @@
+function errorMessage(e){return e instanceof Error?e.message:"string"==typeof e?e:"-- unknown error --"}Object.defineProperty(exports,"__esModule",{value:!0}),exports.errorMessage=errorMessage;

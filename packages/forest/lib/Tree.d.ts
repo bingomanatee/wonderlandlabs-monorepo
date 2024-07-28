@@ -1,19 +1,20 @@
-import { ActionName, BranchIF, DataEngineIF, ForestIF, TreeIF, TreeName, TreeSeed, Acts, DiscardedBranchIF } from "./types";
+import { MutatorName, BranchIF, EngineIF, ForestIF, TreeIF, TreeName, TreeSeed, Mutators, DiscardedBranchIF } from "./types";
 export declare class Tree implements TreeIF {
     forest: ForestIF;
     name: TreeName;
     constructor(forest: ForestIF, name: TreeName, seed: TreeSeed);
     readonly trimmed: DiscardedBranchIF[];
-    private validator?;
+    private validators?;
+    private mutValidators;
     root: BranchIF;
     get top(): BranchIF;
-    dataEngine: string;
+    engineName: string;
     private _engine?;
-    get engine(): DataEngineIF;
+    get engine(): EngineIF;
     get value(): unknown;
     validate(): void;
-    do(name: ActionName, ...args: unknown[]): unknown;
-    readonly acts: Acts;
-    private initActs;
+    mutate(name: MutatorName, ...input: unknown[]): unknown;
+    readonly mut: Mutators;
+    private makeMut;
     trim(id: number, errorId: number): BranchIF | undefined;
 }

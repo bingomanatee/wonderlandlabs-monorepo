@@ -1,44 +1,50 @@
 import { A } from "@svgdotjs/svg.js";
 import { ACTION_NAME_INITIALIZER } from "./constants";
 import {
-  ActionDeltaArgs,
-  ActionIF,
-  ActionName,
+  MutatorArgs,
+  MutatorIF,
+  MutatorName,
   BranchIF,
-  DataEngineIF,
+  EngineIF,
   ForestIF,
   TreeIF,
   TreeName,
   TreeSeed,
   TransactFn,
   TreeValidator,
-  Acts,
+  Mutators,
   DiscardedBranchIF,
+  MutationValidatorIF,
 } from "./types";
 import { Branch } from "./Branch";
 import { join } from "./join";
+import { errorMessage } from "./helpers";
+import { ValidatorError } from "./ValidatorError";
 
-const DEFAULT_INITIALIZER: ActionIF = {
+const DEFAULT_INITIALIZER: MutatorIF = {
   name: "DEFAULT_INITIALIZER",
-  delta: function (_, args: ActionDeltaArgs): unknown {
+  mutator: function (_, args: MutatorArgs): unknown {
     return args[0];
   },
 };
 
 export class Tree implements TreeIF {
   constructor(public forest: ForestIF, public name: TreeName, seed: TreeSeed) {
-    this.dataEngine = seed.engineName;
+    this.engineName = seed.engineName;
     const init = [seed.val];
-    if (seed.validator) this.validator = seed.validator;
+    if (seed.validators) this.validators = seed.validators;
     const action = this.engine.actions.has(ACTION_NAME_INITIALIZER)
       ? this.engine.actions.get(ACTION_NAME_INITIALIZER)!
       : DEFAULT_INITIALIZER;
     this.root = new Branch(this, action, init);
 
-    this.acts = this.initActs();
+    this.mut = this.makeMut();
+    this.mutValidators = seed.mutatorValidators || [];
   }
   readonly trimmed: DiscardedBranchIF[] = [];
-  private validator?: TreeValidator;
+  private validators?: TreeValidator[];
+  private mutValidators: MutationValidatorIF[];
+
   root: BranchIF;
   public get top(): BranchIF {
     let b = this.root;
@@ -48,12 +54,12 @@ export class Tree implements TreeIF {
     }
     return b;
   }
-  dataEngine: string;
+  engineName: string;
 
-  private _engine?: DataEngineIF;
-  get engine(): DataEngineIF {
+  private _engine?: EngineIF;
+  get engine(): EngineIF {
     if (!this._engine) {
-      this._engine = this.forest.dataEngine(this.dataEngine, this);
+      this._engine = this.forest.engine(this.engineName, this);
     }
     return this._engine;
   }
@@ -65,31 +71,69 @@ export class Tree implements TreeIF {
     if (this.engine.validator) {
       this.engine.validator(this.value, this);
     }
-    if (this.validator) {
-      this.validator(this);
-    }
-  }
-
-  do(name: ActionName, ...args: unknown[]) {
-    const action = this.engine.actions.get(name);
-    return this.forest.transact(() => {
-      if (!action)
-        throw new Error(
-          "engine " + this.dataEngine + " does not have an action " + name
-        );
-      let next: BranchIF = new Branch(this, action, args);
-      join(this.top, next);
-      this.validate();
-      return next.value;
+    this.validators?.forEach((val) => {
+      try {
+        val(this);
+      } catch (err) {
+        throw new ValidatorError(err, val);
+      }
     });
   }
 
-  public readonly acts: Acts = {};
-  private initActs() {
-    let newActs: Acts = {};
+  mutate(name: MutatorName, ...input: unknown[]) {
+    // mutation validators validate input - so they execute before a new branch is created. 
+    this.mutValidators.forEach((val: MutationValidatorIF) => {
+      try {
+        if (val.onlyFor) {
+          if (typeof val.onlyFor === "string" && name !== name) {
+            return;
+          }
+          if (Array.isArray(val.onlyFor)) {
+            if (val.onlyFor.indexOf(name) === -1) {
+              return;
+            }
+          }
+        }
+        val.validator(input, this, name);
+      } catch (err) {
+        this.forest.errors.push({
+          message: errorMessage(err),
+          id: this.forest.nextID,
+          mutation: name,
+          validator: val.name,
+        });
+        throw new ValidatorError(err, val, name);
+      }
+    });
+
+    if (!this.engine.actions.has(name)) {
+      throw new Error(
+        "engine " + this.engineName + " does not have an action " + name
+      );
+    }
+    const action = this.engine.actions.get(name)!;
+
+    return this.forest.transact(() => {
+      let next: BranchIF = new Branch(this, action, input);
+      join(this.top, next);
+      try {
+        this.validate();
+      } catch (err) {
+        if (err instanceof ValidatorError) {
+          err.mutation = name;
+        }
+        throw err;
+      }
+      return this.value;
+    });
+  }
+
+  public readonly mut: Mutators = {};
+  private makeMut() {
+    let newActs: Mutators = {};
 
     this.engine.actions.forEach((action, name) => {
-      newActs[name] = (...args: ActionDeltaArgs) => this.do(name, ...args);
+      newActs[name] = (...args: MutatorArgs) => this.mutate(name, ...args);
     });
     return newActs;
   }

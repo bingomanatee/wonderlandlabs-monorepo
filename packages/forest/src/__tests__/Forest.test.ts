@@ -1,5 +1,5 @@
 import Forest from "../Forest";
-import { dataEngineBasic } from "../engines/dataEngine/dataEngineBasic";
+import { dataEngineBasic } from "../engines/engineBasic";
 
 describe("Forest", () => {
   describe(".tree", () => {

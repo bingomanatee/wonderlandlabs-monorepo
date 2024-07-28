@@ -1,14 +1,14 @@
 import { ACTION_NAME_INITIALIZER, CACHE_TOP_ONLY } from "./constants";
 import { join } from "./join";
-import { ActionDeltaArgs, ActionIF, BranchIF, GenObj, TreeIF } from "./types";
+import { MutatorArgs, MutatorIF, BranchIF, GenObj, TreeIF } from "./types";
 
 const CACHE_UNSET = Symbol("CACHE_UNSET");
 
 export class Branch implements BranchIF {
   constructor(
     public tree: TreeIF,
-    public action: ActionIF,
-    public data?: ActionDeltaArgs // @TODO: maybe private?
+    public mutator: MutatorIF,
+    public input?: MutatorArgs // @TODO: maybe private?
   ) {
     this.isAlive = true;
     this.id = tree.forest.nextID;
@@ -23,9 +23,9 @@ export class Branch implements BranchIF {
     if (!this.isAlive) throw new Error("cannot get value from dead branch");
     // console.log("calling value from branch", this);
 
-    if (this.action.cacheable) {
+    if (this.mutator.cacheable) {
       if (!this.isCached) {
-        if (this.action.cacheable === CACHE_TOP_ONLY) {
+        if (this.mutator.cacheable === CACHE_TOP_ONLY) {
           if (this === this.tree.top) {
             this.setCache();
             return this._cache;
@@ -39,18 +39,18 @@ export class Branch implements BranchIF {
       }
     }
 
-    return this.action.delta(this, this.data);
+    return this.mutator.mutator(this, this.input);
   }
 
   private setCache() {
-    this._cache = this.action.delta(this, this.data);
+    this._cache = this.mutator.mutator(this, this.input);
     this.isCached = true;
-    if (this.action.cacheable === CACHE_TOP_ONLY) {
+    if (this.mutator.cacheable === CACHE_TOP_ONLY) {
       this.clearPrevCache();
     }
   }
 
-  clearCache(){
+  clearCache() {
     this._cache = undefined;
     this.isCached = false;
   }
@@ -81,18 +81,18 @@ export class Branch implements BranchIF {
     this.isAlive = false;
     return this;
   }
-  cutMe(errorId :number): BranchIF {
+  cutMe(errorId: number): BranchIF {
     if (!this.isAlive) throw new Error("cannot cut a dead branch");
     if (this.prev) {
       this.prev.next = this.next;
       this.prev = undefined;
     }
     this.tree.trimmed.push({
-       id: this.id, 
-       action: this.action.name,
-       data: this.data,
-       errorId
-    })
+      id: this.id,
+      mutator: this.mutator.name,
+      data: this.input,
+      errorId,
+    });
     return this;
   }
   destroy(): void {

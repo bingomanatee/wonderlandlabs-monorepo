@@ -1,9 +1,9 @@
-import { ActionDeltaArgs, ActionIF, BranchIF, TreeIF } from "./types";
+import { MutatorArgs, MutatorIF, BranchIF, TreeIF } from "./types";
 export declare class Branch implements BranchIF {
     tree: TreeIF;
-    action: ActionIF;
-    data?: ActionDeltaArgs | undefined;
-    constructor(tree: TreeIF, action: ActionIF, data?: ActionDeltaArgs | undefined);
+    mutator: MutatorIF;
+    input?: MutatorArgs | undefined;
+    constructor(tree: TreeIF, mutator: MutatorIF, input?: MutatorArgs | undefined);
     isAlive: boolean;
     isCached: boolean;
     readonly id: number;

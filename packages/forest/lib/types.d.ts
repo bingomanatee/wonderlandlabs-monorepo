@@ -1,78 +1,88 @@
-export type DataEngineName = string;
+export type EngineName = string;
 export type TreeName = string;
-export type ActionName = string;
+export type MutatorName = string;
 export type GenObj = Record<string, unknown>;
+export type MapSrc<k = unknown, v = unknown> = [k, v][];
 export declare function isObj(a: unknown): a is object;
-export type ActionMap = Map<ActionName, ActionIF>;
-export declare function isDataEngineValidatorFn(data: unknown): data is DataEngineValidatorFn;
-export type DataEngineValidatorFn = (data: unknown, tree: TreeIF) => boolean;
-export declare function isDataEngineIF(a: unknown): a is DataEngineIF;
-export interface DataEngineIF {
-    name: DataEngineName;
-    actions: ActionMap;
-    validator?: DataEngineValidatorFn;
+export type MutatorMap = Map<MutatorName, MutatorIF>;
+export declare function isDataEngineValidatorFn(data: unknown): data is EngineValidatorFn;
+export type EngineValidatorFn = (data: unknown, tree: TreeIF) => boolean;
+export declare function isEngineIF(a: unknown): a is EngineIF;
+export interface EngineIF {
+    name: EngineName;
+    actions: MutatorMap;
+    validator?: EngineValidatorFn;
+}
+export type MutationValidatorFn = (input: unknown[], tree: TreeIF, name: string) => void;
+export interface MutationValidatorIF {
+    name: string;
+    onlyFor?: string | string[];
+    validator: MutationValidatorFn;
 }
 export type KeyVal = {
     key: unknown;
     val: unknown;
 };
-export type TreeValidator = (tree: TreeIF) => void;
+export type TreeValidator = (tree: TreeIF) => false | void;
 export type TreeSeed = {
     val?: unknown;
-    dataEngine: DataEngineName;
-    validator?: TreeValidator;
+    engineName: EngineName;
+    validators?: TreeValidator[];
+    mutatorValidators?: MutationValidatorIF[];
 };
 export type Cacheable = boolean | symbol;
-export interface ActionIF {
-    name: ActionName;
+export interface MutatorIF {
+    name: MutatorName;
     cacheable?: Cacheable;
-    delta(branch: BranchIF, ...args: ActionDeltaArgs): unknown;
+    mutator(branch: BranchIF, ...args: MutatorArgs): unknown;
 }
-export type ActionDeltaArgs = unknown[];
+export type MutatorArgs = unknown[];
 export interface BranchIF {
     readonly value: unknown;
     id: number;
     prev?: BranchIF;
     next?: BranchIF;
     tree: TreeIF;
-    action: ActionIF;
+    mutator: MutatorIF;
     push(branch: BranchIF): void;
     popMe(): BranchIF;
     cutMe(errorId: number): BranchIF;
     destroy(): void;
     isTop: boolean;
     isRoot: boolean;
-    data?: ActionDeltaArgs;
+    input?: MutatorArgs;
     isAlive: boolean;
     clearPrevCache(clear?: boolean): void;
     isCached: boolean;
 }
 export interface DiscardedBranchIF {
     id: number;
-    action: string;
-    data?: ActionDeltaArgs;
+    mutator: string;
+    data?: MutatorArgs;
     errorId: number;
 }
-export interface DoErrorIF {
+export interface TransactionErrorIF {
     id: number;
     message: string;
+    mutation?: string;
+    validator?: string;
 }
-export type ActFn = (...args: ActionDeltaArgs) => unknown;
-export type Acts = Record<string, ActFn>;
+export type MutatorFn = (...args: MutatorArgs) => unknown;
+export type Mutators = Record<string, MutatorFn>;
 export interface TreeIF {
     name: TreeName;
     root: BranchIF;
     top: BranchIF;
-    acts: Acts;
-    readonly dataEngine: DataEngineName;
+    mut: Mutators;
+    readonly engineName: EngineName;
     readonly forest: ForestIF;
     readonly value: unknown;
-    do(name: ActionName, ...args: ActionDeltaArgs): unknown;
+    mutate(name: MutatorName, ...args: MutatorArgs): unknown;
     validate(): void;
     trim(id: number, errorId: number): BranchIF | undefined;
     trimmed: DiscardedBranchIF[];
 }
-export type EngineFactory = (tree: TreeIF) => DataEngineIF;
+export type EngineFactory = (tree: TreeIF) => EngineIF;
 export type DataEngineFactory = {
     name: string;
     factory: EngineFactory;
@@ -82,9 +92,9 @@ export type TransactFn = (transId: number) => unknown;
 export interface ForestIF {
     tree(name: TreeName, seed?: TreeSeed): TreeIF;
     nextID: number;
-    dataEngine(nameOrEngine: DataEngineName | DataEngineIF | DataEngineFactory, tree?: TreeIF): DataEngineIF;
+    engine(nameOrEngine: EngineName | EngineIF | DataEngineFactory, tree?: TreeIF): EngineIF;
     transact(fn: TransactFn): unknown;
-    errors: DoErrorIF[];
+    errors: TransactionErrorIF[];
 }
 export type ATIDs = Set<number>;
-export type ActionFactory = (engine: DataEngineIF) => ActionIF;
+export type MutationFactcory = (engine: EngineIF) => MutatorIF;

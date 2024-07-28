@@ -1,4 +1,4 @@
-import { ActionIF, isObj, KeyVal } from "../../types";
+import { MutatorIF, isObj, KeyVal } from "../types";
 
 export type SingleDel = { delKey: unknown };
 export type MultiDel = { delKeys: unknown[] };
@@ -30,6 +30,7 @@ export type DistMapManifestDel = {
 export type DistMapManifestPatch = {
   patch?: GenericMap;
 };
+
 export type DistMapManifest =
   | DistMapManifestSet
   | DistMapManifestPatch

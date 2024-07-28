@@ -1,28 +1,22 @@
 import { A } from "@svgdotjs/svg.js";
 import { ACTION_NAME_INITIALIZER } from "../constants";
-import {
-  ActionDeltaArgs,
-  ActionIF,
-  BranchIF,
-  DataEngineIF,
-  TreeSeed,
-} from "../types";
+import { MutatorArgs, MutatorIF, BranchIF, EngineIF, TreeSeed } from "../types";
 import { Branch } from "../Branch";
 import Forest from "../Forest";
-import { dataEngineBasic } from "../engines/dataEngine/dataEngineBasic";
+import { dataEngineBasic } from "../engines/engineBasic";
 
-const fibInitializer: ActionIF = {
+const fibInitializer: MutatorIF = {
   name: ACTION_NAME_INITIALIZER,
-  delta(branch: BranchIF, data: ActionDeltaArgs) {
+  mutator(branch: BranchIF, data: MutatorArgs) {
     const [init] = data;
     if (init === undefined) return 0;
     return init;
   },
 };
 
-const fibNext: ActionIF = {
+const fibNext: MutatorIF = {
   name: "next",
-  delta(branch: BranchIF) {
+  mutator(branch: BranchIF) {
     const p1 = branch.prev;
     if (!p1) return 0;
     const p2 = p1.prev;
@@ -34,7 +28,7 @@ const fibNext: ActionIF = {
   },
 };
 
-const fibEngine: DataEngineIF = {
+const fibEngine: EngineIF = {
   name: "fib",
   actions: new Map([
     [ACTION_NAME_INITIALIZER, fibInitializer],
@@ -52,7 +46,7 @@ describe("Tree", () => {
       });
 
       expect(tree.value).toBe(100);
-      tree.do("set", 200);
+      tree.mutate("set", 200);
       expect(tree.value).toBe(200);
     });
   });
@@ -75,36 +69,36 @@ describe("Tree", () => {
       it("should increase by the fibonacci scale", () => {
         const f = new Forest([fibEngine]);
         const t = f.tree("fromZero", { engineName: "fib" });
-        t.do("next");
+        t.mutate("next");
         expect(t.value).toBe(1);
-        t.do("next");
+        t.mutate("next");
         expect(t.value).toBe(1);
-        t.do("next");
+        t.mutate("next");
         expect(t.value).toBe(2);
-        t.do("next");
+        t.mutate("next");
         expect(t.value).toBe(3);
-        t.do("next");
+        t.mutate("next");
         expect(t.value).toBe(5);
-        t.do("next");
+        t.mutate("next");
         expect(t.value).toBe(8);
-        t.do("next");
+        t.mutate("next");
         expect(t.value).toBe(13);
       });
 
       it("should increase based on the seed", () => {
         const f = new Forest([fibEngine]);
         const t = f.tree("from100", { engineName: "fib", val: 100 });
-        t.do("next");
+        t.mutate("next");
         expect(t.value).toBe(100);
-        t.do("next");
+        t.mutate("next");
         expect(t.value).toBe(200);
-        t.do("next");
+        t.mutate("next");
         expect(t.value).toBe(300);
-        t.do("next");
+        t.mutate("next");
         expect(t.value).toBe(500);
-        t.do("next");
+        t.mutate("next");
         expect(t.value).toBe(800);
-        t.do("next");
+        t.mutate("next");
         expect(t.value).toBe(1300);
       });
 
@@ -113,17 +107,17 @@ describe("Tree", () => {
         const t = f.tree("fromNeg1", { engineName: "fib", val: -1 });
 
         expect(t.value).toBe(-1);
-        t.do("next");
+        t.mutate("next");
         expect(t.value).toBe(-1);
-        t.do("next");
+        t.mutate("next");
         expect(t.value).toBe(-2);
-        t.do("next");
+        t.mutate("next");
         expect(t.value).toBe(-3);
-        t.do("next");
+        t.mutate("next");
         expect(t.value).toBe(-5);
-        t.do("next");
+        t.mutate("next");
         expect(t.value).toBe(-8);
-        t.do("next");
+        t.mutate("next");
         expect(t.value).toBe(-13);
       });
     });

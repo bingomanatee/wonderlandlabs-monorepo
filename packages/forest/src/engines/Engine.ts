@@ -1,20 +1,20 @@
 import {
-  ActionDeltaArgs,
-  ActionFactory,
-  ActionIF,
-  ActionMap,
+  MutatorArgs,
+  MutationFactcory,
+  MutatorIF,
+  MutatorMap,
   Cacheable,
-  DataEngineIF,
-  DataEngineValidatorFn,
+  EngineIF,
+  EngineValidatorFn,
   TreeIF,
-} from "../../types";
+} from "../types";
 
 export type DataEngineParams = {
   cacheable?: Cacheable;
-  validator?: DataEngineValidatorFn;
+  validator?: EngineValidatorFn;
 };
 
-export default class DataEngine implements DataEngineIF {
+export default class DataEngine implements EngineIF {
   constructor(public name: string, params?: DataEngineParams) {
     if (params) {
       if (params?.cacheable) {
@@ -26,15 +26,15 @@ export default class DataEngine implements DataEngineIF {
     }
   }
 
-  actions: ActionMap = new Map();
+  actions: MutatorMap = new Map();
 
-  validator?: DataEngineValidatorFn;
+  validator?: EngineValidatorFn;
 
   public tree?: TreeIF;
 
   private cacheable?: Cacheable;
 
-  addAction(actOrActFactory: ActionIF | ActionFactory): DataEngine {
+  addAction(actOrActFactory: MutatorIF | MutationFactcory): DataEngine {
     if (typeof actOrActFactory === "function") {
       return this.addAction(actOrActFactory(this));
     }
@@ -42,8 +42,8 @@ export default class DataEngine implements DataEngineIF {
 
     if (this.tree) {
       //@ts-ignore
-      this.tree.acts[actOrActFactory] = (...args: ActionDeltaArgs) =>
-        this.tree!.do(actOrActFactory.name, ...args);
+      this.tree.mut[actOrActFactory] = (...args: MutatorArgs) =>
+        this.tree!.mutate(actOrActFactory.name, ...args);
     }
     return this;
   }

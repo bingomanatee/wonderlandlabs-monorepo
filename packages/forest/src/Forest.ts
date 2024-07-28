@@ -3,36 +3,28 @@ import { Tree } from "./Tree";
 import {
   ATIDs,
   DataEngineFactory,
-  DataEngineIF,
-  DataEngineName,
-  DoErrorIF,
+  EngineIF,
+  EngineName,
+  TransactionErrorIF,
   EngineFactory,
   ForestIF,
   isDataEngineFactory,
-  isDataEngineIF,
+  isEngineIF,
   TransactFn,
   TreeIF,
   TreeName,
   TreeSeed,
 } from "./types";
+import { errorMessage } from "./helpers";
+import { ValidatorError } from "./ValidatorError";
 
-export type DataEngineFactoryOrEngine = DataEngineIF | DataEngineFactory;
-type EngineArgs = DataEngineName | DataEngineFactoryOrEngine;
+export type DataEngineFactoryOrEngine = EngineIF | DataEngineFactory;
+type EngineArgs = EngineName | DataEngineFactoryOrEngine;
 
-type DataEngineFn = (tree: TreeIF) => DataEngineIF;
+type DataEngineFn = (tree: TreeIF) => EngineIF;
 
 function isDataEngineFn(a: unknown): a is DataEngineFn {
   return typeof a === "function";
-}
-
-function errorMessage(err: unknown){ 
-  if (err instanceof Error) {
-    return err.message;
-  }
-  if (typeof err === 'string') {
-    return err;
-  }
-  return '-- unknown error --';
 }
 
 export default class Forest implements ForestIF {
@@ -40,17 +32,16 @@ export default class Forest implements ForestIF {
     engines.forEach((e) => {
       if (isDataEngineFactory(e)) {
         this.engines.set(e.name, e.factory);
-      } else if (isDataEngineIF(e)) {
+      } else if (isEngineIF(e)) {
         this.engines.set(e.name, e);
       } else {
         throw new Error("strange engine");
       }
     });
   }
-  readonly errors: DoErrorIF[] = [];
+  readonly errors: TransactionErrorIF[] = [];
   private trees: Map<TreeName, TreeIF> = new Map();
-  private engines: Map<DataEngineName, DataEngineIF | EngineFactory> =
-    new Map();
+  private engines: Map<EngineName, EngineIF | EngineFactory> = new Map();
 
   tree(name: TreeName, seed?: TreeSeed): TreeIF {
     if (!seed) {
@@ -62,7 +53,7 @@ export default class Forest implements ForestIF {
     this.trees.set(name, newTree);
     return newTree;
   }
-  dataEngine(nameOrEngine: EngineArgs, tree?: TreeIF): DataEngineIF {
+  engine(nameOrEngine: EngineArgs, tree?: TreeIF): EngineIF {
     if (typeof nameOrEngine === "string") {
       if (!this.engines.has(nameOrEngine)) {
         throw new Error("cannot find engine " + nameOrEngine);
@@ -72,7 +63,7 @@ export default class Forest implements ForestIF {
         if (tree) return engine(tree);
         throw new Error("dataEngine(<string>, <tree>) requires a tree arg");
       }
-      if (isDataEngineIF(engine)) {
+      if (isEngineIF(engine)) {
         return engine;
       }
       throw new Error("strange engine for " + nameOrEngine);
@@ -81,7 +72,7 @@ export default class Forest implements ForestIF {
         throw new Error("dataEngine(<string>, <tree>) requires a tree arg");
       }
       return nameOrEngine.factory(tree);
-    } else if (isDataEngineIF(nameOrEngine)) {
+    } else if (isEngineIF(nameOrEngine)) {
       this.engines.set(nameOrEngine.name, nameOrEngine);
       return nameOrEngine;
     } else {
@@ -117,9 +108,15 @@ export default class Forest implements ForestIF {
       });
       return out;
     } catch (err) {
+      const validator = err instanceof ValidatorError ? err.name : "transact error";
+      const mutation = err instanceof ValidatorError ? err.mutation : "transact error";
       const errorId = this.nextID;
-      const message = errorMessage(err);
-      this.errors.push({id: errorId, message});
+      this.errors.push({
+        id: errorId,
+        validator,
+        mutation,
+        message: errorMessage(err),
+      });
       this.changeActiveTransactionIDs((set) => {
         set.delete(transId);
       });

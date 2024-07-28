@@ -9,7 +9,7 @@ const constants_1 = require("../../constants");
 exports.initializer = {
     name: constants_1.ACTION_NAME_INITIALIZER,
     delta(_, args) {
-        if (_.tree.name === 'basic-engine')
+        if (_.tree.name === "basic-engine")
             console.log(constants_1.ACTION_NAME_INITIALIZER, "....................... called with ", args);
         return args[0];
     },

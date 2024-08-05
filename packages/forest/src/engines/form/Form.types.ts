@@ -1,5 +1,5 @@
-import { GenFun, GenObj, isObj, isTreeIF, TreeIF } from "../types";
-import { GenericMap } from "./engineTypes";
+import { GenFun, GenObj, isObj, isTreeIF, TreeIF } from "../../types";
+import Field from "./Field";
 
 export type FieldValidatorFn = (
   field: Field,
@@ -17,6 +17,7 @@ export interface FieldParams extends GenObj {
   defaultValue?: any;
   min?: number; //length, or for range or number control
   max?: number;
+  order?: number;
   label?: string;
   required?: boolean;
   id?: string;
@@ -50,8 +51,8 @@ export function isFieldPairIF(a: unknown): a is FieldPairIF {
   return "value" in o && "data" in o;
 }
 
-export function isFieldValue(a: unknown): a is FieldValue  {
-  return (typeof a === 'string') || (typeof a === 'number');
+export function isFieldValue(a: unknown): a is FieldValue {
+  return typeof a === "string" || typeof a === "number";
 }
 
 export type FieldValueType = FieldValue | FieldPairIF;
@@ -63,52 +64,16 @@ export interface FieldIF {
   params?: Partial<FieldParams>;
 }
 
-export function isFieldIF(a: unknown) : a is FieldIF {
+export function isFieldIF(a: unknown): a is FieldIF {
   if (!isObj(a)) return false;
   const o = a as GenObj;
 
-  if (!('tree' in o)) return false;
+  if (!("tree" in o)) return false;
   if (!isTreeIF(o.tree)) return false;
-  if (![('name' in o)]) return false;
-  if (![('value' in o)]) return false;
-  if (typeof o.name !== 'string') return false;
+  if (!["name" in o]) return false;
+  if (!["value" in o]) return false;
+  if (typeof o.name !== "string") return false;
   return true;
-}
-
-export default class Field implements FieldIF {
-  constructor(input: FieldIF) {
-    this.tree = input.tree;
-    this.name = input.name;
-    this.value = input.value;
-
-    this.params = [this.defaultParams, input.params].reduce(
-      (out: GenObj, input) => {
-        if (isObj(input)) {
-          return { ...out, ...input };
-        }
-        return out;
-      },
-      {}
-    );
-  }
-
-  tree?: TreeIF;
-  name: string;
-  value: FieldValue | FieldPairIF;
-  params?: Partial<FieldParams>;
-
-  private get defaultParams(): FieldParams | undefined {
-    let defaultParams: unknown;
-    let fields = this.tree?.engineInput
-      ? (this.tree.engineInput as GenObj).fields
-      : undefined;
-    if (fields) {
-      if ((fields as GenericMap).has(name)) {
-        defaultParams = ((fields as GenericMap).get(name) as FieldInfo).params;
-      }
-    }
-    return undefined;
-  }
 }
 
 export const FormStatus = {
@@ -144,8 +109,12 @@ export interface FormIF {
   title?: string;
   notes?: string;
   status: FormStatusType;
-  fields: Map<string, FieldInfo>;
   buttons?: Map<string, ButtonIF>;
+}
+
+export interface FormDefIF {
+  form: FormIF;
+  fields: Map<string, FieldIF>;
 }
 
 export function isForm(a: unknown): a is FormIF {

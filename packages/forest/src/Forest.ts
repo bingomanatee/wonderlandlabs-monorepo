@@ -43,13 +43,16 @@ export default class Forest implements ForestIF {
   private trees: Map<TreeName, TreeIF> = new Map();
   private engines: Map<EngineName, EngineIF | EngineFactoryFn> = new Map();
 
-  tree(name: TreeName, seed?: TreeSeed): TreeIF {
+  tree<ValueType, SeedType = TreeSeed>(
+    name: TreeName,
+    seed?: TreeSeed
+  ): TreeIF {
     if (!seed) {
       if (!this.trees.has(name)) throw new Error("cannot find tree " + name);
       return this.trees.get(name)!;
     }
     if (this.trees.has(name)) throw new Error("cannot redefine tree " + name);
-    const newTree = new Tree(this, name, seed);
+    const newTree = new Tree<ValueType>(this, name, seed);
     this.trees.set(name, newTree);
     return newTree;
   }

@@ -4,10 +4,10 @@ import { MutatorArgs, MutatorIF, BranchIF, GenObj, TreeIF } from "./types";
 
 const CACHE_UNSET = Symbol("CACHE_UNSET");
 
-export class Branch implements BranchIF {
+export class Branch<ValueType = unknown> implements BranchIF<ValueType> {
   constructor(
-    public tree: TreeIF,
-    public mutator: MutatorIF,
+    public tree: TreeIF<ValueType>,
+    public mutator: MutatorIF<ValueType>,
     public input?: MutatorArgs // @TODO: maybe private?
   ) {
     this.isAlive = true;
@@ -18,8 +18,8 @@ export class Branch implements BranchIF {
   isCached = false;
   public readonly id: number;
 
-  private _cache: unknown = CACHE_UNSET;
-  get value(): unknown {
+  private _cache: ValueType | typeof CACHE_UNSET = CACHE_UNSET;
+  get value(): ValueType {
     if (!this.isAlive) throw new Error("cannot get value from dead branch");
     // console.log("calling value from branch", this);
 
@@ -28,22 +28,22 @@ export class Branch implements BranchIF {
         if (this.mutator.cacheable === CACHE_TOP_ONLY) {
           if (this === this.tree.top) {
             this.setCache();
-            return this._cache;
+            if (this._cache !== CACHE_UNSET) return this._cache;
           }
         } else {
           this.setCache();
-          return this._cache;
+          if (this._cache !== CACHE_UNSET) return this._cache;
         }
       } else {
-        return this._cache;
+        if (this._cache !== CACHE_UNSET) return this._cache;
       }
     }
 
-    return this.mutator.mutator(this, this.input);
+    return this.mutator.get(this, this.input);
   }
 
   private setCache() {
-    this._cache = this.mutator.mutator(this, this.input);
+    this._cache = this.mutator.get(this, this.input);
     this.isCached = true;
     if (this.mutator.cacheable === CACHE_TOP_ONLY) {
       this.clearPrevCache();
@@ -51,7 +51,7 @@ export class Branch implements BranchIF {
   }
 
   clearCache() {
-    this._cache = undefined;
+    this._cache = CACHE_UNSET;
     this.isCached = false;
   }
 
@@ -72,7 +72,7 @@ export class Branch implements BranchIF {
       join(this, branch);
     }
   }
-  popMe(): BranchIF {
+  popMe(): BranchIF<ValueType> {
     if (!this.isAlive) throw new Error("cannot pop a dead branch");
 
     join(this.prev, this.next);
@@ -81,7 +81,7 @@ export class Branch implements BranchIF {
     this.isAlive = false;
     return this;
   }
-  cutMe(errorId: number): BranchIF {
+  cutMe(errorId: number): BranchIF<ValueType> {
     if (!this.isAlive) throw new Error("cannot cut a dead branch");
     if (this.prev) {
       this.prev.next = this.next;

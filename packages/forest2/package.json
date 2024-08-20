@@ -1,0 +1,55 @@
+{
+  "name": "@wonderlandlabs/forest2",
+  "version": "3.0.0",
+  "description": "Forest overhaul",
+  "type": "module",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "author": "David Edelhart",
+  "license": "MIT",
+  "dependencies": {
+    "@wonderlandlabs/collect": "^1.0.2",
+    "@wonderlandlabs/styler": "0.0.8",
+    "@wonderlandlabs/walrus": "workspace:^",
+    "lodash.isequal": "^4.5.0",
+    "rxjs": "^7.8.1",
+    "uuid": "^9.0.1"
+  },
+  "files": [
+    "lib/**/*"
+  ],
+  "homepage": "https://github.com/bingomanatee/wonderlandlabs-monorepo/tree/main/packages/forest",
+  "scripts": {
+    "build": "tsc && yarn uglify",
+    "uglify": "node uglify.cjs",
+    "format": "prettier --write \"src/**/*.(js|ts)\"",
+    "lint": "eslint src --ext .js,.ts",
+    "lint:fix": "eslint src --fix --ext .js,.ts",
+    "test": "jest --config jest.config.json",
+    "bt": "npm run build; jest --config jest.config.json",
+    "prepare": "npm run build; yarn uglify",
+    "prepublishOnly": "npm test && yarn lint",
+    "preversion": "yarn lint",
+    "version": "yarn && git add -A src",
+    "postversion": "git push && git push --tags"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.24.3",
+    "@babel/preset-env": "^7.24.3",
+    "@types/jest": "^29.5.12",
+    "@types/lodash.isequal": "^4.5.6",
+    "@types/node": "^20.14.11",
+    "@types/uuid": "^9.0.3",
+    "babel-jest": "^29.7.0",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.1.2",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.4.3",
+    "uglify-js": "^3.17.4"
+  },
+  "jest": {
+    "transform": {
+      "^.+\\.[t|j]sx?$": "babel-jest"
+    }
+  }
+}

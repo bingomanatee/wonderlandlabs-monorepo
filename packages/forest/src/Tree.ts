@@ -1,4 +1,3 @@
-import { A } from "@svgdotjs/svg.js";
 import { ACTION_NAME_INITIALIZER } from "./constants";
 import {
   MutatorArgs,
@@ -28,8 +27,8 @@ const DEFAULT_INITIALIZER: MutatorIF = {
   },
 };
 
-export class Tree implements TreeIF {
-  constructor(public forest: ForestIF, public name: TreeName, seed: TreeSeed) {
+export class Tree implements TreeIF<ValueType = unknown> {
+  constructor(public forest: ForestIF, public name: TreeName, seed?: TreeSeed) {
     this.engineName = seed.engineName;
     const init = [seed.val];
     if (seed.validators) this.validators = seed.validators;
@@ -46,7 +45,7 @@ export class Tree implements TreeIF {
   private mutValidators: MutationValidatorIF[];
   public engineInput?: unknown;
 
-  root: BranchIF;
+  root: BranchIF<ValueType>;
   public get top(): BranchIF {
     let b = this.root;
     while (b) {

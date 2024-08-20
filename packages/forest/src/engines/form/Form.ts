@@ -1,4 +1,4 @@
-import { FormIF, FormStatus, ButtonIF, isFieldIF } from "./Form.types";
+import { FormIF, FormStatus, ButtonIF } from "./Form.types";
 
 export class Form implements FormIF {
   constructor(params?: Partial<FormIF>) {
@@ -13,27 +13,4 @@ export class Form implements FormIF {
   notes?: string | undefined;
   status: string;
   buttons?: Map<string, ButtonIF> | undefined;
-
-  set(key, val) {
-    const fields = new Map(this.fields);
-    if (isFieldIF(val)) {
-      fields.set(key, val);
-    } else {
-      const newField = fields.has(key) ? new Field(fields.get(key) : new Field());
-      
-      if (isFieldPairIF(val) || isFieldValue(val)) {
-        newField.value = val;
-      } else {
-        throw new Error("bad set value");
-      }
-
-      if (params) {
-        if (newField.params) {
-          newField.params = { ...newField.params, params };
-        } else {
-          newField.params = params;
-        }
-      }
-    }
-  }
 }

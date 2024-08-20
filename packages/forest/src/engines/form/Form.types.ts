@@ -24,6 +24,7 @@ export interface FieldParams extends GenObj {
   style?: GenObj;
   className?: string;
   validators?: FieldValidator[];
+  exposure?: boolean | 'hidden';
 }
 
 // FieldInfo is the transient data stored in form.
@@ -76,6 +77,16 @@ export function isFieldIF(a: unknown): a is FieldIF {
   return true;
 }
 
+export function isFormAndFieldsIF(a: unknown) : a is FormAndFieldsIF {
+  if (!isObj(a)) return false;
+  const o = a as GenObj;
+  if (!('form' in a && 'field' in a)) return false;
+
+  if (!isForm(a.form)) return false;
+  if (!(a.field instanceof Map)) return false;
+  return true;
+}
+
 export const FormStatus = {
   active: "active",
   locked: "locked",
@@ -112,9 +123,11 @@ export interface FormIF {
   buttons?: Map<string, ButtonIF>;
 }
 
-export interface FormDefIF {
+export type FieldMap = Map<string, FieldIF>;
+
+export interface FormAndFieldsIF {
   form: FormIF;
-  fields: Map<string, FieldIF>;
+  fields: FieldMap;
 }
 
 export function isForm(a: unknown): a is FormIF {

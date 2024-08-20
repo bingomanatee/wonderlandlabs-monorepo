@@ -8,14 +8,14 @@ export function isObj(a: unknown): a is object {
   return !!(a && typeof a === "object");
 }
 
-export type MutatorMap = Map<MutatorName, MutatorIF>;
+export type MutatorMap<ValueType> = Map<MutatorName, MutatorIF<ValueType>>;
 
 export function isDataEngineValidatorFn(
   data: unknown
 ): data is EngineValidatorFn {
   return typeof data === "function";
 }
-export type EngineValidatorFn = (data: unknown, tree: TreeIF) => boolean;
+export type EngineValidatorFn = (data: unknown, tree: TreeIF) => boolean | void;
 export function isEngineIF(a: unknown): a is EngineIF {
   if (!(isObj(a) && "name" in a && a.name && typeof a.name === "string")) {
     return false;
@@ -26,9 +26,9 @@ export function isEngineIF(a: unknown): a is EngineIF {
   return true;
 }
 
-export interface EngineIF {
+export interface EngineIF<ValueType> {
   name: EngineName;
-  actions: MutatorMap;
+  actions: MutatorMap<ValueType>;
   validator?: EngineValidatorFn;
 }
 
@@ -48,8 +48,8 @@ export type KeyVal = { key: unknown; val: unknown };
 
 export type TreeValidator = (tree: TreeIF) => false | void; // throws if invalid
 
-export type TreeSeed = {
-  val?: unknown;
+export type TreeSeed<ValueType = unknown> = {
+  val?: ValueType;
   engineName: EngineName;
   engineInput?: unknown;
   validators?: TreeValidator[];
@@ -57,23 +57,23 @@ export type TreeSeed = {
 };
 
 export type Cacheable = boolean | symbol;
-export interface MutatorIF {
+export interface MutatorIF<ValueType> {
   name: MutatorName;
   cacheable?: Cacheable;
-  mutator(branch: BranchIF, ...args: MutatorArgs): unknown; // how to derive a value for a given branch
+  get(branch: BranchIF<ValueType>, ...args: MutatorArgs): ValueType; // how to derive a value for a given branch
 }
 
 export type MutatorArgs = unknown[];
-export interface BranchIF {
-  readonly value: unknown;
+export interface BranchIF<ValueType = unknown> {
+  readonly value: ValueType;
   id: number;
   prev?: BranchIF;
   next?: BranchIF;
   tree: TreeIF;
-  mutator: MutatorIF;
-  push(branch: BranchIF): void;
-  popMe(): BranchIF;
-  cutMe(errorId: number): BranchIF;
+  mutator: MutatorIF<ValueType>;
+  push(branch: BranchIF<ValueType>): void;
+  popMe(): BranchIF<ValueType>;
+  cutMe(errorId: number): BranchIF<ValueType>;
   destroy(): void;
   isTop: boolean;
   isRoot: boolean;
@@ -99,16 +99,16 @@ export interface TransactionErrorIF {
 
 export type MutatorFn = (...args: MutatorArgs) => unknown;
 export type Mutators = Record<string, MutatorFn>;
-export interface TreeIF {
+export type TreeIF<ValueType = unknown> {
   name: TreeName;
-  root: BranchIF;
-  top: BranchIF;
+  root: BranchIF<ValueType>;
+  top: BranchIF<ValueType>;
   mut: Mutators;
   readonly engineName: EngineName;
   readonly forest: ForestIF;
   readonly value: unknown;
   readonly engineInput?: unknown;
-  mutate(name: MutatorName, ...args: MutatorArgs): unknown;
+  mutate(name: MutatorName, ...args: MutatorArgs): void;
   validate(): void;
   trim(id: number, errorId: number): BranchIF | undefined;
   trimmed: DiscardedBranchIF[];
@@ -144,11 +144,14 @@ export function isEngineFactory(a: unknown): a is EngineFactory {
 
 export type TransactFn = (transId: number) => unknown;
 export interface ForestIF {
-  tree(name: TreeName, seed?: TreeSeed): TreeIF;
+  tree<ValueType>(
+    name: TreeName,
+    seed?: TreeSeed
+  ): TreeIF<ValueType>;
   nextID: number;
-  engine(
+  engine<ValueType>(
     nameOrEngine: EngineName | EngineIF | EngineFactory,
-    tree?: TreeIF
+    tree?: TreeIF<ValueType>
   ): EngineIF;
   transact(fn: TransactFn): unknown;
   errors: TransactionErrorIF[];

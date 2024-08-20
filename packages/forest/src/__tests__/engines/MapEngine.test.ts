@@ -1,4 +1,5 @@
 import Forest from "../../Forest";
+import "@types/jest";
 
 import { engineMap } from "../../engines/engineMap";
 import { GenericMap } from "../../engines/engineTypes";
@@ -14,7 +15,7 @@ const NEW_DATA: Map<unknown, unknown> = new Map([
   ["bar", 300],
 ] as MapSrc);
 
-describe("DistMap", () => {
+describe("engineMap", () => {
   describe("set", () => {
     it("should allow you to set individual values", () => {
       const f = new Forest([engineMap]);

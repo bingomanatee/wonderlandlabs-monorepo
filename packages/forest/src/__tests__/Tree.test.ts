@@ -1,4 +1,3 @@
-import { A } from "@svgdotjs/svg.js";
 import { ACTION_NAME_INITIALIZER } from "../constants";
 import { MutatorArgs, MutatorIF, BranchIF, EngineIF, TreeSeed } from "../types";
 import { Branch } from "../Branch";

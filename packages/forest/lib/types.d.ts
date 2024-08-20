@@ -6,7 +6,7 @@ export type MapSrc<k = unknown, v = unknown> = [k, v][];
 export declare function isObj(a: unknown): a is object;
 export type MutatorMap = Map<MutatorName, MutatorIF>;
 export declare function isDataEngineValidatorFn(data: unknown): data is EngineValidatorFn;
-export type EngineValidatorFn = (data: unknown, tree: TreeIF) => boolean;
+export type EngineValidatorFn = (data: unknown, tree: TreeIF) => boolean | void;
 export declare function isEngineIF(a: unknown): a is EngineIF;
 export interface EngineIF {
     name: EngineName;

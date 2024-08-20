@@ -1,4 +1,4 @@
-import type { BranchIF } from "./types.branch";
+import type { BranchIF, OffshootIF } from "./types.branch";
 import type { ForestIF } from "./types.forest";
 
 export type TreeName = string;
@@ -8,15 +8,36 @@ export type ChangeFN<ValueType> = (
   seed: any
 ) => ValueType;
 
-export interface ChangeIF<ValueType, SeedType = unknown> {
+export interface Mutator<ValueType> {
   next: ChangeFN<ValueType>;
-  seed: SeedType;
+  seed?: any;
 }
 
-export interface TreeIF<ValueType> {
-  name: TreeName;
-  root: BranchIF<ValueType>;
-  top: BranchIF<ValueType>;
-  forest: ForestIF;
-  grow(change: ChangeIF<ValueType>): BranchIF<ValueType>;
+export function isMutator<ValueType>(a: unknown): a is Mutator<ValueType> {
+  return !!(
+    a &&
+    typeof a === "object" &&
+    "next" in a &&
+    typeof a.next === "function"
+  );
 }
+
+interface Assertion<ValueType> {
+  next: ValueType;
+}
+export type ChangeIF<ValueType> = Mutator<ValueType> | Assertion<ValueType>;
+
+export interface TreeIF<ValueType> {
+  name?: TreeName;
+  root?: BranchIF<ValueType>;
+  top?: BranchIF<ValueType>;
+  forest: ForestIF;
+  offshoots?: OffshootIF<ValueType>[];
+  rollback(time: number, message: string): void;
+  grow(change: ChangeIF<ValueType>): BranchIF<ValueType>;
+
+  value: ValueType;
+}
+export type TreeParams<TreeValueType> = {
+  initial?: TreeValueType;
+};

@@ -1,14 +1,18 @@
 import type { BranchIF, OffshootIF } from "./types.branch";
 import type { ForestIF } from "./types.forest";
-import type { ChangeIF, TreeIF } from "./types.trees";
+import { isMutator, type ChangeIF, type TreeIF } from "./types.trees";
 
 export class Branch<ValueType> implements BranchIF<ValueType> {
   constructor(
     public readonly tree: TreeIF<ValueType>,
     public readonly change: ChangeIF<ValueType>
-  ) {}
+  ) {
+    this.time = tree.forest.nextTime;
+  }
+
   next?: BranchIF<ValueType>;
   prev?: BranchIF<ValueType>;
+  public readonly time: number;
 
   add<SeedType = any>(change: ChangeIF<ValueType>): BranchIF<ValueType> {
     const nextBranch = new Branch<ValueType>(this.tree, change);
@@ -18,7 +22,10 @@ export class Branch<ValueType> implements BranchIF<ValueType> {
   offshoots?: OffshootIF<ValueType>[] | undefined;
 
   get value(): ValueType {
-    return this.change.next(this, this.change.seed);
+    if (isMutator<ValueType>(this.change)) {
+      return this.change.next(this, this.change.seed);
+    }
+    return this.change.next;
   }
 
   linkTo(branch: BranchIF<ValueType>) {

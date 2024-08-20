@@ -1,6 +1,6 @@
-import type { TreeName, TreeIF } from "./types.trees";
+import type { TreeName, TreeIF, TreeParams } from "./types.trees";
 
-export type SeasonFn<ResultType> = (forest: ForestIF) => ResultType;
+export type TaskFn<ResultType> = (forest: ForestIF) => ResultType;
 
 export interface ForestIF {
   tree<ValueType>(
@@ -9,16 +9,11 @@ export interface ForestIF {
   ): TreeIF<ValueType> | undefined;
   addTree<ValueType>(
     name: TreeName,
-    initialValue: ValueType,
-    caller?: TreeIF<unknown>
+    params?: TreeParams<ValueType>
   ): TreeIF<ValueType>;
-  hasTree(name: TreeName, caller?: TreeIF<unknown>): boolean;
-  removeTree(
-    name: TreeName,
-    caller?: TreeIF<unknown>
-  ): TreeIF<unknown> | undefined;
+  hasTree(name: TreeName): boolean;
 
   nextTime: number;
 
-  season<ResultType>(change: SeasonFn<ResultType>): ResultType;
+  do<ResultType>(change: TaskFn<ResultType>): ResultType;
 }

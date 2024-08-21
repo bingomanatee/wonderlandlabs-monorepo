@@ -1,13 +1,15 @@
 import { Branch } from "./Branch";
-import type { BranchIF, OffshootIF } from "./types.branch";
+import type { BranchIF } from "./types.branch";
+import type { OffshootIF } from "./types";
 import type { ForestIF } from "./types.forest";
-import type { ChangeIF, TreeIF, TreeName, TreeParams } from "./types.trees";
+import type { TreeIF, TreeName, TreeParams } from "./types.trees";
+import type { ChangeIF } from "./types.shared";
 
 export default class Tree<TreeValueType> implements TreeIF<TreeValueType> {
   constructor(
     public forest: ForestIF,
     public readonly name: TreeName,
-    params?: TreeParams<TreeValueType>
+    private params?: TreeParams<TreeValueType>
   ) {
     if (params && "initial" in params) {
       const { initial } = params;
@@ -25,6 +27,7 @@ export default class Tree<TreeValueType> implements TreeIF<TreeValueType> {
     if (this.top.time < time) return;
 
     let firstObs = this.top;
+
     while (firstObs.prev && firstObs.prev.time >= time) {
       firstObs = firstObs.prev;
     }
@@ -39,6 +42,7 @@ export default class Tree<TreeValueType> implements TreeIF<TreeValueType> {
     this.offshoots.push(offshoot);
 
     const last = firstObs.prev;
+    this.top = last;
 
     if (last) {
       last.next = undefined;
@@ -52,14 +56,20 @@ export default class Tree<TreeValueType> implements TreeIF<TreeValueType> {
   root?: BranchIF<TreeValueType>;
   top?: BranchIF<TreeValueType>;
   grow(change: ChangeIF<TreeValueType>): BranchIF<TreeValueType> {
-    const next = new Branch<TreeValueType>(this, change);
-    if (this.top) {
-      this.top.linkTo(next);
-    } else {
+    return this.forest.do(() => {
+      const next = new Branch<TreeValueType>(this, change);
+      if (this.top) {
+        this.top.linkTo(next);
+      } else {
+        this.root = next;
+      }
       this.top = next;
-      this.root = next;
-    }
-    return next;
+      if (this.params?.validator) {
+        const err = this.params.validator(next.value, this);
+        if (err) throw err;
+      }
+      return next;
+    });
   }
 
   get value() {

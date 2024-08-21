@@ -14,5 +14,8 @@ describe("Forest", () => {
     expect(f.hasTree("foo")).toBeTruthy();
 
     expect(f.tree("foo")?.value).toBe(1);
+
+    f.addTree("bar", { initial: 100 });
+    expect(f.tree("bar")?.value).toBe(100);
   });
 });

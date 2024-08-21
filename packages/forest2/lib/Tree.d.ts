@@ -1,10 +1,13 @@
-import type { BranchIF, OffshootIF } from "./types.branch";
+import type { BranchIF } from "./types.branch";
+import type { OffshootIF } from "./types";
 import type { ForestIF } from "./types.forest";
-import type { ChangeIF, TreeIF, TreeName, TreeParams } from "./types.trees";
+import type { TreeIF, TreeName, TreeParams } from "./types.trees";
+import type { ChangeIF } from "./types.shared";
 export default class Tree<TreeValueType> implements TreeIF<TreeValueType> {
     forest: ForestIF;
     readonly name: TreeName;
-    constructor(forest: ForestIF, name: TreeName, params?: TreeParams<TreeValueType>);
+    private params?;
+    constructor(forest: ForestIF, name: TreeName, params?: TreeParams<TreeValueType> | undefined);
     rollback(time: number, message: string): void;
     offshoots?: OffshootIF<TreeValueType>[];
     root?: BranchIF<TreeValueType>;

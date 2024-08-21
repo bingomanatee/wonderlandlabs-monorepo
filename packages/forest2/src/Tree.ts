@@ -22,6 +22,10 @@ export default class Tree<TreeValueType> implements TreeIF<TreeValueType> {
     }
   }
 
+  next(next: TreeValueType) {
+    this.grow({next})
+  }
+
   rollback(time: number, message: string): void {
     if (!this.top) return;
     if (this.top.time < time) return;

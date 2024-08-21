@@ -18,7 +18,7 @@ export class Branch<ValueType> implements BranchIF<ValueType> {
   }
   public set next(value: BranchIF<ValueType> | undefined) {
     if (this === value) throw new Error('cannot self recurse');
-    if (this.prev === value) throw new Error('cannot self recurse loop');
+    if (value && (this.prev === value)) throw new Error('cannot self recurse loop');
     this._next = value;
   }
   private _prev?: BranchIF<ValueType> | undefined;
@@ -27,7 +27,7 @@ export class Branch<ValueType> implements BranchIF<ValueType> {
   }
   public set prev(value: BranchIF<ValueType> | undefined) {
     if (this.prev === value) throw new Error ('cannot self-recurse')
-      if (this.next === value) throw new Error('cannot self recurse loop');
+      if (value &&( this.next === value)) throw new Error('cannot self recurse loop');
     this._prev = value;
   }
   public readonly time: number;

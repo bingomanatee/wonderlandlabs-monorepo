@@ -49,5 +49,7 @@ describe("tree", () => {
     expect(() => t.grow({ next: 0.5 })).toThrow("must be a whole number");
 
     expect(t.value).toBe(200);
+    t.next(300);
+    expect(t.value).toBe(300);
   });
 });

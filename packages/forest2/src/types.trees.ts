@@ -13,14 +13,14 @@ export interface TreeIF<ValueType> {
   offshoots?: OffshootIF<ValueType>[];
   rollback(time: number, message: string): void;
   grow(change: ChangeIF<ValueType>): BranchIF<ValueType>;
-
+  next(value: ValueType): void;
   value: ValueType;
 }
 
 export type ValidatorFn<TreeValueType> = (
   value: TreeValueType,
   tree: TreeIF<TreeValueType>
-) => Error | undefined; // also throws
+) => Error | void | undefined; // also throws
 
 export type TreeParams<TreeValueType> = {
   initial?: TreeValueType;

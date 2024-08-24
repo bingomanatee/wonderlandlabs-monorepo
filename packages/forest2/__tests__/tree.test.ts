@@ -52,4 +52,40 @@ describe("tree", () => {
     t.next(300);
     expect(t.value).toBe(300);
   });
+
+  describe("subscribe", () => {
+    it("should allow subscription on a populated tree", () => {
+      const f = new Forest();
+
+      const t = f.addTree<number>("bar", {
+        initial: 100,
+      });
+
+      const out: number[] = [];
+
+      t.subscribe((v: number) => out.push(v));
+
+      expect(out).toEqual([100]);
+
+      t.grow({ next: 300 });
+      expect(out).toEqual([100, 300]);
+    });
+
+    it("should allow subscription on an unpopulted tree", () => {
+      const f = new Forest();
+
+      const t = f.addTree<number>("bar", {
+      });
+
+      const out: number[] = [];
+
+      t.subscribe((v: number) => out.push(v));
+
+      expect(out).toEqual([]);
+
+      t.grow({ next: 300 });
+      expect(out).toEqual([300]);
+
+    });
+  });
 });

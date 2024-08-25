@@ -49,9 +49,27 @@ class MapCollection extends Collection_1.Collection {
         this.tree.top.value.forEach(iter);
     }
     keys() {
-        return function* () {
-            yield "a";
-            yield "b";
+        const tree = this.tree;
+        return {
+            [Symbol.iterator]: function* () {
+                if (tree.top) {
+                    for (const out of tree.top.value.keys()) {
+                        yield out;
+                    }
+                }
+            },
+        };
+    }
+    values() {
+        const tree = this.tree;
+        return {
+            [Symbol.iterator]: function* () {
+                if (tree.top) {
+                    for (const out of tree.top.value.values()) {
+                        yield out;
+                    }
+                }
+            },
         };
     }
 }

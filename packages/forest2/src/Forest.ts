@@ -1,7 +1,7 @@
 import Tree from "./Tree";
 import type { ForestIF, TaskFn } from "./types.forest";
 import type { TreeName, TreeIF, TreeParams } from "./types.trees";
-
+import { BehaviorSubject } from "rxjs";
 export class Forest {
   private trees: Map<TreeName, TreeIF<any>> = new Map();
 
@@ -29,9 +29,13 @@ export class Forest {
     return time;
   }
 
+  public depth = new BehaviorSubject<Set<number>>(new Set());
+
   do<ResultType>(change: TaskFn<ResultType>) {
     const taskTime = this.nextTime;
-
+    const newSet = new Set(this.depth.value);
+    newSet.add(taskTime);
+    this.depth.next(newSet);
     try {
       const result = change(this);
       return result;
@@ -44,5 +48,8 @@ export class Forest {
       });
       throw err;
     }
+    const newSet2 = new Set(this.depth.value);
+    newSet2.delete(taskTime);
+    this.depth.next(newSet2);
   }
 }

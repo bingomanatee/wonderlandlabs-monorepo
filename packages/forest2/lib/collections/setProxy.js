@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.setProxy = setProxy;
 const MapCollection_1 = require("./MapCollection");
-function* makeIterator(target, key, value) {
+function makeIterator(target, key, value) {
     return function* () {
         let keys = target.keys();
         let next = keys.next();
@@ -15,30 +15,29 @@ function* makeIterator(target, key, value) {
         yield [value, key];
     };
 }
-function* makeValueIterator(target, key, value) {
-    return function* () {
-        let keys = target.keys();
-        let next = keys.next();
-        while (!next.done) {
-            const nextKey = next.value;
-            if (nextKey !== key)
-                yield target.get(nextKey);
-            next = keys.next();
-        }
-        yield value;
+function makeValueIterator(target, key, value) {
+    return {
+        [Symbol.iterator]: function* () {
+            let keys = target.keys();
+            let next = keys.next();
+            while (!next.done) {
+                const nextKey = next.value;
+                if (nextKey !== key)
+                    yield target.get(nextKey);
+                next = keys.next();
+            }
+            yield value;
+        },
     };
 }
-function* makeKeyIterator(target, key) {
-    return function* () {
-        let keys = target.keys();
-        let next = keys.next();
-        while (!next.done) {
-            const nextKey = next.value;
-            if (nextKey !== key)
-                yield nextKey;
-            next = keys.next();
-        }
-        yield key;
+function makeKeyIterator(target, key) {
+    return {
+        [Symbol.iterator]: function* () {
+            for (const k of target.keys()) {
+                yield k;
+            }
+            yield key;
+        },
     };
 }
 function makeEach(target, key, value) {
@@ -72,10 +71,10 @@ function setProxy(map, key, value) {
                     out = makeEach(target, key, value);
                     break;
                 case "keys":
-                    out = makeKeyIterator(target, key);
+                    out = () => makeKeyIterator(target, key);
                     break;
                 case "values":
-                    out = makeValueIterator(target, key, value);
+                    out = () => makeValueIterator(target, key, value);
                     break;
                 case "size":
                     out = target.size + (target.has(key) ? 0 : 1);

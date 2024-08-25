@@ -81,4 +81,17 @@ export default class MapCollection<
       },
     };
   }
+
+  values() {
+    const tree = this.tree;
+    return {
+      [Symbol.iterator]: function* () {
+        if (tree.top) {
+          for (const out of tree.top.value.values()) {
+            yield out as ValueType;
+          }
+        }
+      },
+    };
+  }
 }

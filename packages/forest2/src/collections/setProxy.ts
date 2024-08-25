@@ -7,12 +7,8 @@ function makeIterator<KeyType, ValueType>(
   value: ValueType
 ) {
   return function* () {
-    let keys = target.keys();
-    let next = keys.next();
-    while (!next.done) {
-      const nextKey = next.value;
-      if (nextKey !== key) yield [target.get(nextKey), nextKey];
-      next = keys.next();
+    for (const list of target) {
+      yield list;
     }
     yield [value, key];
   };
@@ -24,13 +20,11 @@ function makeValueIterator<KeyType, ValueType>(
   value: ValueType
 ) {
   return {
+    // because one of the key may be redundant
+    // we have to iterate over keys to find and skip it
     [Symbol.iterator]: function* () {
-      let keys = target.keys();
-      let next = keys.next();
-      while (!next.done) {
-        const nextKey = next.value;
-        if (nextKey !== key) yield target.get(nextKey);
-        next = keys.next();
+      for (const k of target.keys()) {
+        if (k !== key) yield target.get(k);
       }
       yield value;
     },
@@ -44,7 +38,7 @@ function makeKeyIterator<KeyType, ValueType>(
   return {
     [Symbol.iterator]: function* () {
       for (const k of target.keys()) {
-        yield k;
+        if (k !== key) yield k;
       }
       yield key;
     },
@@ -57,7 +51,9 @@ function makeEach<KeyType, ValueType>(
   value: ValueType
 ) {
   return (eachFN: IterFn<KeyType, ValueType>) => {
-    target.forEach(eachFN);
+    target.forEach((v, k) => {
+      if (k !== key) eachFN(v, k);
+    });
     eachFN(value, key);
   };
 }

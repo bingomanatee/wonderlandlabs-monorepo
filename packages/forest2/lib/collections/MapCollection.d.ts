@@ -10,5 +10,10 @@ export default class MapCollection<KeyType = unknown, ValueType = unknown> exten
     get(key: KeyType): ValueType | undefined;
     get size(): number;
     forEach(iter: IterFn<KeyType, ValueType>): void;
-    keys(): () => Generator<"a" | "b", void, unknown>;
+    keys(): {
+        [Symbol.iterator]: () => Generator<KeyType, void, unknown>;
+    };
+    values(): {
+        [Symbol.iterator]: () => Generator<ValueType, void, unknown>;
+    };
 }

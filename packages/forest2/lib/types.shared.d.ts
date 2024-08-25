@@ -10,4 +10,6 @@ interface Assertion<ValueType> {
     name?: string;
 }
 export type ChangeIF<ValueType> = Mutator<ValueType> | Assertion<ValueType>;
+export type SubscribeFn<ValueType> = (next: ValueType) => any;
+export type IterFn<KeyType, ValueType> = (v: ValueType, k: KeyType) => void;
 export {};

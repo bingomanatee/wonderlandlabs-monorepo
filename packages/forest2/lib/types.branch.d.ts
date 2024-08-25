@@ -1,6 +1,6 @@
 import type { TreeIF } from "./types.trees";
 import type { ChangeIF } from "./types.shared";
-export type ChangeFN<ValueType> = (value: ValueType | undefined, branch: BranchIF<ValueType>, seed: any) => ValueType;
+export type ChangeFN<ValueType> = (prev: BranchIF<ValueType> | undefined, seed?: any) => ValueType;
 export interface BranchIF<ValueType> {
     value: ValueType;
     time: number;

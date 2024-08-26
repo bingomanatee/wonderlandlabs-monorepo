@@ -1,5 +1,5 @@
 import { Forest } from "../../src/Forest";
-import MapCollection from "../../src/collections/MapCollection";
+import MapCollection from "../../src/collections/MapCollection/MapCollection";
 
 const MAP_SEED: [string, number][] = [
   ["a", 1],
@@ -246,11 +246,14 @@ describe("MapCollection", () => {
       });
 
       mc.set("c", 30); // force a proxy;
-      mc.delete('a')
+      mc.delete("a");
 
       const clone = new Map(mc.value);
 
-      const extendedSeed: [string, number][] = [['b', 2], ['c', 30]];
+      const extendedSeed: [string, number][] = [
+        ["b", 2],
+        ["c", 30],
+      ];
       expect(clone).toEqual(new Map<string, number>(extendedSeed));
     });
   });

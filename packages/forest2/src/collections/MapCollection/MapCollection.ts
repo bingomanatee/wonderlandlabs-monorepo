@@ -1,6 +1,6 @@
-import type { IterFn } from "../types.shared";
-import { Collection } from "./Collection";
-import type { CollectionParams } from "./Collection";
+import type { IterFn } from "../../types.shared";
+import { Collection } from "../Collection";
+import type { CollectionParams } from "../Collection";
 import { deleteProxyFor } from "./deleteProxyFor";
 import { setProxyFor } from "./setProxyFor";
 
@@ -61,10 +61,9 @@ export default class MapCollection<
 
       this.tree.grow({ next });
     } else {
-    const next = new Map(this.tree.top.value);
-    for (const key of keys) next.delete(key);
-    this.tree.grow({ next });
-
+      const next = new Map(this.tree.top.value);
+      for (const key of keys) next.delete(key);
+      this.tree.grow({ next });
     }
   }
 
@@ -73,6 +72,14 @@ export default class MapCollection<
       return undefined;
     }
     return this.tree.top.value.get(key);
+  }
+
+  replace(map: Map<KeyType, ValueType>) {
+    this.tree.grow({ next: map });
+  }
+
+  clear() {
+    this.replace(new Map());
   }
 
   get size() {

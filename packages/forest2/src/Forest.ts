@@ -1,15 +1,33 @@
 import Tree from "./Tree";
+
 import type { ForestIF, TaskFn } from "./types.forest";
 import type { TreeName, TreeIF, TreeParams } from "./types.trees";
 import { BehaviorSubject } from "rxjs";
-export class Forest {
+
+function pad(n: number) {
+  let str = `${n}`;
+  while (str.length < 3) str = "0" + str;
+  return str;
+}
+
+export class Forest implements ForestIF {
+  uniqueTreeName(basis: string = "tree"): string {
+    if (!this.hasTree(basis)) return basis;
+    let number = 1;
+
+    while (this.hasTree(`${basis}-${pad(number)}`)) {
+      number += 1;
+    }
+
+    return `${basis}-${pad(number)}`;
+  }
   private trees: Map<TreeName, TreeIF<any>> = new Map();
 
   public hasTree(name: TreeName) {
     return this.trees.has(name);
   }
 
-  tree<ValueType>(name: TreeName) {
+  tree<ValueType>(name: TreeName): TreeIF<ValueType> | undefined {
     if (!this.hasTree(name)) return undefined;
     return this.trees.get(name);
   }

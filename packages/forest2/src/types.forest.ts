@@ -15,5 +15,7 @@ export interface ForestIF {
 
   nextTime: number;
 
+  uniqueTreeName(basis: string): string
+
   do<ResultType>(change: TaskFn<ResultType>): ResultType;
 }

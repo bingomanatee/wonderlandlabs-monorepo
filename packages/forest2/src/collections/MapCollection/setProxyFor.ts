@@ -1,92 +1,102 @@
-import type { IterFn } from "../types.shared";
+import type { IterFn } from "../../types.shared";
 import { isMapKey, noSet } from "./MapCollection";
 
-export type MapDeleteInfo<KeyType, ValueType> = {
+export type MapSetInfo<KeyType, ValueType> = {
   map: Map<KeyType, ValueType>;
-  keys: KeyType[];
+  key: KeyType;
+  value: ValueType;
 };
-
 function makeIterator<KeyType, ValueType>(
-  target: MapDeleteInfo<KeyType, ValueType>
+  target: MapSetInfo<KeyType, ValueType>
 ) {
-  const { map, keys } = target;
+  const { map, key, value } = target;
   return function* () {
     for (const list of map) {
-      const [listKey] = list;
-      if (!keys.includes(listKey)) yield list;
+      yield list;
     }
+    yield [key, value];
   };
 }
 
 function makeValueIterator<KeyType, ValueType>(
-  target: MapDeleteInfo<KeyType, ValueType>
+  target: MapSetInfo<KeyType, ValueType>
 ) {
-  const { map, keys } = target;
+  const { map, key, value } = target;
   return () => ({
     // because one of the key may be redundant
     // we have to iterate over keys to find and skip it
     [Symbol.iterator]: function* () {
       for (const k of map.keys()) {
-        if (!keys.includes(k)) yield map.get(k);
+        if (k !== key) yield map.get(k);
       }
+      yield value;
+    },
+  });
+}
+function makeEntriesIterator<KeyType, ValueType>(
+  target: MapSetInfo<KeyType, ValueType>
+) {
+  const { map, key, value } = target;
+  return () => ({
+    // because one of the key may be redundant
+    // we have to iterate over keys to find and skip it
+    [Symbol.iterator]: function* () {
+      for (const k of map.keys()) {
+        if (k !== key) yield [k, map.get(k)];
+      }
+      yield [key, value];
     },
   });
 }
 
 function makeKeyIterator<KeyType, ValueType>(
-  target: MapDeleteInfo<KeyType, ValueType>
+  target: MapSetInfo<KeyType, ValueType>
 ) {
-  const { map, keys } = target;
+  const { map, key } = target;
   return () => ({
     [Symbol.iterator]: function* () {
       for (const k of map.keys()) {
-        if (!keys.includes(k)) yield k;
+        if (k !== key) yield k;
       }
+      yield key;
     },
   });
 }
 
 function getter<KeyType, ValueType>(
-  target: MapDeleteInfo<KeyType, ValueType>,
+  target: MapSetInfo<KeyType, ValueType>,
   key: KeyType
 ) {
-  return target.keys.includes(key) ? undefined : target.map.get(key);
+  return key === target.key ? target.value : target.map.get(key);
 }
 
 function haser<KeyType, ValueType>(
-  target: MapDeleteInfo<KeyType, ValueType>,
+  target: MapSetInfo<KeyType, ValueType>,
   key: KeyType
 ) {
-  return key === !target.keys.includes(key) && target.map.has(key);
+  return key === target.key ? true : target.map.has(key);
 }
-function makeEach<KeyType, ValueType>(
-  target: MapDeleteInfo<KeyType, ValueType>
-) {
-  const { map, keys } = target;
+function makeEach<KeyType, ValueType>(target: MapSetInfo<KeyType, ValueType>) {
+  const { map, key, value } = target;
   return (eachFN: IterFn<KeyType, ValueType>) => {
     map.forEach((v, k) => {
-      if (!keys.includes(k)) eachFN(v, k);
+      if (k !== key) eachFN(v, k);
     });
+    eachFN(value, key);
   };
 }
 
-function size<KeyType, ValueType>(target: MapDeleteInfo<KeyType, ValueType>) {
-  const { map, keys } = target;
-  let count = map.size;
-  for (const k of keys) {
-    if (map.has(k)) {
-      count -= 1;
-    }
-  }
-  return Math.max(count, 0);
+function size<KeyType, ValueType>(target: MapSetInfo<KeyType, ValueType>) {
+  const { map, key } = target;
+  return map.has(key) ? map.size : map.size + 1;
 }
 
-export function deleteProxyFor<KeyType, ValueType>(
-  target: MapDeleteInfo<KeyType, ValueType>
+export function setProxyFor<KeyType = unknown, ValueType = unknown>(
+  target: MapSetInfo<KeyType, ValueType>
 ) {
   const handler = {
     get(
-      target: MapDeleteInfo<KeyType, ValueType>,
+      target: MapSetInfo<KeyType, ValueType>,
       method: keyof typeof target.map
     ) {
       let out: any = undefined;
@@ -116,6 +126,10 @@ export function deleteProxyFor<KeyType, ValueType>(
 
         case "values":
           out = makeValueIterator<KeyType, ValueType>(target);
+          break;
+
+          case 'entries': 
+          out = makeEntriesIterator<KeyType, ValueType>(target);
           break;
 
         case "size":

@@ -1,14 +1,16 @@
 import { Forest } from "../../src/Forest";
 import MapCollection from "../../src/collections/MapCollection";
 
+const MAP_SEED: [string, number][] = [
+  ["a", 1],
+  ["b", 2],
+];
+
 describe("MapCollection", () => {
   it("should get values from a map", () => {
     const f = new Forest();
     const mc = new MapCollection<string, number>("foo", {
-      initial: new Map<string, number>([
-        ["a", 1],
-        ["b", 2],
-      ]),
+      initial: new Map<string, number>(MAP_SEED),
     });
 
     expect(mc.get("a")).toBe(1);
@@ -18,7 +20,7 @@ describe("MapCollection", () => {
     expect(mc.size).toBe(2);
   });
 
-  it("should ge values from a map with set", () => {
+  it("should get values from a map with set", () => {
     const f = new Forest();
     const mc = new MapCollection<string, number>("foo", {
       initial: new Map<string, number>([
@@ -36,7 +38,23 @@ describe("MapCollection", () => {
     expect(mc.size).toBe(3);
   });
 
-  it("should respect overrides", () => {
+  it("should allow keys to be deleted", () => {
+    const f = new Forest();
+    const mc = new MapCollection<string, number>("foo", {
+      initial: new Map<string, number>(MAP_SEED),
+    });
+
+    mc.set("c", 30);
+    mc.delete("a");
+
+    expect(mc.get("b")).toBe(2);
+
+    expect(mc.get("a")).toBeUndefined();
+
+    expect(mc.size).toBe(2);
+  });
+
+  it("should respect set overrides", () => {
     const f = new Forest();
     const mc = new MapCollection<string, number>("foo", {
       initial: new Map<string, number>([
@@ -204,6 +222,36 @@ describe("MapCollection", () => {
       }
 
       expect(values2).toEqual([2, 30, 100]);
+    });
+  });
+
+  describe("iterator/clone", () => {
+    it("iterates after set", () => {
+      const f = new Forest();
+      const mc = new MapCollection<string, number>("foo", {
+        initial: new Map<string, number>(MAP_SEED),
+      });
+
+      mc.set("c", 3); // force a proxy;
+
+      const clone = new Map(mc.value);
+
+      const extendedSeed: [string, number][] = [...MAP_SEED, ["c", 3]];
+      expect(clone).toEqual(new Map<string, number>(extendedSeed));
+    });
+    it("iterates after set and delete", () => {
+      const f = new Forest();
+      const mc = new MapCollection<string, number>("foo", {
+        initial: new Map<string, number>(MAP_SEED),
+      });
+
+      mc.set("c", 30); // force a proxy;
+      mc.delete('a')
+
+      const clone = new Map(mc.value);
+
+      const extendedSeed: [string, number][] = [['b', 2], ['c', 30]];
+      expect(clone).toEqual(new Map<string, number>(extendedSeed));
     });
   });
 });

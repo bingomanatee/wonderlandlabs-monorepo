@@ -1,21 +1,8 @@
-import { Forest } from "../Forest";
-import type { CollectionIF } from "../type.collection";
-import type { IterFn, SubscribeFn } from "../types.shared";
-import type { ForestIF } from "../types.forest";
-import type { TreeIF, ValidatorFn } from "../types.trees";
-import type { ChangeFN } from "../types.branch";
-import type { PartialObserver } from "rxjs";
+import type { IterFn } from "../types.shared";
 import { Collection } from "./Collection";
 import type { CollectionParams } from "./Collection";
-import { setProxy } from "./setProxy";
-
-const m = new Map();
-
-function* NullIterator<KeyType>(): IterableIterator<KeyType> {
-  return { next: () => ({ done: true }) };
-}
-
-type MapIteratorFn<ValueType> = () => IterableIterator<ValueType>;
+import { deleteProxyFor } from "./deleteProxyFor";
+import { setProxyFor } from "./setProxyFor";
 
 export function isMapKey<MapType>(
   map: MapType,
@@ -41,14 +28,43 @@ export default class MapCollection<
 
   set(key: KeyType, value: ValueType) {
     if (this.tree.top) {
-      const next = setProxy<KeyType, ValueType>(
-        this.tree.top.value,
-        key,
-        value
-      );
-      this.tree.grow({ next });
+      if (canProxy) {
+        const next = setProxyFor<KeyType, ValueType>({
+          map: this.tree.top.value,
+          key,
+          value,
+        });
+        this.tree.grow({ next });
+      } else {
+        let next = new Map(this.tree.top.value);
+        next.set(key, value);
+        this.tree.grow({ next });
+      }
     } else {
       this.tree.grow({ next: new Map([[key, value]]) });
+    }
+  }
+
+  delete(key: KeyType) {
+    return this.deleteMany([key]);
+  }
+
+  deleteMany(keys: KeyType[]) {
+    if (!this.tree.top) {
+      return;
+    }
+    if (canProxy) {
+      const next = deleteProxyFor<KeyType, ValueType>({
+        map: this.tree.top.value,
+        keys,
+      });
+
+      this.tree.grow({ next });
+    } else {
+    const next = new Map(this.tree.top.value);
+    for (const key of keys) next.delete(key);
+    this.tree.grow({ next });
+
     }
   }
 

@@ -7,6 +7,8 @@ export declare const canProxy: boolean;
 export default class MapCollection<KeyType = unknown, ValueType = unknown> extends Collection<Map<KeyType, ValueType>> {
     constructor(name: string, params: CollectionParams<Map<KeyType, ValueType>>);
     set(key: KeyType, value: ValueType): void;
+    delete(key: KeyType): void;
+    deleteMany(keys: KeyType[]): void;
     get(key: KeyType): ValueType | undefined;
     get size(): number;
     forEach(iter: IterFn<KeyType, ValueType>): void;

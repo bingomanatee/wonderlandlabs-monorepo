@@ -4,11 +4,7 @@ exports.canProxy = void 0;
 exports.isMapKey = isMapKey;
 exports.noSet = noSet;
 const Collection_1 = require("./Collection");
-const setProxy_1 = require("./setProxy");
-const m = new Map();
-function* NullIterator() {
-    return { next: () => ({ done: true }) };
-}
+const setProxyFor_1 = require("./setProxyFor");
 function isMapKey(map, a) {
     if (a === Symbol.iterator)
         return true;
@@ -25,12 +21,43 @@ class MapCollection extends Collection_1.Collection {
     }
     set(key, value) {
         if (this.tree.top) {
-            const next = (0, setProxy_1.setProxy)(this.tree.top.value, key, value);
-            this.tree.grow({ next });
+            if (exports.canProxy) {
+                const next = (0, setProxyFor_1.setProxyFor)({
+                    map: this.tree.top.value,
+                    key,
+                    value,
+                });
+                this.tree.grow({ next });
+            }
+            else {
+                let next = new Map(this.tree.top.value);
+                next.set(key, value);
+                this.tree.grow({ next });
+            }
         }
         else {
             this.tree.grow({ next: new Map([[key, value]]) });
         }
+    }
+    delete(key) {
+        return this.deleteMany([key]);
+    }
+    deleteMany(keys) {
+        if (!this.tree.top) {
+            return;
+        }
+        // if (canProxy) {
+        //   const next = deleteProxyFor<KeyType, ValueType>({
+        //     map: this.tree.top.value,
+        //     keys,
+        //   });
+        //   this.tree.grow({ next });
+        // } else {
+        const next = new Map(this.tree.top.value);
+        for (const key of keys)
+            next.delete(key);
+        this.tree.grow({ next });
+        // }
     }
     get(key) {
         if (!this.tree.top) {

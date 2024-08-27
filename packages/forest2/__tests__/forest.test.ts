@@ -1,4 +1,6 @@
 import { Forest } from "../src/Forest";
+import { expect, it, describe } from "@jest/globals";
+import type { BranchIF } from "../src/types.branch";
 
 describe("Forest", () => {
   describe("constructor", () => {
@@ -55,6 +57,52 @@ describe("Forest", () => {
       }).toThrow("foo must be multiple of 100");
       expect(foo.value).toBe(100);
       expect(bar.value).toBe(300);
+    });
+  });
+
+  describe("observe", () => {
+    it("should observe values", () => {
+      const f = new Forest();
+      type Numeric = { num: number };
+
+      const t = f.addTree<Numeric>("foo", {
+        initial: { num: 0 },
+        validator(value) {
+          if (!(value.num % 3)) throw new Error("no values divisible by 3");
+        },
+      });
+
+      function growBy(n: number) {
+        return {
+          next(prev: BranchIF<Numeric> | undefined, seed: number) {
+            return prev ? { num: prev.value.num + seed } : { num: seed };
+          },
+          seed: n,
+        };
+      }
+
+      const values: number[] = [];
+      f.observe<Numeric>("foo").subscribe((v) => values.push(v.num));
+      expect(values).toEqual([0]);
+
+      t.grow(growBy(2));
+
+      expect(t.value).toEqual({ num: 2 });
+      expect(values).toEqual([0, 2]);
+
+      f.do(() => {
+        t.grow(growBy(2));
+        t.grow(growBy(3));
+        t.grow(growBy(4));
+      });
+
+      expect(() => {
+        f.do(() => {
+          t.grow(growBy(4))
+        })
+      }).toThrow();
+
+      expect(values).toEqual([0, 2, 11]);
     });
   });
 });

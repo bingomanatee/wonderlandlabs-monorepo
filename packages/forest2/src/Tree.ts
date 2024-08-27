@@ -88,13 +88,15 @@ export default class Tree<ValueType> implements TreeIF<ValueType> {
     });
   }
 
+  get subject() {
+    return this.stream.pipe(
+      filter((b: BranchIF<ValueType> | undefined) => !!b),
+      map((b: BranchIF<ValueType>) => b.value)
+    );
+  }
+
   subscribe(observer: PartialObserver<ValueType> | SubscribeFn<ValueType>) {
-    return this.stream
-      .pipe(
-        filter((b: BranchIF<ValueType> | undefined) => !!b),
-        map((b: BranchIF<ValueType>) => b.value)
-      )
-      .subscribe(observer);
+    return this.subject.subscribe(observer);
   }
 
   get value() {

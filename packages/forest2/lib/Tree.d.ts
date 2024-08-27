@@ -16,6 +16,7 @@ export default class Tree<ValueType> implements TreeIF<ValueType> {
     root?: BranchIF<ValueType>;
     top?: BranchIF<ValueType>;
     grow(change: ChangeIF<ValueType>): BranchIF<ValueType>;
+    get subject(): import("rxjs").Observable<ValueType>;
     subscribe(observer: PartialObserver<ValueType> | SubscribeFn<ValueType>): import("rxjs").Subscription;
     get value(): ValueType;
 }

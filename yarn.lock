@@ -2803,6 +2803,7 @@ __metadata:
   dependencies:
     "@babel/core": "npm:^7.24.3"
     "@babel/preset-env": "npm:^7.24.3"
+    "@jest/globals": "npm:^29.7.0"
     "@types/jest": "npm:^29.5.12"
     "@types/lodash.isequal": "npm:^4.5.6"
     "@types/node": "npm:^20.14.11"

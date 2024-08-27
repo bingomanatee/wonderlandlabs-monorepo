@@ -1,6 +1,7 @@
 import { Forest } from "../src/Forest";
 import type { BranchIF } from "../src/types.branch";
 import type { TreeIF } from "../src/types.trees";
+import {expect, it, describe} from '@jest/globals';
 
 describe("tree", () => {
   it("should update values", () => {

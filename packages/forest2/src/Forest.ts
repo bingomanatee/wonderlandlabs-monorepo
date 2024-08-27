@@ -2,7 +2,15 @@ import Tree from "./Tree";
 
 import type { ForestIF, TaskFn } from "./types.forest";
 import type { TreeName, TreeIF, TreeParams } from "./types.trees";
-import { BehaviorSubject } from "rxjs";
+import {
+  BehaviorSubject,
+  combineLatest,
+  Observable,
+  filter,
+  map,
+  distinctUntilChanged,
+} from "rxjs";
+import isEqual from "lodash.isequal";
 
 function pad(n: number) {
   let str = `${n}`;
@@ -51,11 +59,10 @@ export class Forest implements ForestIF {
 
   do<ResultType>(change: TaskFn<ResultType>) {
     const taskTime = this.nextTime;
-    const newSet = new Set(this.depth.value);
-    newSet.add(taskTime);
-    this.depth.next(newSet);
+    this.addDepth(taskTime);
     try {
       const result = change(this);
+      this.unDepth(taskTime);
       return result;
     } catch (err) {
       this.trees.forEach((tree) => {
@@ -66,8 +73,43 @@ export class Forest implements ForestIF {
       });
       throw err;
     }
+  }
+
+  private addDepth(taskTime: number) {
+    const newSet = new Set(this.depth.value);
+    newSet.add(taskTime);
+    this.depth.next(newSet);
+  }
+
+  private unDepth(taskTime: number) {
     const newSet2 = new Set(this.depth.value);
     newSet2.delete(taskTime);
     this.depth.next(newSet2);
+  }
+
+  /**
+   * observes value changes for a tree when all 'do()' actions have completed.
+   * meaning, if any errors are thrown and reset the values, no emissions are made.
+   * distinct values mean that only values that are different are emitted.
+   * @param name {string}
+   * @returns
+   */
+  observe<ValueType>(name: TreeName) {
+    if (!this.hasTree(name))
+      throw new Error("cannot observe " + name + ": no tree by that name");
+
+    const tree = this.tree(name);
+    if (!tree)
+      throw new Error(
+        "cannot observe " + name + ": no tree by that name exists"
+      ); // for typescript
+
+    return combineLatest(this.depth, tree.subject).pipe(
+      filter(([depth]: [Set<Number>, any]) => {
+        return depth.size === 0;
+      }),
+      map(([, value]: [Set<Number>, any]) => value),
+      distinctUntilChanged(isEqual)
+    ) as Observable<ValueType>;
   }
 }

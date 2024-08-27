@@ -4451,6 +4451,7 @@ const RAW_RUNTIME_STATE =
           ["@wonderlandlabs/forest2", "workspace:packages/forest2"],\
           ["@babel/core", "npm:7.24.7"],\
           ["@babel/preset-env", "virtual:ee9c16b3774868c555824f8c8a42586f4497687472c6b8e8104f56acab9e3cf73b06da57cf9c7d8be7b7b6cdf750580791d6449ac55717d542f0e8979c18ba02#npm:7.24.7"],\
+          ["@jest/globals", "npm:29.7.0"],\
           ["@types/jest", "npm:29.5.12"],\
           ["@types/lodash.isequal", "npm:4.5.8"],\
           ["@types/node", "npm:20.14.11"],\

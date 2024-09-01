@@ -39,11 +39,16 @@ export abstract class Collection<ValueType> implements CollectionIF<ValueType> {
   }
 
   mutate<SeedType>(next: ChangeFN<ValueType>, seed?: SeedType) {
+    this.tree.grow({next, seed}) // untested
     return this;
   }
 
+  protected get subject () {
+    return this.tree.subject
+  }
+
   subscribe(observer: PartialObserver<ValueType> | SubscribeFn<ValueType>) {
-    return this.tree.subscribe(observer);
+    return this.subject.subscribe(observer);
   }
 
   public forest: ForestIF;

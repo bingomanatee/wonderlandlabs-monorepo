@@ -12,10 +12,11 @@ export type CollectionParams<ValueType> = {
 export declare abstract class Collection<ValueType> implements CollectionIF<ValueType> {
     name: string;
     private params?;
-    constructor(name: string, params?: CollectionParams<ValueType> | undefined, forest?: ForestIF);
+    constructor(name: string, params?: CollectionParams<ValueType>, forest?: ForestIF);
     get value(): ValueType;
     next(next: ValueType): CollectionIF<ValueType>;
     mutate<SeedType>(next: ChangeFN<ValueType>, seed?: SeedType): this;
+    protected get subject(): import("rxjs").Observable<ValueType>;
     subscribe(observer: PartialObserver<ValueType> | SubscribeFn<ValueType>): import("rxjs").Subscription;
     forest: ForestIF;
     protected get tree(): TreeIF<ValueType>;

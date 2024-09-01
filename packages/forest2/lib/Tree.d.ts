@@ -8,7 +8,7 @@ export default class Tree<ValueType> implements TreeIF<ValueType> {
     forest: ForestIF;
     readonly name: TreeName;
     private params?;
-    constructor(forest: ForestIF, name: TreeName, params?: TreeParams<ValueType> | undefined);
+    constructor(forest: ForestIF, name: TreeName, params?: TreeParams<ValueType>);
     private stream;
     next(next: ValueType): void;
     rollback(time: number, message: string): void;

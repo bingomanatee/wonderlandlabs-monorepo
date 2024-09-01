@@ -23,10 +23,14 @@ class Collection {
         return this;
     }
     mutate(next, seed) {
+        this.tree.grow({ next, seed }); // untested
         return this;
     }
+    get subject() {
+        return this.tree.subject;
+    }
     subscribe(observer) {
-        return this.tree.subscribe(observer);
+        return this.subject.subscribe(observer);
     }
     get tree() {
         const tree = this.forest.tree(this.name);

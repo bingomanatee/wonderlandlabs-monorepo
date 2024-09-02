@@ -5,6 +5,7 @@ import type {
   FieldProps,
   FieldError,
   FieldValidator,
+  FieldBaseParams,
 } from "./types.formCollection";
 
 type MessyValidator = FieldValidator | undefined;
@@ -26,14 +27,14 @@ export class FieldExtended implements FieldIF {
     return this.field.value;
   }
 
-  get staticProps(): FieldProps | undefined {
-    return this.formCollection.staticProps?.get(this.name);
+  get baseParamsLocal(): FieldBaseParams {
+    return this.formCollection.fieldBaseParams?.get(this.name) ?? {};
   }
 
   private _props: FieldProps | undefined | symbol = UNSET;
   get props() {
     if (this._props === UNSET) {
-      this._props = [this.staticProps, this.field.props].reduce(
+      this._props = [this.baseParamsLocal?.props, this.field.props].reduce(
         (out: FieldProps, item: FieldProps | undefined) => {
           if (item) {
             return { ...out, ...item };
@@ -51,51 +52,62 @@ export class FieldExtended implements FieldIF {
   get validators() {
     if (this._validators === UNSET) {
       this._validators = [
-        this.staticProps?.validators,
+        this._blend("validators"),
         this.field.validators,
       ].flat();
     }
     return typeof this._validators === "symbol" ? undefined : this._validators;
   }
 
+  private _errors: FieldError[] | symbol = UNSET;
   /**
    * summarizes all the errors in the
    * @returns FieldError[]
    */
-  get errors() {
-    let errors: FieldError[] = [];
-    this.validators?.forEach((v: FieldValidator | undefined) => {
-      if (v) {
-        let err = v(this);
-        if (err && !errors.some((e) => isEqual(e, err))) {
-          // errors should not be redundant - that being said, small variations will seep through.
-          errors.push(err);
+  get errors(): FieldError[] {
+    if (this._errors === UNSET) {
+      const errors = [];
+      this.validators?.forEach((v: FieldValidator | undefined) => {
+        if (v) {
+          let err = v(this, errors);
+          if (err && !errors.some((e) => isEqual(e, err))) {
+            // errors should not be redundant - that being said, small variations will seep through.
+            errors.push(err);
+          }
         }
-      }
-    });
+      });
+      this._errors = errors;
+      return errors;
+    }
 
-    return errors;
+    return this._errors as FieldError[];
   }
 
   get edited() {
     return Boolean(this.field.edited);
   }
 
-  get required() {
-    return Boolean(this.field.required);
+  // express
+  private _blend(propName: string) {
+    if (propName in this.field) return this.field[propName];
+    if (
+      this.formCollection.fieldBaseParams.has(this.name) &&
+      propName in this.formCollection.fieldBaseParams.get(this.name)
+    ) {
+      return this.formCollection.fieldBaseParams.get(this.name)[propName];
+    }
+    return undefined;
   }
+
+  get isRequired() {
+    return this._blend("isRequired");
+  }
+
   get order() {
-    return this.field.order;
+    return this._blend("order");
   }
 
   get label() {
-    if (this.field.label) return this.field.label;
-    if (
-      this.props &&
-      "label" in this.props &&
-      typeof this.props.label === "string"
-    )
-      return this.props.label;
-    return undefined;
+    return this._blend("label");
   }
 }

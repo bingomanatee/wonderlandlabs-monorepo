@@ -8,6 +8,7 @@ class FormCollection {
     constructor(name, fields, params) {
         this.name = name;
         this.params = params;
+        this.fieldBaseParams = new Map();
         this.fieldMap = new Map();
         // #region form
         this.form = {};
@@ -15,45 +16,39 @@ class FormCollection {
         this.initFields(fields);
         this.initForm(params?.form);
     }
-    get staticProps() {
-        if (!this._staticProps) {
-            this._staticProps = new Map();
-        }
-        return this._staticProps;
-    }
     /**
      * interprets fields into a fieldMap.
      * @param {FieldDef} fields
      */
     initFields(fields) {
         const fieldMap = new Map();
-        const add = (name, value, staticProps, rest) => {
+        const add = (name, value, baseParams, rest) => {
             const field = { name, value, ...rest };
-            if (staticProps) {
-                this.staticProps.set(name, staticProps);
+            if (baseParams) {
+                this.fieldBaseParams.set(name, baseParams);
             }
             fieldMap.set(name, field);
         };
         if ((0, types_formCollection_1.isFieldList)(fields)) {
-            for (const { name, staticProps, value, ...rest } of fields) {
-                add(name, value, staticProps, rest);
+            for (const { name, baseParams: baseParams, value, ...rest } of fields) {
+                add(name, value, baseParams, rest);
             }
         }
         else if ((0, types_formCollection_1.isFieldRecord)(fields)) {
             const keys = Object.keys(fields);
             for (const key of keys) {
                 const record = fields[key];
-                const { staticProps, value, ...rest } = record;
+                const { baseParams, value, ...rest } = record;
                 if (!(0, types_formCollection_1.isFieldValue)(value))
                     throw new Error("bad field value");
-                add(key, value, staticProps, rest);
+                add(key, value, baseParams, rest);
             }
         }
-        this.fieldMap = fieldMap;
+        this.makeFieldMapCollection(fieldMap);
     }
-    makeFieldMapCollection() {
+    makeFieldMapCollection(fieldMap) {
         const name = this.forest.uniqueTreeName(this.name + ":fields");
-        this._fieldMapCollection = new FormFieldMapCollection_1.FormFieldMapCollection(name, this.fieldMap, this);
+        this._fieldMapCollection = new FormFieldMapCollection_1.FormFieldMapCollection(name, fieldMap, this);
     }
     initForm(initialForm) {
         if (initialForm) {

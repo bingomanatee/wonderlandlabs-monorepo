@@ -4,6 +4,15 @@ exports.FormFieldMapCollection = void 0;
 const Collection_1 = require("../Collection");
 const rxjs_1 = require("rxjs");
 const FieldExtended_1 = require("./FieldExtended");
+/**
+ * this is a "utility sub-class" of FormCollection designed exclusively
+ * to track the field properties of FormCollection's fields.
+ *
+ * As it encases all values in a FieldExtended instance,
+ * its designed to augment the subject by a "mapped map" of its sourced
+ * values, allowing for the initial statics and validators to
+ * provide defaults for the transient properties.
+ */
 class FormFieldMapCollection extends Collection_1.Collection {
     constructor(name, fields, formCollection) {
         super(name, {

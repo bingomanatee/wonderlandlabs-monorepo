@@ -11,7 +11,8 @@ export function isFieldValue(a: unknown): a is FieldValue {
 
 export type ErrorMessageMap = Map<number, string>;
 export type FieldValidator = (
-  field: FieldIF
+  field: FieldIF,
+  previousErrors: FieldError[]
 ) => FieldError | void | false | null;
 export type FieldError = {
   message: string;
@@ -24,13 +25,16 @@ export interface FieldIF {
   label?: string | undefined;
   value: FieldValue;
   props?: FieldProps; // an extension point for any custom tracker props
-  staticProps?: FieldProps; // this is a "constructor" property
+  baseParams?: FieldBaseParams; // this is a "constructor" property - all acutal returned FieldIF values won't have this.
   errors?: FieldError[];
-  validators?: FieldValidator | FieldValidator[];
+  validators?: FieldValidator | FieldValidator[]; // will in most cases be in "baseParams"
   edited?: boolean;
-  required?: boolean;
-  order?: number;
+  isRequired?: boolean; // will in most cases be in "baseParams"
+  order?: number; // will in most cases be in "baseParams"
 }
+
+// These are the "initial and default" values any field may define.
+export type FieldBaseParams = Partial<Omit<FieldIF, "baseParams" | "value">>;
 
 export interface FormIF {
   name?: string;
@@ -49,8 +53,7 @@ export interface Params {
   forest?: ForestIF;
 }
 
-export type PropMap = Map<string, FieldProps>;
-
+// #region field collections
 export type FieldList = FieldIF[];
 export type FieldRecord = Record<string, Partial<FieldIF>>;
 
@@ -82,8 +85,11 @@ export function isFieldRecord(a: unknown): a is FieldRecord {
     return false;
   return true;
 }
+// #endregion
 
-export interface FormCollectionIF extends CollectionIF<FormSetIF> {
+export type BaseParamMap = Map<string, FieldBaseParams>;
+
+export interface FormCollectionIF {
   forest: ForestIF;
-  staticProps: PropMap;
+  fieldBaseParams: BaseParamMap;
 }

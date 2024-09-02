@@ -12,15 +12,17 @@ export type FieldError = {
 };
 export interface FieldIF {
     name: string;
+    label?: string | undefined;
     value: FieldValue;
     props?: FieldProps;
-    staticProps?: FieldProps;
+    baseParams?: FieldBaseParams;
     errors?: FieldError[];
     validators?: FieldValidator | FieldValidator[];
     edited?: boolean;
     required?: boolean;
     order?: number;
 }
+export type FieldBaseParams = Partial<Omit<FieldIF, "baseParams" | "value">>;
 export interface FormIF {
     name?: string;
     props?: Record<string, any>;
@@ -36,14 +38,14 @@ export interface Params {
     errorMessages?: string[];
     forest?: ForestIF;
 }
-export type PropMap = Map<string, FieldProps>;
 export type FieldList = FieldIF[];
 export type FieldRecord = Record<string, Partial<FieldIF>>;
 export declare function isObj(a: unknown): a is object;
 export declare function isField(a: unknown): a is FieldIF;
 export declare function isFieldList(a: unknown): a is FieldList;
 export declare function isFieldRecord(a: unknown): a is FieldRecord;
+export type BaseParamMap = Map<string, FieldBaseParams>;
 export interface FormCollectionIF extends CollectionIF<FormSetIF> {
     forest: ForestIF;
-    staticProps: PropMap;
+    fieldBaseParams: BaseParamMap;
 }

@@ -17,58 +17,76 @@ class FieldExtended {
         this.formCollection = formCollection;
         this._props = UNSET;
         this._validators = UNSET;
+        this._errors = UNSET;
     }
     get value() {
         return this.field.value;
     }
-    get staticProps() {
-        return this.formCollection.staticProps?.get(this.name);
+    get baseParamsLocal() {
+        return this.formCollection.fieldBaseParams?.get(this.name) ?? {};
     }
     get props() {
         if (this._props === UNSET) {
-            this._props = [this.staticProps, this.field.props].reduce((out, item) => {
+            this._props = [this.baseParamsLocal?.props, this.field.props].reduce((out, item) => {
                 if (item) {
                     return { ...out, ...item };
                 }
                 return out;
             }, {});
         }
-        return Array.isArray(this._props) ? this._props : undefined;
+        return typeof this._props === "symbol" ? undefined : this._props;
     }
     get validators() {
         if (this._validators === UNSET) {
             this._validators = [
-                this.staticProps?.validators,
+                this._blend("validators"),
                 this.field.validators,
             ].flat();
         }
-        return typeof this._validators === 'symbol' ? undefined : this._validators;
+        return typeof this._validators === "symbol" ? undefined : this._validators;
     }
     /**
      * summarizes all the errors in the
      * @returns FieldError[]
      */
     get errors() {
-        let errors = [];
-        this.validators?.forEach((v) => {
-            if (v) {
-                let err = v(this);
-                if (err && !errors.some((e) => (0, lodash_isequal_1.default)(e, err))) {
-                    // errors should not be redundant - that being said, small variations will seep through.
-                    errors.push(err);
+        if (this._errors === UNSET) {
+            const errors = [];
+            this.validators?.forEach((v) => {
+                if (v) {
+                    let err = v(this);
+                    if (err && !errors.some((e) => (0, lodash_isequal_1.default)(e, err))) {
+                        // errors should not be redundant - that being said, small variations will seep through.
+                        errors.push(err);
+                    }
                 }
-            }
-        });
-        return errors;
+            });
+            this._errors = errors;
+            return errors;
+        }
+        return this._errors;
     }
     get edited() {
         return Boolean(this.field.edited);
     }
+    // express
+    _blend(propName) {
+        if (propName in this.field)
+            return this.field[propName];
+        if (this.formCollection.fieldBaseParams.has(this.name) &&
+            propName in this.formCollection.fieldBaseParams.get(this.name)) {
+            return this.formCollection.fieldBaseParams.get(this.name)[propName];
+        }
+        return undefined;
+    }
     get required() {
-        return Boolean(this.field.required);
+        return this._blend("required");
     }
     get order() {
-        return this.field.order;
+        return this._blend("order");
+    }
+    get label() {
+        return this._blend("label");
     }
 }
 exports.FieldExtended = FieldExtended;

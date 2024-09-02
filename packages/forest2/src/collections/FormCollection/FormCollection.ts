@@ -10,10 +10,12 @@ import type {
   FieldRecord,
   FormSetIF,
   Params,
-  PropMap,
-  FieldProps,
   FormIF,
   FieldIF,
+  FieldBaseParams,
+  BaseParamMap,
+  FormCollectionIF,
+  FieldMap,
 } from "./types.formCollection";
 import {
   isFieldList,
@@ -24,21 +26,14 @@ import { FormFieldMapCollection } from "./FormFieldMapCollection";
 
 type FieldDef = FieldList | FieldRecord;
 
-class FormCollection implements CollectionIF<FormSetIF> {
+class FormCollection implements CollectionIF<FormSetIF>, FormCollectionIF {
   constructor(public name: string, fields: FieldDef, private params?: Params) {
     this.forest = params?.forest ?? new Forest();
     this.initFields(fields);
     this.initForm(params?.form);
   }
 
-  private _staticProps?: PropMap;
-
-  public get staticProps(): PropMap {
-    if (!this._staticProps) {
-      this._staticProps = new Map<string, FieldProps>();
-    }
-    return this._staticProps;
-  }
+  public fieldBaseParams: BaseParamMap = new Map();
 
   public forest: ForestIF;
   private fieldMap: Map<string, FieldIF> = new Map();
@@ -52,37 +47,37 @@ class FormCollection implements CollectionIF<FormSetIF> {
     const add = (
       name: string,
       value: string | number,
-      staticProps: FieldProps | undefined,
+      baseParams: FieldBaseParams | undefined,
       rest: Partial<FieldIF>
     ) => {
       const field: FieldIF = { name, value, ...rest };
-      if (staticProps) {
-        this.staticProps.set(name, staticProps);
+      if (baseParams) {
+        this.fieldBaseParams.set(name, baseParams);
       }
       fieldMap.set(name, field);
     };
     if (isFieldList(fields)) {
-      for (const { name, staticProps, value, ...rest } of fields) {
-        add(name, value, staticProps, rest);
+      for (const { name, baseParams: baseParams, value, ...rest } of fields) {
+        add(name, value, baseParams, rest);
       }
     } else if (isFieldRecord(fields)) {
       const keys = Object.keys(fields);
       for (const key of keys) {
         const record: Partial<FieldIF> = fields[key];
-        const { staticProps, value, ...rest } = record;
+        const { baseParams, value, ...rest } = record;
         if (!isFieldValue(value)) throw new Error("bad field value");
-        add(key, value, staticProps, rest);
+        add(key, value, baseParams, rest);
       }
     }
-    this.fieldMap = fieldMap;
+    this.makeFieldMapCollection(fieldMap);
   }
 
   private _fieldMapCollection?: FormFieldMapCollection;
-  private makeFieldMapCollection() {
+  private makeFieldMapCollection(fieldMap: FieldMap) {
     const name = this.forest.uniqueTreeName(this.name + ":fields");
     this._fieldMapCollection = new FormFieldMapCollection(
       name,
-      this.fieldMap,
+      fieldMap,
       this
     );
   }

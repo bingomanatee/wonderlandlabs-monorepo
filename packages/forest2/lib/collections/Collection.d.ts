@@ -1,9 +1,9 @@
-import type { CollectionIF } from "../type.collection";
-import type { SubscribeFn } from "../types.shared";
-import type { ForestIF } from "../types.forest";
-import type { TreeIF, ValidatorFn } from "../types.trees";
-import type { ChangeFN } from "../types.branch";
-import type { PartialObserver } from "rxjs";
+import type { CollectionIF } from '../type.collection';
+import type { SubscribeFn } from '../types.shared';
+import type { ForestIF } from '../types.forest';
+import type { TreeIF, ValidatorFn } from '../types.trees';
+import type { ChangeFN } from '../types.branch';
+import type { PartialObserver } from 'rxjs';
 export type CollectionParams<ValueType> = {
     initial?: ValueType;
     validator?: ValidatorFn<ValueType>;

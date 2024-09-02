@@ -1,4 +1,4 @@
-import type { TreeName, TreeIF, TreeParams } from "./types.trees";
+import type { TreeName, TreeIF, TreeParams } from './types.trees';
 import type { Observable } from 'rxjs';
 export type TaskFn<ResultType> = (forest: ForestIF) => ResultType;
 export interface ForestIF {

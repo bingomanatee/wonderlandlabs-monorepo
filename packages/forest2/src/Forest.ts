@@ -1,7 +1,7 @@
-import Tree from "./Tree";
+import Tree from './Tree';
 
-import type { ForestIF, TaskFn } from "./types.forest";
-import type { TreeName, TreeIF, TreeParams } from "./types.trees";
+import type { ForestIF, TaskFn } from './types.forest';
+import type { TreeName, TreeIF, TreeParams } from './types.trees';
 import {
   BehaviorSubject,
   combineLatest,
@@ -9,18 +9,18 @@ import {
   filter,
   map,
   distinctUntilChanged,
-} from "rxjs";
-import isEqual from "lodash.isequal";
+} from 'rxjs';
+import isEqual from 'lodash.isequal';
 
 function pad(n: number) {
   let str = `${n}`;
-  while (str.length < 3) str = "0" + str;
+  while (str.length < 3) {str = '0' + str;}
   return str;
 }
 
 export class Forest implements ForestIF {
-  uniqueTreeName(basis: string = "tree"): string {
-    if (!this.hasTree(basis)) return basis;
+  uniqueTreeName(basis: string = 'tree'): string {
+    if (!this.hasTree(basis)) {return basis;}
     let number = 1;
 
     while (this.hasTree(`${basis}-${pad(number)}`)) {
@@ -36,12 +36,12 @@ export class Forest implements ForestIF {
   }
 
   tree<ValueType>(name: TreeName): TreeIF<ValueType> | undefined {
-    if (!this.hasTree(name)) return undefined;
+    if (!this.hasTree(name)) {return undefined;}
     return this.trees.get(name);
   }
 
   public addTree<ValueType>(name: TreeName, params?: TreeParams<ValueType>) {
-    if (this.hasTree(name)) throw new Error("cannot redefine tree " + name);
+    if (this.hasTree(name)) {throw new Error('cannot redefine tree ' + name);}
 
     const tree: TreeIF<ValueType> = new Tree<ValueType>(this, name, params);
     this.trees.set(name, tree);
@@ -68,7 +68,7 @@ export class Forest implements ForestIF {
       this.trees.forEach((tree) => {
         tree.rollback(
           taskTime,
-          err instanceof Error ? err.message : "unknown error"
+          err instanceof Error ? err.message : 'unknown error'
         );
       });
       throw err;
@@ -96,19 +96,19 @@ export class Forest implements ForestIF {
    */
   observe<ValueType>(name: TreeName) {
     if (!this.hasTree(name))
-      throw new Error("cannot observe " + name + ": no tree by that name");
+    {throw new Error('cannot observe ' + name + ': no tree by that name');}
 
     const tree = this.tree(name);
     if (!tree)
-      throw new Error(
-        "cannot observe " + name + ": no tree by that name exists"
-      ); // for typescript
+    {throw new Error(
+      'cannot observe ' + name + ': no tree by that name exists'
+    );} // for typescript
 
     return combineLatest(this.depth, tree.subject).pipe(
-      filter(([depth]: [Set<Number>, any]) => {
+      filter(([ depth ]: [Set<number>, undefined]) => {
         return depth.size === 0;
       }),
-      map(([, value]: [Set<Number>, any]) => value),
+      map(([ , value ]: [Set<number>, undefined]) => value),
       distinctUntilChanged(isEqual)
     ) as Observable<ValueType>;
   }

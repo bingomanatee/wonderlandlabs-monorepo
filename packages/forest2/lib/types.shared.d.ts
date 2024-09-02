@@ -1,4 +1,4 @@
-import type { ChangeFN } from "./types.branch";
+import type { ChangeFN } from './types.branch';
 export interface Mutator<ValueType> {
     next: ChangeFN<ValueType>;
     seed?: any;

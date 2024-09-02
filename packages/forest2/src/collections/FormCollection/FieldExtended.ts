@@ -1,4 +1,4 @@
-import isEqual from "lodash.isequal";
+import isEqual from 'lodash.isequal';
 import type {
   FieldIF,
   FormCollectionIF,
@@ -6,11 +6,11 @@ import type {
   FieldError,
   FieldValidator,
   FieldBaseParams,
-} from "./types.formCollection";
+} from './types.formCollection';
 
 type MessyValidator = FieldValidator | undefined;
 type MessyValidators = MessyValidator[];
-const UNSET = Symbol("unset");
+const UNSET = Symbol('unset');
 /**
  * FieldExtended blends the properties of the static props of the
  * transient field with the staticProps from the formCollection's map.
@@ -34,7 +34,7 @@ export class FieldExtended implements FieldIF {
   private _props: FieldProps | undefined | symbol = UNSET;
   get props() {
     if (this._props === UNSET) {
-      this._props = [this.baseParamsLocal?.props, this.field.props].reduce(
+      this._props = [ this.baseParamsLocal?.props, this.field.props ].reduce(
         (out: FieldProps, item: FieldProps | undefined) => {
           if (item) {
             return { ...out, ...item };
@@ -44,7 +44,7 @@ export class FieldExtended implements FieldIF {
         {}
       );
     }
-    return typeof this._props === "symbol" ? undefined : this._props;
+    return typeof this._props === 'symbol' ? undefined : this._props;
   }
 
   private _validators: FieldValidator[] | undefined | symbol = UNSET;
@@ -52,11 +52,11 @@ export class FieldExtended implements FieldIF {
   get validators() {
     if (this._validators === UNSET) {
       this._validators = [
-        this._blend("validators"),
+        this._blend('validators'),
         this.field.validators,
       ].flat();
     }
-    return typeof this._validators === "symbol" ? undefined : this._validators;
+    return typeof this._validators === 'symbol' ? undefined : this._validators;
   }
 
   private _errors: FieldError[] | symbol = UNSET;
@@ -69,7 +69,7 @@ export class FieldExtended implements FieldIF {
       const errors = [];
       this.validators?.forEach((v: FieldValidator | undefined) => {
         if (v) {
-          let err = v(this, errors);
+          const err = v(this, errors);
           if (err && !errors.some((e) => isEqual(e, err))) {
             // errors should not be redundant - that being said, small variations will seep through.
             errors.push(err);
@@ -89,7 +89,7 @@ export class FieldExtended implements FieldIF {
 
   // express
   private _blend(propName: string) {
-    if (propName in this.field) return this.field[propName];
+    if (propName in this.field) {return this.field[propName];}
     if (
       this.formCollection.fieldBaseParams.has(this.name) &&
       propName in this.formCollection.fieldBaseParams.get(this.name)
@@ -100,14 +100,14 @@ export class FieldExtended implements FieldIF {
   }
 
   get isRequired() {
-    return this._blend("isRequired");
+    return this._blend('isRequired');
   }
 
   get order() {
-    return this._blend("order");
+    return this._blend('order');
   }
 
   get label() {
-    return this._blend("label");
+    return this._blend('label');
   }
 }

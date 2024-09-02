@@ -1,9 +1,9 @@
-import type { BranchIF } from "./types.branch";
-import type { OffshootIF } from "./types";
-import type { ForestIF } from "./types.forest";
-import type { TreeIF, TreeName, TreeParams } from "./types.trees";
-import type { ChangeIF, SubscribeFn } from "./types.shared";
-import type { PartialObserver } from "rxjs";
+import type { BranchIF } from './types.branch';
+import type { OffshootIF } from './types';
+import type { ForestIF } from './types.forest';
+import type { TreeIF, TreeName, TreeParams } from './types.trees';
+import type { ChangeIF, SubscribeFn } from './types.shared';
+import type { PartialObserver } from 'rxjs';
 export default class Tree<ValueType> implements TreeIF<ValueType> {
     forest: ForestIF;
     readonly name: TreeName;

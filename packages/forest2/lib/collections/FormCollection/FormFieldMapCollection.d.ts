@@ -1,5 +1,5 @@
-import { Collection } from "../Collection";
-import type { FieldMap, FormCollectionIF } from "./types.formCollection";
+import { Collection } from '../Collection';
+import type { FieldMap, FormCollectionIF } from './types.formCollection';
 /**
  * this is a "utility sub-class" of FormCollection designed exclusively
  * to track the field properties of FormCollection's fields.

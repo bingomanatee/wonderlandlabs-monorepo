@@ -1,28 +1,28 @@
-import type { CollectionIF } from "../../type.collection";
-import type { ForestIF } from "../../types.forest";
+import type { ForestIF } from '../../types.forest';
 export type FieldProps = Record<string, any>;
 export type FieldValue = string | number;
 export type FieldMap = Map<string, FieldIF>;
 export declare function isFieldValue(a: unknown): a is FieldValue;
 export type ErrorMessageMap = Map<number, string>;
-export type FieldValidator = (field: FieldIF) => FieldError | void | false | null;
+export type FieldValidator = (field: FieldIF, previousErrors: FieldError[]) => FieldError | void | false | null;
 export type FieldError = {
     message: string;
     severity?: number;
 };
 export interface FieldIF {
     name: string;
-    label?: string | undefined;
     value: FieldValue;
-    props?: FieldProps;
-    baseParams?: FieldBaseParams;
-    errors?: FieldError[];
-    validators?: FieldValidator | FieldValidator[];
     edited?: boolean;
-    required?: boolean;
+    errors?: FieldError[];
+    props?: FieldProps;
+    isRequired?: boolean;
     order?: number;
+    label?: string | undefined;
+    validators?: FieldValidator | FieldValidator[];
+    baseParams?: FieldBaseParams;
 }
-export type FieldBaseParams = Partial<Omit<FieldIF, "baseParams" | "value">>;
+export declare function isFieldIF(a: unknown): a is FieldIF;
+export type FieldBaseParams = Partial<Omit<FieldIF, 'baseParams' | 'value'>>;
 export interface FormIF {
     name?: string;
     props?: Record<string, any>;
@@ -45,7 +45,7 @@ export declare function isField(a: unknown): a is FieldIF;
 export declare function isFieldList(a: unknown): a is FieldList;
 export declare function isFieldRecord(a: unknown): a is FieldRecord;
 export type BaseParamMap = Map<string, FieldBaseParams>;
-export interface FormCollectionIF extends CollectionIF<FormSetIF> {
+export interface FormCollectionIF {
     forest: ForestIF;
     fieldBaseParams: BaseParamMap;
 }

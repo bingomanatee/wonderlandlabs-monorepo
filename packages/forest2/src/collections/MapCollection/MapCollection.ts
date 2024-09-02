@@ -1,23 +1,23 @@
-import type { IterFn } from "../../types.shared";
-import { Collection } from "../Collection";
-import type { CollectionParams } from "../Collection";
-import { deleteProxyFor } from "./deleteProxyFor";
-import { setProxyFor } from "./setProxyFor";
+import type { IterFn } from '../../types.shared';
+import { Collection } from '../Collection';
+import type { CollectionParams } from '../Collection';
+import { deleteProxyFor } from './deleteProxyFor';
+import { setProxyFor } from './setProxyFor';
 
 export function isMapKey<MapType>(
   map: MapType,
   a: keyof any
 ): a is keyof MapType {
-  if (a === Symbol.iterator) return true;
+  if (a === Symbol.iterator) {return true;}
   // @ts-ignore 7052
   return map instanceof Map && a in map;
 }
 
 export function noSet() {
-  throw new Error("forest maps are immutable");
+  throw new Error('forest maps are immutable');
 }
 
-export const canProxy = typeof Proxy === "function";
+export const canProxy = typeof Proxy === 'function';
 export default class MapCollection<
   KeyType = unknown,
   ValueType = unknown
@@ -36,17 +36,17 @@ export default class MapCollection<
         });
         this.tree.grow({ next });
       } else {
-        let next = new Map(this.tree.top.value);
+        const next = new Map(this.tree.top.value);
         next.set(key, value);
         this.tree.grow({ next });
       }
     } else {
-      this.tree.grow({ next: new Map([[key, value]]) });
+      this.tree.grow({ next: new Map([ [ key, value ] ]) });
     }
   }
 
   delete(key: KeyType) {
-    return this.deleteMany([key]);
+    return this.deleteMany([ key ]);
   }
 
   deleteMany(keys: KeyType[]) {
@@ -62,7 +62,7 @@ export default class MapCollection<
       this.tree.grow({ next });
     } else {
       const next = new Map(this.tree.top.value);
-      for (const key of keys) next.delete(key);
+      for (const key of keys) {next.delete(key);}
       this.tree.grow({ next });
     }
   }
@@ -83,12 +83,12 @@ export default class MapCollection<
   }
 
   get size() {
-    if (!this.tree.top) return 0;
+    if (!this.tree.top) {return 0;}
     return this.tree.top.value.size;
   }
 
   forEach(iter: IterFn<KeyType, ValueType>) {
-    if (!this.tree.top) return;
+    if (!this.tree.top) {return;}
     this.tree.top.value.forEach(iter);
   }
 

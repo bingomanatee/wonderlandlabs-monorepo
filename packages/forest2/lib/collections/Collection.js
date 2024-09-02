@@ -8,7 +8,7 @@ class Collection {
         this.params = params;
         this.forest = forest ?? new Forest_1.Forest();
         if (this.forest.hasTree(name)) {
-            throw new Error("cannot create collection - tree " + name + " exists");
+            throw new Error('cannot create collection - tree ' + name + ' exists');
         }
         this.forest.addTree(name, {
             initial: params?.initial,
@@ -34,8 +34,9 @@ class Collection {
     }
     get tree() {
         const tree = this.forest.tree(this.name);
-        if (!tree)
-            throw new Error("cannot find tree " + this.name);
+        if (!tree) {
+            throw new Error('cannot find tree ' + this.name);
+        }
         return tree;
     }
 }

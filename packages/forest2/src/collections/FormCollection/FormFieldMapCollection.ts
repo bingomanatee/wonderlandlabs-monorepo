@@ -1,9 +1,9 @@
-import type { CollectionIF } from "../../type.collection";
-import { Collection } from "../Collection";
-import { map } from "rxjs";
+import type { CollectionIF } from '../../type.collection';
+import { Collection } from '../Collection';
+import { map } from 'rxjs';
 
-import type { FieldMap, FormCollectionIF } from "./types.formCollection";
-import { FieldExtended } from "./FieldExtended";
+import type { FieldMap, FormCollectionIF } from './types.formCollection';
+import { FieldExtended } from './FieldExtended';
 
 /**
  * this is a "utility sub-class" of FormCollection designed exclusively
@@ -23,8 +23,8 @@ export class FormFieldMapCollection extends Collection<FieldMap> {
 
     const mappedFields = new Map();
 
-    for (const [name, field] of fields ) {
-        mappedFields.set(name, new FieldExtended(field, name, formCollection));
+    for (const [ name, field ] of fields ) {
+      mappedFields.set(name, new FieldExtended(field, name, formCollection));
     }
 
     super(
@@ -39,8 +39,8 @@ export class FormFieldMapCollection extends Collection<FieldMap> {
   protected get subject() {
     return super.subject.pipe(
       map((fieldMap: FieldMap) => {
-        let map = new Map(fieldMap);
-        for (const [name, field] of fieldMap) {
+        const map = new Map(fieldMap);
+        for (const [ name, field ] of fieldMap) {
           const mappedField = new FieldExtended(
             field,
             name,

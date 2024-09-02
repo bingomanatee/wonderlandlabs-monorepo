@@ -15,15 +15,19 @@ const FieldExtended_1 = require("./FieldExtended");
  */
 class FormFieldMapCollection extends Collection_1.Collection {
     constructor(name, fields, formCollection) {
+        const mappedFields = new Map();
+        for (const [name, field] of fields) {
+            mappedFields.set(name, new FieldExtended_1.FieldExtended(field, name, formCollection));
+        }
         super(name, {
-            initial: fields,
+            initial: mappedFields,
         }, formCollection.forest);
         this.name = name;
         this.formCollection = formCollection;
     }
     get subject() {
         return super.subject.pipe((0, rxjs_1.map)((fieldMap) => {
-            let map = new Map(fieldMap);
+            const map = new Map(fieldMap);
             for (const [name, field] of fieldMap) {
                 const mappedField = new FieldExtended_1.FieldExtended(field, name, this.formCollection);
             }

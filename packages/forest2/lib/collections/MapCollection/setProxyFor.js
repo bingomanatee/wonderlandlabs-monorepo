@@ -18,8 +18,9 @@ function makeValueIterator(target) {
         // we have to iterate over keys to find and skip it
         [Symbol.iterator]: function* () {
             for (const k of map.keys()) {
-                if (k !== key)
+                if (k !== key) {
                     yield map.get(k);
+                }
             }
             yield value;
         },
@@ -32,8 +33,9 @@ function makeEntriesIterator(target) {
         // we have to iterate over keys to find and skip it
         [Symbol.iterator]: function* () {
             for (const k of map.keys()) {
-                if (k !== key)
+                if (k !== key) {
                     yield [k, map.get(k)];
+                }
             }
             yield [key, value];
         },
@@ -44,8 +46,9 @@ function makeKeyIterator(target) {
     return () => ({
         [Symbol.iterator]: function* () {
             for (const k of map.keys()) {
-                if (k !== key)
+                if (k !== key) {
                     yield k;
+                }
             }
             yield key;
         },
@@ -61,8 +64,9 @@ function makeEach(target) {
     const { map, key, value } = target;
     return (eachFN) => {
         map.forEach((v, k) => {
-            if (k !== key)
+            if (k !== key) {
                 eachFN(v, k);
+            }
         });
         eachFN(value, key);
     };
@@ -76,30 +80,31 @@ function setProxyFor(target) {
         get(target, method) {
             let out = undefined;
             switch (method) {
-                case "get":
+                case 'get':
                     out = (key) => getter(target, key);
                     break;
-                case "set":
+                case 'set':
                     out = MapCollection_1.noSet;
                     break;
-                case "clear":
+                case 'clear':
                     out = MapCollection_1.noSet;
-                case "has":
+                    break;
+                case 'has':
                     out = (key) => haser(target, key);
                     break;
-                case "forEach":
+                case 'forEach':
                     out = makeEach(target);
                     break;
-                case "keys":
+                case 'keys':
                     out = makeKeyIterator(target);
                     break;
-                case "values":
+                case 'values':
                     out = makeValueIterator(target);
                     break;
                 case 'entries':
                     out = makeEntriesIterator(target);
                     break;
-                case "size":
+                case 'size':
                     out = size(target);
                     break;
                 case Symbol.iterator:

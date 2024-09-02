@@ -7,15 +7,16 @@ const Collection_1 = require("../Collection");
 const deleteProxyFor_1 = require("./deleteProxyFor");
 const setProxyFor_1 = require("./setProxyFor");
 function isMapKey(map, a) {
-    if (a === Symbol.iterator)
+    if (a === Symbol.iterator) {
         return true;
+    }
     // @ts-ignore 7052
     return map instanceof Map && a in map;
 }
 function noSet() {
-    throw new Error("forest maps are immutable");
+    throw new Error('forest maps are immutable');
 }
-exports.canProxy = typeof Proxy === "function";
+exports.canProxy = typeof Proxy === 'function';
 class MapCollection extends Collection_1.Collection {
     constructor(name, params) {
         super(name, params);
@@ -31,7 +32,7 @@ class MapCollection extends Collection_1.Collection {
                 this.tree.grow({ next });
             }
             else {
-                let next = new Map(this.tree.top.value);
+                const next = new Map(this.tree.top.value);
                 next.set(key, value);
                 this.tree.grow({ next });
             }
@@ -56,8 +57,9 @@ class MapCollection extends Collection_1.Collection {
         }
         else {
             const next = new Map(this.tree.top.value);
-            for (const key of keys)
+            for (const key of keys) {
                 next.delete(key);
+            }
             this.tree.grow({ next });
         }
     }
@@ -74,13 +76,15 @@ class MapCollection extends Collection_1.Collection {
         this.replace(new Map());
     }
     get size() {
-        if (!this.tree.top)
+        if (!this.tree.top) {
             return 0;
+        }
         return this.tree.top.value.size;
     }
     forEach(iter) {
-        if (!this.tree.top)
+        if (!this.tree.top) {
             return;
+        }
         this.tree.top.value.forEach(iter);
     }
     keys() {

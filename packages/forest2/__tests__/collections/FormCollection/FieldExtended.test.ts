@@ -23,12 +23,12 @@ describe("FieldExtended", () => {
       value: "foo",
       props: { className: "comment-class" },
     };
-    const staticProps = {
+    const baseParams = {
       label: "Comments",
       className: "override-me",
     };
     const ex = new FieldExtended(testField, testField.name, {
-      fieldBaseParams: new Map([["comments", staticProps]]),
+      fieldBaseParams: new Map([["comments", baseParams]]),
     });
 
     expect(ex.name).toBe(testField.name);

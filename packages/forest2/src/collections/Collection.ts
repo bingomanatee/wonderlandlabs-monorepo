@@ -1,10 +1,10 @@
-import { Forest } from "../Forest";
-import type { CollectionIF } from "../type.collection";
-import type { SubscribeFn } from "../types.shared";
-import type { ForestIF } from "../types.forest";
-import type { TreeIF, ValidatorFn } from "../types.trees";
-import type { ChangeFN } from "../types.branch";
-import type { PartialObserver } from "rxjs";
+import { Forest } from '../Forest';
+import type { CollectionIF } from '../type.collection';
+import type { SubscribeFn } from '../types.shared';
+import type { ForestIF } from '../types.forest';
+import type { TreeIF, ValidatorFn } from '../types.trees';
+import type { ChangeFN } from '../types.branch';
+import type { PartialObserver } from 'rxjs';
 
 export type CollectionParams<ValueType> = {
   initial?: ValueType;
@@ -20,7 +20,7 @@ export abstract class Collection<ValueType> implements CollectionIF<ValueType> {
   ) {
     this.forest = forest ?? new Forest();
     if (this.forest.hasTree(name)) {
-      throw new Error("cannot create collection - tree " + name + " exists");
+      throw new Error('cannot create collection - tree ' + name + ' exists');
     }
 
     this.forest.addTree(name, {
@@ -39,12 +39,12 @@ export abstract class Collection<ValueType> implements CollectionIF<ValueType> {
   }
 
   mutate<SeedType>(next: ChangeFN<ValueType>, seed?: SeedType) {
-    this.tree.grow({next, seed}) // untested
+    this.tree.grow({ next, seed }); // untested
     return this;
   }
 
   protected get subject () {
-    return this.tree.subject
+    return this.tree.subject;
   }
 
   subscribe(observer: PartialObserver<ValueType> | SubscribeFn<ValueType>) {
@@ -55,7 +55,7 @@ export abstract class Collection<ValueType> implements CollectionIF<ValueType> {
 
   protected get tree(): TreeIF<ValueType> {
     const tree = this.forest.tree<ValueType>(this.name);
-    if (!tree) throw new Error("cannot find tree " + this.name);
+    if (!tree) {throw new Error('cannot find tree ' + this.name);}
     return tree;
   }
 }

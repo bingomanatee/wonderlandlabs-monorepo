@@ -5,6 +5,12 @@
       {
         "rootDir": "."
       }
+    ] ,
+       "^.+\\.ts$": [
+      "ts-jest",
+      {
+        "rootDir": "."
+      }
     ]
   },
   "testRegex": "(/__tests__/.*|(\\.|/)(test|spec))\\.(t|j)s$",

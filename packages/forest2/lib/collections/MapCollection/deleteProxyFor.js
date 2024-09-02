@@ -7,8 +7,9 @@ function makeIterator(target) {
     return function* () {
         for (const list of map) {
             const [listKey] = list;
-            if (!keys.includes(listKey))
+            if (!keys.includes(listKey)) {
                 yield list;
+            }
         }
     };
 }
@@ -19,8 +20,9 @@ function makeValueIterator(target) {
         // we have to iterate over keys to find and skip it
         [Symbol.iterator]: function* () {
             for (const k of map.keys()) {
-                if (!keys.includes(k))
+                if (!keys.includes(k)) {
                     yield map.get(k);
+                }
             }
         },
     });
@@ -32,8 +34,9 @@ function makeEntriesIterator(target) {
         // we have to iterate over keys to find and skip it
         [Symbol.iterator]: function* () {
             for (const k of map.keys()) {
-                if (!keys.includes(k))
+                if (!keys.includes(k)) {
                     yield [k, map.get(k)];
+                }
             }
         },
     });
@@ -43,8 +46,9 @@ function makeKeyIterator(target) {
     return () => ({
         [Symbol.iterator]: function* () {
             for (const k of map.keys()) {
-                if (!keys.includes(k))
+                if (!keys.includes(k)) {
                     yield k;
+                }
             }
         },
     });
@@ -59,8 +63,9 @@ function makeEach(target) {
     const { map, keys } = target;
     return (eachFN) => {
         map.forEach((v, k) => {
-            if (!keys.includes(k))
+            if (!keys.includes(k)) {
                 eachFN(v, k);
+            }
         });
     };
 }
@@ -79,29 +84,31 @@ function deleteProxyFor(target) {
         get(target, method) {
             let out = undefined;
             switch (method) {
-                case "get":
+                case 'get':
                     out = (key) => getter(target, key);
                     break;
-                case "set":
+                case 'set':
                     out = MapCollection_1.noSet;
                     break;
-                case "clear":
+                case 'clear':
                     out = MapCollection_1.noSet;
-                case "has":
+                    break;
+                case 'has':
                     out = (key) => haser(target, key);
                     break;
-                case "forEach":
+                case 'forEach':
                     out = makeEach(target);
                     break;
-                case "keys":
+                case 'keys':
                     out = makeKeyIterator(target);
                     break;
-                case "values":
+                case 'values':
                     out = makeValueIterator(target);
                     break;
                 case 'entries':
                     out = makeEntriesIterator(target);
-                case "size":
+                    break;
+                case 'size':
                     out = size(target);
                     break;
                 case Symbol.iterator:

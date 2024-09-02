@@ -1,5 +1,5 @@
-import type { IterFn } from "../../types.shared";
-import { isMapKey, noSet } from "./MapCollection";
+import type { IterFn } from '../../types.shared';
+import { isMapKey, noSet } from './MapCollection';
 
 export type MapSetInfo<KeyType, ValueType> = {
   map: Map<KeyType, ValueType>;
@@ -14,7 +14,7 @@ function makeIterator<KeyType, ValueType>(
     for (const list of map) {
       yield list;
     }
-    yield [key, value];
+    yield [ key, value ];
   };
 }
 
@@ -27,7 +27,9 @@ function makeValueIterator<KeyType, ValueType>(
     // we have to iterate over keys to find and skip it
     [Symbol.iterator]: function* () {
       for (const k of map.keys()) {
-        if (k !== key) yield map.get(k);
+        if (k !== key) {
+          yield map.get(k);
+        }
       }
       yield value;
     },
@@ -42,9 +44,11 @@ function makeEntriesIterator<KeyType, ValueType>(
     // we have to iterate over keys to find and skip it
     [Symbol.iterator]: function* () {
       for (const k of map.keys()) {
-        if (k !== key) yield [k, map.get(k)];
+        if (k !== key) {
+          yield [ k, map.get(k) ];
+        }
       }
-      yield [key, value];
+      yield [ key, value ];
     },
   });
 }
@@ -56,7 +60,9 @@ function makeKeyIterator<KeyType, ValueType>(
   return () => ({
     [Symbol.iterator]: function* () {
       for (const k of map.keys()) {
-        if (k !== key) yield k;
+        if (k !== key) {
+          yield k;
+        }
       }
       yield key;
     },
@@ -80,7 +86,9 @@ function makeEach<KeyType, ValueType>(target: MapSetInfo<KeyType, ValueType>) {
   const { map, key, value } = target;
   return (eachFN: IterFn<KeyType, ValueType>) => {
     map.forEach((v, k) => {
-      if (k !== key) eachFN(v, k);
+      if (k !== key) {
+        eachFN(v, k);
+      }
     });
     eachFN(value, key);
   };
@@ -101,44 +109,45 @@ export function setProxyFor<KeyType = unknown, ValueType = unknown>(
     ) {
       let out: any = undefined;
       switch (method) {
-        case "get":
-          out = (key: KeyType) => getter<KeyType, ValueType>(target, key);
-          break;
+      case 'get':
+        out = (key: KeyType) => getter<KeyType, ValueType>(target, key);
+        break;
 
-        case "set":
-          out = noSet;
-          break;
+      case 'set':
+        out = noSet;
+        break;
 
-        case "clear":
-          out = noSet;
+      case 'clear':
+        out = noSet;
+        break;
 
-        case "has":
-          out = (key: KeyType) => haser<KeyType, ValueType>(target, key);
-          break;
+      case 'has':
+        out = (key: KeyType) => haser<KeyType, ValueType>(target, key);
+        break;
 
-        case "forEach":
-          out = makeEach<KeyType, ValueType>(target);
-          break;
+      case 'forEach':
+        out = makeEach<KeyType, ValueType>(target);
+        break;
 
-        case "keys":
-          out = makeKeyIterator<KeyType, ValueType>(target);
-          break;
+      case 'keys':
+        out = makeKeyIterator<KeyType, ValueType>(target);
+        break;
 
-        case "values":
-          out = makeValueIterator<KeyType, ValueType>(target);
-          break;
+      case 'values':
+        out = makeValueIterator<KeyType, ValueType>(target);
+        break;
 
-          case 'entries': 
-          out = makeEntriesIterator<KeyType, ValueType>(target);
-          break;
+      case 'entries':
+        out = makeEntriesIterator<KeyType, ValueType>(target);
+        break;
 
-        case "size":
-          out = size<KeyType, ValueType>(target);
-          break;
+      case 'size':
+        out = size<KeyType, ValueType>(target);
+        break;
 
-        case Symbol.iterator:
-          out = makeIterator<KeyType, ValueType>(target);
-          break;
+      case Symbol.iterator:
+        out = makeIterator<KeyType, ValueType>(target);
+        break;
       }
       return out;
     },

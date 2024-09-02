@@ -39,15 +39,16 @@ class FormCollection {
             for (const key of keys) {
                 const record = fields[key];
                 const { baseParams, value, ...rest } = record;
-                if (!(0, types_formCollection_1.isFieldValue)(value))
-                    throw new Error("bad field value");
+                if (!(0, types_formCollection_1.isFieldValue)(value)) {
+                    throw new Error('bad field value');
+                }
                 add(key, value, baseParams, rest);
             }
         }
         this.makeFieldMapCollection(fieldMap);
     }
     makeFieldMapCollection(fieldMap) {
-        const name = this.forest.uniqueTreeName(this.name + ":fields");
+        const name = this.forest.uniqueTreeName(this.name + ':fields');
         this._fieldMapCollection = new FormFieldMapCollection_1.FormFieldMapCollection(name, fieldMap, this);
     }
     initForm(initialForm) {
@@ -74,17 +75,18 @@ class FormCollection {
     }
     // @s-expect-error TS2416
     subscribe(observer) {
-        if (typeof observer === "function")
+        if (typeof observer === 'function') {
             observer = { next: observer };
+        }
         // @s-expect-error TS2416
         return this.stream.subscribe(observer);
     }
     mutate(next, seed, ...rest) {
-        throw new Error("not implemented");
+        throw new Error('not implemented');
         return this;
     }
     next(next) {
-        throw new Error("not implemented");
+        throw new Error('not implemented');
         return this;
     }
 }

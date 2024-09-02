@@ -1,4 +1,4 @@
-import type { ChangeFN } from "./types.branch";
+import type { ChangeFN } from './types.branch';
 
 export interface Mutator<ValueType> {
   next: ChangeFN<ValueType>;
@@ -9,9 +9,9 @@ export interface Mutator<ValueType> {
 export function isMutator<ValueType>(a: unknown): a is Mutator<ValueType> {
   return !!(
     a &&
-    typeof a === "object" &&
-    "next" in a &&
-    typeof a.next === "function"
+    typeof a === 'object' &&
+    'next' in a &&
+    typeof a.next === 'function'
   );
 }
 interface Assertion<ValueType> {

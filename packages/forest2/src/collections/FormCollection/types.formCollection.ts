@@ -1,12 +1,12 @@
-import type { CollectionIF } from "../../type.collection";
-import type { ForestIF } from "../../types.forest";
+import type { CollectionIF } from '../../type.collection';
+import type { ForestIF } from '../../types.forest';
 
 export type FieldProps = Record<string, any>;
 export type FieldValue = string | number;
 export type FieldMap = Map<string, FieldIF>;
 
 export function isFieldValue(a: unknown): a is FieldValue {
-  return ["strng", "number"].includes(typeof a);
+  return typeof a == 'string' || typeof a === 'number';
 }
 
 export type ErrorMessageMap = Map<number, string>;
@@ -22,19 +22,44 @@ export type FieldError = {
 };
 export interface FieldIF {
   name: string;
-  label?: string | undefined;
   value: FieldValue;
-  props?: FieldProps; // an extension point for any custom tracker props
-  baseParams?: FieldBaseParams; // this is a "constructor" property - all acutal returned FieldIF values won't have this.
-  errors?: FieldError[];
-  validators?: FieldValidator | FieldValidator[]; // will in most cases be in "baseParams"
+  // ^ ^ the only required values
+
   edited?: boolean;
-  isRequired?: boolean; // will in most cases be in "baseParams"
-  order?: number; // will in most cases be in "baseParams"
+  errors?: FieldError[]; // transient - derived from validators if any.
+
+  // v   v  v  values that are most likely NON chaqnging and present in baseParams.
+
+  props?: FieldProps; // generic extension point for any needed info
+  isRequired?: boolean;
+  order?: number;
+  label?: string | undefined;
+  validators?: FieldValidator | FieldValidator[];
+
+  baseParams?: FieldBaseParams;
+}
+
+export function isFieldIF(a: unknown): a is FieldIF {
+  if (!isObj(a)) {
+    return false;
+  }
+  const o = a as Record<string, any>;
+
+  if (
+    !(
+      'name' in o &&
+      'value' in o &&
+      typeof o.name === 'string' &&
+      isFieldValue(o.value)
+    )
+  ) {
+    return false;
+  }
+  return true;
 }
 
 // These are the "initial and default" values any field may define.
-export type FieldBaseParams = Partial<Omit<FieldIF, "baseParams" | "value">>;
+export type FieldBaseParams = Partial<Omit<FieldIF, 'baseParams' | 'value'>>;
 
 export interface FormIF {
   name?: string;
@@ -58,18 +83,18 @@ export type FieldList = FieldIF[];
 export type FieldRecord = Record<string, Partial<FieldIF>>;
 
 export function isObj(a: unknown): a is object {
-  return Boolean(a && typeof a === "object");
+  return Boolean(a && typeof a === 'object');
 }
 
 export function isField(a: unknown): a is FieldIF {
-  if (!isObj(a)) return false;
+  if (!isObj(a)) {return false;}
   const o = a as object;
 
   return Boolean(
-    "name" in o &&
-      "value" in o &&
-      typeof o.name === "string" &&
-      (typeof o.value === "number" || typeof o.value === "string")
+    'name' in o &&
+      'value' in o &&
+      typeof o.name === 'string' &&
+      (typeof o.value === 'number' || typeof o.value === 'string')
   );
 }
 
@@ -78,11 +103,11 @@ export function isFieldList(a: unknown): a is FieldList {
 }
 
 export function isFieldRecord(a: unknown): a is FieldRecord {
-  if (!isObj(a)) return false;
+  if (!isObj(a)) {return false;}
   const o = a as object;
-  if (!Array.from(Object.values(o)).every(isField)) return false;
-  if (!Array.from(Object.keys(o)).every((k: unknown) => typeof k === "string"))
-    return false;
+  if (!Array.from(Object.values(o)).every(isField)) {return false;}
+  if (!Array.from(Object.keys(o)).every((k: unknown) => typeof k === 'string'))
+  {return false;}
   return true;
 }
 // #endregion

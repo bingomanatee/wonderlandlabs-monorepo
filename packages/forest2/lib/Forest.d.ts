@@ -1,6 +1,6 @@
-import type { ForestIF, TaskFn } from "./types.forest";
-import type { TreeName, TreeIF, TreeParams } from "./types.trees";
-import { BehaviorSubject, Observable } from "rxjs";
+import type { ForestIF, TaskFn } from './types.forest';
+import type { TreeName, TreeIF, TreeParams } from './types.trees';
+import { BehaviorSubject, Observable } from 'rxjs';
 export declare class Forest implements ForestIF {
     uniqueTreeName(basis?: string): string;
     private trees;

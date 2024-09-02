@@ -1,8 +1,8 @@
-import type { BranchIF } from "./types.branch";
-import type { OffshootIF } from "./types";
-import type { ForestIF } from "./types.forest";
-import { type TreeIF } from "./types.trees";
-import { isMutator, type ChangeIF } from "./types.shared";
+import type { BranchIF } from './types.branch';
+import type { OffshootIF } from './types';
+import type { ForestIF } from './types.forest';
+import { type TreeIF } from './types.trees';
+import { isMutator, type ChangeIF } from './types.shared';
 
 export class Branch<ValueType> implements BranchIF<ValueType> {
   constructor(
@@ -17,8 +17,8 @@ export class Branch<ValueType> implements BranchIF<ValueType> {
     return this._next;
   }
   public set next(value: BranchIF<ValueType> | undefined) {
-    if (this === value) throw new Error('cannot self recurse');
-    if (value && (this.prev === value)) throw new Error('cannot self recurse loop');
+    if (this === value) {throw new Error('cannot self recurse');}
+    if (value && (this.prev === value)) {throw new Error('cannot self recurse loop');}
     this._next = value;
   }
   private _prev?: BranchIF<ValueType> | undefined;
@@ -26,13 +26,13 @@ export class Branch<ValueType> implements BranchIF<ValueType> {
     return this._prev;
   }
   public set prev(value: BranchIF<ValueType> | undefined) {
-    if (this.prev === value) throw new Error ('cannot self-recurse')
-      if (value &&( this.next === value)) throw new Error('cannot self recurse loop');
+    if (this.prev === value) {throw new Error ('cannot self-recurse');}
+    if (value &&( this.next === value)) {throw new Error('cannot self recurse loop');}
     this._prev = value;
   }
   public readonly time: number;
 
-  add<SeedType = any>(change: ChangeIF<ValueType>): BranchIF<ValueType> {
+  add<SeedType = undefined>(change: ChangeIF<ValueType>): BranchIF<ValueType> {
     const nextBranch = new Branch<ValueType>(this.tree, change);
     this.link(this, nextBranch);
     return nextBranch;
@@ -53,11 +53,11 @@ export class Branch<ValueType> implements BranchIF<ValueType> {
     branchA: BranchIF<ValueType> | undefined,
     branchB: BranchIF<ValueType> | undefined
   ) {
-    if (branchA) branchA.next = branchB;
-    if (branchB) branchB.prev = branchA;
+    if (branchA) {branchA.next = branchB;}
+    if (branchB) {branchB.prev = branchA;}
   }
 
   toString() {
-    return `branch ${this.time} of tree {${this.tree.name ?? '(anon)'}} - value = ${ this.value} next=${this.next ? this.next.time : '<null>'} prev=${this.prev ? this.prev.time : '<null>'}`
+    return `branch ${this.time} of tree {${this.tree.name ?? '(anon)'}} - value = ${ this.value} next=${this.next ? this.next.time : '<null>'} prev=${this.prev ? this.prev.time : '<null>'}`;
   }
 }

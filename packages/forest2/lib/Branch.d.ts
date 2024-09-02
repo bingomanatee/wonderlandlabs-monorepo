@@ -1,7 +1,7 @@
-import type { BranchIF } from "./types.branch";
-import type { OffshootIF } from "./types";
-import { type TreeIF } from "./types.trees";
-import { type ChangeIF } from "./types.shared";
+import type { BranchIF } from './types.branch';
+import type { OffshootIF } from './types';
+import { type TreeIF } from './types.trees';
+import { type ChangeIF } from './types.shared';
 export declare class Branch<ValueType> implements BranchIF<ValueType> {
     readonly tree: TreeIF<ValueType>;
     readonly change: ChangeIF<ValueType>;
@@ -13,7 +13,7 @@ export declare class Branch<ValueType> implements BranchIF<ValueType> {
     get prev(): BranchIF<ValueType> | undefined;
     set prev(value: BranchIF<ValueType> | undefined);
     readonly time: number;
-    add<SeedType = any>(change: ChangeIF<ValueType>): BranchIF<ValueType>;
+    add<SeedType = undefined>(change: ChangeIF<ValueType>): BranchIF<ValueType>;
     offshoots?: OffshootIF<ValueType>[] | undefined;
     get value(): ValueType;
     linkTo(branch: BranchIF<ValueType>): void;

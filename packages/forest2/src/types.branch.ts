@@ -1,5 +1,5 @@
-import type { TreeIF } from "./types.trees";
-import type { ChangeIF } from "./types.shared";
+import type { TreeIF } from './types.trees';
+import type { ChangeIF } from './types.shared';
 
 export type ChangeFN<ValueType> = (
   prev: BranchIF<ValueType> | undefined,

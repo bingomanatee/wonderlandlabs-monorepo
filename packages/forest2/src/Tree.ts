@@ -1,12 +1,12 @@
-import { Branch } from "./Branch";
-import type { BranchIF } from "./types.branch";
-import type { OffshootIF } from "./types";
-import type { ForestIF } from "./types.forest";
-import type { TreeIF, TreeName, TreeParams } from "./types.trees";
-import type { ChangeIF, SubscribeFn } from "./types.shared";
-import { BehaviorSubject, Subject, filter, map } from "rxjs";
-import type { PartialObserver } from "rxjs";
-const UNINITIALIZED = Symbol("tree has no value");
+import { Branch } from './Branch';
+import type { BranchIF } from './types.branch';
+import type { OffshootIF } from './types';
+import type { ForestIF } from './types.forest';
+import type { TreeIF, TreeName, TreeParams } from './types.trees';
+import type { ChangeIF, SubscribeFn } from './types.shared';
+import { BehaviorSubject, Subject, filter, map } from 'rxjs';
+import type { PartialObserver } from 'rxjs';
+const UNINITIALIZED = Symbol('tree has no value');
 
 export default class Tree<ValueType> implements TreeIF<ValueType> {
   constructor(
@@ -14,7 +14,7 @@ export default class Tree<ValueType> implements TreeIF<ValueType> {
     public readonly name: TreeName,
     private params?: TreeParams<ValueType>
   ) {
-    if (params && "initial" in params) {
+    if (params && 'initial' in params) {
       const { initial } = params;
       if (initial !== undefined) {
         this.root = new Branch<ValueType>(this, {
@@ -36,8 +36,8 @@ export default class Tree<ValueType> implements TreeIF<ValueType> {
   }
 
   rollback(time: number, message: string): void {
-    if (!this.top) return;
-    if (this.top.time < time) return;
+    if (!this.top) {return;}
+    if (this.top.time < time) {return;}
 
     let firstObs = this.top;
 
@@ -79,7 +79,7 @@ export default class Tree<ValueType> implements TreeIF<ValueType> {
       this.top = next;
       if (this.params?.validator) {
         const err = this.params.validator(next.value, this);
-        if (err) throw err;
+        if (err) {throw err;}
       }
 
       this.stream.next(this.top);
@@ -100,7 +100,7 @@ export default class Tree<ValueType> implements TreeIF<ValueType> {
   }
 
   get value() {
-    if (!this.top) throw new Error("cannot get the value from an empty tree");
+    if (!this.top) {throw new Error('cannot get the value from an empty tree');}
     return this.top.value;
   }
 }

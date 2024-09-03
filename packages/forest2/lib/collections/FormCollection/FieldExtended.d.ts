@@ -1,4 +1,4 @@
-import type { FieldIF, FormCollectionIF, FieldProps, FieldError, FieldValidator, FieldBaseParams } from './types.formCollection';
+import type { FieldIF, FormCollectionIF, FieldProps, FieldError, FieldValidator, FieldBase } from "./types.formCollection";
 /**
  * FieldExtended blends the properties of the static props of the
  * transient field with the staticProps from the formCollection's map.
@@ -9,7 +9,7 @@ export declare class FieldExtended implements FieldIF {
     private formCollection;
     constructor(field: FieldIF, name: string, formCollection: Partial<FormCollectionIF>);
     get value(): import("./types.formCollection").FieldValue;
-    get baseParamsLocal(): FieldBaseParams;
+    get baseParamsLocal(): FieldBase;
     private _props;
     get props(): FieldProps;
     private _validators;

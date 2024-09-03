@@ -103,6 +103,9 @@ export function setProxyFor<KeyType = unknown, ValueType = unknown>(
   target: MapSetInfo<KeyType, ValueType>
 ) {
   const handler = {
+    set() {
+      throw new Error('forest maps are immutable - cannot set any properties on maps');
+    },
     get(
       target: MapSetInfo<KeyType, ValueType>,
       method: keyof typeof target.map

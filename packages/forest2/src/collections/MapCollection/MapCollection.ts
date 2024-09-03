@@ -1,4 +1,5 @@
 import type { IterFn } from '../../types.shared';
+import { canProxy } from '../../utils';
 import { Collection } from '../Collection';
 import type { CollectionParams } from '../Collection';
 import { deleteProxyFor } from './deleteProxyFor';
@@ -17,7 +18,6 @@ export function noSet() {
   throw new Error('forest maps are immutable');
 }
 
-export const canProxy = typeof Proxy === 'function';
 export default class MapCollection<
   KeyType = unknown,
   ValueType = unknown

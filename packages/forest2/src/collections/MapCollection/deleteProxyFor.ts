@@ -19,6 +19,22 @@ function makeIterator<KeyType, ValueType>(
     }
   };
 }
+function makeEntriesIterator<KeyType, ValueType>(
+  target: MapDeleteInfo<KeyType, ValueType>
+) {
+  const { map, keys } = target;
+  return () => ({
+    // because one of the key may be redundant
+    // we have to iterate over keys to find and skip it
+    [Symbol.iterator]: function* () {
+      for (const k of map.keys()) {
+        if (!keys.includes(k)) {
+          yield [ k, map.get(k) ];
+        }
+      }
+    },
+  });
+}
 
 function makeValueIterator<KeyType, ValueType>(
   target: MapDeleteInfo<KeyType, ValueType>
@@ -31,22 +47,6 @@ function makeValueIterator<KeyType, ValueType>(
       for (const k of map.keys()) {
         if (!keys.includes(k)) {
           yield map.get(k);
-        }
-      }
-    },
-  });
-}
-function makeEntriesIterator<KeyType, ValueType>(
-  target: MapDeleteInfo<KeyType, ValueType>
-) {
-  const { map, keys } = target;
-  return () => ({
-    // because one of the key may be redundant
-    // we have to iterate over keys to find and skip it
-    [Symbol.iterator]: function* () {
-      for (const k of map.keys()) {
-        if (!keys.includes(k)) {
-          yield [ k, map.get(k) ];
         }
       }
     },
@@ -109,6 +109,11 @@ export function deleteProxyFor<KeyType, ValueType>(
   target: MapDeleteInfo<KeyType, ValueType>
 ) {
   const handler = {
+    set() {
+      throw new Error(
+        'forest maps are immutable - cannot set any properties on maps'
+      );
+    },
     get(
       target: MapDeleteInfo<KeyType, ValueType>,
       method: keyof typeof target.map
@@ -146,7 +151,7 @@ export function deleteProxyFor<KeyType, ValueType>(
       case 'entries':
         out = makeEntriesIterator<KeyType, ValueType>(target);
         break;
-          
+
       case 'size':
         out = size<KeyType, ValueType>(target);
         break;

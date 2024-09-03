@@ -1,10 +1,8 @@
-import { Forest } from '../../Forest';
-import type { CollectionIF } from '../../type.collection';
-import type { ChangeFN } from '../../types.branch';
-import type { ForestIF } from '../../types.forest';
-import type { SubscribeFn } from '../../types.shared';
-import { BehaviorSubject } from 'rxjs';
-import type { SubjectLike, PartialObserver, Unsubscribable } from 'rxjs';
+import { Forest } from "../../Forest";
+import type { ForestIF } from "../../types.forest";
+import type { SubscribeFn } from "../../types.shared";
+import { BehaviorSubject, map } from "rxjs";
+import type { SubjectLike, PartialObserver, Unsubscribable } from "rxjs";
 import type {
   FieldList,
   FieldRecord,
@@ -12,22 +10,22 @@ import type {
   Params,
   FormIF,
   FieldIF,
-  FieldBaseParams,
+  FieldBase,
   BaseParamMap,
   FormCollectionIF,
   FieldMap,
-} from './types.formCollection';
+} from "./types.formCollection";
 import {
   isFieldList,
   isFieldRecord,
   isFieldValue,
-} from './types.formCollection';
-import { FormFieldMapCollection } from './FormFieldMapCollection';
+} from "./types.formCollection";
+import { FormFieldMapCollection } from "./FormFieldMapCollection";
 
 type FieldDef = FieldList | FieldRecord;
 
-class FormCollection implements CollectionIF<FormSetIF>, FormCollectionIF {
-  constructor(public name: string, fields: FieldDef, private params?: Params) {
+export default class FormCollection implements FormCollectionIF {
+  constructor(public name: string, fields: FieldDef, params?: Params) {
     this.forest = params?.forest ?? new Forest();
     this.initFields(fields);
     this.initForm(params?.form);
@@ -47,7 +45,7 @@ class FormCollection implements CollectionIF<FormSetIF>, FormCollectionIF {
     const add = (
       name: string,
       value: string | number,
-      baseParams: FieldBaseParams | undefined,
+      baseParams: FieldBase | undefined,
       rest: Partial<FieldIF>
     ) => {
       const field: FieldIF = { name, value, ...rest };
@@ -56,6 +54,7 @@ class FormCollection implements CollectionIF<FormSetIF>, FormCollectionIF {
       }
       fieldMap.set(name, field);
     };
+
     if (isFieldList(fields)) {
       for (const { name, baseParams: baseParams, value, ...rest } of fields) {
         add(name, value, baseParams, rest);
@@ -65,22 +64,27 @@ class FormCollection implements CollectionIF<FormSetIF>, FormCollectionIF {
       for (const key of keys) {
         const record: Partial<FieldIF> = fields[key];
         const { baseParams, value, ...rest } = record;
-        if (!isFieldValue(value)) {throw new Error('bad field value');}
+        if (!isFieldValue(value)) {
+          throw new Error("bad field value");
+        }
+        console.log("adding", key, value, baseParams, rest);
         add(key, value, baseParams, rest);
       }
+    } else {
+      throw new Error("bad feilds type in FormCollection");
     }
-    this.makeFieldMapCollection(fieldMap);
-  }
 
-  private _fieldMapCollection?: FormFieldMapCollection;
-  private makeFieldMapCollection(fieldMap: FieldMap) {
-    const name = this.forest.uniqueTreeName(this.name + ':fields');
-    this._fieldMapCollection = new FormFieldMapCollection(
-      name,
+    const fcName = this.forest.uniqueTreeName(this.name + ":fields");
+    this.fieldMapCollection = new FormFieldMapCollection(
+      fcName,
       fieldMap,
       this
     );
+
+    console.log("fmc:", this.fieldMapCollection.value);
   }
+
+  private fieldMapCollection: FormFieldMapCollection;
 
   // #region form
 
@@ -94,41 +98,47 @@ class FormCollection implements CollectionIF<FormSetIF>, FormCollectionIF {
 
   // region value, stream, next;
   public get value() {
-    return {
-      form: this.form,
-      fields: this.fieldMap,
-    };
+    return this.stream.value;
   }
 
-  private _stream?: SubjectLike<FormSetIF>;
+  private _stream?: BehaviorSubject<FormSetIF>;
 
   private get stream() {
     if (!this._stream) {
       this._stream = new BehaviorSubject({
-        fields: this.fieldMap,
+        fields: this.fieldMapCollection.value,
         form: this.form,
       });
+      // at this point we are assuming that the form is static;
+      const self = this;
+      this.fieldMapCollection.tree.subject // note - _fieldMapCollection is always instatntiated in the consctructor
+        .pipe(map((fields: FieldMap) => ({ fields, form: self.form })))
+        .subscribe(this._stream);
     }
+
     return this._stream!;
   }
   // @s-expect-error TS2416
   subscribe(observer: PartialObserver<FormSetIF> | SubscribeFn<FormSetIF>) {
-    if (typeof observer === 'function') {observer = { next: observer };}
+    if (typeof observer === "function") {
+      observer = { next: observer };
+    }
     // @s-expect-error TS2416
     return this.stream.subscribe(observer) as Unsubscribable;
   }
 
-  mutate<SeedType = unknown, RestType = unknown>(
-    next: ChangeFN<FormSetIF>,
-    seed?: SeedType,
-    ...rest: RestType[]
-  ) {
-    throw new Error('not implemented');
-    return this;
+  // the "standard mutators" are too gross for this use case
+
+  setFieldValue(name: string, value: string | number) {
+    this.fieldMapCollection?.setFieldValue(name, value);
   }
 
-  next(next: FormSetIF): CollectionIF<FormSetIF> {
-    throw new Error('not implemented');
-    return this;
+  get isValid(): boolean {
+    for (const [, field] of this.fieldMapCollection.value) {
+      if (field.errors?.length) {
+        return false;
+      }
+    }
+    return true;
   }
 }

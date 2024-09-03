@@ -1,1 +1,100 @@
-var __importDefault=this&&this.__importDefault||function(e){return e&&e.__esModule?e:{default:e}};Object.defineProperty(exports,"__esModule",{value:!0}),exports.Forest=void 0;let Tree_1=__importDefault(require("./Tree")),rxjs_1=require("rxjs"),lodash_isequal_1=__importDefault(require("lodash.isequal"));function pad(e){let t=""+e;for(;t.length<3;)t="0"+t;return t}class Forest{constructor(){this.trees=new Map,this._time=0,this.depth=new rxjs_1.BehaviorSubject(new Set)}uniqueTreeName(e="tree"){if(!this.hasTree(e))return e;let t=1;for(;this.hasTree(e+"-"+pad(t));)t+=1;return e+"-"+pad(t)}hasTree(e){return this.trees.has(e)}tree(e){if(this.hasTree(e))return this.trees.get(e)}addTree(e,t){if(this.hasTree(e))throw new Error("cannot redefine tree "+e);t=new Tree_1.default(this,e,t);return this.trees.set(e,t),t}get nextTime(){var e=this._time+1;return this._time=e}do(e){let r=this.nextTime;this.addDepth(r);try{var t=e(this);return this.unDepth(r),t}catch(t){throw this.trees.forEach(e=>{e.rollback(r,t instanceof Error?t.message:"unknown error")}),t}}addDepth(e){var t=new Set(this.depth.value);t.add(e),this.depth.next(t)}unDepth(e){var t=new Set(this.depth.value);t.delete(e),this.depth.next(t)}observe(e){if(!this.hasTree(e))throw new Error("cannot observe "+e+": no tree by that name");var t=this.tree(e);if(t)return(0,rxjs_1.combineLatest)(this.depth,t.subject).pipe((0,rxjs_1.filter)(([e])=>0===e.size),(0,rxjs_1.map)(([,e])=>e),(0,rxjs_1.distinctUntilChanged)(lodash_isequal_1.default));throw new Error("cannot observe "+e+": no tree by that name exists")}}exports.Forest=Forest;
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.Forest = void 0;
+const Tree_1 = __importDefault(require("./Tree"));
+const rxjs_1 = require("rxjs");
+const lodash_isequal_1 = __importDefault(require("lodash.isequal"));
+function pad(n) {
+    let str = `${n}`;
+    while (str.length < 3) {
+        str = '0' + str;
+    }
+    return str;
+}
+class Forest {
+    constructor() {
+        this.trees = new Map();
+        this._time = 0;
+        this.depth = new rxjs_1.BehaviorSubject(new Set());
+    }
+    uniqueTreeName(basis = 'tree') {
+        if (!this.hasTree(basis)) {
+            return basis;
+        }
+        let number = 1;
+        while (this.hasTree(`${basis}-${pad(number)}`)) {
+            number += 1;
+        }
+        return `${basis}-${pad(number)}`;
+    }
+    hasTree(name) {
+        return this.trees.has(name);
+    }
+    tree(name) {
+        if (!this.hasTree(name)) {
+            return undefined;
+        }
+        return this.trees.get(name);
+    }
+    addTree(name, params) {
+        if (this.hasTree(name)) {
+            throw new Error('cannot redefine tree ' + name);
+        }
+        const tree = new Tree_1.default(this, name, params);
+        this.trees.set(name, tree);
+        return tree;
+    }
+    get nextTime() {
+        const time = this._time + 1;
+        this._time = time;
+        return time;
+    }
+    do(change) {
+        const taskTime = this.nextTime;
+        this.addDepth(taskTime);
+        try {
+            const result = change(this);
+            this.unDepth(taskTime);
+            return result;
+        }
+        catch (err) {
+            this.trees.forEach((tree) => {
+                tree.rollback(taskTime, err instanceof Error ? err.message : 'unknown error');
+            });
+            throw err;
+        }
+    }
+    addDepth(taskTime) {
+        const newSet = new Set(this.depth.value);
+        newSet.add(taskTime);
+        this.depth.next(newSet);
+    }
+    unDepth(taskTime) {
+        const newSet2 = new Set(this.depth.value);
+        newSet2.delete(taskTime);
+        this.depth.next(newSet2);
+    }
+    /**
+     * observes value changes for a tree when all 'do()' actions have completed.
+     * meaning, if any errors are thrown and reset the values, no emissions are made.
+     * distinct values mean that only values that are different are emitted.
+     * @param name {string}
+     * @returns
+     */
+    observe(name) {
+        if (!this.hasTree(name)) {
+            throw new Error('cannot observe ' + name + ': no tree by that name');
+        }
+        const tree = this.tree(name);
+        if (!tree) {
+            throw new Error('cannot observe ' + name + ': no tree by that name exists');
+        } // for typescript
+        return (0, rxjs_1.combineLatest)(this.depth, tree.subject).pipe((0, rxjs_1.filter)(([depth]) => {
+            return depth.size === 0;
+        }), (0, rxjs_1.map)(([, value]) => value), (0, rxjs_1.distinctUntilChanged)(lodash_isequal_1.default));
+    }
+}
+exports.Forest = Forest;

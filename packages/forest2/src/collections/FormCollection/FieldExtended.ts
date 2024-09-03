@@ -5,7 +5,7 @@ import type {
   FieldProps,
   FieldError,
   FieldValidator,
-  FieldBaseParams,
+  FieldBase,
 } from './types.formCollection';
 
 type MessyValidator = FieldValidator | undefined;
@@ -14,6 +14,7 @@ const UNSET = Symbol('unset');
 /**
  * FieldExtended blends the properties of the static props of the
  * transient field with the staticProps from the formCollection's map.
+ * --- deprecated - we are using functions now to extend fields. 
  */
 
 export class FieldExtended implements FieldIF {
@@ -27,7 +28,7 @@ export class FieldExtended implements FieldIF {
     return this.field.value;
   }
 
-  get baseParamsLocal(): FieldBaseParams {
+  get baseParamsLocal(): FieldBase {
     return this.formCollection.fieldBaseParams?.get(this.name) ?? {};
   }
 
@@ -89,7 +90,9 @@ export class FieldExtended implements FieldIF {
 
   // express
   private _blend(propName: string) {
-    if (propName in this.field) {return this.field[propName];}
+    if (propName in this.field) {
+      return this.field[propName];
+    }
     if (
       this.formCollection.fieldBaseParams.has(this.name) &&
       propName in this.formCollection.fieldBaseParams.get(this.name)

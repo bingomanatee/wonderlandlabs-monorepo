@@ -53,7 +53,7 @@ export abstract class Collection<ValueType> implements CollectionIF<ValueType> {
 
   public forest: ForestIF;
 
-  protected get tree(): TreeIF<ValueType> {
+  public get tree(): TreeIF<ValueType> {
     const tree = this.forest.tree<ValueType>(this.name);
     if (!tree) {throw new Error('cannot find tree ' + this.name);}
     return tree;

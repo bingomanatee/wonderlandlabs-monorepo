@@ -5,7 +5,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.FieldExtended = void 0;
 const lodash_isequal_1 = __importDefault(require("lodash.isequal"));
-const UNSET = Symbol('unset');
+const UNSET = Symbol("unset");
 /**
  * FieldExtended blends the properties of the static props of the
  * transient field with the staticProps from the formCollection's map.
@@ -34,16 +34,16 @@ class FieldExtended {
                 return out;
             }, {});
         }
-        return typeof this._props === 'symbol' ? undefined : this._props;
+        return typeof this._props === "symbol" ? undefined : this._props;
     }
     get validators() {
         if (this._validators === UNSET) {
             this._validators = [
-                this._blend('validators'),
+                this._blend("validators"),
                 this.field.validators,
             ].flat();
         }
-        return typeof this._validators === 'symbol' ? undefined : this._validators;
+        return typeof this._validators === "symbol" ? undefined : this._validators;
     }
     /**
      * summarizes all the errors in the
@@ -81,13 +81,13 @@ class FieldExtended {
         return undefined;
     }
     get isRequired() {
-        return this._blend('isRequired');
+        return this._blend("isRequired");
     }
     get order() {
-        return this._blend('order');
+        return this._blend("order");
     }
     get label() {
-        return this._blend('label');
+        return this._blend("label");
     }
 }
 exports.FieldExtended = FieldExtended;

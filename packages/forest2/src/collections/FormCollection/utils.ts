@@ -54,7 +54,7 @@ export function isRequired(field: FieldIF) {
 }
 
 export const TOO_SHORT = 'field must be 8 or more characters';
-export function minLength(field: FieldIF, errors: FieldError[]) {
+export function isLongEnough(field: FieldIF, errors: FieldError[]) {
   if (errors.length || typeof field.value !== 'string') {return;}
   if (field.value.length < 8)
   {return {
@@ -64,7 +64,7 @@ export function minLength(field: FieldIF, errors: FieldError[]) {
 }
 export const commonPasswords = 'password,abc123'.split(',');
 
-export function isCommonPassword(field: FieldIF, errors: FieldError[]) {
+export function isNotCommonPassword(field: FieldIF, errors: FieldError[]) {
   if (errors.length) {return null;}
   const { value } = field;
   const s = value as string;
@@ -112,8 +112,8 @@ export const makeMockFormCollection = (): FormCollectionIF => ({
           isRequired,
           isString,
           isSingleWord,
-          isCommonPassword,
-          minLength,
+          isNotCommonPassword,
+          isLongEnough,
         ],
       },
     ],

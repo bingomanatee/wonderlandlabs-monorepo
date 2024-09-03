@@ -1,5 +1,6 @@
-import { Collection } from '../Collection';
-import type { FieldMap, FormCollectionIF } from './types.formCollection';
+import type { CollectionIF } from "../../type.collection";
+import { Collection } from "../Collection";
+import type { FieldMap, FormCollectionIF } from "./types.formCollection";
 /**
  * this is a "utility sub-class" of FormCollection designed exclusively
  * to track the field properties of FormCollection's fields.
@@ -9,9 +10,9 @@ import type { FieldMap, FormCollectionIF } from './types.formCollection';
  * values, allowing for the initial statics and validators to
  * provide defaults for the transient properties.
  */
-export declare class FormFieldMapCollection extends Collection<FieldMap> {
+export declare class FormFieldMapCollection extends Collection<FieldMap> implements CollectionIF<FieldMap> {
     name: string;
     private formCollection;
     constructor(name: string, fields: FieldMap, formCollection: FormCollectionIF);
-    protected get subject(): import("rxjs").Observable<Map<string, import("./types.formCollection").FieldIF>>;
+    setFieldValue(name: string, value: string | number): void;
 }

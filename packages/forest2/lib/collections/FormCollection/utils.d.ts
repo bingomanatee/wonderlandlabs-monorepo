@@ -20,12 +20,12 @@ export declare function isRequired(field: FieldIF): {
     severity: number;
 };
 export declare const TOO_SHORT = "field must be 8 or more characters";
-export declare function minLength(field: FieldIF, errors: FieldError[]): {
+export declare function isLongEnough(field: FieldIF, errors: FieldError[]): {
     message: string;
     severity: number;
 };
 export declare const commonPasswords: string[];
-export declare function isCommonPassword(field: FieldIF, errors: FieldError[]): {
+export declare function isNotCommonPassword(field: FieldIF, errors: FieldError[]): {
     message: string;
 };
 export declare const makeFields: (values?: Record<string, string | number>) => Map<string, FieldIF>;

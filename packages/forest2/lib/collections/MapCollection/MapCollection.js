@@ -1,8 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.canProxy = void 0;
 exports.isMapKey = isMapKey;
 exports.noSet = noSet;
+const utils_1 = require("../../utils");
 const Collection_1 = require("../Collection");
 const deleteProxyFor_1 = require("./deleteProxyFor");
 const setProxyFor_1 = require("./setProxyFor");
@@ -16,14 +16,13 @@ function isMapKey(map, a) {
 function noSet() {
     throw new Error('forest maps are immutable');
 }
-exports.canProxy = typeof Proxy === 'function';
 class MapCollection extends Collection_1.Collection {
     constructor(name, params) {
         super(name, params);
     }
     set(key, value) {
         if (this.tree.top) {
-            if (exports.canProxy) {
+            if (utils_1.canProxy) {
                 const next = (0, setProxyFor_1.setProxyFor)({
                     map: this.tree.top.value,
                     key,
@@ -48,7 +47,7 @@ class MapCollection extends Collection_1.Collection {
         if (!this.tree.top) {
             return;
         }
-        if (exports.canProxy) {
+        if (utils_1.canProxy) {
             const next = (0, deleteProxyFor_1.deleteProxyFor)({
                 map: this.tree.top.value,
                 keys,

@@ -1,9 +1,13 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.FormFieldMapCollection = void 0;
 const Collection_1 = require("../Collection");
-const rxjs_1 = require("rxjs");
-const FieldExtended_1 = require("./FieldExtended");
+const extendField_1 = __importDefault(require("./extendField"));
+const utils_1 = require("../../utils");
+const fieldMapSetValueProxy_1 = require("./fieldMapSetValueProxy");
 /**
  * this is a "utility sub-class" of FormCollection designed exclusively
  * to track the field properties of FormCollection's fields.
@@ -17,7 +21,11 @@ class FormFieldMapCollection extends Collection_1.Collection {
     constructor(name, fields, formCollection) {
         const mappedFields = new Map();
         for (const [name, field] of fields) {
-            mappedFields.set(name, new FieldExtended_1.FieldExtended(field, name, formCollection));
+            if (field.baseParams) {
+                formCollection.fieldBaseParams.set(name, field.baseParams);
+                delete field.baseParams;
+            }
+            mappedFields.set(name, (0, extendField_1.default)(field, formCollection.fieldBaseParams.get(name)));
         }
         super(name, {
             initial: mappedFields,
@@ -25,14 +33,32 @@ class FormFieldMapCollection extends Collection_1.Collection {
         this.name = name;
         this.formCollection = formCollection;
     }
-    get subject() {
-        return super.subject.pipe((0, rxjs_1.map)((fieldMap) => {
-            const map = new Map(fieldMap);
-            for (const [name, field] of fieldMap) {
-                const mappedField = new FieldExtended_1.FieldExtended(field, name, this.formCollection);
-            }
-            return map;
-        }));
+    setFieldValue(name, value) {
+        if (!this.value.has(name)) {
+            console.warn('cannot set field value - no field "' +
+                name +
+                '" in this FormFieldMapCollection');
+        }
+        if (!this.tree.top) {
+            throw new Error("canot setFieldValue to empty FormFieldMapCollection");
+        }
+        const map = this.tree.top.value;
+        const basis = this.formCollection.fieldBaseParams.get(name);
+        // if we can use proxies, make a proxy of the map that returns a copy of the named field
+        // with a different value. 
+        if (utils_1.canProxy) {
+            const next = (0, fieldMapSetValueProxy_1.fieldMapSetValueProxy)(map, name, value, basis);
+            this.next(next);
+        }
+        else {
+            const prev = map.get(name);
+            if (!prev)
+                throw new Error("cannot get " + name); // typescriptism
+            let next = (0, extendField_1.default)({ name, value }, prev, basis);
+            let newMap = new Map(map);
+            newMap.set(name, next);
+            this.next(newMap);
+        }
     }
 }
 exports.FormFieldMapCollection = FormFieldMapCollection;

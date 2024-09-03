@@ -1,19 +1,12 @@
 import { expect, it, describe } from "@jest/globals";
 import type {
-  FieldIF,
-  FieldError,
-  FormCollectionIF,
   FieldMap,
 } from "../../../src/collections/FormCollection/types.formCollection";
 import { FormFieldMapCollection } from "../../../src/collections/FormCollection/FormFieldMapCollection";
-import { Forest } from "../../../src/Forest";
 
 import {
-  commonUserNames,
   IS_REQUIRED,
   IS_TOO_COMMON,
-  isSingleWord,
-  isString,
   makeFields,
   makeMockFormCollection,
   NO_EMPTY_CHARS,

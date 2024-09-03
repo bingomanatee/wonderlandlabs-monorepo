@@ -1,1 +1,9 @@
-function isMutator(t){return!!(t&&"object"==typeof t&&"next"in t&&"function"==typeof t.next)}Object.defineProperty(exports,"__esModule",{value:!0}),exports.isMutator=isMutator;
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.isMutator = isMutator;
+function isMutator(a) {
+    return !!(a &&
+        typeof a === 'object' &&
+        'next' in a &&
+        typeof a.next === 'function');
+}

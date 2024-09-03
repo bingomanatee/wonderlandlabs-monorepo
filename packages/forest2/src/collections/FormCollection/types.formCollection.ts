@@ -36,7 +36,7 @@ export interface FieldIF {
   label?: string | undefined;
   validators?: FieldValidator | FieldValidator[];
 
-  baseParams?: FieldBaseParams;
+  baseParams?: FieldBase;
 }
 
 export function isFieldIF(a: unknown): a is FieldIF {
@@ -59,7 +59,7 @@ export function isFieldIF(a: unknown): a is FieldIF {
 }
 
 // These are the "initial and default" values any field may define.
-export type FieldBaseParams = Partial<Omit<FieldIF, 'baseParams' | 'value'>>;
+export type FieldBase = Partial<Omit<FieldIF, 'baseParams' | 'value'>>;
 
 export interface FormIF {
   name?: string;
@@ -87,7 +87,9 @@ export function isObj(a: unknown): a is object {
 }
 
 export function isField(a: unknown): a is FieldIF {
-  if (!isObj(a)) {return false;}
+  if (!isObj(a)) {
+    return false;
+  }
   const o = a as object;
 
   return Boolean(
@@ -103,16 +105,23 @@ export function isFieldList(a: unknown): a is FieldList {
 }
 
 export function isFieldRecord(a: unknown): a is FieldRecord {
-  if (!isObj(a)) {return false;}
+  if (!isObj(a)) {
+    return false;
+  }
   const o = a as object;
-  if (!Array.from(Object.values(o)).every(isField)) {return false;}
-  if (!Array.from(Object.keys(o)).every((k: unknown) => typeof k === 'string'))
-  {return false;}
+  if (!Array.from(Object.values(o)).every(isField)) {
+    return false;
+  }
+  if (
+    !Array.from(Object.keys(o)).every((k: unknown) => typeof k === 'string')
+  ) {
+    return false;
+  }
   return true;
 }
 // #endregion
 
-export type BaseParamMap = Map<string, FieldBaseParams>;
+export type BaseParamMap = Map<string, FieldBase>;
 
 export interface FormCollectionIF {
   forest: ForestIF;

@@ -77,6 +77,9 @@ function size(target) {
 }
 function setProxyFor(target) {
     const handler = {
+        set() {
+            throw new Error('forest maps are immutable - cannot set any properties on maps');
+        },
         get(target, method) {
             let out = undefined;
             switch (method) {

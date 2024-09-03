@@ -21,13 +21,13 @@
   "files": [
     "lib/**/*"
   ],
-  "homepage": "https://github.com/bingomanatee/wonderlandlabs-monorepo/tree/main/packages/forest",
+  "homepage": "https://github.com/bingomanatee/wonderlandlabs-monorepo/tree/main/packages/forest2",
   "scripts": {
     "build": "tsc && yarn uglify",
     "uglify": "node uglify.cjs",
     "format": "prettier --write \"src/**/*.(js|ts)\"",
     "lint": "eslint src/**/*.ts",
-    "lint:fix": "eslint src --fix",
+    "lint:fix": "eslint src/**/*.ts --fix",
     "test": "jest --config jest.config.json",
     "bt": "npm run build; jest --config jest.config.json",
     "prepare": "npm run build; yarn uglify",

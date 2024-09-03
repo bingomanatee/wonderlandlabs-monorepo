@@ -5,8 +5,8 @@ exports.isString = isString;
 exports.isSingleWord = isSingleWord;
 exports.isCommonUserName = isCommonUserName;
 exports.isRequired = isRequired;
-exports.minLength = minLength;
-exports.isCommonPassword = isCommonPassword;
+exports.isLongEnough = isLongEnough;
+exports.isNotCommonPassword = isNotCommonPassword;
 const Forest_1 = require("../../Forest");
 function isString(field) {
     if (!field.value && !field.isRequired) {
@@ -58,7 +58,7 @@ function isRequired(field) {
     }
 }
 exports.TOO_SHORT = 'field must be 8 or more characters';
-function minLength(field, errors) {
+function isLongEnough(field, errors) {
     if (errors.length || typeof field.value !== 'string') {
         return;
     }
@@ -70,7 +70,7 @@ function minLength(field, errors) {
     }
 }
 exports.commonPasswords = 'password,abc123'.split(',');
-function isCommonPassword(field, errors) {
+function isNotCommonPassword(field, errors) {
     if (errors.length) {
         return null;
     }
@@ -116,8 +116,8 @@ const makeMockFormCollection = () => ({
                     isRequired,
                     isString,
                     isSingleWord,
-                    isCommonPassword,
-                    minLength,
+                    isNotCommonPassword,
+                    isLongEnough,
                 ],
             },
         ],

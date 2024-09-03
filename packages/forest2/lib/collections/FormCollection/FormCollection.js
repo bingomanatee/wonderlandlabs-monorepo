@@ -4,6 +4,7 @@ const Forest_1 = require("../../Forest");
 const rxjs_1 = require("rxjs");
 const types_formCollection_1 = require("./types.formCollection");
 const FormFieldMapCollection_1 = require("./FormFieldMapCollection");
+const utils_1 = require("../../utils");
 class FormCollection {
     constructor(name, fields, params) {
         this.name = name;
@@ -40,7 +41,7 @@ class FormCollection {
                 const record = fields[key];
                 const { baseParams, value, ...rest } = record;
                 if (!(0, types_formCollection_1.isFieldValue)(value)) {
-                    throw new Error('bad field value');
+                    throw new Error("bad field value");
                 }
                 add(key, value, baseParams, rest);
             }
@@ -48,7 +49,7 @@ class FormCollection {
         this.makeFieldMapCollection(fieldMap);
     }
     makeFieldMapCollection(fieldMap) {
-        const name = this.forest.uniqueTreeName(this.name + ':fields');
+        const name = this.forest.uniqueTreeName(this.name + ":fields");
         this._fieldMapCollection = new FormFieldMapCollection_1.FormFieldMapCollection(name, fieldMap, this);
     }
     initForm(initialForm) {
@@ -75,18 +76,23 @@ class FormCollection {
     }
     // @s-expect-error TS2416
     subscribe(observer) {
-        if (typeof observer === 'function') {
+        if (typeof observer === "function") {
             observer = { next: observer };
         }
         // @s-expect-error TS2416
         return this.stream.subscribe(observer);
     }
+    // the "standard mutators" are too gross for this use case
+    setFieldValue(name, value) {
+        if (utils_1.canProxy) {
+        }
+    }
     mutate(next, seed, ...rest) {
-        throw new Error('not implemented');
+        throw new Error("not implemented");
         return this;
     }
     next(next) {
-        throw new Error('not implemented');
+        throw new Error("not implemented");
         return this;
     }
 }

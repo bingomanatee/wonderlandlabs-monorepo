@@ -19,5 +19,5 @@ export declare abstract class Collection<ValueType> implements CollectionIF<Valu
     protected get subject(): import("rxjs").Observable<ValueType>;
     subscribe(observer: PartialObserver<ValueType> | SubscribeFn<ValueType>): import("rxjs").Subscription;
     forest: ForestIF;
-    protected get tree(): TreeIF<ValueType>;
+    get tree(): TreeIF<ValueType>;
 }

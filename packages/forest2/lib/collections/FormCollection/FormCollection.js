@@ -4,11 +4,9 @@ const Forest_1 = require("../../Forest");
 const rxjs_1 = require("rxjs");
 const types_formCollection_1 = require("./types.formCollection");
 const FormFieldMapCollection_1 = require("./FormFieldMapCollection");
-const utils_1 = require("../../utils");
 class FormCollection {
     constructor(name, fields, params) {
         this.name = name;
-        this.params = params;
         this.fieldBaseParams = new Map();
         this.fieldMap = new Map();
         // #region form
@@ -46,11 +44,11 @@ class FormCollection {
                 add(key, value, baseParams, rest);
             }
         }
-        this.makeFieldMapCollection(fieldMap);
-    }
-    makeFieldMapCollection(fieldMap) {
-        const name = this.forest.uniqueTreeName(this.name + ":fields");
-        this._fieldMapCollection = new FormFieldMapCollection_1.FormFieldMapCollection(name, fieldMap, this);
+        else {
+            throw new Error("bad feilds type in FormCollection");
+        }
+        const fcName = this.forest.uniqueTreeName(this.name + ":fields");
+        this.fieldMapCollection = new FormFieldMapCollection_1.FormFieldMapCollection(fcName, fieldMap, this);
     }
     initForm(initialForm) {
         if (initialForm) {
@@ -60,17 +58,19 @@ class FormCollection {
     // #endregion
     // region value, stream, next;
     get value() {
-        return {
-            form: this.form,
-            fields: this.fieldMap,
-        };
+        return this.stream.value;
     }
     get stream() {
         if (!this._stream) {
             this._stream = new rxjs_1.BehaviorSubject({
-                fields: this.fieldMap,
+                fields: this.fieldMapCollection.value,
                 form: this.form,
             });
+            // at this point we are assuming that the form is static;
+            const self = this;
+            this.fieldMapCollection.tree.subject // note - _fieldMapCollection is always instatntiated in the consctructor
+                .pipe((0, rxjs_1.map)((fields) => ({ fields, form: self.form })))
+                .subscribe(this._stream);
         }
         return this._stream;
     }
@@ -84,15 +84,15 @@ class FormCollection {
     }
     // the "standard mutators" are too gross for this use case
     setFieldValue(name, value) {
-        if (utils_1.canProxy) {
+        this.fieldMapCollection?.setFieldValue(name, value);
+    }
+    get isValid() {
+        for (const [, field] of this.fieldMapCollection.value) {
+            if (field.errors?.length) {
+                return false;
+            }
         }
-    }
-    mutate(next, seed, ...rest) {
-        throw new Error("not implemented");
-        return this;
-    }
-    next(next) {
-        throw new Error("not implemented");
-        return this;
+        return true;
     }
 }
+exports.default = FormCollection;

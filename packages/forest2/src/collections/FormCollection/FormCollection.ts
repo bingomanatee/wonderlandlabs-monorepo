@@ -67,7 +67,6 @@ export default class FormCollection implements FormCollectionIF {
         if (!isFieldValue(value)) {
           throw new Error("bad field value");
         }
-        console.log("adding", key, value, baseParams, rest);
         add(key, value, baseParams, rest);
       }
     } else {
@@ -80,8 +79,6 @@ export default class FormCollection implements FormCollectionIF {
       fieldMap,
       this
     );
-
-    console.log("fmc:", this.fieldMapCollection.value);
   }
 
   private fieldMapCollection: FormFieldMapCollection;

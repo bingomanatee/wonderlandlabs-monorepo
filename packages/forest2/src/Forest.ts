@@ -11,6 +11,8 @@ import {
   distinctUntilChanged,
 } from 'rxjs';
 import isEqual from 'lodash.isequal';
+import type { NotesMap, InfoParams, Info } from './types.shared';
+import { NotableHelper } from './utils';
 
 function pad(n: number) {
   let str = `${n}`;
@@ -40,6 +42,10 @@ export class Forest implements ForestIF {
     return this.trees.get(name);
   }
 
+  get treeNames() {
+    return Array.from(this.trees.keys())
+  }
+
   public addTree<ValueType>(name: TreeName, params?: TreeParams<ValueType>) {
     if (this.hasTree(name)) {throw new Error('cannot redefine tree ' + name);}
 
@@ -49,10 +55,12 @@ export class Forest implements ForestIF {
   }
   private _time = 0;
 
+  get time() {
+    return this._time;
+  }
   get nextTime() {
-    const time = this._time + 1;
-    this._time = time;
-    return time;
+    this._time = this._time + 1;
+    return this.time;
   }
 
   public depth = new BehaviorSubject<Set<number>>(new Set());
@@ -104,7 +112,7 @@ export class Forest implements ForestIF {
       'cannot observe ' + name + ': no tree by that name exists'
     );} // for typescript
 
-    return combineLatest(this.depth, tree.subject).pipe(
+    return combineLatest([this.depth, tree.subject]).pipe(
       filter(([ depth ]: [Set<number>, undefined]) => {
         return depth.size === 0;
       }),
@@ -112,4 +120,23 @@ export class Forest implements ForestIF {
       distinctUntilChanged(isEqual)
     ) as Observable<ValueType>;
   }
+  // #region notable 
+
+  private _notes?: NotesMap;
+
+  addNote(message: string, params?: InfoParams) {
+    if (!this._notes) this._notes = new Map();
+    NotableHelper.addNote(this.time, this._notes, message, params);
+  }
+
+  hasNoteAt(time: number) {
+    return this._notes?.has(time) || false;
+  }
+
+  notes(fromTime: number, toTime: number = 0): Info[] {
+    if (!this._notes) return [];
+
+    return NotableHelper.notes(this._notes, fromTime, toTime);
+  }
+  // #endregion
 }

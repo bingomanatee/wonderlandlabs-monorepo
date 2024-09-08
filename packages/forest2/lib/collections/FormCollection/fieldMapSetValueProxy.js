@@ -7,9 +7,67 @@ exports.fieldMapSetValueProxy = fieldMapSetValueProxy;
 const MapCollection_1 = require("../MapCollection/MapCollection");
 const extendField_1 = __importDefault(require("./extendField"));
 function getter(map, key, name, updatedField) {
-    if (key !== name)
+    if (key !== name) {
         return map.get(key);
+    }
     return updatedField;
+}
+function makeIterator(map, name, newField) {
+    return function* () {
+        for (const list of map) {
+            const [listKey] = list;
+            if (listKey === name) {
+                yield [name, newField];
+            }
+            else {
+                yield list;
+            }
+        }
+    };
+}
+function makeEntriesIterator(map, name, newField) {
+    return () => ({
+        // because one of the key may be redundant
+        // we have to iterate over keys to find and skip it
+        [Symbol.iterator]: function* () {
+            for (const k of map.keys()) {
+                if (k === name) {
+                    yield [k, newField];
+                }
+                else {
+                    yield [k, map.get(k)];
+                }
+            }
+        },
+    });
+}
+function makeValueIterator(map, name, newField) {
+    return () => ({
+        // because one of the key may be redundant
+        // we have to iterate over keys to find and skip it
+        [Symbol.iterator]: function* () {
+            for (const k of map.keys()) {
+                if (k === name) {
+                    yield newField;
+                }
+                else {
+                    yield map.get(k);
+                }
+            }
+        },
+    });
+}
+function makeForEach(map, name, newField) {
+    return (fn) => {
+        return map.forEach((value, key) => {
+            if (key === name) {
+                fn(newField, key);
+            }
+            else {
+                fn(value, key);
+            }
+        });
+    };
 }
 /**
  *
@@ -23,44 +81,44 @@ function getter(map, key, name, updatedField) {
  * @returns
  */
 function fieldMapSetValueProxy(map, name, value, basis) {
-    const updatedField = (0, extendField_1.default)({ name, value }, map.get(name), basis);
+    const updatedField = (0, extendField_1.default)({ name, value, edited: true }, map.get(name), basis);
     const newGetter = (key) => getter(map, key, name, updatedField);
     const handler = {
         set() {
-            throw new Error("forest field maps are immutable - cannot set any properties on field maps");
+            throw new Error('forest field maps are immutable - cannot set any properties on field maps');
         },
         get(target, method) {
             let out = undefined;
             switch (method) {
-                case "get":
+                case 'get':
                     out = newGetter;
                     break;
-                case "set":
+                case 'set':
                     out = MapCollection_1.noSet;
                     break;
-                case "clear":
+                case 'clear':
                     out = MapCollection_1.noSet;
                     break;
-                case "has":
+                case 'has':
                     out = (key) => target.has(key);
                     break;
-                case "forEach":
-                    out = (fn) => target.forEach(fn);
+                case 'forEach':
+                    out = makeForEach(map, name, updatedField);
                     break;
-                case "keys":
+                case 'keys':
                     out = () => target.keys();
                     break;
-                case "values":
-                    out = () => target.values();
+                case 'values':
+                    out = makeValueIterator(map, name, updatedField);
                     break;
-                case "entries":
-                    out = () => target.entries();
+                case 'entries':
+                    out = makeEntriesIterator(map, name, updatedField);
                     break;
-                case "size":
+                case 'size':
                     out = target.size;
                     break;
                 case Symbol.iterator:
-                    out = target[Symbol.iterator];
+                    out = makeIterator(map, name, updatedField);
                     break;
             }
             return out;

@@ -1,12 +1,12 @@
-import { Branch } from './Branch';
-import type { BranchIF } from './types.branch';
-import type { OffshootIF } from './types';
-import type { ForestIF } from './types.forest';
-import type { TreeIF, TreeName, TreeParams } from './types.trees';
-import type { ChangeIF, SubscribeFn } from './types.shared';
-import { BehaviorSubject, Subject, filter, map } from 'rxjs';
-import type { PartialObserver } from 'rxjs';
-const UNINITIALIZED = Symbol('tree has no value');
+import { Branch } from "./Branch";
+import type { BranchIF } from "./types.branch";
+import type { OffshootIF } from "./types";
+import type { ForestIF } from "./types.forest";
+import type { TreeIF, TreeName, TreeParams } from "./types.trees";
+import type { ChangeIF, Info, InfoParams, NotesMap, SubscribeFn } from "./types.shared";
+import { BehaviorSubject, Subject, filter, map } from "rxjs";
+import type { PartialObserver } from "rxjs";
+import { NotableHelper } from "./utils";
 
 export default class Tree<ValueType> implements TreeIF<ValueType> {
   constructor(
@@ -14,7 +14,7 @@ export default class Tree<ValueType> implements TreeIF<ValueType> {
     public readonly name: TreeName,
     private params?: TreeParams<ValueType>
   ) {
-    if (params && 'initial' in params) {
+    if (params && "initial" in params) {
       const { initial } = params;
       if (initial !== undefined) {
         this.root = new Branch<ValueType>(this, {
@@ -36,8 +36,12 @@ export default class Tree<ValueType> implements TreeIF<ValueType> {
   }
 
   rollback(time: number, message: string): void {
-    if (!this.top) {return;}
-    if (this.top.time < time) {return;}
+    if (!this.top) {
+      return;
+    }
+    if (this.top.time < time) {
+      return;
+    }
 
     let firstObs = this.top;
 
@@ -79,7 +83,9 @@ export default class Tree<ValueType> implements TreeIF<ValueType> {
       this.top = next;
       if (this.params?.validator) {
         const err = this.params.validator(next.value, this);
-        if (err) {throw err;}
+        if (err) {
+          throw err;
+        }
       }
 
       this.stream.next(this.top);
@@ -99,8 +105,42 @@ export default class Tree<ValueType> implements TreeIF<ValueType> {
     return this.subject.subscribe(observer);
   }
 
+  valueAt(at: number): ValueType | undefined {
+    if (!this.top) return undefined;
+
+    let mostRecent = this.top;
+    while (mostRecent) {
+      if (mostRecent.time > at) mostRecent = mostRecent.prev;
+      else break;
+    }
+    if (mostRecent) return mostRecent.value;
+    return undefined;
+  }
+
   get value() {
-    if (!this.top) {throw new Error('cannot get the value from an empty tree');}
+    if (!this.top) {
+      throw new Error("cannot get the value from an empty tree");
+    }
     return this.top.value;
   }
+
+  // #region notable 
+
+  private _notes?: NotesMap;
+
+  addNote(message: string, params?: InfoParams) {
+    if (!this._notes) this._notes = new Map();
+    NotableHelper.addNote(this.forest.time, this._notes, message, params, this.name);
+  }
+
+  hasNoteAt(time: number) {
+    return this._notes?.has(time) || false;
+  }
+
+  notes(fromTime: number, toTime: number = 0): Info[] {
+    if (!this._notes) return [];
+
+    return NotableHelper.notes(this._notes, fromTime, toTime);
+  }
+  // #endregion
 }

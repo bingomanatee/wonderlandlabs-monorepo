@@ -107,4 +107,28 @@ describe("Forest", () => {
       expect(values).toEqual([0, 2, 11]);
     });
   });
+
+  describe("notes", () => {
+    it("should add notes without params", () => {
+      const f = new Forest();
+
+      const t = f.addTree<string>("foo", { initial: "" });
+      expect(t.notes(0, Number.MAX_SAFE_INTEGER)).toEqual([]);
+
+      f.addNote("foo starts blank");
+      expect(f.notes(0, Number.MAX_SAFE_INTEGER)).toEqual([
+        { time: 1, message: "foo starts blank", tree: undefined, params: undefined },
+      ]);
+
+      t.next("a");
+      t.next("b");
+
+      f.addNote("foo is at b");
+
+      expect(f.notes(0, Number.MAX_SAFE_INTEGER)).toEqual([
+        { time: 1, message: "foo starts blank", tree: undefined, params: undefined },
+        { time: 5, message: "foo is at b", tree: undefined, params: undefined },
+      ]);
+    });
+  });
 });

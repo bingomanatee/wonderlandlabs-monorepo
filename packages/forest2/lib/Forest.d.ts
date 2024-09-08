@@ -1,6 +1,7 @@
 import type { ForestIF, TaskFn } from './types.forest';
 import type { TreeName, TreeIF, TreeParams } from './types.trees';
 import { BehaviorSubject, Observable } from 'rxjs';
+import type { InfoParams, Info } from './types.shared';
 export declare class Forest implements ForestIF {
     uniqueTreeName(basis?: string): string;
     private trees;
@@ -8,6 +9,7 @@ export declare class Forest implements ForestIF {
     tree<ValueType>(name: TreeName): TreeIF<ValueType> | undefined;
     addTree<ValueType>(name: TreeName, params?: TreeParams<ValueType>): TreeIF<ValueType>;
     private _time;
+    get time(): number;
     get nextTime(): number;
     depth: BehaviorSubject<Set<number>>;
     do<ResultType>(change: TaskFn<ResultType>): ResultType;
@@ -21,4 +23,8 @@ export declare class Forest implements ForestIF {
      * @returns
      */
     observe<ValueType>(name: TreeName): Observable<ValueType>;
+    private _notes?;
+    addNote(message: string, params?: InfoParams): void;
+    hasNoteAt(time: number): boolean;
+    notes(fromTime: number, toTime?: number): Info[];
 }

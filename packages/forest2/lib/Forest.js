@@ -7,6 +7,7 @@ exports.Forest = void 0;
 const Tree_1 = __importDefault(require("./Tree"));
 const rxjs_1 = require("rxjs");
 const lodash_isequal_1 = __importDefault(require("lodash.isequal"));
+const utils_1 = require("./utils");
 function pad(n) {
     let str = `${n}`;
     while (str.length < 3) {
@@ -19,6 +20,7 @@ class Forest {
         this.trees = new Map();
         this._time = 0;
         this.depth = new rxjs_1.BehaviorSubject(new Set());
+        // #endregion
     }
     uniqueTreeName(basis = 'tree') {
         if (!this.hasTree(basis)) {
@@ -47,10 +49,12 @@ class Forest {
         this.trees.set(name, tree);
         return tree;
     }
+    get time() {
+        return this._time;
+    }
     get nextTime() {
-        const time = this._time + 1;
-        this._time = time;
-        return time;
+        this._time = this._time + 1;
+        return this.time;
     }
     do(change) {
         const taskTime = this.nextTime;
@@ -92,9 +96,22 @@ class Forest {
         if (!tree) {
             throw new Error('cannot observe ' + name + ': no tree by that name exists');
         } // for typescript
-        return (0, rxjs_1.combineLatest)(this.depth, tree.subject).pipe((0, rxjs_1.filter)(([depth]) => {
+        return (0, rxjs_1.combineLatest)([this.depth, tree.subject]).pipe((0, rxjs_1.filter)(([depth]) => {
             return depth.size === 0;
         }), (0, rxjs_1.map)(([, value]) => value), (0, rxjs_1.distinctUntilChanged)(lodash_isequal_1.default));
+    }
+    addNote(message, params) {
+        if (!this._notes)
+            this._notes = new Map();
+        utils_1.NotableHelper.addNote(this.time, this._notes, message, params);
+    }
+    hasNoteAt(time) {
+        return this._notes?.has(time) || false;
+    }
+    notes(fromTime, toTime = 0) {
+        if (!this._notes)
+            return [];
+        return utils_1.NotableHelper.notes(this._notes, fromTime, toTime);
     }
 }
 exports.Forest = Forest;

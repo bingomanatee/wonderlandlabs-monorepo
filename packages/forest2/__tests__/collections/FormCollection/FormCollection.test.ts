@@ -12,11 +12,12 @@ import {
 } from "../../../src/collections/FormCollection/utils";
 
 const MUST_BE_EMAIL = 'must be email format: "___@__.__';
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 function isEmail(f: FieldIF, errors: FieldError[]) {
   if (errors.length) return;
 
-  if (!/.*#.+\..*$/.test(f.value as string)) {
+  if (!EMAIL_RE.test(f.value as string)) {
     return {
       message: MUST_BE_EMAIL,
       severity: 5,
@@ -61,6 +62,67 @@ describe("FormCollection", () => {
       forest: f,
     });
 
-    console.log("comment form:", fm.value);
+    expect([...fm.value.fields.keys()]).toEqual([
+      "title",
+      "content",
+      "authorEmail",
+    ]);
+    expect([...fm.value.fields.values()].map((f) => f.value)).toEqual([
+      "",
+      "",
+      "",
+    ]);
+    expect([...fm.value.fields.values()].map((f) => f.errors)).toEqual([
+      [
+        {
+          message: "field must be 8 or more characters",
+          severity: 5,
+        },
+      ],
+      [
+        {
+          message: "field must be 8 or more characters",
+          severity: 5,
+        },
+      ],
+      [
+        {
+          message: 'must be email format: "___@__.__',
+          severity: 5,
+        },
+      ],
+    ]);
+  });
+
+  it("can update with values", () => {
+    const f = new Forest();
+
+    const fm = new FormCollection("comment", COMMENT_FIELDS, {
+      forest: f,
+    });
+    fm.setFieldValue("title", "Great Expectations");
+    fm.setFieldValue("authorEmail", "foo@bar.com");
+
+    expect([...fm.value.fields.keys()]).toEqual([
+      "title",
+      "content",
+      "authorEmail",
+    ]);
+    expect([...fm.value.fields.values()].map((f) => f.value)).toEqual([
+      "Great Expectations",
+      "",
+      "foo@bar.com",
+    ]);
+    expect([...fm.value.fields.values()].map((f) => f.edited)).toEqual([
+      true,
+      undefined,
+      true,
+    ]);
+    const errors = [...fm.value.fields.values()].map((f) => f.errors);
+    expect(errors).toEqual([
+      [],
+      [{ message: "field must be 8 or more characters", severity: 5 }],
+      [],
+    ]);
   });
 });

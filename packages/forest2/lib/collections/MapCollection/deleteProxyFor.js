@@ -13,20 +13,6 @@ function makeIterator(target) {
         }
     };
 }
-function makeValueIterator(target) {
-    const { map, keys } = target;
-    return () => ({
-        // because one of the key may be redundant
-        // we have to iterate over keys to find and skip it
-        [Symbol.iterator]: function* () {
-            for (const k of map.keys()) {
-                if (!keys.includes(k)) {
-                    yield map.get(k);
-                }
-            }
-        },
-    });
-}
 function makeEntriesIterator(target) {
     const { map, keys } = target;
     return () => ({
@@ -36,6 +22,20 @@ function makeEntriesIterator(target) {
             for (const k of map.keys()) {
                 if (!keys.includes(k)) {
                     yield [k, map.get(k)];
+                }
+            }
+        },
+    });
+}
+function makeValueIterator(target) {
+    const { map, keys } = target;
+    return () => ({
+        // because one of the key may be redundant
+        // we have to iterate over keys to find and skip it
+        [Symbol.iterator]: function* () {
+            for (const k of map.keys()) {
+                if (!keys.includes(k)) {
+                    yield map.get(k);
                 }
             }
         },
@@ -81,6 +81,9 @@ function size(target) {
 }
 function deleteProxyFor(target) {
     const handler = {
+        set() {
+            throw new Error('forest maps are immutable - cannot set any properties on maps');
+        },
         get(target, method) {
             let out = undefined;
             switch (method) {

@@ -10,7 +10,7 @@ export class Branch<ValueType> implements BranchIF<ValueType> {
     public readonly tree: TreeIF<ValueType>,
     public readonly change: ChangeIF<ValueType>
   ) {
-    this.time = tree.forest.nextTime;
+    this.time = ('time' in change) ? change.time: tree.forest.nextTime;
   }
 
   public get cause() {
@@ -118,5 +118,15 @@ export class Branch<ValueType> implements BranchIF<ValueType> {
     }} - value = ${this.value} next=${
       this.next ? this.next.time : "<null>"
     } prev=${this.prev ? this.prev.time : "<null>"}`;
+  }
+
+  destroy() {
+    this.next = null;
+    this.prev = null;
+    this._cacheValue = undefined;
+    // @ts-expect-error
+    this.tree = undefined;
+    // @ts-expect-error
+    this.change = undefined;
   }
 }

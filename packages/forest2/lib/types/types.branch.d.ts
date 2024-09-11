@@ -12,4 +12,5 @@ export interface BranchIF<ValueType> {
     link(branchA: BranchIF<ValueType> | undefined, branchB: BranchIF<ValueType> | undefined): void;
     linkTo(branchB: BranchIF<ValueType> | undefined): void;
     toString(): string;
+    destroy(): void;
 }

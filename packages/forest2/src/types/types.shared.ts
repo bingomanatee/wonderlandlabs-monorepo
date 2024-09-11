@@ -1,4 +1,4 @@
-import type { ChangeFN } from './types.branch';
+import type { ChangeFN } from "./types.branch";
 
 /**
  * a "literal replacement value"
@@ -6,6 +6,7 @@ import type { ChangeFN } from './types.branch';
 export interface Assertion<ValueType> {
   assert: ValueType;
   name: string;
+  time?: number; // in truncation time is asserted; do not manually assert time yourself.
 }
 
 /**

@@ -7,6 +7,7 @@ import { Collection } from '../Collection';
 import type { CollectionParams } from '../Collection';
 import { deleteProxyFor } from './deleteProxyFor';
 import { setProxyFor } from './setProxyFor';
+import type { BranchIF } from '../../types/types.branch';
 
 export function noSet() {
   throw new Error('forest maps are immutable');
@@ -19,8 +20,8 @@ export default class MapCollection<
   constructor(name: string, params: CollectionParams<Map<KeyType, ValueType>>) {
     type MapType = Map<KeyType, ValueType>;
 
-    function mapCloner(t: TreeIF<MapType>): MapType {
-      const prevValue: MapType = t.value;
+    function mapCloner(t: TreeIF<MapType>, branch?: BranchIF<MapType>): MapType {
+      const prevValue: MapType = branch? branch.value : t.value;
       if (!(prevValue instanceof Map)) {throw new Error('cannot clone map');}
       // @ts-expect-error 2769
       return new Map(...prevValue.entries()) as MapType;

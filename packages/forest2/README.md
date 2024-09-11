@@ -192,6 +192,16 @@ may be useful.
 
 The notes list in forest and that in individual trees are distinct and unrelated; tree notes will include the name of the tree.
 
+# What can you put in a tree?
+
+Forest puts no limit on what a tree can store. That being said - _simple values_ make the best candidate for a tree. As a rule of thumb if it can be processed by JSON.stringify, or is a 
+Map of things that are "stringifiable" and keyed by strings or numbers. 
+
+Class instances, functions, DOM fragments all are not good candidates for Tree storage; its best to find some other way of storing these things such as keeping them in a seperate map 
+and referring to them with ID numbers/strings. 
+
+Objects and arrays are valid, but ideally are not deeply nested or overlong. 
+
 # Collections
 
 An collection is a "class that uses Forest". It can add, manipulate and filter
@@ -331,58 +341,22 @@ everything you'd expect except for the !CLONE! at time 23. What is that?
 Well, as we added this to the constructor:
 
 ```
-      cloneInterval: 6,
-      cloner(t: TreeIF<number>) {
-        return t.top ? t.top.value : 0;
-      },
+{ // ...
+  cloneInterval: 6,
+  cloner(t: TreeIF<number>, branch?: BranchIF<number>) {
+    if (branch) return branch.value;
+    return t.top ? t.top.value : 0;
+  },
+}
 ```
+
+note- the cloner may either target a specific branch's value (if the second parameter is present) or the tree's top branch (if there is no second parameter); and there is 
+also the possiblity that _both_ branch and tree.top is absent. (see above example)
 
 every six changes, the cloner adds a hard value so that the mutators don't callback too deeply. Mutation functions are nice in that they can reduce memory from history, but if there
 are too many of them you want to break the callback chain with an asserted literal value. 
 
-# Caching
+# Caching and Cloning 
 
-Caching is one of the tree hardest problems in computer science. 
-
-There are two circumstances where caching is important 
-
-1. the collection uses proxies; chaining proxies past a certain depth is unwise. 
-2. the collection has a series of mutators; in which chained functional callbacks is unwise.
-
-## Ittermittent caching -- by configuration
-
-If your use pattern falls into one of these patterns then the you should apply ittermittent caching (as above) every 6-12 values. 
-* set a **cloneInterval** (positive number in the 6...20 range)
-* set a **cloner** (tree) => value. note - _not all trees have tops_ so provide a default value in the cloner if the tree has no branches. 
-
-the cloner can be a simple destructuring
-```
- (tree) => {
-  return tree.top? {...tree.top.value} : {}
-}
-```
-or some other way to ensure simple pure JS values. 
-
-## Practical caching -- by default
-
-Its assumed that simple values (basic strings, numbers, arrays of basic strings, and basic objects) are cacheable; even if you 
-have a mutator, they will be locally cached by the branch to reduce calls to the mutators that are destined to return the same value. 
-
-put another way, every mutator in a given branch that returns a simple serializable value will only be called once. Its value will be saved
-and that saved value will be returned in all circumstances. If for some reason you _want_ to always generate a value then pass `{...uncacheable: true}` 
-as a constructor params. 
-
-that being said even if no caching is done, _mutators should always be idempotent_ - mutators that produce a different value every time (bacause
-of the use of time or `Math.random()` to alter their values) should not be kept in forest (or any other state system).
-
-### The Proxy Paradox
-
-Even if you use default caching a "simple" proxy can have an indefinate nest of predecessors. 
-Because of that in scenarios where proxies are being used, use ittermittent cachine to "deproxy" values every once in a while. 
-
-# References and Forest
-
-One of the down sides of mutators is that complex values will be unique every time you pull them down. That is why using observer patterns 
-is better than direct inspection. Assertion doesn't have this problem so if you insist on direct access of the branch/tree values, use 
-isEqaul rather than === for comparison. 
-
+in order to maintain referential uniqueness, mutator outputs are cached. Caching has a lot of
+little considerations - see [README.caching.com](./README.caching.md) for details. 

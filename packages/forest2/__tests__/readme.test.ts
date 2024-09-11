@@ -2,6 +2,7 @@ import { Forest } from "../src/Forest";
 import type { BranchIF, ChangeFN } from "../src/types/types.branch";
 import { Collection } from "../src/collections/Collection";
 import type { TreeIF } from "../src/types/types.trees";
+import { expect, it, describe } from "@jest/globals";
 
 function makeCounter(initial = 0, name = "counter") {
   const f = new Forest();
@@ -35,7 +36,8 @@ function makeCounter(initial = 0, name = "counter") {
         ["zeroOut", () => 0],
       ]),
       cloneInterval: 6,
-      cloner(t: TreeIF<number>) {
+      cloner(t: TreeIF<number>, branch?: BranchIF<number>) {
+        if (branch) return branch.value;
         return t.top ? t.top.value : 0;
       },
       validator(v) {

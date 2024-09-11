@@ -22,4 +22,6 @@ export interface BranchIF<ValueType> {
   linkTo(branchB: BranchIF<ValueType> | undefined): void;
 
   toString(): string;
+
+  destroy(): void;  // dereference anything you can possibly
 }

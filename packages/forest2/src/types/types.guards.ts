@@ -1,6 +1,5 @@
 import type {
   FieldIF,
-  FieldValue,
 } from '../collections/FormCollection/types.formCollection';
 import type { Assertion, Mutator } from './types.shared';
 import type { CachingParams } from './types.trees';
@@ -47,6 +46,7 @@ export function hasCachingParams(a: unknown): a is CachingParams<unknown> {
 
   return typeof o.cloner === 'function' && typeof o.cloneInterval === 'number';
 }
+
 export function isMapKey<MapType>(
   map: MapType,
   a: keyof any

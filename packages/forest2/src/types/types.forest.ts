@@ -18,6 +18,7 @@ export interface ForestIF extends Notable {
 
   nextTime: number;
   time: number;
+  readonly activeTasks: number[];
   
   uniqueTreeName(basis: string): string;
 

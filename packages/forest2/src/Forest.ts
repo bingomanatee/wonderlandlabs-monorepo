@@ -73,9 +73,15 @@ export class Forest implements ForestIF {
 
   public depth = new BehaviorSubject<Set<number>>(new Set());
 
+  get activeTasks() {
+    if (!this.depth.value.size) return [];
+
+    return Array.from(this.depth.value.values());
+  }
+
   do<ResultType>(change: TaskFn<ResultType>) {
     const taskTime = this.nextTime;
-    this.addDepth(taskTime);
+    this.addDoTime(taskTime);
     try {
       const result = change(this);
       this.unDepth(taskTime);
@@ -91,7 +97,7 @@ export class Forest implements ForestIF {
     }
   }
 
-  private addDepth(taskTime: number) {
+  private addDoTime(taskTime: number) {
     const newSet = new Set(this.depth.value);
     newSet.add(taskTime);
     this.depth.next(newSet);

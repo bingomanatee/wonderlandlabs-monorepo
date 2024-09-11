@@ -1,8 +1,8 @@
-import type { BranchIF } from './types.branch';
-import type { OffshootIF } from '../types';
-import type { ForestIF } from './types.forest';
-import type { ChangeIF, Notable, SubscribeFn } from './types.shared';
-import { PartialObserver, Subscription, Observable } from 'rxjs';
+import type { BranchIF } from "./types.branch";
+import type { OffshootIF } from "../types";
+import type { ForestIF } from "./types.forest";
+import type { ChangeIF, Notable, SubscribeFn } from "./types.shared";
+import { PartialObserver, Subscription, Observable } from "rxjs";
 
 export type TreeName = string;
 
@@ -35,7 +35,7 @@ export interface TreeIF<ValueType> extends Notable {
   valueAt(at: number): ValueType | undefined;
 
   validate(value: ValueType): TreeValuation<ValueType>;
-  depth(upTo: number) : number
+  depth(upTo: number): number;
 }
 
 export type ValidatorFn<TreeValueType> = (
@@ -43,12 +43,18 @@ export type ValidatorFn<TreeValueType> = (
   tree: TreeIF<TreeValueType>
 ) => Error | void | undefined; // also throws
 
+export type TreeClonerFn<TreeValueType> = (
+  tree: TreeIF<TreeValueType>,
+  branch?: BranchIF<TreeValueType>
+) => TreeValueType;
+
 export type TreeParamsBase<TreeValueType> = {
   initial?: TreeValueType;
   uncacheable?: boolean;
   maxBranches?: number; // if your history gets REALLY LONG (over say 200)...
-  trimTo: number;       // ... trim the tree history to this many branches;
+  trimTo?: number; // ... trim the tree history to this many branches;
   validator?: ValidatorFn<TreeValueType>;
+  cloner?: TreeClonerFn<TreeValueType>;
 };
 
 export type TreeParams<TreeValueType> =
@@ -56,6 +62,6 @@ export type TreeParams<TreeValueType> =
   | (TreeParamsBase<TreeValueType> & CachingParams<TreeValueType>);
 
 export type CachingParams<TreeValueType> = {
-  cloner(tree: TreeIF<TreeValueType>): TreeValueType;
+  cloner: TreeClonerFn<TreeValueType>;
   cloneInterval: number;
 };

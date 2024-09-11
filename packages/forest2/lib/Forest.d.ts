@@ -13,8 +13,9 @@ export declare class Forest implements ForestIF {
     get time(): number;
     get nextTime(): number;
     depth: BehaviorSubject<Set<number>>;
+    get activeTasks(): number[];
     do<ResultType>(change: TaskFn<ResultType>): ResultType;
-    private addDepth;
+    private addDoTime;
     private unDepth;
     /**
      * observes value changes for a tree when all 'do()' actions have completed.

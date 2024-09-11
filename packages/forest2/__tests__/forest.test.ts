@@ -1,6 +1,7 @@
 import { Forest } from "../src/Forest";
 import { expect, it, describe } from "@jest/globals";
-import type { BranchIF } from "../src/types.branch";
+import type { BranchIF } from "../src/types/types.branch";
+import type { ChangeIF } from "../src/types/types.shared";
 
 describe("Forest", () => {
   describe("constructor", () => {
@@ -51,8 +52,8 @@ describe("Forest", () => {
 
       expect(() => {
         f.do(() => {
-          f.tree<number>("bar")?.next(500);
-          f.tree<number>("foo")?.next(333);
+          f.tree<number>("bar")?.next(500, "next");
+          f.tree<number>("foo")?.next(333, "next");
         });
       }).toThrow("foo must be multiple of 100");
       expect(foo.value).toBe(100);
@@ -68,21 +69,24 @@ describe("Forest", () => {
       const t = f.addTree<Numeric>("foo", {
         initial: { num: 0 },
         validator(value) {
+          if (value === undefined) return;
           if (!(value.num % 3)) throw new Error("no values divisible by 3");
         },
       });
 
-      function growBy(n: number) {
+      function growBy(n: number): ChangeIF<Numeric> {
         return {
-          next(prev: BranchIF<Numeric> | undefined, seed: number) {
+          mutator(prev: BranchIF<Numeric> | undefined, seed: number) {
             return prev ? { num: prev.value.num + seed } : { num: seed };
           },
           seed: n,
+          name: "growBy",
         };
       }
 
       const values: number[] = [];
-      f.observe<Numeric>("foo").subscribe((v: Numeric) => values.push(v.num));
+      f.observe<Numeric>("foo").subscribe((v: Numeric) => {
+        if (v) values.push(v.num)});
       expect(values).toEqual([0]);
 
       t.grow(growBy(2));
@@ -117,7 +121,12 @@ describe("Forest", () => {
 
       f.addNote("foo starts blank");
       expect(f.notes(0, Number.MAX_SAFE_INTEGER)).toEqual([
-        { time: 1, message: "foo starts blank", tree: undefined, params: undefined },
+        {
+          time: 1,
+          message: "foo starts blank",
+          tree: undefined,
+          params: undefined,
+        },
       ]);
 
       t.next("a");
@@ -126,7 +135,12 @@ describe("Forest", () => {
       f.addNote("foo is at b");
 
       expect(f.notes(0, Number.MAX_SAFE_INTEGER)).toEqual([
-        { time: 1, message: "foo starts blank", tree: undefined, params: undefined },
+        {
+          time: 1,
+          message: "foo starts blank",
+          tree: undefined,
+          params: undefined,
+        },
         { time: 5, message: "foo is at b", tree: undefined, params: undefined },
       ]);
     });

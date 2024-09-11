@@ -1,8 +1,8 @@
-import type { BranchIF } from './types.branch';
+import type { BranchIF } from './types/types.branch';
 import type { OffshootIF } from './types';
-import type { ForestIF } from './types.forest';
-import { type TreeIF } from './types.trees';
-import { isMutator, type ChangeIF } from './types.shared';
+import { type TreeIF } from './types/types.trees';
+import { type ChangeIF } from './types/types.shared';
+import { isMutator } from './types/types.guards';
 
 export class Branch<ValueType> implements BranchIF<ValueType> {
   constructor(
@@ -10,6 +10,10 @@ export class Branch<ValueType> implements BranchIF<ValueType> {
     public readonly change: ChangeIF<ValueType>
   ) {
     this.time = tree.forest.nextTime;
+  }
+
+  public get cause() {
+    return this.change.name;
   }
 
   private _next?: BranchIF<ValueType> | undefined;
@@ -32,7 +36,13 @@ export class Branch<ValueType> implements BranchIF<ValueType> {
   }
   public readonly time: number;
 
-  add<SeedType = undefined>(change: ChangeIF<ValueType>): BranchIF<ValueType> {
+  /**
+   * 
+   * executes a "grow." note, it is not encapsulated by transaction
+   *  and does not trigger watchers,
+   *  so it should not be called directly by application code. 
+   */
+  add(change: ChangeIF<ValueType>): BranchIF<ValueType> {
     const nextBranch = new Branch<ValueType>(this.tree, change);
     this.link(this, nextBranch);
     return nextBranch;
@@ -41,7 +51,7 @@ export class Branch<ValueType> implements BranchIF<ValueType> {
 
   get value(): ValueType {
     if (isMutator<ValueType>(this.change)) {
-      return this.change.next(this.prev, this.change.seed);
+      return this.change.mutator(this.prev, this.change.seed);
     }
     return this.change.next;
   }

@@ -1,5 +1,5 @@
-import type { ForestIF } from "../../types.forest";
-import type { SubscribeFn } from "../../types.shared";
+import type { ForestIF } from "../../types/types.forest";
+import type { SubscribeFn } from "../../types/types.shared";
 import type { PartialObserver, Unsubscribable } from "rxjs";
 import type { FieldList, FieldRecord, FormSetIF, Params, BaseParamMap, FormCollectionIF } from "./types.formCollection";
 type FieldDef = FieldList | FieldRecord;

@@ -1,11 +1,12 @@
-import type { BranchIF } from './types.branch';
+import type { BranchIF } from './types/types.branch';
 import type { OffshootIF } from './types';
-import { type TreeIF } from './types.trees';
-import { type ChangeIF } from './types.shared';
+import { type TreeIF } from './types/types.trees';
+import { type ChangeIF } from './types/types.shared';
 export declare class Branch<ValueType> implements BranchIF<ValueType> {
     readonly tree: TreeIF<ValueType>;
     readonly change: ChangeIF<ValueType>;
     constructor(tree: TreeIF<ValueType>, change: ChangeIF<ValueType>);
+    get cause(): string;
     private _next?;
     get next(): BranchIF<ValueType> | undefined;
     set next(value: BranchIF<ValueType> | undefined);
@@ -13,7 +14,13 @@ export declare class Branch<ValueType> implements BranchIF<ValueType> {
     get prev(): BranchIF<ValueType> | undefined;
     set prev(value: BranchIF<ValueType> | undefined);
     readonly time: number;
-    add<SeedType = undefined>(change: ChangeIF<ValueType>): BranchIF<ValueType>;
+    /**
+     *
+     * executes a "grow." note, it is not encapsulated by transaction
+     *  and does not trigger watchers,
+     *  so it should not be called directly by application code.
+     */
+    add(change: ChangeIF<ValueType>): BranchIF<ValueType>;
     offshoots?: OffshootIF<ValueType>[] | undefined;
     get value(): ValueType;
     linkTo(branch: BranchIF<ValueType>): void;

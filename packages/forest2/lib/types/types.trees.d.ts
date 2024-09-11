@@ -1,9 +1,15 @@
 import type { BranchIF } from "./types.branch";
-import type { OffshootIF } from "./types";
+import type { OffshootIF } from "../types";
 import type { ForestIF } from "./types.forest";
 import type { ChangeIF, Notable, SubscribeFn } from "./types.shared";
 import { PartialObserver, Subscription, Observable } from "rxjs";
 export type TreeName = string;
+export type TreeValuation<ValueType> = {
+    value: ValueType;
+    tree: TreeIF<ValueType>;
+    isValid: boolean;
+    error?: string;
+};
 export interface TreeIF<ValueType> extends Notable {
     name?: TreeName;
     root?: BranchIF<ValueType>;
@@ -20,15 +26,15 @@ export interface TreeIF<ValueType> extends Notable {
     subject: Observable<ValueType>;
     subscribe(observer: PartialObserver<ValueType> | SubscribeFn<ValueType>): Subscription;
     valueAt(at: number): ValueType | undefined;
+    validate(value: ValueType): TreeValuation<ValueType>;
 }
 export type ValidatorFn<TreeValueType> = (value: TreeValueType, tree: TreeIF<TreeValueType>) => Error | void | undefined;
 export type TreeParamsBase<TreeValueType> = {
     initial?: TreeValueType;
     validator?: ValidatorFn<TreeValueType>;
 };
-export type TreeParams<TreeValueType> = TreeParamsBase<TreeValueType> | (TreeParamsBase<TreeValueType> & WithCloner<TreeValueType>);
-export type WithCloner<TreeValueType> = {
+export type TreeParams<TreeValueType> = TreeParamsBase<TreeValueType> | (TreeParamsBase<TreeValueType> & CachingParams<TreeValueType>);
+export type CachingParams<TreeValueType> = {
     cloner(tree: TreeIF<TreeValueType>): TreeValueType;
     cloneInterval: number;
 };
-export declare function isWithCloner(a: unknown): a is WithCloner<unknown>;

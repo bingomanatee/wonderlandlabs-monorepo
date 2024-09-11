@@ -1,12 +1,13 @@
-import type { ForestIF, TaskFn } from './types.forest';
-import type { TreeName, TreeIF, TreeParams } from './types.trees';
-import { BehaviorSubject, Observable } from 'rxjs';
-import type { InfoParams, Info } from './types.shared';
+import type { ForestIF, TaskFn } from "./types/types.forest";
+import type { TreeName, TreeIF, TreeParams } from "./types/types.trees";
+import { BehaviorSubject, Observable } from "rxjs";
+import type { InfoParams, Info } from "./types/types.shared";
 export declare class Forest implements ForestIF {
     uniqueTreeName(basis?: string): string;
     private trees;
     hasTree(name: TreeName): boolean;
     tree<ValueType>(name: TreeName): TreeIF<ValueType> | undefined;
+    get treeNames(): string[];
     addTree<ValueType>(name: TreeName, params?: TreeParams<ValueType>): TreeIF<ValueType>;
     private _time;
     get time(): number;

@@ -3,16 +3,17 @@ import type { ChangeIF } from './types.shared';
 
 export type ChangeFN<ValueType> = (
   prev: BranchIF<ValueType> | undefined,
-  seed?: any
+  seed?: any,
 ) => ValueType;
 
 export interface BranchIF<ValueType> {
   value: ValueType;
+  cause: string; // the 'name' of the change
   time: number;
   tree: TreeIF<ValueType>;
   next?: BranchIF<ValueType>;
   prev?: BranchIF<ValueType>;
-  add(change: ChangeIF<ValueType>): BranchIF<ValueType>;
+  add(next: ChangeIF<ValueType>): BranchIF<ValueType>;
 
   link(
     branchA: BranchIF<ValueType> | undefined,

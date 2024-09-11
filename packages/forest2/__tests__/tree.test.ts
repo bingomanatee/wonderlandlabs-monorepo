@@ -1,6 +1,6 @@
 import { Forest } from "../src/Forest";
-import type { BranchIF } from "../src/types.branch";
-import type { TreeIF } from "../src/types.trees";
+import type { BranchIF } from "../src/types/types.branch";
+import type { TreeIF } from "../src/types/types.trees";
 import { expect, it, describe } from "@jest/globals";
 
 describe("tree", () => {
@@ -9,9 +9,7 @@ describe("tree", () => {
 
     const t = f.addTree<number>("bar", { initial: 100 });
 
-    t.grow({
-      next: 200,
-    });
+    t.next(200);
 
     expect(t.value).toBe(200);
   });
@@ -21,7 +19,8 @@ describe("tree", () => {
     const t = f.addTree<number>("bar", { initial: 100 });
 
     t.grow({
-      next(prev?: BranchIF<number>) {
+      name: "multiply",
+      mutator(prev?: BranchIF<number>) {
         if (!prev) return 0;
         return prev.value * 2;
       },
@@ -43,11 +42,11 @@ describe("tree", () => {
       },
     });
 
-    t.grow({ next: 200 });
+    t.next(200);
     expect(t.value).toBe(200);
 
-    expect(() => t.grow({ next: -1 })).toThrow("must be positive");
-    expect(() => t.grow({ next: 0.5 })).toThrow("must be a whole number");
+    expect(() => t.next(-1, "next (error)")).toThrow("must be positive");
+    expect(() => t.next(0.5, "next (error)")).toThrow("must be a whole number");
 
     expect(t.value).toBe(200);
     t.next(300);
@@ -68,7 +67,7 @@ describe("tree", () => {
 
       expect(out).toEqual([100]);
 
-      t.grow({ next: 300 });
+      t.next(300);
       expect(out).toEqual([100, 300]);
     });
 
@@ -83,7 +82,7 @@ describe("tree", () => {
 
       expect(out).toEqual([]);
 
-      t.grow({ next: 300 });
+      t.next(300);
       expect(out).toEqual([300]);
     });
   });
@@ -115,29 +114,26 @@ describe("tree", () => {
       );
     }
 
-    expect(backwards).toEqual(
-      [
-        '17 alpha=d1, beta=e1, gamma=e2',
-        '16 alpha=d1, beta=e1, gamma=c',
-        '15 alpha=d1, beta=e1, gamma=c',
-        '14 alpha=d1, beta=d2, gamma=c',
-        '13 alpha=d1, beta=d2, gamma=c',
-        '12 alpha=d1, beta=b, gamma=c',
-        '11 alpha=d1, beta=b, gamma=c',
-        '10 alpha=a, beta=b, gamma=c',
-        '9 alpha=a, beta=b, gamma=c',
-        '8 alpha=a, beta=b, gamma=',
-        '7 alpha=a, beta=b, gamma=',
-        '6 alpha=a, beta=, gamma=',
-        '5 alpha=a, beta=, gamma=',
-        '4 alpha=, beta=, gamma=',
-        '3 alpha=, beta=, gamma=',
-        '2 alpha=, beta=, gamma=undefined',
-        '1 alpha=, beta=undefined, gamma=undefined',
-        '0 alpha=undefined, beta=undefined, gamma=undefined'
-      ]
-
-    )
+    expect(backwards).toEqual([
+      "17 alpha=d1, beta=e1, gamma=e2",
+      "16 alpha=d1, beta=e1, gamma=c",
+      "15 alpha=d1, beta=e1, gamma=c",
+      "14 alpha=d1, beta=d2, gamma=c",
+      "13 alpha=d1, beta=d2, gamma=c",
+      "12 alpha=d1, beta=b, gamma=c",
+      "11 alpha=d1, beta=b, gamma=c",
+      "10 alpha=a, beta=b, gamma=c",
+      "9 alpha=a, beta=b, gamma=c",
+      "8 alpha=a, beta=b, gamma=",
+      "7 alpha=a, beta=b, gamma=",
+      "6 alpha=a, beta=, gamma=",
+      "5 alpha=a, beta=, gamma=",
+      "4 alpha=, beta=, gamma=",
+      "3 alpha=, beta=, gamma=",
+      "2 alpha=, beta=, gamma=undefined",
+      "1 alpha=, beta=undefined, gamma=undefined",
+      "0 alpha=undefined, beta=undefined, gamma=undefined",
+    ]);
   });
 
   describe("notes", () => {

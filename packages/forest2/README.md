@@ -1,6 +1,6 @@
 # Forest 3.0 : "Forestry"
 
-Forest is an attempt to create a journalled, transactional synchronous, query based muuti collection database.
+Forest is an attempt to create a journalled, transactional synchronous, query based muuti collection ecosystem.
 
 It is intened as a Redis Killer for client side / react apps, but can have other applications.
 
@@ -9,253 +9,299 @@ It is intened as a Redis Killer for client side / react apps, but can have other
 every collection -- 'Tree' -- has an initial k/v store. Every update is a linked list that defines the key/values that are added or deleted.
 These changes are synchronous - that is, the update is appended to the tree and creates a subsitute value(values) for the base.
 
-### Pending
+This means, you can observe not only what the state of an individual collection was at a specific time, but what the state of the entire ecosystem _was_ at a given point, and annotate each change with a name to allow for bug tracking as far back in time as you want to go.
 
-New changes are marked as pending.
+## Transactional
 
-- Asyncronous changes may be awaiting the return of data from a remote source ('syncrhonization'). All changes inside a transaction are cosidered pending until the transaction is completed.
-- Changes to a base with a validation pipe are considered transient until the vaildation is passed.
+Collections assert changes inside of a "do closure" (in the Forest they originate from) and run all validators on changed trees before each closure is completed.
+Trees with invalid data are "trimmed" - changes are retained in each trees' `offshoots` property for inspection.
+This means, you can write validators which can traverse an entire (pending) tree in committable state and interrupt a trees' status, trimming
+bad data off the tree before any changes are broadcast. This allows you
+to validate collections not only based on their current state but on their
+relationship with other collections.
 
-### Good
+## Observable
 
-Good changes have passed any validation and are permanant. (unless they are contained by a pending transaction).
+All trees express the Observable interface of RxJS, including an exposed subject property, so they can be subscirbed to using familiar Rx patterns.
 
-### Bad
+## Customizable
 
-Bad changes have failed validation (or synchronization).
+You can write a completely unique "engine" on top of a tree collection
+that uses one or multiple trees to define an ecosystem. A form can be modeled using the provided engine which blends a collection for fields with a collection of form parameters with open customization.
 
-## Heirarchy of data
+## Open-ended
 
-Data in a Forest are contained within a three-level heirarchy:
+Any type of data you wish can be contained with in a Tree; Maps, DOM, database connections, Immer instances, etc. As long as you can define how you want your data to change and it can be held by a javascript reference, it can be managed with a tree.
 
-- Forests contain zero or many Trees;
-- Trees are contain zero or many Leafs;
-- A leaf is a coincidence of a key and a value.
+# Terminology
 
-This is analogous to a Database with Tables and indexed rows.
+The Forest model is a three-tiered state mangement system. Each change is encased within a **Branch**, which is a linked-list node that extends history over (numerically indexed) time.
 
-## Type definitions of Trees
+Branches are contained within **Trees** which are a named unique collection of the history of a single item of state.
 
-Trees are formally defined as having a single type of key and value. (<$K,$V>); however given the fact that Forests contain many trees and its impossible
-to know what the key / value type of a tree is given its name, the k/v type retuned by `tree(name)` is unknown; you must use `as` to enforece a more specifically typed tree.
+Trees are contained within a **Forest** which manages a namespace of Tree instances, enforces a timeline and allows for transactional containment of change.
 
-## Transactional Integrity
+## A quick example
 
-Transactions create "batches" of changes that either SUCCEED or FAIL as a group. This means that any failures of specific changes bring all the changes following the opening of the transaction to a halt. Similarly the contained changes are all considered "atomic" - when a transcation is completed they are all "squashed" into a single changeset (per table).
-
-This prevents "partial/broken" updates to occur. For instance if you have a rule that one tables' records' foreign key must have a relationship to another tables' content,
-you may have one transaction to seed the foreign record and another to assert the related record. At the end of the transaction, if the foreign key/related record is not valid, ALL the changes in the change set may end up getting rolled back.
-
-## Query Based
-
-Getting data from a Forest is done with a _query_. Query defines which records are retrieved; they can be a simple "by key" retrieval, or a complex graph of related records.
-Querys can execute once or may create a "stream" that is updated every time the source tree(s) are updated.
-
-# Why Forest 3.0?
-
-## 1. Because RxDB
-
-I learned a lot reading RxDB code and wanted to leverage some of their techniques. However RxDB
-is a different beast and has a different place in the ecosystem.
-
-* Forest is Memory Only - RxDB is multi-store
-* Forest is sync; RxDB is Async
-* Forest embraces transactions - RxDB does not
-* Forest doesn't have a locked in schema (yet) - RxDB does
-* Forest hopes to embrace multi-table nested queries - RXDB are flat key-value stores
-* Forest strongly embraces journal-driven data integrity, in part because of its transactional aims. 
-
-That being said - the overarching goal of a streaming, structured store is shared betwen the two systems. Moving control to a centralized Forest graph makes sense in Forest 3.0.
-
-## 2. Because Forest 2.0 has too much code
-
-In a goal to use modular transactio, Forest 2.0 became a huge and verbose system. In part because the
-stoore and the jouranl were two seperate beasts. Unifying store and data in a single chain makes a lot 
-of what used to be verbose and difficul to read relatively simple. 
-
-## 3. Because Forest really doesn't need all the dependencies used in Forest 2.0,
-
-@wonderlandlabs/collect for all its power really wasn't needed for Forest; as fun ad powerful as it is, Forest really
-can do fine with POJOs, Maps and RxJS. Having less dense depenedencies should make things run a lot faster and simpler. 
-
-There is some loss of features; Forest now is wholly Map/Key-value driven, and if you want stores to have other formats, 
-as of today (July 5 2024) you do have to use your own IO logic to transfer data into a map. 
-
-Future releses for a more Object-driven store system will be added once the basic principles are proven and tested. 
-But the payout here is that the code required to drive Forest 3.0 is vastly smaller than the previous edition. 
-
-# Taxonomy and architecture
-
-Forest uses a key/value/map driven heirarchy, 
-
-* Every data graph requires a Forest to be created for it. 
-* Forests have 0+ __Trees__ each identified by a name (string). 
-* Each tree has 0+ __Values__ iedntified by a __Key__ in the data map. No assumption for type is made for either,
-  but trees can bey identified/as'ed into a Generic pattern.. `myTree: TreeIF<keyType, valueType> = myForest.tree('name') as TreeIF<keyType, valueType>`. 
-* Values can be basic property values (heterogeneus) or records (homogenous). No assumption is made about the depth of a tree. 
-
-Another common structure is a _Leaf_. Leaves are "annotated records" of a value with props `{keyName, key, val}`. 
-
-You can set key/values on Forest instances, or their trees. 
-```
-myForest.set('sales', '2016/01/01', {sales: 10000, returns: 50});
-// or 
-myForest.set({treeName: 'sales', key: '2016/01/01', val: {sales: 10000, returns: 50}});
-// or
-myForest.tree('sales').set('2016/01/01', {sales: 10000, returns: 50})
-```
-
-Likewise, you can get or set from Forests or Trees:
+you can grow by adding a "Growth function" which returns a dynamic value
+based on the linked list chain, or force a value into a tree with the `next` method.
 
 ```
-console.log(myForest.get('sales', '2016/01/01'));
-// or 
-console.log(myForest.tree('sales').get('2016/01/01'));
-```
-all of these calls will have the same output, `{sales: 10000, returns: 50}`.
+const f = new Forest();
 
-### Calling actions on branches directly
+const t = f.addTree<number>("counter", { initial: 0 });
+t.subscribe((value: number) => {
+  console.log("tree change", t.top?.cause, ":", value);
+});
 
-You can even call it on branches - but you will get a Leaf rather than a raw value. Note - don't rely on this in production
-as this is an internal convenience and may change later. 
+const growBy = (n: number) => ({
+  next(prevBranch: BranchIF<number> | undefined, inc = 1) {
+    if (prevBranch) {
+      return prevBranch.value + inc;
+    }
+    return inc;
+  },
+  seed: n,
+  name: "growBy " + n,
+});
 
-```
-myForest.tree('sales').top.set('2016/01/01',{sales: 10000, returns: 50} ) 
-console.log(myForest.tree('sales').top.get('2016/01/01')); 
-// output --- {tree: 'sales', key: '2016/01/01', val: {sales: 10000, returns: 50}}
-```
+t.grow(growBy(3));
 
-note - while setting _any_ branch will automaticlally append a new branch to the end of top, calling `get(key)` on 
-a branch will only look at its own values and any in previous branches - it won't look forward for values. 
+// 'tree change growBy 3 : 3
 
-## TMI (1) Referntial integrity 
+t.grow(growBy(4));
 
-Forest makes no promise regarding referential integrity of its values; only that they will be __equivalent__ to what was passed in.
-eg., the prototype chain probably won't be preserved. (its possible Immer will be added at some point to drive that point home.).
 
-At this point there is also no guarantee that values _WON'T_ be referentially identical to their input, either.
+// 'tree change growBy 4 : 7
 
-At some point input filtering will be an optional feature in which case you can be guaranteed that referntial integrity
-won't be preerved (depeding on the nature of your filter function). 
+t.next(100, 'set to 100');
 
-# Public API
-
-While there are many methods you _can_ call on Forests and Trees, here are the ones you _should_ call:
+// tree change set to 100 : 100
 
 ```
-// a key/value collection
-export interface TreeIF<$K = unknown, $V = unknown> extends Data<$K, $V> {
-  name: TreeName;
-  forest: ForestIF;
-  status: Status;
-  values(): Map<$K, $V>;
-  count(stopAt?: number): number;
-  clearValues(): BranchIF<$K, $V>[]; // removes ALL data from the tree. 
-  readonly size: number; // the number of records stored in the data -- INCLUDING DELETED REFERENCES.
+
+at any point you can "run back in time" through a tree's list:
+
+```
+let current = t.top;
+
+while (current) {
+  console.log(
+    "README.md -- at",
+    current.time,
+    "cause:",
+    current.cause,
+    "value:",
+    current.value
+  );
+  current = current.prev;
 }
+});
+/**
+*
+*  -- at 7 cause: set to 100 value: 100
+* -- at 5 cause: growBy 4 value: 7
+* -- at 3 cause: growBy 3 value: 3
+* -- at 1 cause: initial value: 0
+*/
 
-export type ScopeFn = (forest: ForestIF, ...args: any) => any;
+```
 
-// a connection of Trees.
-export interface ForestIF {
-  readonly cacheInterval: number;
-  trees: Map<TreeName, TreeIF>;
-  tree(t: TreeName): TreeIF | undefined;
-  addTree(params: TreeFactoryParams): TreeIF; // creates a new tree; throws if existing unless upsert is true.
-  // an existing tree ignores the second argument (map).
-  get(treeNameOrLeaf: TreeName | LeafIdentityIF, key?: unknown): LeafIF;
-  set( // accepts name, key, value OR {tableName, key, val}
-    treeNameOrLeaf: TreeName | LeafIF,
-    key?: unknown,
-    val?: unknown
-  ): ChangeResponse;
-  delete(tree: TreeName | LeafIF, keys?: unknown | unknown[]): ChangeResponse;
-  hasKey(t: TreeName, k: unknown): boolean;
-  has(r: LeafIdentityIF<unknown>): boolean;
-  hasAll(r: LeafIdentityIF<unknown>[]): boolean;
-  hasTree(t: TreeName): boolean;
-  transact(fn: ScopeFn, params?: ScopeParams, ...args: never): unknown; // performs an "all or nothing" set of operations; 
-  // any thrown (uncaught) errors resets the tree(s) to the state they were at before the transaction stared. 
+## Engines use proxies to conserve memory
+
+Keeping large collections up to date with history can eat up memory. To make things less wasteful, engines can use proxies to create "tweaked versions" of historical data that are the same _except_ for a single key / value that was changed.
+
+for instances where available, the MapCollection's 'set' action creates a proxy of the previous edition that is the same, except that the size is changed and the value of a _single key_ is different when `value.get(key)` is called.
+
+After a defined number of changes, collections can cache their value, creating a concrete value with no proxying/historical dependence. This limits the depth of callbacks for performance.
+
+(also, for IE and other runtimes without proxying, non-proxy options are provided).
+
+# The Forest Promise
+
+As with previous iterations of Forest, Forest stores are
+
+- Quick to define
+- transactionally contain
+- allow actions to call each other with indfeinate depth for orchestration
+- Can be used globally or locally
+- minimize view notification by only broacasting outside the outermost transaction
+- produce synchromous change and can always be immediately inspected for current value
+
+the principal change for Forest 3.0 is that the Engine is no longer a class instance defiend by the Forest library but (can be) a custom class with your own action definitions. It also has even fewer depenencies than the previous iteration.
+
+# "Just enough API
+
+Everything in Forest extends from a Forest instance.
+
+## Forest:
+
+- `addTree<ValueType>(name, {initialValue: ValueType})`: new TreeIF<ValueType>
+- `hasTree(name: string)`: boolean
+- `uniqueTreeName(likeName: string)`: string
+  > if you want to produce a new unique name for addTree
+- `tree<ValueType>(name: string) : TreeIF<ValueType> | undefined
+  > retrieve a previous tree _if it exists_
+- do<ResultType>( doFn) : ResultType
+  > (throws) perform any actions and emit a single change to any previously defined observers: synchronous
+  > doFn = (f: Forest) => ResultType
+- `observe<ValueType>(name: string)`: SubjectLike<ValueType>
+  > returns a subscription to a named tree, that only emits after all do()'s are complete.
+
+## Tree:
+
+Trees are made from(in) forest instances.
+
+- (constructor): (name: string, params: TreeParams)
+  parameters are:
+  - validator?: (value: ValueType, tree: TreeIF<ValueTYpe>)
+  - initial?: ValueType
+    > may throw or return an error (or string) if invalid
+- `name`: string
+- `value`: ValueType
+- top?: BranchIF<ValueType> | undefined.
+  > while any tree with an initial value will have a top there are some
+  > circumstances where the tree may be "without branches" -- if validators disallowed all submissions, or there is no initial parameter.
+- `next(nextValue: ValueType, cause?: string): void
+  > sets the value of the tree to the defined overwrite; may throw if validators present.
+- `grow(change: ChangeIF): BranchIF<ValueType> (the top)
+- `valueAt(time: number) // the value of the branch "in history"
+- `validate(value: ValueType) : {isValid, value, tree, error?: string}
+  > if you want to "test an input" before committing it to state,
+  > validate tries the value against any validators; doesn't throw,
+  > but returns feedback in a handy object
+- `offshoots`: {time, errror, branch}[]
+  > invalid branches removed during submission.
+
+## Branch:
+
+Branches should in general not be messed with externally; their one outward facing field is `value` but that may as well be accessed indrectly, off their tree; the exception may be examining offshoots
+
+## changes
+
+a "change" is an annotated action. It can be either a 
+
+### Notes
+
+If you want to throw a message into the history of the tree (or forest),
+you can call the `.addNote(message: string, Params?: {})` method of a tree or forest and add a viewable memo. Trees or forests' notes can be accessed off the `.notes(time)` or `notes(time, time)` method to view
+any annotations.
+
+next/grow do not by design add to the notes collection to avoid duplication, but branch-scouring in combination with manual annotation
+may be useful.
+
+The notes list in forest and that in individual trees are distinct and unrelated; tree notes will include the name of the tree.
+
+# Collections
+
+An collection is a "class that uses Forest". It can add, manipulate and filter
+trees. Collections that are based on the Collection class (and satisfy the CollectionIF) is based on a specific (single) 
+tree and will allow for controlled manipulaition of its values. 
+
+* a MapCollection uses proxied maps and exposes "mappy" methods. 
+* a FormCollection is a "multi-tree" engine that puts form-centric properties in one tree and a map of detailed form-centric fields. Its validators, unlike Forest validators, express errors for "bad values" without throwing/pruning trees, allowing the user to enter values for fields as they may and providing real time feedback for field falidation. 
+
+## Custom Collections
+
+You can create any class you like around a tree/forest paradigm. you can create "change methods" in any manner you like. However, the Collection class has a custom "actions" property in its parameter that lets you define methods as you will, wrapping each in a transaction (`do()`) wrapper for sanitation. 
+
+Collections will create a forest if not injeted as a parameter; if you 
+have a simple "single tree" use case, a Collection will do just fine. 
+
+```
+
+    const f = new Forest();
+
+    const counter = new Collection("counter", {
+      initial: 0,
+      actions: new Map<string, ChangeFN<number>>([
+        ["increment", (branch) => {
+            if (!branch) return 1;
+            return branch.value + 1;
+        }],
+        ["decrement", (branch) =>{
+            if (!branch) return -1;
+            return branch.value - 1;
+        }],
+        ["add", (branch,s) =>{
+            if (!branch) return s as number;
+            return branch.value + (s as number)
+        }],
+        ["zeroOut", () => 0],
+      ]),
+      cloneInterval: 6,
+      cloner(t: TreeIF<number>) {
+        return t.top ? t.top.value : 0;
+      },
+      validator(v) {
+        if (Number.isNaN(v)) throw new Error("must be a number");
+        if (v !== Math.floor(v)) throw new Error("must be integer");
+      },
+    });
+
+    counter.subscribe((n: number) => console.log('collection is ', n, 'because of', counter.tree.top?.cause))
+ 
+    counter.act('increment');
+    counter.act('increment');
+    try {
+    counter.act('add', 1.5)
+    } catch (e) {
+      console.log("--- error:', e.message);
+    }
+    counter.act('increment');
+    counter.act('add', 100);
+    counter.act('zeroOut');
+    counter.act('add', 300);
+    counter.act('increment');
+    counter.act('decrement');
+    /**
+     *      
+      collection is  0 because of initial
+      collection is  1 because of increment
+      collection is  2 because of increment
+      --- error: must be integer
+      collection is  3 because of increment
+      collection is  103 because of add
+      collection is  0 because of zeroOut
+      collection is  300 because of add
+      collection is  301 because of increment
+      collection is  300 because of decrement
+     */
+
+```
+
+since these mutation functions are **calling each other** through history, we set the collection to "hard cache" its value every six actions. What does that do? if we were to "crawl the history" we'll see the occasional "cache action": 
+
+```
+let t = counter.tree.top;
+while (t) {
+  console.log(t.time, ":counter value: ", t.value, "cause:", t.cause);
+  t = t.prev;
 }
+/**
+  *   
+    29 :counter value:  300 cause: decrement
+    26 :counter value:  301 cause: increment
+    23 :counter value:  300 cause: !CLONE!
+    22 :counter value:  300 cause: add
+    19 :counter value:  0 cause: zeroOut
+    13 :counter value:  103 cause: add
+    10 :counter value:  3 cause: increment
+    7 :counter value:  2 cause: increment
+    4 :counter value:  1 cause: increment
+    1 :counter value:  0 cause: initial
+  */
 ```
 
-## TMI(2): caching and garbage collection
+everything you'd expect except for the !CLONE! at time 23. What is that?
+Well, as we added this to the constructor:
 
-Internally tree data is maintained in a Branch. Each branch has a data map which overrides/annotates the previous one. thus, each `myTree.set(k, v)` call creates a branch which journals that action. 
-
-When you call `myTree.get(k)`, the journal is traversed most recent to last recent until a value is found for that key. 
-For efficiency a cache can be asserted at any branch contaiing all previous values, to impprove retrieval time. Once a branch
-with a cache is found, the cache is trusted and no further parent branches are polled. 
-
-Forest by default will cache every eight branches. You can manually lower the cacheInterval when you configure forest by passing it as a constructor parameter. (todo: tree-level config for cacheInterval). You can even set it to 0 to create rolling
-caches for each branch, 
-
-Caches can of course get pretty heavy after a while. However, every time you create a cache, it will clear out caches above it, 
-so a tree will never have more than one cached branch -- unless it has a transaction(scope); cache-clearing is blocked by a scope, so that you're not constantly destroying/recreatig caches when scopes are active. But clearing out the last transaction should garbage-collect caches below the last one. 
-
-### The Tradeoffs
-
-If you don't cache, writing becomes MUCH faster - you never transport values from the root to any branches' cache. The 
-cost for that is every _get_ (read) becomes a loop through the data. If the data is distributed eqsully along all branches it will be `On/2`, with n being the numver of branches. If most of the data is in the root it will be nearly `On`. 
-
-You can manually cache at any point by calling `myTree.top?.cache = myTree.top?.mergedData()`. You can even clear out all branches by calling 
 ```
-const data = myTree.top?.mergedData() || new Map(); 
-myTree,root.prune();
- myTree.root = new Branch({
-    data
-})
+      cloneInterval: 6,
+      cloner(t: TreeIF<number>) {
+        return t.top ? t.top.value : 0;
+      },
 ```
-__*DO NOT DO THIS INSIDE A TRANSACTION*__ or you may lose all your data. 
 
-But it is probably better to let Forest handle the read/write optimization on its own timeline. Practically speaking, the same
-data is likely to get set and get a lot, which will make it retrieve relatively fast. 
-
-## TMI (3) - atomic actions 
-
-Each branch is atomic. If it is inside a scope (transaction) the transaction is considered atomic, 
-effectively containing the set of all changes that follow it (including those in sub-scopes). 
-
-There is no limit to the number of key/values that can be changed, deleted or added by a branch; you can replace _one_, _all_ or _none_ 
-of the keys within the branches' data. 
-
-* If the action type is `Action_s.replace` then _all_ the data in the tree is replaced by the branches' data; 
-* If the action type is `Action_s.clear` then _all_ the data in the tree is _erased_ by the branch. 
-
-(the "replace" functionality has not been implemented yet). 
-
-## WARNING: DO NOT EDIT BRANCHES
-
-You should only maipulate trees through the public APIs - otherwise things can get wierd. Forest is extremely write-once - manipulation 
-of the data maps is guaranteed to make things ... really wierd. 
-
-# Roadmap
-
-## MVP 
-
-0. user defined actions
-1. filters
-2. validation
-3. RxJS subscription
-3.1 React hooks
-
-## Power Features
-4. Graph queries / indexing
-5. "Active record" ORM system
-6. schema
-7. Object based trees
-8. Single-tree "Basic mode"
-11. Selector subscription
-11.2 Documentation and Sample Site
-11.3 Rxjs as a devDependency
-
-## Miracle Features
-9. Asynchronous branching and resolution -- "Back to the future" / virtualized forests and trees
-12. variable-depth trees (single-value, multi-dimensional data trees)
-13. GraphQL integration
-14. FQL - forest query language for scripted actions
-15. Storage IO, serialization/deserialization
-16. Immer integration perhaps as a "utility pack"
-17. Arbitrary publishing pipeline, perhaps with events/listeners for sub-actions
-18. Google toolbar
-19. Web Workers
+every six changes, the cloner adds a hard value so that the mutators don't callback too deeply. Mutation functions are nice in that they can reduce memory from history, but if there
+are too many of them you want to break the callback chain with an asserted literal value. 

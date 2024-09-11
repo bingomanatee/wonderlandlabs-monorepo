@@ -1,6 +1,6 @@
-import type { CollectionIF } from '../../type.collection';
-import { Collection } from '../Collection';
-import type { FieldMap, FormCollectionIF } from './types.formCollection';
+import type { CollectionIF } from "../../types/type.collection";
+import { Collection } from "../Collection";
+import type { FieldMap, FormCollectionIF } from "./types.formCollection";
 /**
  * this is a "utility sub-class" of FormCollection designed exclusively
  * to track the field properties of FormCollection's fields.
@@ -14,5 +14,11 @@ export declare class FormFieldMapCollection extends Collection<FieldMap> impleme
     name: string;
     private formCollection;
     constructor(name: string, fields: FieldMap, formCollection: FormCollectionIF);
+    /**
+     * sets (adds or updates) the value for a keyed item
+     * @param {KeyType} name
+     * @param {ValueType} value
+     * @returns
+     */
     setFieldValue(name: string, value: string | number): void;
 }

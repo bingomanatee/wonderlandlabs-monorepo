@@ -1,23 +1,16 @@
 import type { ChangeFN } from "./types.branch";
+import type { Assertion } from "./types.guards";
 
 export interface Mutator<ValueType> {
-  next: ChangeFN<ValueType>;
+  mutator: ChangeFN<ValueType>;
   seed?: any;
-  name?: string;
+  name: string;
 }
 
-export function isMutator<ValueType>(a: unknown): a is Mutator<ValueType> {
-  return !!(
-    a &&
-    typeof a === "object" &&
-    "next" in a &&
-    typeof a.next === "function"
-  );
-}
-interface Assertion<ValueType> {
-  next: ValueType;
-  name?: string;
-}
+/**
+ * a change is an "assertion of a new value."
+ * All changes must be named, to define clear journaling of acuase.
+ */
 export type ChangeIF<ValueType> = Mutator<ValueType> | Assertion<ValueType>;
 export type SubscribeFn<ValueType> = (next: ValueType) => any;
 

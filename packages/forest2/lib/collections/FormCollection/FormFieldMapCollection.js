@@ -33,18 +33,19 @@ class FormFieldMapCollection extends Collection_1.Collection {
         this.name = name;
         this.formCollection = formCollection;
     }
+    /**
+     * sets (adds or updates) the value for a keyed item
+     * @param {KeyType} name
+     * @param {ValueType} value
+     * @returns
+     */
     setFieldValue(name, value) {
-        if (!this.value.has(name)) {
-            console.warn('cannot set field value - no field "' +
-                name +
-                '" in this FormFieldMapCollection');
-        }
         if (!this.tree.top) {
-            throw new Error('canot setFieldValue to empty FormFieldMapCollection');
+            throw new Error("canot setFieldValue to empty FormFieldMapCollection");
         }
         const map = this.tree.top.value;
         if (!map.has(name)) {
-            throw new Error('FormFieldMapCollection does not have a field ' + name);
+            throw new Error("FormFieldMapCollection does not have a field " + name);
         }
         if (map.get(name).value === value) {
             return;
@@ -55,17 +56,17 @@ class FormFieldMapCollection extends Collection_1.Collection {
         // without exploding memory with duplicate maps all over the place.
         if (utils_1.canProxy) {
             const next = (0, fieldMapSetValueProxy_1.fieldMapSetValueProxy)(map, name, value, basis);
-            this.next(next);
+            this.next(next, "setFieldValue");
         }
         else {
             const prev = map.get(name);
             if (!prev) {
-                throw new Error('cannot get ' + name);
+                throw new Error("cannot get " + name);
             } // typescriptism
             const next = (0, extendField_1.default)({ name, value }, prev, basis);
             const newMap = new Map(map);
             newMap.set(name, next);
-            this.next(newMap);
+            this.next(newMap, "setFieldValue");
         }
     }
 }

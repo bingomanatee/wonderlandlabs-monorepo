@@ -1,6 +1,6 @@
 import { Forest } from "../../Forest";
-import type { ForestIF } from "../../types.forest";
-import type { SubscribeFn } from "../../types.shared";
+import type { ForestIF } from "../../types/types.forest";
+import type { SubscribeFn } from "../../types/types.shared";
 import { BehaviorSubject, map } from "rxjs";
 import type { SubjectLike, PartialObserver, Unsubscribable } from "rxjs";
 import type {
@@ -123,8 +123,6 @@ export default class FormCollection implements FormCollectionIF {
     // @s-expect-error TS2416
     return this.stream.subscribe(observer) as Unsubscribable;
   }
-
-  // the "standard mutators" are too gross for this use case
 
   setFieldValue(name: string, value: string | number) {
     this.fieldMapCollection?.setFieldValue(name, value);

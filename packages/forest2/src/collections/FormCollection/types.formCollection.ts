@@ -1,13 +1,10 @@
-import type { CollectionIF } from '../../type.collection';
-import type { ForestIF } from '../../types.forest';
+import type { CollectionIF } from "../../types/type.collection";
+import type { ForestIF } from "../../types/types.forest";
+import { isObj, isField } from "../../types/types.guards";
 
 export type FieldProps = Record<string, any>;
 export type FieldValue = string | number;
 export type FieldMap = Map<string, FieldIF>;
-
-export function isFieldValue(a: unknown): a is FieldValue {
-  return typeof a == 'string' || typeof a === 'number';
-}
 
 export type ErrorMessageMap = Map<number, string>;
 export type FieldValidator = (
@@ -47,9 +44,9 @@ export function isFieldIF(a: unknown): a is FieldIF {
 
   if (
     !(
-      'name' in o &&
-      'value' in o &&
-      typeof o.name === 'string' &&
+      "name" in o &&
+      "value" in o &&
+      typeof o.name === "string" &&
       isFieldValue(o.value)
     )
   ) {
@@ -59,7 +56,7 @@ export function isFieldIF(a: unknown): a is FieldIF {
 }
 
 // These are the "initial and default" values any field may define.
-export type FieldBase = Partial<Omit<FieldIF, 'baseParams' | 'value'>>;
+export type FieldBase = Partial<Omit<FieldIF, "baseParams" | "value">>;
 
 export interface FormIF {
   name?: string;
@@ -82,26 +79,12 @@ export interface Params {
 export type FieldList = FieldIF[];
 export type FieldRecord = Record<string, Partial<FieldIF>>;
 
-export function isObj(a: unknown): a is object {
-  return Boolean(a && typeof a === 'object');
-}
-
-export function isField(a: unknown): a is FieldIF {
-  if (!isObj(a)) {
-    return false;
-  }
-  const o = a as object;
-
-  return Boolean(
-    'name' in o &&
-      'value' in o &&
-      typeof o.name === 'string' &&
-      (typeof o.value === 'number' || typeof o.value === 'string')
-  );
-}
-
 export function isFieldList(a: unknown): a is FieldList {
   return Array.isArray(a) && a.every(isField);
+}
+
+export function isFieldValue(a: unknown): a is FieldValue {
+  return typeof a == "string" || typeof a === "number";
 }
 
 export function isFieldRecord(a: unknown): a is FieldRecord {
@@ -113,7 +96,7 @@ export function isFieldRecord(a: unknown): a is FieldRecord {
     return false;
   }
   if (
-    !Array.from(Object.keys(o)).every((k: unknown) => typeof k === 'string')
+    !Array.from(Object.keys(o)).every((k: unknown) => typeof k === "string")
   ) {
     return false;
   }

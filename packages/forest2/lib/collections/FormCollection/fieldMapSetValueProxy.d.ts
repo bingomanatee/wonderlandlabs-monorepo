@@ -1,4 +1,4 @@
-import type { FieldBase, FieldMap, FieldValue } from './types.formCollection';
+import type { FieldBase, FieldMap, FieldValue } from "./types.formCollection";
 /**
  *
  * this is a proxy that returns values from the previous map EXCEPT for when you get the entry whose value has been changed

@@ -1,12 +1,8 @@
 import type { ChangeFN } from "./types.branch";
+import type { Assertion } from "./types.guards";
 export interface Mutator<ValueType> {
-    next: ChangeFN<ValueType>;
+    mutator: ChangeFN<ValueType>;
     seed?: any;
-    name: string;
-}
-export declare function isMutator<ValueType>(a: unknown): a is Mutator<ValueType>;
-interface Assertion<ValueType> {
-    next: ValueType;
     name: string;
 }
 /**
@@ -29,4 +25,3 @@ export interface Notable {
     notes(fromTime: number, toTime?: number): Info[];
 }
 export type NotesMap = Map<number, Info[]>;
-export {};

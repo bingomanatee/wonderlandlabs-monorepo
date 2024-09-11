@@ -18,7 +18,7 @@ export interface ForestIF extends Notable {
 
   nextTime: number;
   time: number;
-
+  
   uniqueTreeName(basis: string): string;
 
   do<ResultType>(change: TaskFn<ResultType>): ResultType;

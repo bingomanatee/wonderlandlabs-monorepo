@@ -1,8 +1,7 @@
-import type { ForestIF } from '../../types.forest';
+import type { ForestIF } from "../../types/types.forest";
 export type FieldProps = Record<string, any>;
 export type FieldValue = string | number;
 export type FieldMap = Map<string, FieldIF>;
-export declare function isFieldValue(a: unknown): a is FieldValue;
 export type ErrorMessageMap = Map<number, string>;
 export type FieldValidator = (field: FieldIF, previousErrors: FieldError[]) => FieldError | void | false | null;
 export type FieldError = {
@@ -22,7 +21,7 @@ export interface FieldIF {
     baseParams?: FieldBase;
 }
 export declare function isFieldIF(a: unknown): a is FieldIF;
-export type FieldBase = Partial<Omit<FieldIF, 'baseParams' | 'value'>>;
+export type FieldBase = Partial<Omit<FieldIF, "baseParams" | "value">>;
 export interface FormIF {
     name?: string;
     props?: Record<string, any>;
@@ -40,9 +39,8 @@ export interface Params {
 }
 export type FieldList = FieldIF[];
 export type FieldRecord = Record<string, Partial<FieldIF>>;
-export declare function isObj(a: unknown): a is object;
-export declare function isField(a: unknown): a is FieldIF;
 export declare function isFieldList(a: unknown): a is FieldList;
+export declare function isFieldValue(a: unknown): a is FieldValue;
 export declare function isFieldRecord(a: unknown): a is FieldRecord;
 export type BaseParamMap = Map<string, FieldBase>;
 export interface FormCollectionIF {

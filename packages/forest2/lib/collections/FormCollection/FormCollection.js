@@ -82,7 +82,6 @@ class FormCollection {
         // @s-expect-error TS2416
         return this.stream.subscribe(observer);
     }
-    // the "standard mutators" are too gross for this use case
     setFieldValue(name, value) {
         this.fieldMapCollection?.setFieldValue(name, value);
     }

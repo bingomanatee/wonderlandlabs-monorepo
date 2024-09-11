@@ -1,9 +1,9 @@
-import type { CollectionIF } from "../types/type.collection";
-import type { SubscribeFn } from "../types/types.shared";
-import type { ForestIF } from "../types/types.forest";
-import type { TreeIF, TreeParams } from "../types/types.trees";
-import type { ChangeFN } from "../types/types.branch";
-import type { PartialObserver } from "rxjs";
+import type { CollectionIF } from '../types/type.collection';
+import type { SubscribeFn } from '../types/types.shared';
+import type { ForestIF } from '../types/types.forest';
+import type { TreeIF, TreeParams } from '../types/types.trees';
+import type { ChangeFN } from '../types/types.branch';
+import type { PartialObserver } from 'rxjs';
 export type CollectionParams<ValueType> = TreeParams<ValueType> & {
     actions?: Map<string, ChangeFN<ValueType>>;
     reuseTree?: boolean;

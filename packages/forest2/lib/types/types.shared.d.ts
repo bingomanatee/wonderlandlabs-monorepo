@@ -1,4 +1,4 @@
-import type { ChangeFN } from "./types.branch";
+import type { ChangeFN } from './types.branch';
 /**
  * a "literal replacement value"
  */

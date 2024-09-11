@@ -85,36 +85,36 @@ function fieldMapSetValueProxy(map, name, value, basis) {
     const newGetter = (key) => getter(map, key, name, updatedField);
     const handler = {
         set() {
-            throw new Error("forest field maps are immutable - cannot set any properties on field maps");
+            throw new Error('forest field maps are immutable - cannot set any properties on field maps');
         },
         get(target, method) {
             let out = undefined;
             switch (method) {
-                case "get":
+                case 'get':
                     out = newGetter;
                     break;
-                case "set":
+                case 'set':
                     out = MapCollection_1.noSet;
                     break;
-                case "clear":
+                case 'clear':
                     out = MapCollection_1.noSet;
                     break;
-                case "has":
+                case 'has':
                     out = (key) => target.has(key);
                     break;
-                case "forEach":
+                case 'forEach':
                     out = makeForEach(map, name, updatedField);
                     break;
-                case "keys":
+                case 'keys':
                     out = () => target.keys();
                     break;
-                case "values":
+                case 'values':
                     out = makeValueIterator(map, name, updatedField);
                     break;
-                case "entries":
+                case 'entries':
                     out = makeEntriesIterator(map, name, updatedField);
                     break;
-                case "size":
+                case 'size':
                     out = target.size;
                     break;
                 case Symbol.iterator:

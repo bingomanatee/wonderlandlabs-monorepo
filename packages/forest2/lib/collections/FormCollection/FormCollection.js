@@ -39,15 +39,15 @@ class FormCollection {
                 const record = fields[key];
                 const { baseParams, value, ...rest } = record;
                 if (!(0, types_formCollection_1.isFieldValue)(value)) {
-                    throw new Error("bad field value");
+                    throw new Error('bad field value');
                 }
                 add(key, value, baseParams, rest);
             }
         }
         else {
-            throw new Error("bad feilds type in FormCollection");
+            throw new Error('bad feilds type in FormCollection');
         }
-        const fcName = this.forest.uniqueTreeName(this.name + ":fields");
+        const fcName = this.forest.uniqueTreeName(this.name + ':fields');
         this.fieldMapCollection = new FormFieldMapCollection_1.FormFieldMapCollection(fcName, fieldMap, this);
     }
     initForm(initialForm) {
@@ -76,7 +76,7 @@ class FormCollection {
     }
     // @s-expect-error TS2416
     subscribe(observer) {
-        if (typeof observer === "function") {
+        if (typeof observer === 'function') {
             observer = { next: observer };
         }
         // @s-expect-error TS2416

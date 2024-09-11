@@ -10,9 +10,9 @@ function isFieldIF(a) {
         return false;
     }
     const o = a;
-    if (!("name" in o &&
-        "value" in o &&
-        typeof o.name === "string" &&
+    if (!('name' in o &&
+        'value' in o &&
+        typeof o.name === 'string' &&
         isFieldValue(o.value))) {
         return false;
     }
@@ -22,7 +22,7 @@ function isFieldList(a) {
     return Array.isArray(a) && a.every(types_guards_1.isField);
 }
 function isFieldValue(a) {
-    return typeof a == "string" || typeof a === "number";
+    return typeof a == 'string' || typeof a === 'number';
 }
 function isFieldRecord(a) {
     if (!(0, types_guards_1.isObj)(a)) {
@@ -32,7 +32,7 @@ function isFieldRecord(a) {
     if (!Array.from(Object.values(o)).every(types_guards_1.isField)) {
         return false;
     }
-    if (!Array.from(Object.keys(o)).every((k) => typeof k === "string")) {
+    if (!Array.from(Object.keys(o)).every((k) => typeof k === 'string')) {
         return false;
     }
     return true;

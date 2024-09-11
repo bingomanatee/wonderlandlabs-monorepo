@@ -245,4 +245,28 @@ export default class Tree<ValueType> implements TreeIF<ValueType> {
     return NotableHelper.notes(this._notes, fromTime, toTime);
   }
   // #endregion
+
+  /**
+   * 
+   * returns the size of the tree (number of branches)
+   * because _in theory_ a branch tree can be enormous, we provide an upTo
+   * value - past which branches are not counted. For instance if upTo = 50
+   * then the return value is going to be 0...50. 
+   * 
+   * @param {number} upTo
+   * @returns 
+   */
+  depth(upTo: number): number {
+    if (!this.top) return 0;
+    if (upTo > 100) console.warn('depth checking with larger values is unwarranted');
+
+    let count = 0;
+    let current = this.top;
+    while(count < upTo && current) {
+      count += 1;
+      current = current.prev;
+    }
+
+    return count;
+  }
 }

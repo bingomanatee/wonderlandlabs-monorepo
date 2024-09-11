@@ -1,4 +1,4 @@
-import type { ForestIF } from "../../types/types.forest";
+import type { ForestIF } from '../../types/types.forest';
 export type FieldProps = Record<string, any>;
 export type FieldValue = string | number;
 export type FieldMap = Map<string, FieldIF>;
@@ -21,7 +21,7 @@ export interface FieldIF {
     baseParams?: FieldBase;
 }
 export declare function isFieldIF(a: unknown): a is FieldIF;
-export type FieldBase = Partial<Omit<FieldIF, "baseParams" | "value">>;
+export type FieldBase = Partial<Omit<FieldIF, 'baseParams' | 'value'>>;
 export interface FormIF {
     name?: string;
     props?: Record<string, any>;

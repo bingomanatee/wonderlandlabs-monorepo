@@ -10,13 +10,13 @@ class Collection {
         if (this.forest.hasTree(name)) {
             if (params?.reuseTree) {
                 if (params.validator || params.initial) {
-                    throw new Error("reused tree cannot have validator/initial value - tree exists already and cannot be redefined");
+                    throw new Error('reused tree cannot have validator/initial value - tree exists already and cannot be redefined');
                 }
                 // otherwise, allow Collection to exist
                 return;
             }
             else {
-                throw new Error("cannot create collection - tree " + name + " exists");
+                throw new Error('cannot create collection - tree ' + name + ' exists');
             }
         }
         else {
@@ -34,8 +34,9 @@ class Collection {
     }
     act(name, seed) {
         const fn = this.params?.actions?.get(name);
-        if (!fn)
-            throw new Error("cannot perform action " + name + ": not in colletion");
+        if (!fn) {
+            throw new Error('cannot perform action ' + name + ': not in colletion');
+        }
         return this.forest.do(() => {
             this.mutate(fn, name, seed);
         });
@@ -57,7 +58,7 @@ class Collection {
     get tree() {
         const tree = this.forest.tree(this.name);
         if (!tree) {
-            throw new Error("cannot find tree " + this.name);
+            throw new Error('cannot find tree ' + this.name);
         }
         return tree;
     }

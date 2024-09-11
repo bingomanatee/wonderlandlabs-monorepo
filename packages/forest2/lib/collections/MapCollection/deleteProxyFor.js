@@ -82,36 +82,36 @@ function size(target) {
 function deleteProxyFor(target) {
     const handler = {
         set() {
-            throw new Error("forest maps are immutable - cannot set any properties on maps");
+            throw new Error('forest maps are immutable - cannot set any properties on maps');
         },
         get(target, method) {
             let out = undefined;
             switch (method) {
-                case "get":
+                case 'get':
                     out = (key) => getter(target, key);
                     break;
-                case "set":
+                case 'set':
                     out = MapCollection_1.noSet;
                     break;
-                case "clear":
+                case 'clear':
                     out = MapCollection_1.noSet;
                     break;
-                case "has":
+                case 'has':
                     out = (key) => haser(target, key);
                     break;
-                case "forEach":
+                case 'forEach':
                     out = makeEach(target);
                     break;
-                case "keys":
+                case 'keys':
                     out = makeKeyIterator(target);
                     break;
-                case "values":
+                case 'values':
                     out = makeValueIterator(target);
                     break;
-                case "entries":
+                case 'entries':
                     out = makeEntriesIterator(target);
                     break;
-                case "size":
+                case 'size':
                     out = size(target);
                     break;
                 case Symbol.iterator:

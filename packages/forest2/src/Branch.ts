@@ -1,9 +1,9 @@
-import type { BranchIF } from './types/types.branch';
-import type { OffshootIF } from './types';
-import type { TreeIF } from './types/types.trees';
-import type { ChangeIF } from './types/types.shared';
-import { isAssert, isMutator } from './types/types.guards';
-import { isCacheable } from './isCacheable';
+import type { BranchIF } from "./types/types.branch";
+import type { OffshootIF } from "./types";
+import type { TreeIF } from "./types/types.trees";
+import type { ChangeIF } from "./types/types.shared";
+import { isAssert, isMutator } from "./types/types.guards";
+import { isCacheable } from "./isCacheable";
 
 export class Branch<ValueType> implements BranchIF<ValueType> {
   constructor(
@@ -23,10 +23,10 @@ export class Branch<ValueType> implements BranchIF<ValueType> {
   }
   public set next(value: BranchIF<ValueType> | undefined) {
     if (this === value) {
-      throw new Error('cannot self recurse');
+      throw new Error("cannot self recurse");
     }
     if (value && this.prev === value) {
-      throw new Error('cannot self recurse loop');
+      throw new Error("cannot self recurse loop");
     }
     this._next = value;
   }
@@ -36,10 +36,10 @@ export class Branch<ValueType> implements BranchIF<ValueType> {
   }
   public set prev(value: BranchIF<ValueType> | undefined) {
     if (this.prev === value) {
-      throw new Error('cannot self-recurse');
+      throw new Error("cannot self-recurse");
     }
     if (value && this.next === value) {
-      throw new Error('cannot self recurse loop');
+      throw new Error("cannot self recurse loop");
     }
     this._prev = value;
   }
@@ -52,7 +52,9 @@ export class Branch<ValueType> implements BranchIF<ValueType> {
    *  so it should not be called directly by application code.
    */
   add(change: ChangeIF<ValueType>): BranchIF<ValueType> {
-    if (this.next) {throw new Error('can only add at the end of a chain');}
+    if (this.next) {
+      throw new Error("can only add at the end of a chain");
+    }
     const nextBranch = new Branch<ValueType>(this.tree, change);
     this.link(this, nextBranch);
     return nextBranch;
@@ -67,16 +69,19 @@ export class Branch<ValueType> implements BranchIF<ValueType> {
   }
 
   get value(): ValueType {
-    if (this._hasBeenCached === true) {return this._cached;}
+    if (this._hasBeenCached === true) {
+      return this._cached;
+    }
     if (isAssert(this.change)) {
       return this.change.assert;
     }
     if (
-      isMutator<ValueType>(this.change) &&
-      this._hasBeenCached === null // once it is checked it will be true | false.
+      isMutator<ValueType>(this.change)
     ) {
       const value = this.change.mutator(this.prev, this.change.seed);
-      if (this._hasBeenCached === false) {return value;}
+      if (this._hasBeenCached === false) {// stop trying to see if its cacheable or not, return directly
+        return value;
+      }
 
       if (this.tree.isUncacheable) {
         this._hasBeenCached = false; // stop trying to see if its cacheable or not.
@@ -89,9 +94,7 @@ export class Branch<ValueType> implements BranchIF<ValueType> {
       }
       return value;
     }
-    // ordinarily this should not be a possibility
-    // @ts-expect-error
-    return this.change.assert;
+    throw new Error('impossible change type');
   }
 
   linkTo(branch: BranchIF<ValueType>) {
@@ -110,8 +113,10 @@ export class Branch<ValueType> implements BranchIF<ValueType> {
   }
 
   toString() {
-    return `branch ${this.time} of tree {${this.tree.name ?? '(anon)'
-    }} - value = ${this.value} next=${this.next ? this.next.time : '<null>'
-    } prev=${this.prev ? this.prev.time : '<null>'}`;
+    return `branch ${this.time} of tree {${
+      this.tree.name ?? "(anon)"
+    }} - value = ${this.value} next=${
+      this.next ? this.next.time : "<null>"
+    } prev=${this.prev ? this.prev.time : "<null>"}`;
   }
 }

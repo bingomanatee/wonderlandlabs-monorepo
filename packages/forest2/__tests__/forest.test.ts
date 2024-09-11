@@ -66,7 +66,7 @@ describe("Forest", () => {
       const f = new Forest();
       type Numeric = { num: number };
 
-      const t = f.addTree<Numeric>("foo", {
+      const t = f.addTree<Numeric>("obsever-tree", {
         initial: { num: 0 },
         validator(value) {
           if (value === undefined) return;
@@ -85,7 +85,7 @@ describe("Forest", () => {
       }
 
       const values: number[] = [];
-      f.observe<Numeric>("foo").subscribe((v: Numeric) => {
+      f.observe<Numeric>(t.name!).subscribe((v: Numeric) => {
         if (v) values.push(v.num)});
       expect(values).toEqual([0]);
 

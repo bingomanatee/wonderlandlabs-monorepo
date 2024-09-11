@@ -229,10 +229,6 @@ have a simple "single tree" use case, a Collection will do just fine.
         }],
         ["zeroOut", () => 0],
       ]),
-      cloneInterval: 6,
-      cloner(t: TreeIF<number>) {
-        return t.top ? t.top.value : 0;
-      },
       validator(v) {
         if (Number.isNaN(v)) throw new Error("must be a number");
         if (v !== Math.floor(v)) throw new Error("must be integer");
@@ -272,7 +268,45 @@ have a simple "single tree" use case, a Collection will do just fine.
 
 since these mutation functions are **calling each other** through history, we set the collection to "hard cache" its value every six actions. What does that do? if we were to "crawl the history" we'll see the occasional "cache action": 
 
+
 ```
+
+const f = new Forest();
+
+const counter = new Collection("counter", {
+  initial: 0,
+  actions: new Map<string, ChangeFN<number>>([
+    ["increment", (branch) => {
+        if (!branch) return 1;
+        return branch.value + 1;
+    }],
+    ["decrement", (branch) =>{
+        if (!branch) return -1;
+        return branch.value - 1;
+    }],
+    ["add", (branch,s) =>{
+        if (!branch) return s as number;
+        return branch.value + (s as number)
+    }],
+    ["zeroOut", () => 0],
+  ]),
+  cloneInterval: 6,
+  cloner(t: TreeIF<number>) {
+    return t.top ? t.top.value : 0;
+  },
+  validator(v) {
+    if (Number.isNaN(v)) throw new Error("must be a number");
+    if (v !== Math.floor(v)) throw new Error("must be integer");
+  },
+});
+
+counter.act('increment');
+counter.act('add', 100);
+counter.act('zeroOut');
+counter.act('add', 300);
+counter.act('increment');
+counter.act('decrement');
+
 let t = counter.tree.top;
 while (t) {
   console.log(t.time, ":counter value: ", t.value, "cause:", t.cause);
@@ -308,4 +342,47 @@ are too many of them you want to break the callback chain with an asserted liter
 
 # Caching
 
-Caching 
+Caching is one of the tree hardest problems in computer science. 
+
+There are two circumstances where caching is important 
+
+1. the collection uses proxies; chaining proxies past a certain depth is unwise. 
+2. the collection has a series of mutators; in which chained functional callbacks is unwise.
+
+## Ittermittent caching -- by configuration
+
+If your use pattern falls into one of these patterns then the you should apply ittermittent caching (as above) every 6-12 values. 
+* set a **cloneInterval** (positive number in the 6...20 range)
+* set a **cloner** (tree) => value. note - _not all trees have tops_ so provide a default value in the cloner if the tree has no branches. 
+
+the cloner can be a simple destructuring
+```
+ (tree) => {
+  return tree.top? {...tree.top.value} : {}
+}
+```
+or some other way to ensure simple pure JS values. 
+
+## Practical caching -- by default
+
+Its assumed that simple values (basic strings, numbers, arrays of basic strings, and basic objects) are cacheable; even if you 
+have a mutator, they will be locally cached by the branch to reduce calls to the mutators that are destined to return the same value. 
+
+put another way, every mutator in a given branch that returns a simple serializable value will only be called once. Its value will be saved
+and that saved value will be returned in all circumstances. If for some reason you _want_ to always generate a value then pass `{...uncacheable: true}` 
+as a constructor params. 
+
+that being said even if no caching is done, _mutators should always be idempotent_ - mutators that produce a different value every time (bacause
+of the use of time or `Math.random()` to alter their values) should not be kept in forest (or any other state system).
+
+### The Proxy Paradox
+
+Even if you use default caching a "simple" proxy can have an indefinate nest of predecessors. 
+Because of that in scenarios where proxies are being used, use ittermittent cachine to "deproxy" values every once in a while. 
+
+# References and Forest
+
+One of the down sides of mutators is that complex values will be unique every time you pull them down. That is why using observer patterns 
+is better than direct inspection. Assertion doesn't have this problem so if you insist on direct access of the branch/tree values, use 
+isEqaul rather than === for comparison. 
+

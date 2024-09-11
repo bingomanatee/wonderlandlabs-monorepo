@@ -41,11 +41,11 @@ class FormFieldMapCollection extends Collection_1.Collection {
      */
     setFieldValue(name, value) {
         if (!this.tree.top) {
-            throw new Error("canot setFieldValue to empty FormFieldMapCollection");
+            throw new Error('canot setFieldValue to empty FormFieldMapCollection');
         }
         const map = this.tree.top.value;
         if (!map.has(name)) {
-            throw new Error("FormFieldMapCollection does not have a field " + name);
+            throw new Error('FormFieldMapCollection does not have a field ' + name);
         }
         if (map.get(name).value === value) {
             return;
@@ -56,17 +56,17 @@ class FormFieldMapCollection extends Collection_1.Collection {
         // without exploding memory with duplicate maps all over the place.
         if (utils_1.canProxy) {
             const next = (0, fieldMapSetValueProxy_1.fieldMapSetValueProxy)(map, name, value, basis);
-            this.next(next, "setFieldValue");
+            this.next(next, 'setFieldValue');
         }
         else {
             const prev = map.get(name);
             if (!prev) {
-                throw new Error("cannot get " + name);
+                throw new Error('cannot get ' + name);
             } // typescriptism
             const next = (0, extendField_1.default)({ name, value }, prev, basis);
             const newMap = new Map(map);
             newMap.set(name, next);
-            this.next(newMap, "setFieldValue");
+            this.next(newMap, 'setFieldValue');
         }
     }
 }

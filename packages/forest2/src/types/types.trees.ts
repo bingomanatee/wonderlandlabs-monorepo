@@ -35,6 +35,7 @@ export interface TreeIF<ValueType> extends Notable {
   valueAt(at: number): ValueType | undefined;
 
   validate(value: ValueType): TreeValuation<ValueType>;
+  depth(upTo: number) : number
 }
 
 export type ValidatorFn<TreeValueType> = (
@@ -45,6 +46,8 @@ export type ValidatorFn<TreeValueType> = (
 export type TreeParamsBase<TreeValueType> = {
   initial?: TreeValueType;
   uncacheable?: boolean;
+  maxBranches?: number; // if your history gets REALLY LONG (over say 200)...
+  trimTo: number;       // ... trim the tree history to this many branches;
   validator?: ValidatorFn<TreeValueType>;
 };
 

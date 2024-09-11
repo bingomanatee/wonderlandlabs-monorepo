@@ -1,9 +1,9 @@
-import type { BranchIF } from "./types/types.branch";
-import type { OffshootIF } from "./types";
-import type { ForestIF } from "./types/types.forest";
-import type { TreeIF, TreeName, TreeParams, TreeValuation } from "./types/types.trees";
-import type { ChangeIF, Info, InfoParams, SubscribeFn } from "./types/types.shared";
-import type { PartialObserver } from "rxjs";
+import type { BranchIF } from './types/types.branch';
+import type { OffshootIF } from './types';
+import type { ForestIF } from './types/types.forest';
+import type { TreeIF, TreeName, TreeParams, TreeValuation } from './types/types.trees';
+import type { ChangeIF, Info, InfoParams, SubscribeFn } from './types/types.shared';
+import type { PartialObserver } from 'rxjs';
 export declare const CLONE_NAME = "!CLONE!";
 export default class Tree<ValueType> implements TreeIF<ValueType> {
     forest: ForestIF;

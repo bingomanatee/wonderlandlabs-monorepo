@@ -1,6 +1,6 @@
-import type { CollectionIF } from "../../types/type.collection";
-import type { ForestIF } from "../../types/types.forest";
-import { isObj, isField } from "../../types/types.guards";
+import type { CollectionIF } from '../../types/type.collection';
+import type { ForestIF } from '../../types/types.forest';
+import { isObj, isField } from '../../types/types.guards';
 
 export type FieldProps = Record<string, any>;
 export type FieldValue = string | number;
@@ -44,9 +44,9 @@ export function isFieldIF(a: unknown): a is FieldIF {
 
   if (
     !(
-      "name" in o &&
-      "value" in o &&
-      typeof o.name === "string" &&
+      'name' in o &&
+      'value' in o &&
+      typeof o.name === 'string' &&
       isFieldValue(o.value)
     )
   ) {
@@ -56,7 +56,7 @@ export function isFieldIF(a: unknown): a is FieldIF {
 }
 
 // These are the "initial and default" values any field may define.
-export type FieldBase = Partial<Omit<FieldIF, "baseParams" | "value">>;
+export type FieldBase = Partial<Omit<FieldIF, 'baseParams' | 'value'>>;
 
 export interface FormIF {
   name?: string;
@@ -84,7 +84,7 @@ export function isFieldList(a: unknown): a is FieldList {
 }
 
 export function isFieldValue(a: unknown): a is FieldValue {
-  return typeof a == "string" || typeof a === "number";
+  return typeof a == 'string' || typeof a === 'number';
 }
 
 export function isFieldRecord(a: unknown): a is FieldRecord {
@@ -96,7 +96,7 @@ export function isFieldRecord(a: unknown): a is FieldRecord {
     return false;
   }
   if (
-    !Array.from(Object.keys(o)).every((k: unknown) => typeof k === "string")
+    !Array.from(Object.keys(o)).every((k: unknown) => typeof k === 'string')
   ) {
     return false;
   }

@@ -41,11 +41,11 @@ class Collection {
         });
     }
     next(next, name) {
-        this.tree.grow({ next, name });
+        this.tree.next(next, name);
         return this;
     }
     mutate(mutator, name, seed) {
-        this.tree.grow({ mutator, name, seed }); // untested
+        this.tree.grow({ mutator, name, seed });
         return this;
     }
     get subject() {

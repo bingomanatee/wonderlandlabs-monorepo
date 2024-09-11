@@ -1,8 +1,8 @@
-import { Forest } from "../../Forest";
-import type { ForestIF } from "../../types/types.forest";
-import type { SubscribeFn } from "../../types/types.shared";
-import { BehaviorSubject, map } from "rxjs";
-import type { SubjectLike, PartialObserver, Unsubscribable } from "rxjs";
+import { Forest } from '../../Forest';
+import type { ForestIF } from '../../types/types.forest';
+import type { SubscribeFn } from '../../types/types.shared';
+import { BehaviorSubject, map } from 'rxjs';
+import type { SubjectLike, PartialObserver, Unsubscribable } from 'rxjs';
 import type {
   FieldList,
   FieldRecord,
@@ -14,13 +14,13 @@ import type {
   BaseParamMap,
   FormCollectionIF,
   FieldMap,
-} from "./types.formCollection";
+} from './types.formCollection';
 import {
   isFieldList,
   isFieldRecord,
   isFieldValue,
-} from "./types.formCollection";
-import { FormFieldMapCollection } from "./FormFieldMapCollection";
+} from './types.formCollection';
+import { FormFieldMapCollection } from './FormFieldMapCollection';
 
 type FieldDef = FieldList | FieldRecord;
 
@@ -65,15 +65,15 @@ export default class FormCollection implements FormCollectionIF {
         const record: Partial<FieldIF> = fields[key];
         const { baseParams, value, ...rest } = record;
         if (!isFieldValue(value)) {
-          throw new Error("bad field value");
+          throw new Error('bad field value');
         }
         add(key, value, baseParams, rest);
       }
     } else {
-      throw new Error("bad feilds type in FormCollection");
+      throw new Error('bad feilds type in FormCollection');
     }
 
-    const fcName = this.forest.uniqueTreeName(this.name + ":fields");
+    const fcName = this.forest.uniqueTreeName(this.name + ':fields');
     this.fieldMapCollection = new FormFieldMapCollection(
       fcName,
       fieldMap,
@@ -117,7 +117,7 @@ export default class FormCollection implements FormCollectionIF {
   }
   // @s-expect-error TS2416
   subscribe(observer: PartialObserver<FormSetIF> | SubscribeFn<FormSetIF>) {
-    if (typeof observer === "function") {
+    if (typeof observer === 'function') {
       observer = { next: observer };
     }
     // @s-expect-error TS2416
@@ -129,7 +129,7 @@ export default class FormCollection implements FormCollectionIF {
   }
 
   get isValid(): boolean {
-    for (const [, field] of this.fieldMapCollection.value) {
+    for (const [ , field ] of this.fieldMapCollection.value) {
       if (field.errors?.length) {
         return false;
       }

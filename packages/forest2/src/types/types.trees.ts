@@ -1,8 +1,8 @@
-import type { BranchIF } from "./types.branch";
-import type { OffshootIF } from "../types";
-import type { ForestIF } from "./types.forest";
-import type { ChangeIF, Notable, SubscribeFn } from "./types.shared";
-import { PartialObserver, Subscription, Observable } from "rxjs";
+import type { BranchIF } from './types.branch';
+import type { OffshootIF } from '../types';
+import type { ForestIF } from './types.forest';
+import type { ChangeIF, Notable, SubscribeFn } from './types.shared';
+import { PartialObserver, Subscription, Observable } from 'rxjs';
 
 export type TreeName = string;
 
@@ -18,6 +18,7 @@ export interface TreeIF<ValueType> extends Notable {
   root?: BranchIF<ValueType>;
   top?: BranchIF<ValueType>;
   forest: ForestIF;
+  readonly isUncacheable?: boolean;
   offshoots?: OffshootIF<ValueType>[];
   rollback(time: number, message: string): void;
   /**
@@ -43,6 +44,7 @@ export type ValidatorFn<TreeValueType> = (
 
 export type TreeParamsBase<TreeValueType> = {
   initial?: TreeValueType;
+  uncacheable?: boolean;
   validator?: ValidatorFn<TreeValueType>;
 };
 

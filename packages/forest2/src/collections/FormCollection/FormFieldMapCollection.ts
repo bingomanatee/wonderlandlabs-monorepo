@@ -1,11 +1,11 @@
-import type { CollectionIF } from "../../types/type.collection";
-import { Collection } from "../Collection";
+import type { CollectionIF } from '../../types/type.collection';
+import { Collection } from '../Collection';
 // import { map } from 'rxjs';
 
-import type { FieldMap, FormCollectionIF } from "./types.formCollection";
-import extendField from "./extendField";
-import { canProxy } from "../../utils";
-import { fieldMapSetValueProxy } from "./fieldMapSetValueProxy";
+import type { FieldMap, FormCollectionIF } from './types.formCollection';
+import extendField from './extendField';
+import { canProxy } from '../../utils';
+import { fieldMapSetValueProxy } from './fieldMapSetValueProxy';
 
 /**
  * this is a "utility sub-class" of FormCollection designed exclusively
@@ -27,7 +27,7 @@ export class FormFieldMapCollection
   ) {
     const mappedFields = new Map();
 
-    for (const [name, field] of fields) {
+    for (const [ name, field ] of fields) {
       if (field.baseParams) {
         formCollection.fieldBaseParams.set(name, field.baseParams);
         delete field.baseParams;
@@ -55,11 +55,11 @@ export class FormFieldMapCollection
    */
   setFieldValue(name: string, value: string | number) {
     if (!this.tree.top) {
-      throw new Error("canot setFieldValue to empty FormFieldMapCollection");
+      throw new Error('canot setFieldValue to empty FormFieldMapCollection');
     }
     const map = this.tree.top.value;
     if (!map.has(name)) {
-      throw new Error("FormFieldMapCollection does not have a field " + name);
+      throw new Error('FormFieldMapCollection does not have a field ' + name);
     }
     if (map.get(name).value === value) {
       return;
@@ -71,11 +71,11 @@ export class FormFieldMapCollection
     // without exploding memory with duplicate maps all over the place.
     if (canProxy) {
       const next = fieldMapSetValueProxy(map, name, value, basis);
-      this.next(next, "setFieldValue");
+      this.next(next, 'setFieldValue');
     } else {
       const prev = map.get(name);
       if (!prev) {
-        throw new Error("cannot get " + name);
+        throw new Error('cannot get ' + name);
       } // typescriptism
 
       const next = extendField({ name, value }, prev, basis);
@@ -83,7 +83,7 @@ export class FormFieldMapCollection
       const newMap = new Map(map);
 
       newMap.set(name, next);
-      this.next(newMap, "setFieldValue");
+      this.next(newMap, 'setFieldValue');
     }
   }
 }

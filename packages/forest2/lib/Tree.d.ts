@@ -10,6 +10,7 @@ export default class Tree<ValueType> implements TreeIF<ValueType> {
     readonly name: TreeName;
     private params?;
     constructor(forest: ForestIF, name: TreeName, params?: TreeParams<ValueType>);
+    get isUncacheable(): boolean;
     private stream;
     next(next: ValueType, name?: string): void;
     rollback(time: number, message: string): void;

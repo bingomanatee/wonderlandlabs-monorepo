@@ -1,6 +1,6 @@
-import { PartialObserver, Subscription, Unsubscribable } from "rxjs";
-import type { ChangeFN } from "./types.branch";
-import type { SubscribeFn } from "./types.shared";
+import { PartialObserver, Subscription, Unsubscribable } from 'rxjs';
+import type { ChangeFN } from './types.branch';
+import type { SubscribeFn } from './types.shared';
 
 export interface CollectionIF<ValueType> {
   // abstract

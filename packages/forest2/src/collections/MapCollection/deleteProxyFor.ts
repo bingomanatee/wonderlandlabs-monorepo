@@ -1,5 +1,5 @@
-import type { IterFn } from "../../types/types.shared";
-import { noSet } from "./MapCollection";
+import type { IterFn } from '../../types/types.shared';
+import { noSet } from './MapCollection';
 
 export type MapDeleteInfo<KeyType, ValueType> = {
   map: Map<KeyType, ValueType>;
@@ -12,7 +12,7 @@ function makeIterator<KeyType, ValueType>(
   const { map, keys } = target;
   return function* () {
     for (const list of map) {
-      const [listKey] = list;
+      const [ listKey ] = list;
       if (!keys.includes(listKey)) {
         yield list;
       }
@@ -29,7 +29,7 @@ function makeEntriesIterator<KeyType, ValueType>(
     [Symbol.iterator]: function* () {
       for (const k of map.keys()) {
         if (!keys.includes(k)) {
-          yield [k, map.get(k)];
+          yield [ k, map.get(k) ];
         }
       }
     },
@@ -111,7 +111,7 @@ export function deleteProxyFor<KeyType, ValueType>(
   const handler = {
     set() {
       throw new Error(
-        "forest maps are immutable - cannot set any properties on maps"
+        'forest maps are immutable - cannot set any properties on maps'
       );
     },
     get(
@@ -120,45 +120,45 @@ export function deleteProxyFor<KeyType, ValueType>(
     ) {
       let out: any = undefined;
       switch (method) {
-        case "get":
-          out = (key: KeyType) => getter<KeyType, ValueType>(target, key);
-          break;
+      case 'get':
+        out = (key: KeyType) => getter<KeyType, ValueType>(target, key);
+        break;
 
-        case "set":
-          out = noSet;
-          break;
+      case 'set':
+        out = noSet;
+        break;
 
-        case "clear":
-          out = noSet;
-          break;
+      case 'clear':
+        out = noSet;
+        break;
 
-        case "has":
-          out = (key: KeyType) => haser<KeyType, ValueType>(target, key);
-          break;
+      case 'has':
+        out = (key: KeyType) => haser<KeyType, ValueType>(target, key);
+        break;
 
-        case "forEach":
-          out = makeEach<KeyType, ValueType>(target);
-          break;
+      case 'forEach':
+        out = makeEach<KeyType, ValueType>(target);
+        break;
 
-        case "keys":
-          out = makeKeyIterator<KeyType, ValueType>(target);
-          break;
+      case 'keys':
+        out = makeKeyIterator<KeyType, ValueType>(target);
+        break;
 
-        case "values":
-          out = makeValueIterator<KeyType, ValueType>(target);
-          break;
+      case 'values':
+        out = makeValueIterator<KeyType, ValueType>(target);
+        break;
 
-        case "entries":
-          out = makeEntriesIterator<KeyType, ValueType>(target);
-          break;
+      case 'entries':
+        out = makeEntriesIterator<KeyType, ValueType>(target);
+        break;
 
-        case "size":
-          out = size<KeyType, ValueType>(target);
-          break;
+      case 'size':
+        out = size<KeyType, ValueType>(target);
+        break;
 
-        case Symbol.iterator:
-          out = makeIterator<KeyType, ValueType>(target);
-          break;
+      case Symbol.iterator:
+        out = makeIterator<KeyType, ValueType>(target);
+        break;
       }
       return out;
     },

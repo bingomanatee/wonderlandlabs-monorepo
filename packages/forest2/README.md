@@ -305,3 +305,7 @@ Well, as we added this to the constructor:
 
 every six changes, the cloner adds a hard value so that the mutators don't callback too deeply. Mutation functions are nice in that they can reduce memory from history, but if there
 are too many of them you want to break the callback chain with an asserted literal value. 
+
+# Caching
+
+Caching 

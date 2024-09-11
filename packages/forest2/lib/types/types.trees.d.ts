@@ -15,6 +15,7 @@ export interface TreeIF<ValueType> extends Notable {
     root?: BranchIF<ValueType>;
     top?: BranchIF<ValueType>;
     forest: ForestIF;
+    readonly isUncacheable?: boolean;
     offshoots?: OffshootIF<ValueType>[];
     rollback(time: number, message: string): void;
     /**
@@ -31,6 +32,7 @@ export interface TreeIF<ValueType> extends Notable {
 export type ValidatorFn<TreeValueType> = (value: TreeValueType, tree: TreeIF<TreeValueType>) => Error | void | undefined;
 export type TreeParamsBase<TreeValueType> = {
     initial?: TreeValueType;
+    uncacheable?: boolean;
     validator?: ValidatorFn<TreeValueType>;
 };
 export type TreeParams<TreeValueType> = TreeParamsBase<TreeValueType> | (TreeParamsBase<TreeValueType> & CachingParams<TreeValueType>);

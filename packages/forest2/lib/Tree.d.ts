@@ -1,14 +1,14 @@
-import type { BranchIF } from './types/types.branch';
-import type { OffshootIF } from './types';
-import type { ForestIF } from './types/types.forest';
-import type { TreeIF, TreeName, TreeParams, TreeValuation } from './types/types.trees';
-import type { ChangeIF, Info, InfoParams, SubscribeFn } from './types/types.shared';
-import type { PartialObserver } from 'rxjs';
+import type { BranchIF } from "./types/types.branch";
+import type { OffshootIF } from "./types";
+import type { ForestIF } from "./types/types.forest";
+import type { TreeIF, TreeName, TreeParams, TreeValuation } from "./types/types.trees";
+import type { ChangeIF, Info, InfoParams, SubscribeFn } from "./types/types.shared";
+import type { PartialObserver } from "rxjs";
 export declare const CLONE_NAME = "!CLONE!";
 export default class Tree<ValueType> implements TreeIF<ValueType> {
     forest: ForestIF;
     readonly name: TreeName;
-    private params?;
+    readonly params?: TreeParams<ValueType>;
     constructor(forest: ForestIF, name: TreeName, params?: TreeParams<ValueType>);
     get isUncacheable(): boolean;
     private stream;
@@ -31,6 +31,12 @@ export default class Tree<ValueType> implements TreeIF<ValueType> {
      */
     private _trim;
     private _trimBefore;
+    /**
+     * this method erases all references contained in branches from the parameter forward.
+     *
+     * @param fromBranch
+     */
+    private _destoryOldData;
     get subject(): import("rxjs").Observable<ValueType>;
     subscribe(observer: PartialObserver<ValueType> | SubscribeFn<ValueType>): import("rxjs").Subscription;
     valueAt(at: number): ValueType | undefined;
@@ -46,8 +52,11 @@ export default class Tree<ValueType> implements TreeIF<ValueType> {
      * value - past which branches are not counted. For instance if upTo = 50
      * then the return value is going to be 0...50.
      *
+     * if upTo is falsy, the true length of the branches
+     * will be returned however deep that may be
+     *
      * @param {number} upTo
      * @returns
      */
-    depth(upTo: number): number;
+    branchCount(upTo?: number): number;
 }

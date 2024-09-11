@@ -10,7 +10,9 @@ export class Branch<ValueType> implements BranchIF<ValueType> {
     public readonly tree: TreeIF<ValueType>,
     public readonly change: ChangeIF<ValueType>
   ) {
-    this.time = ('time' in change) ? change.time: tree.forest.nextTime;
+    if (!tree || !change) throw new Error("unparameterized branch");
+
+    this.time = change && "time" in change ? change.time : tree.forest.nextTime;
   }
 
   public get cause() {
@@ -23,10 +25,10 @@ export class Branch<ValueType> implements BranchIF<ValueType> {
   }
   public set next(value: BranchIF<ValueType> | undefined) {
     if (this === value) {
-      throw new Error("cannot self recurse");
+      throw new Error("next: cannot self recurse");
     }
     if (value && this.prev === value) {
-      throw new Error("cannot self recurse loop");
+      throw new Error("next: prev: cannot self recurse loop");
     }
     this._next = value;
   }
@@ -35,11 +37,11 @@ export class Branch<ValueType> implements BranchIF<ValueType> {
     return this._prev;
   }
   public set prev(value: BranchIF<ValueType> | undefined) {
-    if (this.prev === value) {
-      throw new Error("cannot self-recurse");
+    if (this === value) {
+      throw new Error("prev: cannot self-recurse");
     }
     if (value && this.next === value) {
-      throw new Error("cannot self recurse loop");
+      throw new Error("prev:next:cannot self recurse loop");
     }
     this._prev = value;
   }
@@ -56,7 +58,7 @@ export class Branch<ValueType> implements BranchIF<ValueType> {
       throw new Error("can only add at the end of a chain");
     }
     const nextBranch = new Branch<ValueType>(this.tree, change);
-    this.link(this, nextBranch);
+    Branch.link(this, nextBranch);
     return nextBranch;
   }
   offshoots?: OffshootIF<ValueType>[] | undefined;
@@ -68,18 +70,47 @@ export class Branch<ValueType> implements BranchIF<ValueType> {
     this._hasBeenCached = true;
   }
 
+  _resetCache() {
+    // clear out any non-top caches; use cached value one last time.
+    const out = this._cached;
+    delete this._cached;
+    this._hasBeenCached = null;
+    return out;
+  }
+
+  clone(toAssert?: boolean): BranchIF<ValueType> {
+    const value = this.tree.params?.cloner
+      ? this.tree.params.cloner(this)
+      : this.value;
+    const change = toAssert
+      ? { assert: value, name: "cloned", time: this.time }
+      : this.change;
+    const out = new Branch(this.tree, change);
+    out.prev = this.prev;
+    out.next = this.next;
+    return out;
+  }
+
   get value(): ValueType {
+    if (!this.change)
+      throw new Error("cannot get value of branch without change");
     if (this._hasBeenCached === true) {
+      if (this !== this.tree.top) {
+        return this._resetCache();
+      }
       return this._cached;
     }
     if (isAssert(this.change)) {
       return this.change.assert;
     }
-    if (
-      isMutator<ValueType>(this.change)
-    ) {
+    if (isMutator<ValueType>(this.change)) {
       const value = this.change.mutator(this.prev, this.change.seed);
-      if (this._hasBeenCached === false) {// stop trying to see if its cacheable or not, return directly
+      if (this !== this.tree.top) {
+        // to reduce the number of unneede caches, don't cache any branches that are not currently top.
+        return value;
+      }
+      if (this._hasBeenCached === false) {
+        // stop trying to see if its cacheable or not, return directly
         return value;
       }
 
@@ -94,21 +125,40 @@ export class Branch<ValueType> implements BranchIF<ValueType> {
       }
       return value;
     }
-    throw new Error('impossible change type');
+    console.warn(
+      "impossible changeType",
+      this.change,
+      isAssert(this.change),
+      isMutator(this.change),
+      this
+    );
+    throw new Error("impossible");
   }
 
   linkTo(branch: BranchIF<ValueType>) {
-    return this.link(this, branch);
+    return Branch.link(this, branch);
   }
-  link(
-    branchA: BranchIF<ValueType> | undefined,
-    branchB: BranchIF<ValueType> | undefined
+  static link(
+    branchA: BranchIF<unknown> | undefined,
+    branchB: BranchIF<unknown> | undefined
   ) {
     if (branchA) {
       branchA.next = branchB;
     }
     if (branchB) {
       branchB.prev = branchA;
+    }
+  }
+
+  static unlink(
+    branchA: BranchIF<unknown> | undefined,
+    branchB: BranchIF<unknown> | undefined
+  ) {
+    if (branchA) {
+      branchA.next = undefined;
+    }
+    if (branchB) {
+      branchB.prev = undefined;
     }
   }
 

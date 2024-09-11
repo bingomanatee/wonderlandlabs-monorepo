@@ -17,6 +17,7 @@ export interface TreeIF<ValueType> extends Notable {
   name?: TreeName;
   root?: BranchIF<ValueType>;
   top?: BranchIF<ValueType>;
+  readonly params?: TreeParams<ValueType>;
   forest: ForestIF;
   readonly isUncacheable?: boolean;
   offshoots?: OffshootIF<ValueType>[];
@@ -35,7 +36,7 @@ export interface TreeIF<ValueType> extends Notable {
   valueAt(at: number): ValueType | undefined;
 
   validate(value: ValueType): TreeValuation<ValueType>;
-  depth(upTo: number): number;
+  branchCount(upTo?: number): number;
 }
 
 export type ValidatorFn<TreeValueType> = (
@@ -44,7 +45,6 @@ export type ValidatorFn<TreeValueType> = (
 ) => Error | void | undefined; // also throws
 
 export type TreeClonerFn<TreeValueType> = (
-  tree: TreeIF<TreeValueType>,
   branch?: BranchIF<TreeValueType>
 ) => TreeValueType;
 

@@ -1,4 +1,4 @@
-import type { ChangeFN } from "./types.branch";
+import type { MutatorFn as MutatorFn } from "./types.branch";
 
 /**
  * a "literal replacement value"
@@ -13,7 +13,7 @@ export interface Assertion<ValueType> {
  * a "dynamic mutator" that computes off the previous branch
  */
 export interface Mutator<ValueType> {
-  mutator: ChangeFN<ValueType>;
+  mutator: MutatorFn<ValueType>;
   seed?: any;
   name: string;
 }

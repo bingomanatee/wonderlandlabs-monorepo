@@ -19,7 +19,6 @@ import type {
 import { BehaviorSubject, filter, map } from "rxjs";
 import type { PartialObserver } from "rxjs";
 import { NotableHelper } from "./utils";
-import { isCacheable } from "./isCacheable";
 
 export const CLONE_NAME = "!CLONE!";
 
@@ -27,7 +26,7 @@ export default class Tree<ValueType> implements TreeIF<ValueType> {
   constructor(
     public forest: ForestIF,
     public readonly name: TreeName,
-    private params?: TreeParams<ValueType>
+    public readonly params?: TreeParams<ValueType>
   ) {
     if (params && "initial" in params) {
       const { initial } = params;
@@ -167,7 +166,7 @@ export default class Tree<ValueType> implements TreeIF<ValueType> {
     let count = 0;
     while (check) {
       if (count >= cloneInterval) {
-        const clonedValue: ValueType = cloner(this);
+        const clonedValue: ValueType = cloner(this.top);
 
         try {
           const next = this.top?.add({
@@ -175,14 +174,6 @@ export default class Tree<ValueType> implements TreeIF<ValueType> {
             name: CLONE_NAME,
           });
           this.top = next;
-          if (this.name === "counter:cached") {
-            console.log(
-              "added top:",
-              this.top.time,
-              this.top.value,
-              this.top.cause
-            );
-          }
         } catch (e) {
           console.warn("cannot clone! error is ", e);
         }
@@ -197,7 +188,7 @@ export default class Tree<ValueType> implements TreeIF<ValueType> {
   }
 
   _maybeTrim() {
-    if (!(this.top && !this.params?.cloner)) {
+    if (!(this.top && this.params?.cloner)) {
       return;
     }
 
@@ -213,24 +204,26 @@ export default class Tree<ValueType> implements TreeIF<ValueType> {
 
     let endTime = this.top.time;
     let startTime = this.root.time;
-    if (endTime + startTime + 1 < maxBranches) {
+    const treeTime = endTime + startTime + 1;
+
+    if (treeTime < maxBranches) {
       return; // its impossible for there to exist branch overflow if not enough time has passed
     }
 
-    if (activeTasks.some((n: number) => n <= startTime)) {
-      return;
-    } // we can trim up to the previous branch before the earliest task has started
-    //  but nothing after that.
-
-    const lastTimeToTrim = activeTasks.reduce((m, n) => {
-      return Math.min(m, n);
-    }, Number.POSITIVE_INFINITY);
-
-    if (this.depth(maxBranches) < maxBranches) {
+    const count = this.branchCount(maxBranches + 1);
+    if (count <= maxBranches) {
       return;
     }
 
-    this._trim(trimTo, lastTimeToTrim);
+    if (activeTasks.length) {
+      const firstTimeToSave = activeTasks.reduce((m, n) => {
+        return Math.min(m, n);
+      }, Number.POSITIVE_INFINITY);
+
+      this._trim(trimTo, firstTimeToSave);
+    } else {
+      this._trim(trimTo, Number.POSITIVE_INFINITY, true);
+    }
   }
 
   /**
@@ -241,76 +234,78 @@ export default class Tree<ValueType> implements TreeIF<ValueType> {
    *
    * We trim to the LOWEST of these two branches;
    */
-  private _trim(maxCount, earliestEventTime) {
+  private _trim(maxCount: number, firstTimeToSave: number, ignoreTime = false) {
     let fromBottom = this.root;
     let fromTop = this.top;
-    if (fromBottom.time >= earliestEventTime) return;
 
+    if (!ignoreTime && fromBottom.time >= firstTimeToSave) return;
     let count = 0;
 
     while (fromTop && count < maxCount) {
+      fromTop = fromTop.prev;
       if (
+        !ignoreTime &&
         fromBottom &&
         fromBottom.time &&
-        fromBottom.time < earliestEventTime
+        fromBottom.time < firstTimeToSave
       ) {
         fromBottom = fromBottom.next;
       }
-
-      fromTop = fromTop.prev;
+      count += 1;
     }
-    if (!fromTop || count <= maxCount) return;
+    if (!fromTop || count < maxCount) return;
 
     // at this point if fromBottom exists it is at or a lttle past the earliest time.
 
-    while (fromBottom && fromBottom.time > earliestEventTime) {
-      fromBottom = fromBottom.prev;
-    }
-
-    if (fromTop.time >= earliestEventTime) {
-      // we have to trim by time because there are too many branches BUT we reached our count
-      // before running into the branch that is in the earliest event
-      this._trimBefore(fromBottom);
-    } else {
-      // we are trimming to the first tree before the first cancellable event and ignoring actual count
-
-      if (
-        fromBottom &&
-        fromBottom !== this.root &&
-        fromBottom.prev !== this.root
-      ) {
-        this._trimBefore(fromBottom);
+    if (!ignoreTime) {
+      while (fromBottom && fromBottom.time >= firstTimeToSave) {
+        // ensure that we are preserving the branch BEFORE the eariest pending event
+        fromBottom = fromBottom.prev;
       }
     }
-  }
 
-  private _trimBefore(branch: BranchIF<ValueType>) {
-    if (!branch.prev || branch.prev === this.root) return;
-    const oldRoot = this.root;
-
-    this.root = new Branch(this, {
-      assert: this.params.cloner(this, branch.prev),
-      time: branch.prev.time,
-      name: "truncated seed",
-    });
-
-    let oldData = branch.prev;
-    this.root.link(this.root, branch);
-
-    this._destoryOldData(oldData);
-  }
-
-  private _destoryOldData(oldData: BranchIF<ValueType> | undefined) {
-    let next: BranchIF<ValueType> | undefined; // because destruction removes prev/next link we
-    // presere the "next to destroy" before calling `destroy()`.
-
-    while (oldData) {
-      next = oldData.next;
-      oldData.destroy();
-      oldData = next;
+    if (ignoreTime || fromTop.time < firstTimeToSave) {
+      // we are trimming before or at the first event to save
+      this._trimBefore(fromTop);
+    } else {
+      // there is an event prior to the size-based cutoff; trim to that event
+      this._trimBefore(fromBottom);
     }
   }
-  
+
+  private _trimBefore(branch?: BranchIF<ValueType>) {
+    if (!branch || !branch.prev || branch.prev === this.root) return;
+    const oldRoot = this.root;
+
+    // create an artificial branch that has the value and time of the previous branch
+    // but has an asserted not computed value.
+    const seedBranch = branch.clone(true);
+    Branch.unlink(seedBranch.prev, seedBranch);
+    Branch.link(seedBranch, seedBranch.next);
+    this.root = seedBranch;
+    // chain the new artificial branch to the trim target
+    this._destoryOldData(oldRoot, seedBranch);
+  }
+
+  /**
+   * this method erases all references contained in branches from the parameter forward.
+   *
+   * @param fromBranch
+   */
+  private _destoryOldData(
+    fromBranch: BranchIF<ValueType> | undefined,
+    toBranch: BranchIF<ValueType> | undefined
+  ) {
+    let next: BranchIF<ValueType> | undefined;
+    // because destruction removes prev/next link we
+    // presere the "next to destroy" before calling `destroy()`.
+    while (fromBranch) {
+      if (fromBranch.time >= toBranch?.time) return;
+      next = fromBranch.next;
+      fromBranch.destroy();
+      fromBranch = next;
+    }
+  }
 
   get subject() {
     return this.stream.pipe(
@@ -386,15 +381,18 @@ export default class Tree<ValueType> implements TreeIF<ValueType> {
    * value - past which branches are not counted. For instance if upTo = 50
    * then the return value is going to be 0...50.
    *
+   * if upTo is falsy, the true length of the branches
+   * will be returned however deep that may be
+   *
    * @param {number} upTo
    * @returns
    */
-  depth(upTo: number): number {
+  branchCount(upTo?: number): number {
     if (!this.top) return 0;
 
     let count = 0;
     let current = this.top;
-    while (count < upTo && current) {
+    while ((!upTo || count < upTo) && current) {
       count += 1;
       current = current.prev;
     }

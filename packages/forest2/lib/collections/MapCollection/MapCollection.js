@@ -11,8 +11,8 @@ function noSet() {
 }
 class MapCollection extends Collection_1.Collection {
     constructor(name, params) {
-        function mapCloner(t) {
-            const prevValue = t.value;
+        function mapCloner(branch) {
+            const prevValue = branch?.value;
             if (!(prevValue instanceof Map)) {
                 throw new Error('cannot clone map');
             }

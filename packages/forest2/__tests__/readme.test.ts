@@ -1,8 +1,12 @@
 import { Forest } from "../src/Forest";
-import type { BranchIF, ChangeFN } from "../src/types/types.branch";
+import type { BranchIF, MutatorFn } from "../src/types/types.branch";
 import { Collection } from "../src/collections/Collection";
 import type { TreeIF } from "../src/types/types.trees";
 import { expect, it, describe } from "@jest/globals";
+
+function message(...items: any[]) {
+  if (false) console.log(...items);
+}
 
 function makeCounter(initial = 0, name = "counter") {
   const f = new Forest();
@@ -11,7 +15,7 @@ function makeCounter(initial = 0, name = "counter") {
     name,
     {
       initial,
-      actions: new Map<string, ChangeFN<number>>([
+      actions: new Map<string, MutatorFn<number>>([
         [
           "increment",
           (branch) => {
@@ -36,9 +40,9 @@ function makeCounter(initial = 0, name = "counter") {
         ["zeroOut", () => 0],
       ]),
       cloneInterval: 6,
-      cloner(t: TreeIF<number>, branch?: BranchIF<number>) {
+      cloner(branch?: BranchIF<number>) {
         if (branch) return branch.value;
-        return t.top ? t.top.value : 0;
+        return 0;
       },
       validator(v) {
         if (Number.isNaN(v)) throw new Error("must be a number");
@@ -55,7 +59,7 @@ describe("README.md", () => {
 
     const t = f.addTree<number>("counter", { initial: 0 });
     t.subscribe((value: number) => {
-      console.log("tree change", t.top?.cause, ":", value);
+      message("tree change", t.top?.cause, ":", value);
     });
 
     const growBy = (n: number) => ({
@@ -86,7 +90,7 @@ describe("README.md", () => {
     let current = t.top;
 
     while (current) {
-      console.log(
+      message(
         "README.md -- at",
         current.time,
         "cause:",
@@ -109,7 +113,7 @@ describe("README.md", () => {
     const counter = makeCounter(0);
 
     counter.subscribe((n: number) =>
-      console.log("collection is ", n, "because of", counter.tree.top?.cause)
+      message("collection is ", n, "because of", counter.tree.top?.cause)
     );
 
     counter.act("increment");
@@ -150,7 +154,7 @@ describe("README.md", () => {
 
     let t = counter.tree.top;
     while (t) {
-      console.log(t.time, ":counter value: ", t.value, "cause:", t.cause);
+      message(t.time, ":counter value: ", t.value, "cause:", t.cause);
       t = t.prev;
     }
     /**

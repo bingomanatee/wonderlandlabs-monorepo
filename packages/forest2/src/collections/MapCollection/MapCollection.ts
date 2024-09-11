@@ -20,8 +20,8 @@ export default class MapCollection<
   constructor(name: string, params: CollectionParams<Map<KeyType, ValueType>>) {
     type MapType = Map<KeyType, ValueType>;
 
-    function mapCloner(t: TreeIF<MapType>, branch?: BranchIF<MapType>): MapType {
-      const prevValue: MapType = branch? branch.value : t.value;
+    function mapCloner(branch?: BranchIF<MapType>): MapType {
+      const prevValue: MapType = branch?.value;
       if (!(prevValue instanceof Map)) {throw new Error('cannot clone map');}
       // @ts-expect-error 2769
       return new Map(...prevValue.entries()) as MapType;

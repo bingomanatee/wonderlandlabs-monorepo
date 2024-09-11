@@ -1,9 +1,9 @@
-import type { TreeIF } from './types.trees';
-import type { ChangeIF } from './types.shared';
+import type { TreeIF } from "./types.trees";
+import type { ChangeIF } from "./types.shared";
 
-export type ChangeFN<ValueType> = (
+export type MutatorFn<ValueType> = (
   prev: BranchIF<ValueType> | undefined,
-  seed?: any,
+  seed?: any
 ) => ValueType;
 
 export interface BranchIF<ValueType> {
@@ -14,14 +14,10 @@ export interface BranchIF<ValueType> {
   next?: BranchIF<ValueType>;
   prev?: BranchIF<ValueType>;
   add(next: ChangeIF<ValueType>): BranchIF<ValueType>;
-
-  link(
-    branchA: BranchIF<ValueType> | undefined,
-    branchB: BranchIF<ValueType> | undefined
-  ): void;
+  clone(toAssert?: boolean): BranchIF<ValueType>
   linkTo(branchB: BranchIF<ValueType> | undefined): void;
 
   toString(): string;
 
-  destroy(): void;  // dereference anything you can possibly
+  destroy(): void; // dereference anything you can possibly
 }

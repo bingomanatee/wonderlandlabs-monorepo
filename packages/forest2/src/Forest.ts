@@ -1,7 +1,7 @@
-import Tree from './Tree';
+import Tree from "./Tree";
 
-import type { ForestIF, TaskFn } from './types/types.forest';
-import type { TreeName, TreeIF, TreeParams } from './types/types.trees';
+import type { ForestIF, TaskFn } from "./types/types.forest";
+import type { TreeName, TreeIF, TreeParams } from "./types/types.trees";
 import {
   BehaviorSubject,
   combineLatest,
@@ -9,21 +9,21 @@ import {
   filter,
   map,
   distinctUntilChanged,
-} from 'rxjs';
-import isEqual from 'lodash.isequal';
-import type { NotesMap, InfoParams, Info } from './types/types.shared';
-import { NotableHelper } from './utils';
+} from "rxjs";
+import isEqual from "lodash.isequal";
+import type { NotesMap, InfoParams, Info } from "./types/types.shared";
+import { NotableHelper } from "./utils";
 
 function pad(n: number) {
   let str = `${n}`;
   while (str.length < 3) {
-    str = '0' + str;
+    str = "0" + str;
   }
   return str;
 }
 
 export class Forest implements ForestIF {
-  uniqueTreeName(basis: string = 'tree'): string {
+  uniqueTreeName(basis: string = "tree"): string {
     if (!this.hasTree(basis)) {
       return basis;
     }
@@ -54,7 +54,7 @@ export class Forest implements ForestIF {
 
   public addTree<ValueType>(name: TreeName, params?: TreeParams<ValueType>) {
     if (this.hasTree(name)) {
-      throw new Error('cannot redefine tree ' + name);
+      throw new Error("cannot redefine tree " + name);
     }
 
     const tree: TreeIF<ValueType> = new Tree<ValueType>(this, name, params);
@@ -71,42 +71,43 @@ export class Forest implements ForestIF {
     return this.time;
   }
 
-  public depth = new BehaviorSubject<Set<number>>(new Set());
+  public activeTaskSubject = new BehaviorSubject<Set<number>>(new Set());
 
   get activeTasks() {
-    if (!this.depth.value.size) return [];
+    if (!this.activeTaskSubject.value.size) return [];
 
-    return Array.from(this.depth.value.values());
+    return Array.from(this.activeTaskSubject.value.values());
   }
 
   do<ResultType>(change: TaskFn<ResultType>) {
     const taskTime = this.nextTime;
-    this.addDoTime(taskTime);
+    this.addActiveTask(taskTime);
     try {
       const result = change(this);
-      this.unDepth(taskTime);
+      this.removeActiveTask(taskTime);
       return result;
     } catch (err) {
+      this.removeActiveTask(taskTime);
       this.trees.forEach((tree) => {
         tree.rollback(
           taskTime,
-          err instanceof Error ? err.message : 'unknown error'
+          err instanceof Error ? err.message : "unknown error"
         );
       });
       throw err;
     }
   }
 
-  private addDoTime(taskTime: number) {
-    const newSet = new Set(this.depth.value);
+  private addActiveTask(taskTime: number) {
+    const newSet = new Set(this.activeTaskSubject.value);
     newSet.add(taskTime);
-    this.depth.next(newSet);
+    this.activeTaskSubject.next(newSet);
   }
 
-  private unDepth(taskTime: number) {
-    const newSet2 = new Set(this.depth.value);
+  private removeActiveTask(taskTime: number) {
+    const newSet2 = new Set(this.activeTaskSubject.value);
     newSet2.delete(taskTime);
-    this.depth.next(newSet2);
+    this.activeTaskSubject.next(newSet2);
   }
 
   /**
@@ -118,21 +119,21 @@ export class Forest implements ForestIF {
    */
   observe<ValueType>(name: TreeName) {
     if (!this.hasTree(name)) {
-      throw new Error('cannot observe ' + name + ': no tree by that name');
+      throw new Error("cannot observe " + name + ": no tree by that name");
     }
 
     const tree = this.tree(name);
     if (!tree) {
       throw new Error(
-        'cannot observe ' + name + ': no tree by that name exists'
+        "cannot observe " + name + ": no tree by that name exists"
       );
     } // for typescript
 
-    return combineLatest([ this.depth, tree.subject ]).pipe(
-      filter(([ depth ]: [Set<number>, undefined]) => {
+    return combineLatest([this.activeTaskSubject, tree.subject]).pipe(
+      filter(([depth]: [Set<number>, undefined]) => {
         return depth.size === 0;
       }),
-      map(([ , value ]: [Set<number>, undefined]) => value),
+      map(([, value]: [Set<number>, undefined]) => value),
       distinctUntilChanged(isEqual)
     ) as Observable<ValueType>;
   }
@@ -141,7 +142,9 @@ export class Forest implements ForestIF {
   private _notes?: NotesMap;
 
   addNote(message: string, params?: InfoParams) {
-    if (!this._notes) {this._notes = new Map();}
+    if (!this._notes) {
+      this._notes = new Map();
+    }
     NotableHelper.addNote(this.time, this._notes, message, params);
   }
 
@@ -150,7 +153,9 @@ export class Forest implements ForestIF {
   }
 
   notes(fromTime: number, toTime: number = 0): Info[] {
-    if (!this._notes) {return [];}
+    if (!this._notes) {
+      return [];
+    }
 
     return NotableHelper.notes(this._notes, fromTime, toTime);
   }

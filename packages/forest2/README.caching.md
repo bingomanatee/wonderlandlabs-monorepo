@@ -141,20 +141,21 @@ isEqaul rather than === for comparison.
 ## OK BOOMER
 
 most state system doesn't last that long. however in the unlikely event that a tree gets too
-long we have a "Terminal system" to trim really old branches. Two properties in a tree's 
-parameters:
+long we have a "Terminal system" to trim really old branches. It limits the size of the branch tree and cauterizes older values. 
+
+Two properties in a tree's parameters enable a limited branch length:
 
 * `maxBranches` -- the maximum number of branches to retain. Should be large (50 or 100) but not too large...
 * `trimTo` -- when trimming occurs keep this many branches. 
 * `cloner` must be set in order to provide a baseline for a mutator.
-   i.e., if the "last branch"is a mutator it needs one branch
-   before it's value to be based on. 
+   i.e., if the "last branch"is a mutator it needs one branch before it's value to be based on. 
 
 trimTo must be at least 4 and up to 80% of it. otherwise trimming becomes too frequent. 
 
 a useful example: maxBranches = 80, trimTo = 60. that is when the tree is 80 branches or more 
 trim it to 60 branches. Meaning trimmig a large tree will occur on the 81st branch and 
-every 20 branches after that. 
+every 20 branches after that. The greater the difference is between trimTt and maxBranches, the less often 
+tree trimming will occur. 
 
 ### Trimming and active events 
 
@@ -188,3 +189,12 @@ and it has a maxBranches/trimTo of 5 and 2; the progress would look like this:
 
  and so on; its a "rolling truncation" except that truncation only occurs every few branches
  for efficiencies' sake. 
+
+
+# Some Very Technical details
+
+# Trimming Trees: the "plus one" factor
+
+In order to allow for the possibility that the "last branch" (according to the desired trimTo size) is a 
+mutator that plays off the previous value, when trimminc occurs, the previous branch to the last branch
+is cloned and converted to an assert -- and THAT branch is made into the root; the remaining branch (trimTo branches long (or more)) is placed after that assert branch.

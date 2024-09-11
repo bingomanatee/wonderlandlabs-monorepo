@@ -25,6 +25,8 @@ export declare class Branch<ValueType> implements BranchIF<ValueType> {
     _cached: ValueType | undefined;
     _hasBeenCached: boolean | null;
     private _cacheValue;
+    _resetCache(): ValueType;
+    clone(toAssert?: boolean): BranchIF<ValueType>;
     get value(): ValueType;
     linkTo(branch: BranchIF<ValueType>): void;
     link(branchA: BranchIF<ValueType> | undefined, branchB: BranchIF<ValueType> | undefined): void;

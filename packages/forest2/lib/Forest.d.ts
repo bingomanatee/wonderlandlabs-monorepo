@@ -1,7 +1,7 @@
-import type { ForestIF, TaskFn } from './types/types.forest';
-import type { TreeName, TreeIF, TreeParams } from './types/types.trees';
-import { BehaviorSubject, Observable } from 'rxjs';
-import type { InfoParams, Info } from './types/types.shared';
+import type { ForestIF, TaskFn } from "./types/types.forest";
+import type { TreeName, TreeIF, TreeParams } from "./types/types.trees";
+import { BehaviorSubject, Observable } from "rxjs";
+import type { InfoParams, Info } from "./types/types.shared";
 export declare class Forest implements ForestIF {
     uniqueTreeName(basis?: string): string;
     private trees;
@@ -12,11 +12,11 @@ export declare class Forest implements ForestIF {
     private _time;
     get time(): number;
     get nextTime(): number;
-    depth: BehaviorSubject<Set<number>>;
+    activeTaskSubject: BehaviorSubject<Set<number>>;
     get activeTasks(): number[];
     do<ResultType>(change: TaskFn<ResultType>): ResultType;
-    private addDoTime;
-    private unDepth;
+    private addActiveTask;
+    private removeActiveTask;
     /**
      * observes value changes for a tree when all 'do()' actions have completed.
      * meaning, if any errors are thrown and reset the values, no emissions are made.

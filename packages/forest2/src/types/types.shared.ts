@@ -15,7 +15,7 @@ export interface Assertion<ValueType> {
  * a "dynamic mutator" that computes off the previous branch
  */
 export interface Mutator<ValueType> {
-  mutator: ValueProviderFN<ValueType>;
+  mutator: MutationValueProviderFN<ValueType>;
   seed?: any;
   name: string;
 }
@@ -51,9 +51,10 @@ export const ValueProviderContext = {
   itermittentCache: "ITTERMITTENT_CACHE",
 };
 
- export type VPRContextKeys = keyof typeof ValueProviderContext;
+export type VPRContextKeys = keyof typeof ValueProviderContext;
 
- export type ValueProviderContextType = typeof ValueProviderContext[VPRContextKeys];
+export type ValueProviderContextType =
+  typeof ValueProviderContext[VPRContextKeys];
 /**
  * export const TypeEnum : {
   string : 'string',
@@ -76,29 +77,30 @@ export const ValueProviderContext = {
 export type TypeEnumType = typeof TypeEnum[TypeEnumKeys]
  */
 
- export type BaseValueProviderParams<Value> = {
+export type BaseValueProviderParams<Value> = {
   branch: BranchIF<Value>;
   tree: TreeIF<Value>;
   value: Value;
   context: ValueProviderContextType;
 };
 
- export type MutationValueProviderParams<Value> = BaseValueProviderParams<Value> & {
-  branch: BranchIF<Value> | undefined;
-  value: Value | undefined;
-  seed?: any;
-};
+export type MutationValueProviderParams<Value> =
+  BaseValueProviderParams<Value> & {
+    branch: BranchIF<Value> | undefined;
+    value: Value | undefined;
+    seed?: any;
+  };
 
- export type LocalValueProviderParams<Value> = BaseValueProviderParams<Value> & {};
-
-
- export type TruncationValueProviderParams<Value> = BaseValueProviderParams<Value> & {};
-
- export type IttermittentCacheProviderParams<Value> =
+export type LocalValueProviderParams<Value> =
   BaseValueProviderParams<Value> & {};
 
+export type TruncationValueProviderParams<Value> =
+  BaseValueProviderParams<Value> & {};
 
- export type ValueProviderParams<Value = undefined> =
+export type IttermittentCacheProviderParams<Value> =
+  BaseValueProviderParams<Value> & {};
+
+export type ValueProviderParams<Value = undefined> =
   | MutationValueProviderParams<Value>
   | LocalValueProviderParams<Value>
   | TruncationValueProviderParams<Value>
@@ -106,13 +108,10 @@ export type TypeEnumType = typeof TypeEnum[TypeEnumKeys]
 
 /**
  * ValueProviders are used:
- * 1. as the mutator for a change - deriving the value from a branch and potentially a seed.
- *    note the branch fed a mutator provider is the _previous branch_
- *    and the value is the value of the _previous branch_
- * 2. to cache a value for truncation - which will be the "new root" transforming into an assertion.
- * 3. to cache a value for ittermittent caching - which will inject an assertion node in the tree
+ * . to cache a value for truncation - which will be the "new root" transforming into an assertion.
+ * . to cache a value for ittermittent caching - which will inject an assertion node in the tree
  *    to limit callback depth
- * 4. local Caching - to eliminate the necessity for repetitive calls to a mutation provider.
+ * . local Caching - to eliminate the necessity for repetitive calls to a mutation provider.
  *
  * Mutators are defiend in the changer of the branch; the other providers are embedded in the tree definition.
  *  They will often produce a dynamic (proxy) of the previous value, to limit memory bloat.
@@ -130,3 +129,5 @@ export type TypeEnumType = typeof TypeEnum[TypeEnumKeys]
 export type ValueProviderFN<Value = unknown> = (
   params: ValueProviderParams<Value>
 ) => Value;
+
+export type MutationValueProviderFN<Value = unknown> = (params: MutationValueProviderParams<Value>) => Value

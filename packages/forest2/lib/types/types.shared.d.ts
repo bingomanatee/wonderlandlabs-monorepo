@@ -12,7 +12,7 @@ export interface Assertion<ValueType> {
  * a "dynamic mutator" that computes off the previous branch
  */
 export interface Mutator<ValueType> {
-    mutator: ValueProviderFN<ValueType>;
+    mutator: MutationValueProviderFN<ValueType>;
     seed?: any;
     name: string;
 }
@@ -82,13 +82,10 @@ export type IttermittentCacheProviderParams<Value> = BaseValueProviderParams<Val
 export type ValueProviderParams<Value = undefined> = MutationValueProviderParams<Value> | LocalValueProviderParams<Value> | TruncationValueProviderParams<Value> | IttermittentCacheProviderParams<Value>;
 /**
  * ValueProviders are used:
- * 1. as the mutator for a change - deriving the value from a branch and potentially a seed.
- *    note the branch fed a mutator provider is the _previous branch_
- *    and the value is the value of the _previous branch_
- * 2. to cache a value for truncation - which will be the "new root" transforming into an assertion.
- * 3. to cache a value for ittermittent caching - which will inject an assertion node in the tree
+ * . to cache a value for truncation - which will be the "new root" transforming into an assertion.
+ * . to cache a value for ittermittent caching - which will inject an assertion node in the tree
  *    to limit callback depth
- * 4. local Caching - to eliminate the necessity for repetitive calls to a mutation provider.
+ * . local Caching - to eliminate the necessity for repetitive calls to a mutation provider.
  *
  * Mutators are defiend in the changer of the branch; the other providers are embedded in the tree definition.
  *  They will often produce a dynamic (proxy) of the previous value, to limit memory bloat.
@@ -104,3 +101,4 @@ export type ValueProviderParams<Value = undefined> = MutationValueProviderParams
  *
  */
 export type ValueProviderFN<Value = unknown> = (params: ValueProviderParams<Value>) => Value;
+export type MutationValueProviderFN<Value = unknown> = (params: MutationValueProviderParams<Value>) => Value;

@@ -4,7 +4,6 @@ import { Collection } from "../Collection";
 import type { CollectionParams } from "../Collection";
 import { deleteProxyFor } from "./deleteProxyFor";
 import { setProxyFor } from "./setProxyFor";
-import { isMutationValueProviderParams } from "./../../types/types.guards";
 export function noSet() {
   throw new Error("forest maps are immutable");
 }
@@ -18,9 +17,6 @@ export default class MapCollection<
       cloneParams: ValueProviderParams<Map<KeyType, ValueType>>
     ): Map<KeyType, ValueType> {
       const { value } = cloneParams;
-      if (isMutationValueProviderParams<Map<KeyType, ValueType>>(cloneParams))
-        return value;
-
       if (!(value instanceof Map)) {
         throw new Error("cannot clone map");
       }

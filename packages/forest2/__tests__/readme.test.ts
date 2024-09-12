@@ -6,7 +6,6 @@ import type {
   ValueProviderParams,
 } from "../src/types/types.shared";
 import type { CollectionAction } from "../src/types/type.collection";
-import { isMutationValueProviderParams } from "../src/types/types.guards";
 
 function message(...items: any[]) {
   if (false) console.log(...items);
@@ -41,20 +40,20 @@ function makeCounter(initial = 0, name = "counter") {
           (collection, n: number) => {
             collection.mutate(
               (params) => {
-                if (isMutationValueProviderParams(params)) {
-                  const { value, seed } = params;
-                  return value === undefined ? seed : value + seed;
-                }
-                return 0;
+                const { value, seed } = params;
+                return value === undefined ? seed : value + seed;
               },
               "add",
               n
             );
           },
         ],
-        ["zeroOut", (collection) => {
-          collection.next(0, 'zeroOut')
-        }],
+        [
+          "zeroOut",
+          (collection) => {
+            collection.next(0, "zeroOut");
+          },
+        ],
       ]),
       cloneInterval: 6,
       serializer(params: ValueProviderParams<number>) {

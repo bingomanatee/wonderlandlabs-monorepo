@@ -33,6 +33,19 @@ that uses one or multiple trees to define an ecosystem. A form can be modeled us
 
 Any type of data you wish can be contained with in a Tree; Maps, DOM, database connections, Immer instances, etc. As long as you can define how you want your data to change and it can be held by a javascript reference, it can be managed with a tree.
 
+# The Forest Contract
+
+As with previous iterations of Forest, Forest stores are
+
+- Quick to define
+- transactionally contain
+- allow actions to call each other with indfeinate depth for orchestration
+- Can be used globally or locally
+- minimize view notification by only broacasting outside the outermost transaction
+- produce synchromous change and can always be immediately inspected for current value
+
+the principal change for Forest 3.0 is that the Engine is no longer a class instance defiend by the Forest library but (can be) a custom class with your own action definitions. It also has even fewer depenencies than the previous iteration.
+
 # Terminology
 
 The Forest model is a three-tiered state mangement system. Each change is encased within a **Branch**, which is a linked-list node that extends history over (numerically indexed) time.
@@ -55,11 +68,8 @@ t.subscribe((value: number) => {
 });
 
 const growBy = (n: number) => ({
-  next(prevBranch: BranchIF<number> | undefined, inc = 1) {
-    if (prevBranch) {
-      return prevBranch.value + inc;
-    }
-    return inc;
+  mutator({value, seed }) {
+    return Number(seed + (value ?? 0));
   },
   seed: n,
   name: "growBy " + n,
@@ -107,32 +117,26 @@ while (current) {
 
 ```
 
-## Engines use proxies to conserve memory
+## Collections can use proxies to conserve memory
 
 Keeping large collections up to date with history can eat up memory. To make things less wasteful, engines can use proxies to create "tweaked versions" of historical data that are the same _except_ for a single key / value that was changed.
 
 for instances where available, the MapCollection's 'set' action creates a proxy of the previous edition that is the same, except that the size is changed and the value of a _single key_ is different when `value.get(key)` is called.
 
-After a defined number of changes, collections can cache their value, creating a concrete value with no proxying/historical dependence. This limits the depth of callbacks for performance.
+this means that if you have a 500 item map and you set five keys to different values (one by one)
+your history is not 6 x 500 items big: it has one 500 item map as the initial value, and
+five fixed-size proxies to emulate maps with slightly different values.
+
+(see [README.caching.md](./README.caching.md)) to see how we can serialize proxies ittermittently
+to limit the callback depth of series of proxies)
 
 (also, for IE and other runtimes without proxying, non-proxy options are provided).
 
-# The Forest Promise
-
-As with previous iterations of Forest, Forest stores are
-
-- Quick to define
-- transactionally contain
-- allow actions to call each other with indfeinate depth for orchestration
-- Can be used globally or locally
-- minimize view notification by only broacasting outside the outermost transaction
-- produce synchromous change and can always be immediately inspected for current value
-
-the principal change for Forest 3.0 is that the Engine is no longer a class instance defiend by the Forest library but (can be) a custom class with your own action definitions. It also has even fewer depenencies than the previous iteration.
-
 # "Just enough API
 
-Everything in Forest extends from a Forest instance.
+Everything in Forest extends from a Forest instance. it is a "database of trees"
+and synchronizes transactions in functions that can change multiple trees, so that in an
+error, all the trees are reset to their pre-function state.
 
 ## Forest:
 
@@ -156,22 +160,24 @@ Trees are made from(in) forest instances.
   parameters are:
   - validator?: (value: ValueType, tree: TreeIF<ValueTYpe>)
   - initial?: ValueType
-    > may throw or return an error (or string) if invalid
 - `name`: string
 - `value`: ValueType
-- top?: BranchIF<ValueType> | undefined.
+  > shortcut to this.top?.value
+- top?: BranchIF<ValueType>.
   > while any tree with an initial value will have a top there are some
   > circumstances where the tree may be "without branches" -- if validators disallowed all submissions, or there is no initial parameter.
 - `next(nextValue: ValueType, cause?: string): void
   > sets the value of the tree to the defined overwrite; may throw if validators present.
 - `grow(change: ChangeIF): BranchIF<ValueType> (the top)
-- `valueAt(time: number) // the value of the branch "in history"
+  > contians a "mutator" function that parametrically derives its value
+  > based on a seed and previous branch
+- `valueAt(time: number) // the value of the branch "in history" at (or just before) the given time
 - `validate(value: ValueType) : {isValid, value, tree, error?: string}
   > if you want to "test an input" before committing it to state,
   > validate tries the value against any validators; doesn't throw,
   > but returns feedback in a handy object
 - `offshoots`: {time, errror, branch}[]
-  > invalid branches removed during submission.
+  > invalid branches removed during submission due to validation failures
 
 ## Branch:
 
@@ -179,7 +185,7 @@ Branches should in general not be messed with externally; their one outward faci
 
 ## changes
 
-a "change" is an annotated action. It can be either a 
+a "change" is an annotated action. It can be either a
 
 ### Notes
 
@@ -194,29 +200,29 @@ The notes list in forest and that in individual trees are distinct and unrelated
 
 # What can you put in a tree?
 
-Forest puts no limit on what a tree can store. That being said - _simple values_ make the best candidate for a tree. As a rule of thumb if it can be processed by JSON.stringify, or is a 
-Map of things that are "stringifiable" and keyed by strings or numbers. 
+Forest puts no limit on what a tree can store. That being said - _simple values_ make the best candidate for a tree. As a rule of thumb if it can be processed by JSON.stringify, or is a
+Map of things that are "stringifiable" and keyed by strings or numbers.
 
-Class instances, functions, DOM fragments all are not good candidates for Tree storage; its best to find some other way of storing these things such as keeping them in a seperate map 
-and referring to them with ID numbers/strings. 
+Class instances, functions, DOM fragments all are not good candidates for Tree storage; its best to find some other way of storing these things such as keeping them in a seperate map
+and referring to them with ID numbers/strings.
 
-Objects and arrays are valid, but ideally are not deeply nested or overlong. 
+Objects and arrays are valid, but ideally are not deeply nested or overlong.
 
 # Collections
 
 An collection is a "class that uses Forest". It can add, manipulate and filter
-trees. Collections that are based on the Collection class (and satisfy the CollectionIF) is based on a specific (single) 
-tree and will allow for controlled manipulaition of its values. 
+trees. Collections that are based on the Collection class (and satisfy the CollectionIF) is based on a specific (single)
+tree and will allow for controlled manipulaition of its values.
 
-* a MapCollection uses proxied maps and exposes "mappy" methods. 
-* a FormCollection is a "multi-tree" engine that puts form-centric properties in one tree and a map of detailed form-centric fields. Its validators, unlike Forest validators, express errors for "bad values" without throwing/pruning trees, allowing the user to enter values for fields as they may and providing real time feedback for field falidation. 
+- a MapCollection uses proxied maps and exposes "mappy" methods.
+- a FormCollection is a "multi-tree" engine that puts form-centric properties in one tree and a map of detailed form-centric fields. Its validators, unlike Forest validators, express errors for "bad values" without throwing/pruning trees, allowing the user to enter values for fields as they may and providing real time feedback for field falidation.
 
 ## Custom Collections
 
-You can create any class you like around a tree/forest paradigm. you can create "change methods" in any manner you like. However, the Collection class has a custom "actions" property in its parameter that lets you define methods as you will, wrapping each in a transaction (`do()`) wrapper for sanitation. 
+You can create any class you like around a tree/forest paradigm. you can create "change methods" in any manner you like. However, the Collection class has a custom "actions" property in its parameter that lets you define methods as you will, wrapping each in a transaction (`do()`) wrapper for sanitation.
 
-Collections will create a forest if not injeted as a parameter; if you 
-have a simple "single tree" use case, a Collection will do just fine. 
+Collections will create a forest if not injeted as a parameter; if you
+have a simple "single tree" use case, a Collection will do just fine.
 
 ```
 
@@ -246,7 +252,7 @@ have a simple "single tree" use case, a Collection will do just fine.
     });
 
     counter.subscribe((n: number) => console.log('collection is ', n, 'because of', counter.tree.top?.cause))
- 
+
     counter.act('increment');
     counter.act('increment');
     try {
@@ -261,7 +267,7 @@ have a simple "single tree" use case, a Collection will do just fine.
     counter.act('increment');
     counter.act('decrement');
     /**
-     *      
+     *
       collection is  0 because of initial
       collection is  1 because of increment
       collection is  2 because of increment
@@ -276,8 +282,7 @@ have a simple "single tree" use case, a Collection will do just fine.
 
 ```
 
-since these mutation functions are **calling each other** through history, we set the collection to "hard cache" its value every six actions. What does that do? if we were to "crawl the history" we'll see the occasional "cache action": 
-
+since these mutation functions are **calling each other** through history, we set the collection to "hard cache" its value every six actions. What does that do? if we were to "crawl the history" we'll see the occasional "cache action":
 
 ```
 
@@ -323,7 +328,7 @@ while (t) {
   t = t.prev;
 }
 /**
-  *   
+  *
     29 :counter value:  300 cause: decrement
     26 :counter value:  301 cause: increment
     23 :counter value:  300 cause: !CLONE!
@@ -350,13 +355,13 @@ Well, as we added this to the constructor:
 }
 ```
 
-note- the cloner may either target a specific branch's value (if the second parameter is present) or the tree's top branch (if there is no second parameter); and there is 
+note- the cloner may either target a specific branch's value (if the second parameter is present) or the tree's top branch (if there is no second parameter); and there is
 also the possiblity that _both_ branch and tree.top is absent. (see above example)
 
 every six changes, the cloner adds a hard value so that the mutators don't callback too deeply. Mutation functions are nice in that they can reduce memory from history, but if there
-are too many of them you want to break the callback chain with an asserted literal value. 
+are too many of them you want to break the callback chain with an asserted literal value.
 
-# Caching and Cloning 
+# Caching and Cloning
 
 in order to maintain referential uniqueness, mutator outputs are cached. Caching has a lot of
-little considerations - see [README.caching.com](./README.caching.md) for details. 
+little considerations - see [README.caching.com](./README.caching.md) for details.

@@ -1,1 +1,102 @@
-function isCacheableArray(e,a=0){return!!Array.isArray(e)&&e.every(e=>isCacheable(e,a+1))}function isSimpleValue(e){if(null==e)return!0;let a=!1;switch(typeof e){case"number":case"undefined":case"string":case"symbol":case"boolean":a=!0}return a}function isCacheableMap(e,a=0){if(50<e.size)return!1;for(var[r,i]of e){if(!isSimpleValue(r))return!1;if(!isCacheable(i,a+1))return!1}return!0}function isCacheableObject(e,a){var r,i=e;if("__proto"in i||"__prototype"in i)return!1;let t=!0;for(r of Object.keys(i)){if("symbol"==typeof r){t=!1;break}if(!isCacheable(i[r],a+1)){t=!1;break}}}function isCacheable(e,a=0){if(3<a)return!1;let r=!1;if(isSimpleValue(e))return!0;switch(typeof e){case"function":r=!1;break;case"object":if(null===e)return!0;r=e instanceof Map?isCacheableMap(e,a):e instanceof Set?isCacheableArray(Array.from(e.values()),a):isCacheableObject(e,a);break;default:null!==e&&!isCacheableArray(e,a)||(r=!0)}return r}Object.defineProperty(exports,"__esModule",{value:!0}),exports.isCacheable=isCacheable;
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.isCacheable = isCacheable;
+function isCacheableArray(a, depth = 0) {
+    if (!Array.isArray(a)) {
+        return false;
+    }
+    return a.every((v) => {
+        return isCacheable(v, depth + 1);
+    });
+}
+function isSimpleValue(value) {
+    if (value === null || value === undefined) {
+        return true;
+    }
+    let out = false;
+    switch (typeof value) {
+        case "number":
+            out = true;
+            break;
+        case "undefined":
+            out = true;
+            break;
+        case "string":
+            out = true;
+            break;
+        case "symbol":
+            out = true;
+            break;
+        case "boolean":
+            out = true;
+            break;
+    }
+    return out;
+}
+function isCacheableMap(value, depth = 0) {
+    if (value.size > 50) {
+        return false;
+    }
+    for (const [key, val] of value) {
+        if (!isSimpleValue(key)) {
+            return false;
+        }
+        if (!isCacheable(val, depth + 1)) {
+            return false;
+        }
+    }
+    return true;
+}
+function isCacheableObject(value, depth) {
+    const valueRecord = value;
+    if ("__proto" in valueRecord || "__prototype" in valueRecord) {
+        return false;
+    }
+    // complex objects' inherited properties can be changed "under the rug" so never cache them.
+    let out = true;
+    for (const key of Object.keys(valueRecord)) {
+        if (typeof key === "symbol") {
+            out = false;
+            break;
+        }
+        const keyValue = valueRecord[key];
+        if (!isCacheable(keyValue, depth + 1)) {
+            out = false;
+            break;
+        }
+    }
+}
+function isCacheable(value, depth = 0) {
+    if (depth > 3) {
+        return false;
+    }
+    let out = false;
+    if (isSimpleValue(value)) {
+        return true;
+    }
+    switch (typeof value) {
+        case "function":
+            out = false;
+            break;
+        case "object":
+            if (value === null) {
+                return true;
+            }
+            if (value instanceof Map) {
+                out = isCacheableMap(value, depth);
+            }
+            else if (value instanceof Set) {
+                out = isCacheableArray(Array.from(value.values()), depth);
+            }
+            else {
+                out = isCacheableObject(value, depth);
+            }
+            break;
+        default:
+            if (value === null || isCacheableArray(value, depth)) {
+                out = true;
+            }
+            break;
+    }
+    return out;
+}

@@ -5,7 +5,6 @@ const utils_1 = require("../../utils");
 const Collection_1 = require("../Collection");
 const deleteProxyFor_1 = require("./deleteProxyFor");
 const setProxyFor_1 = require("./setProxyFor");
-const types_guards_1 = require("./../../types/types.guards");
 function noSet() {
     throw new Error("forest maps are immutable");
 }
@@ -13,8 +12,6 @@ class MapCollection extends Collection_1.Collection {
     constructor(name, params) {
         function mapCloner(cloneParams) {
             const { value } = cloneParams;
-            if ((0, types_guards_1.isMutationValueProviderParams)(cloneParams))
-                return value;
             if (!(value instanceof Map)) {
                 throw new Error("cannot clone map");
             }

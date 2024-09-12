@@ -1,19 +1,15 @@
 import { Forest } from "../src/Forest";
 import { expect, it, describe } from "@jest/globals";
-import type { ChangeIF, ValueProviderParams } from "../src/types/types.shared";
-import { isMutationValueProviderParams } from "../src/types/types.guards";
+import type { ChangeIF, MutationValueProviderParams } from "../src/types/types.shared";
 
 type Numeric = { num: number };
 function growBy(n: number): ChangeIF<Numeric> {
   return {
-    mutator(mParams: ValueProviderParams<Numeric>) {
-      if (isMutationValueProviderParams(mParams)) {
+    mutator(mParams: MutationValueProviderParams<Numeric> ) {
         const { value, seed } = mParams;
 
         if (value === undefined) return { num: Number(seed) };
         return { num: Number(value.num + seed) };
-      }
-      return { num: 0 };
     },
     seed: n,
     name: "growBy",

@@ -20,9 +20,8 @@ describe("tree", () => {
 
     t.grow({
       name: "multiply",
-      mutator(prev?: BranchIF<number>) {
-        if (!prev) return 0;
-        return prev.value * 2;
+      mutator({ value }) {
+        return value === undefined ? 0 : 2;
       },
     });
 

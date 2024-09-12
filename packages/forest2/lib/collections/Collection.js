@@ -37,16 +37,20 @@ class Collection {
         if (!fn) {
             throw new Error("cannot perform action " + name + ": not in colletion");
         }
-        return this.forest.do(() => {
-            this.mutate(fn, name, seed);
-        });
+        const collection = this;
+        return this.forest.do(() => fn(collection, seed));
     }
     next(next, name) {
         this.tree.next(next, name);
         return this;
     }
     mutate(mutator, name, seed) {
-        this.tree.grow({ mutator, name, seed });
+        const change = {
+            name,
+            seed,
+            mutator,
+        };
+        this.tree.grow(change);
         return this;
     }
     get subject() {

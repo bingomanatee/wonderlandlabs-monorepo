@@ -10,7 +10,6 @@ export interface BranchIF<ValueType> {
     prev?: BranchIF<ValueType>;
     add(next: ChangeIF<ValueType>): BranchIF<ValueType>;
     clone(toAssert?: boolean): BranchIF<ValueType>;
-    link(branchA: BranchIF<ValueType> | undefined, branchB: BranchIF<ValueType> | undefined): void;
     linkTo(branchB: BranchIF<ValueType> | undefined): void;
     toString(): string;
     destroy(): void;

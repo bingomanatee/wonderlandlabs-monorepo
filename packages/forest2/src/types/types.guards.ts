@@ -1,8 +1,7 @@
 import type {
   FieldIF,
 } from '../collections/FormCollection/types.formCollection';
-import type { Assertion, Mutator } from './types.shared';
-import type { CachingParams } from './types.trees';
+import { ValueProviderContext, type Assertion, type IttermittentCacheProviderParams, type LocalValueProviderParams, type MutationValueProviderParams, type Mutator, type TruncationValueProviderParams } from './types.shared';
 
 export function isObj(a: unknown): a is object {
   return Boolean(a && typeof a === 'object');
@@ -37,15 +36,6 @@ export function isAssert<ValueType = unknown>(a: unknown): a is Assertion<ValueT
   const o = a as Record<string | number | symbol, unknown>;
   return Boolean('assert' in o);
 }
-     
-export function hasCachingParams(a: unknown): a is CachingParams<unknown> {
-  if (!isObj(a)) {return false;}
-  const o = a as Record<string, any>;
-
-  if (!('cloner' in o && 'cloneInterval' in o)) {return false;}
-
-  return typeof o.cloner === 'function' && typeof o.cloneInterval === 'number';
-}
 
 export function isMapKey<MapType>(
   map: MapType,
@@ -56,4 +46,41 @@ export function isMapKey<MapType>(
   }
   // @ts-ignore 7052
   return map instanceof Map && a in map;
+}
+
+export function isMutationValueProviderParams<Value>(
+  a: unknown
+): a is MutationValueProviderParams<Value> {
+  if (!isObj(a)) return false;
+  return Boolean("context" in a && a.context === ValueProviderContext.mutation);
+}
+
+
+export function isLocalValueProviderParams<Value>(
+  a: unknown
+): a is LocalValueProviderParams<Value> {
+  if (!isObj(a)) return false;
+  return Boolean(
+    "context" in a && a.context === ValueProviderContext.localCache
+  );
+}
+
+
+export function isTruncationValueProviderParams<Value>(
+  a: unknown
+): a is TruncationValueProviderParams<Value> {
+  if (!isObj(a)) return false;
+  return Boolean(
+    "context" in a && a.context === ValueProviderContext.truncation
+  );
+}
+
+
+export function isIttermittentCacheProviderParams<Value>(
+  a: unknown
+): a is IttermittentCacheProviderParams<Value> {
+  if (!isObj(a)) return false;
+  return Boolean(
+    "context" in a && a.context === ValueProviderContext.itermittentCache
+  );
 }

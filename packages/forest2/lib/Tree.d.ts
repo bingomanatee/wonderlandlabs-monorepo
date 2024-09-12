@@ -4,7 +4,6 @@ import type { ForestIF } from "./types/types.forest";
 import type { TreeIF, TreeName, TreeParams, TreeValuation } from "./types/types.trees";
 import type { ChangeIF, Info, InfoParams, SubscribeFn } from "./types/types.shared";
 import type { PartialObserver } from "rxjs";
-export declare const CLONE_NAME = "!CLONE!";
 export default class Tree<ValueType> implements TreeIF<ValueType> {
     forest: ForestIF;
     readonly name: TreeName;
@@ -19,24 +18,6 @@ export default class Tree<ValueType> implements TreeIF<ValueType> {
     top?: BranchIF<ValueType>;
     grow(change: ChangeIF<ValueType>): BranchIF<ValueType>;
     validate(value: ValueType): TreeValuation<ValueType>;
-    _maybeCache(): void;
-    _maybeTrim(): void;
-    /**
-     *
-     * in interest of economy we seek out two branches:
-     *  1 the first branch AFTER the first task in play (because we can't trim above that)
-     * 2 the earliest branch up to or past the max count (becuase we always want to trim below that).
-     *
-     * We trim to the LOWEST of these two branches;
-     */
-    private _trim;
-    private _trimBefore;
-    /**
-     * this method erases all references contained in branches from the parameter forward.
-     *
-     * @param fromBranch
-     */
-    private _destoryOldData;
     get subject(): import("rxjs").Observable<ValueType>;
     subscribe(observer: PartialObserver<ValueType> | SubscribeFn<ValueType>): import("rxjs").Subscription;
     valueAt(at: number): ValueType | undefined;

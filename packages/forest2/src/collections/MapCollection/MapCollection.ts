@@ -1,16 +1,12 @@
-import { isMapIterator } from 'util/types';
-import { hasCachingParams } from '../../types/types.guards';
-import type { IterFn } from '../../types/types.shared';
-import type { TreeIF } from '../../types/types.trees';
-import { canProxy } from '../../utils';
-import { Collection } from '../Collection';
-import type { CollectionParams } from '../Collection';
-import { deleteProxyFor } from './deleteProxyFor';
-import { setProxyFor } from './setProxyFor';
-import type { BranchIF } from '../../types/types.branch';
-
+import type { IterFn, ValueProviderParams } from "../../types/types.shared";
+import { canProxy } from "../../utils";
+import { Collection } from "../Collection";
+import type { CollectionParams } from "../Collection";
+import { deleteProxyFor } from "./deleteProxyFor";
+import { setProxyFor } from "./setProxyFor";
+import { isMutationValueProviderParams } from "./../../types/types.guards";
 export function noSet() {
-  throw new Error('forest maps are immutable');
+  throw new Error("forest maps are immutable");
 }
 
 export default class MapCollection<
@@ -18,21 +14,26 @@ export default class MapCollection<
   ValueType = unknown
 > extends Collection<Map<KeyType, ValueType>> {
   constructor(name: string, params: CollectionParams<Map<KeyType, ValueType>>) {
-    type MapType = Map<KeyType, ValueType>;
+    function mapCloner(
+      cloneParams: ValueProviderParams<Map<KeyType, ValueType>>
+    ): Map<KeyType, ValueType> {
+      const { value } = cloneParams;
+      if (isMutationValueProviderParams<Map<KeyType, ValueType>>(cloneParams))
+        return value;
 
-    function mapCloner(branch?: BranchIF<MapType>): MapType {
-      const prevValue: MapType = branch?.value;
-      if (!(prevValue instanceof Map)) {throw new Error('cannot clone map');}
+      if (!(value instanceof Map)) {
+        throw new Error("cannot clone map");
+      }
       // @ts-expect-error 2769
-      return new Map(...prevValue.entries()) as MapType;
+      return new Map(...value.entries()) as Map<KeyType, ValueType>;
     }
 
-    if (!hasCachingParams) {
+    if (!(params.serializer && params.cloneInterval)) {
       {
-        super(name, { ...params, cloneInterval: 5, cloner: mapCloner });
+        super(name, { ...params, cloneInterval: 5, serializer: mapCloner });
       }
     } else {
-      super(name, { ...params, cloner: mapCloner });
+      super(name, { ...params, serializer: mapCloner });
     }
   }
 
@@ -44,19 +45,19 @@ export default class MapCollection<
           key,
           value,
         });
-        this.tree.next(next, 'set');
+        this.tree.next(next, "set");
       } else {
         const next = new Map(this.tree.top.value);
         next.set(key, value);
-        this.tree.next(next, 'set');
+        this.tree.next(next, "set");
       }
     } else {
-      this.tree.next(new Map([ [ key, value ] ]), 'set');
+      this.tree.next(new Map([[key, value]]), "set");
     }
   }
 
   delete(key: KeyType) {
-    return this.deleteMany([ key ]);
+    return this.deleteMany([key]);
   }
 
   deleteMany(keys: KeyType[]) {
@@ -69,13 +70,13 @@ export default class MapCollection<
         keys,
       });
 
-      this.tree.next(next, 'deleteMany');
+      this.tree.next(next, "deleteMany");
     } else {
       const next = new Map(this.tree.top.value);
       for (const key of keys) {
         next.delete(key);
       }
-      this.tree.next(next, 'deleteMany');
+      this.tree.next(next, "deleteMany");
     }
   }
 
@@ -87,7 +88,7 @@ export default class MapCollection<
   }
 
   replace(map: Map<KeyType, ValueType>) {
-    this.tree.next(map, 'replace');
+    this.tree.next(map, "replace");
   }
 
   clear() {

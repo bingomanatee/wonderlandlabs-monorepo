@@ -1,4 +1,5 @@
-import type { MutatorFn as MutatorFn } from "./types.branch";
+import type { BranchIF } from "./types.branch";
+import type { TreeIF } from "./types.trees";
 /**
  * a "literal replacement value"
  */
@@ -11,7 +12,7 @@ export interface Assertion<ValueType> {
  * a "dynamic mutator" that computes off the previous branch
  */
 export interface Mutator<ValueType> {
-    mutator: MutatorFn<ValueType>;
+    mutator: ValueProviderFN<ValueType>;
     seed?: any;
     name: string;
 }
@@ -35,3 +36,71 @@ export interface Notable {
     notes(fromTime: number, toTime?: number): Info[];
 }
 export type NotesMap = Map<number, Info[]>;
+export declare const ValueProviderContext: {
+    mutation: string;
+    localCache: string;
+    truncation: string;
+    itermittentCache: string;
+};
+export type VPRContextKeys = keyof typeof ValueProviderContext;
+export type ValueProviderContextType = typeof ValueProviderContext[VPRContextKeys];
+/**
+ * export const TypeEnum : {
+  string : 'string',
+  number :  'number',
+  boolean : 'boolean',
+  symbol : 'symbol',
+  array : 'array',
+  map : 'map',
+  object : 'object',
+  set : 'set',
+  null : 'null',
+  undefined : 'undefined',
+  function : 'function'
+}
+
+ export type TypeEnumKeys = keyof typeof TypeEnum;
+
+//  v v v ---- this is a "pure" type = it can be used in your typescript code
+//             and doesn't exist in any boundary state, like enums
+export type TypeEnumType = typeof TypeEnum[TypeEnumKeys]
+ */
+export type BaseValueProviderParams<Value> = {
+    branch: BranchIF<Value>;
+    tree: TreeIF<Value>;
+    value: Value;
+    context: ValueProviderContextType;
+};
+export type MutationValueProviderParams<Value> = BaseValueProviderParams<Value> & {
+    branch: BranchIF<Value> | undefined;
+    value: Value | undefined;
+    seed?: any;
+};
+export type LocalValueProviderParams<Value> = BaseValueProviderParams<Value> & {};
+export type TruncationValueProviderParams<Value> = BaseValueProviderParams<Value> & {};
+export type IttermittentCacheProviderParams<Value> = BaseValueProviderParams<Value> & {};
+export type ValueProviderParams<Value = undefined> = MutationValueProviderParams<Value> | LocalValueProviderParams<Value> | TruncationValueProviderParams<Value> | IttermittentCacheProviderParams<Value>;
+/**
+ * ValueProviders are used:
+ * 1. as the mutator for a change - deriving the value from a branch and potentially a seed.
+ *    note the branch fed a mutator provider is the _previous branch_
+ *    and the value is the value of the _previous branch_
+ * 2. to cache a value for truncation - which will be the "new root" transforming into an assertion.
+ * 3. to cache a value for ittermittent caching - which will inject an assertion node in the tree
+ *    to limit callback depth
+ * 4. local Caching - to eliminate the necessity for repetitive calls to a mutation provider.
+ *
+ * Mutators are defiend in the changer of the branch; the other providers are embedded in the tree definition.
+ *  They will often produce a dynamic (proxy) of the previous value, to limit memory bloat.
+ *
+ * Truncation and Ittermittent caching should be a "hard serialization" - if the original value was a proxy, for instance, you want to produce
+ * a less dynamic object, map or whatever. Especially with Truncation, as you want to limit the reference to the previous
+ * branch which is destroyed in the process.
+ *
+ * Local caching will be done on nearly every branch, so you in general will just want to produce the value that comes
+ * out of the branches mutatorProvider unchanged.
+ *
+ *
+ *
+ */
+export type ValueProviderFN<Value = unknown> = (params: ValueProviderParams<Value>) => Value;

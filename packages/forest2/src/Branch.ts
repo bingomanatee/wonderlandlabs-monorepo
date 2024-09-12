@@ -1,7 +1,7 @@
 import type { BranchIF } from "./types/types.branch";
 import type { OffshootIF } from "./types";
 import type { TreeIF } from "./types/types.trees";
-import type { ChangeIF } from "./types/types.shared";
+import { ValueProviderContext, type ChangeIF } from "./types/types.shared";
 import { isAssert, isMutator } from "./types/types.guards";
 import { isCacheable } from "./isCacheable";
 
@@ -79,8 +79,13 @@ export class Branch<ValueType> implements BranchIF<ValueType> {
   }
 
   clone(toAssert?: boolean): BranchIF<ValueType> {
-    const value = this.tree.params?.cloner
-      ? this.tree.params.cloner(this)
+    const value = this.tree.params?.serializer
+      ? this.tree.params.serializer({
+        branch: this,
+        tree: this.tree,
+        context: ValueProviderContext.truncation,
+        value: this.value
+      })
       : this.value;
     const change = toAssert
       ? { assert: value, name: "cloned", time: this.time }
@@ -104,7 +109,13 @@ export class Branch<ValueType> implements BranchIF<ValueType> {
       return this.change.assert;
     }
     if (isMutator<ValueType>(this.change)) {
-      const value = this.change.mutator(this.prev, this.change.seed);
+      const value = this.change.mutator({
+        branch: this.prev, 
+        seed: this.change.seed,
+         context: ValueProviderContext.mutation, 
+         tree: this.tree,
+          value: this.prev?.value
+      });
       if (this !== this.tree.top) {
         // to reduce the number of unneede caches, don't cache any branches that are not currently top.
         return value;

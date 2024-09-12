@@ -1,8 +1,8 @@
 import { Forest } from "../src/Forest";
-import type { BranchIF, MutatorFn } from "../src/types/types.branch";
 import { Collection } from "../src/collections/Collection";
-import type { TreeIF } from "../src/types/types.trees";
 import { expect, it, describe } from "@jest/globals";
+import type { MutationValueProviderParams, ValueProviderParams } from "../src/types/types.shared";
+import type { CollectionAction } from "../src/types/type.collection";
 
 function message(...items: any[]) {
   if (false) console.log(...items);
@@ -15,7 +15,7 @@ function makeCounter(initial = 0, name = "counter") {
     name,
     {
       initial,
-      actions: new Map<string, MutatorFn<number>>([
+      actions: new Map<string, CollectionAction<number>>([
         [
           "increment",
           (branch) => {
@@ -40,9 +40,9 @@ function makeCounter(initial = 0, name = "counter") {
         ["zeroOut", () => 0],
       ]),
       cloneInterval: 6,
-      cloner(branch?: BranchIF<number>) {
-        if (branch) return branch.value;
-        return 0;
+      serializer(params: ValueProviderParams<number>) {
+        const {value} = params;
+        return (value === undefined ? 0 : value)
       },
       validator(v) {
         if (Number.isNaN(v)) throw new Error("must be a number");
@@ -63,11 +63,10 @@ describe("README.md", () => {
     });
 
     const growBy = (n: number) => ({
-      mutator(prevBranch: BranchIF<number> | undefined, inc = 1) {
-        if (prevBranch) {
-          return prevBranch.value + inc;
-        }
-        return inc;
+      mutator(mParams: MutationValueProviderParams<number>) {
+        const { value, seed } = mParams;
+        if (value === undefined) return seed;
+        return Number(seed + value);
       },
       seed: n,
       name: "growBy " + n,

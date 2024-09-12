@@ -1,13 +1,17 @@
 import { Forest } from "../Forest";
-import type { CollectionIF } from "../types/type.collection";
-import type { SubscribeFn } from "../types/types.shared";
+import type { CollectionAction, CollectionIF } from "../types/type.collection";
+import type {
+  ChangeIF,
+  SubscribeFn,
+  ValueProviderFN,
+} from "../types/types.shared";
 import type { ForestIF } from "../types/types.forest";
-import type { TreeIF, TreeParams, ValidatorFn } from "../types/types.trees";
-import type { MutatorFn } from "../types/types.branch";
+import type { TreeIF, TreeParams } from "../types/types.trees";
 import type { PartialObserver } from "rxjs";
 
+
 export type CollectionParams<ValueType> = TreeParams<ValueType> & {
-  actions?: Map<string, MutatorFn<ValueType>>;
+  actions?: Map<string, CollectionAction<ValueType>>;
   reuseTree?: boolean;
 };
 
@@ -51,9 +55,8 @@ export class Collection<ValueType> implements CollectionIF<ValueType> {
     if (!fn) {
       throw new Error("cannot perform action " + name + ": not in colletion");
     }
-    return this.forest.do(() => {
-      this.mutate(fn, name, seed);
-    });
+    const collection = this;
+    return this.forest.do(() => fn(collection, seed));
   }
 
   next(next: ValueType, name: string): CollectionIF<ValueType> {
@@ -62,11 +65,16 @@ export class Collection<ValueType> implements CollectionIF<ValueType> {
   }
 
   mutate<SeedType>(
-    mutator: MutatorFn<ValueType>,
+    mutator: ValueProviderFN<ValueType>,
     name: string,
     seed?: SeedType
   ) {
-    this.tree.grow({ mutator, name, seed });
+    const change: ChangeIF<ValueType> = {
+      name,
+      seed,
+      mutator,
+    };
+    this.tree.grow(change);
     return this;
   }
 

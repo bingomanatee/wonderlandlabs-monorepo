@@ -1,31 +1,33 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.noSet = noSet;
-const types_guards_1 = require("../../types/types.guards");
 const utils_1 = require("../../utils");
 const Collection_1 = require("../Collection");
 const deleteProxyFor_1 = require("./deleteProxyFor");
 const setProxyFor_1 = require("./setProxyFor");
+const types_guards_1 = require("./../../types/types.guards");
 function noSet() {
-    throw new Error('forest maps are immutable');
+    throw new Error("forest maps are immutable");
 }
 class MapCollection extends Collection_1.Collection {
     constructor(name, params) {
-        function mapCloner(branch) {
-            const prevValue = branch?.value;
-            if (!(prevValue instanceof Map)) {
-                throw new Error('cannot clone map');
+        function mapCloner(cloneParams) {
+            const { value } = cloneParams;
+            if ((0, types_guards_1.isMutationValueProviderParams)(cloneParams))
+                return value;
+            if (!(value instanceof Map)) {
+                throw new Error("cannot clone map");
             }
             // @ts-expect-error 2769
-            return new Map(...prevValue.entries());
+            return new Map(...value.entries());
         }
-        if (!types_guards_1.hasCachingParams) {
+        if (!(params.serializer && params.cloneInterval)) {
             {
-                super(name, { ...params, cloneInterval: 5, cloner: mapCloner });
+                super(name, { ...params, cloneInterval: 5, serializer: mapCloner });
             }
         }
         else {
-            super(name, { ...params, cloner: mapCloner });
+            super(name, { ...params, serializer: mapCloner });
         }
     }
     set(key, value) {
@@ -36,16 +38,16 @@ class MapCollection extends Collection_1.Collection {
                     key,
                     value,
                 });
-                this.tree.next(next, 'set');
+                this.tree.next(next, "set");
             }
             else {
                 const next = new Map(this.tree.top.value);
                 next.set(key, value);
-                this.tree.next(next, 'set');
+                this.tree.next(next, "set");
             }
         }
         else {
-            this.tree.next(new Map([[key, value]]), 'set');
+            this.tree.next(new Map([[key, value]]), "set");
         }
     }
     delete(key) {
@@ -60,14 +62,14 @@ class MapCollection extends Collection_1.Collection {
                 map: this.tree.top.value,
                 keys,
             });
-            this.tree.next(next, 'deleteMany');
+            this.tree.next(next, "deleteMany");
         }
         else {
             const next = new Map(this.tree.top.value);
             for (const key of keys) {
                 next.delete(key);
             }
-            this.tree.next(next, 'deleteMany');
+            this.tree.next(next, "deleteMany");
         }
     }
     get(key) {
@@ -77,7 +79,7 @@ class MapCollection extends Collection_1.Collection {
         return this.tree.top.value.get(key);
     }
     replace(map) {
-        this.tree.next(map, 'replace');
+        this.tree.next(map, "replace");
     }
     clear() {
         this.replace(new Map());

@@ -4,8 +4,12 @@ exports.isObj = isObj;
 exports.isField = isField;
 exports.isMutator = isMutator;
 exports.isAssert = isAssert;
-exports.hasCachingParams = hasCachingParams;
 exports.isMapKey = isMapKey;
+exports.isMutationValueProviderParams = isMutationValueProviderParams;
+exports.isLocalValueProviderParams = isLocalValueProviderParams;
+exports.isTruncationValueProviderParams = isTruncationValueProviderParams;
+exports.isIttermittentCacheProviderParams = isIttermittentCacheProviderParams;
+const types_shared_1 = require("./types.shared");
 function isObj(a) {
     return Boolean(a && typeof a === 'object');
 }
@@ -35,20 +39,30 @@ function isAssert(a) {
     const o = a;
     return Boolean('assert' in o);
 }
-function hasCachingParams(a) {
-    if (!isObj(a)) {
-        return false;
-    }
-    const o = a;
-    if (!('cloner' in o && 'cloneInterval' in o)) {
-        return false;
-    }
-    return typeof o.cloner === 'function' && typeof o.cloneInterval === 'number';
-}
 function isMapKey(map, a) {
     if (a === Symbol.iterator) {
         return true;
     }
     // @ts-ignore 7052
     return map instanceof Map && a in map;
+}
+function isMutationValueProviderParams(a) {
+    if (!isObj(a))
+        return false;
+    return Boolean("context" in a && a.context === types_shared_1.ValueProviderContext.mutation);
+}
+function isLocalValueProviderParams(a) {
+    if (!isObj(a))
+        return false;
+    return Boolean("context" in a && a.context === types_shared_1.ValueProviderContext.localCache);
+}
+function isTruncationValueProviderParams(a) {
+    if (!isObj(a))
+        return false;
+    return Boolean("context" in a && a.context === types_shared_1.ValueProviderContext.truncation);
+}
+function isIttermittentCacheProviderParams(a) {
+    if (!isObj(a))
+        return false;
+    return Boolean("context" in a && a.context === types_shared_1.ValueProviderContext.itermittentCache);
 }

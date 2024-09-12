@@ -21,7 +21,7 @@ describe("tree", () => {
     t.grow({
       name: "multiply",
       mutator({ value }) {
-        return value === undefined ? 0 : 2;
+        return value === undefined ? 0 : 2 * value;
       },
     });
 

@@ -1,8 +1,12 @@
 import { Forest } from "../src/Forest";
 import { Collection } from "../src/collections/Collection";
 import { expect, it, describe } from "@jest/globals";
-import type { MutationValueProviderParams, ValueProviderParams } from "../src/types/types.shared";
+import type {
+  MutationValueProviderParams,
+  ValueProviderParams,
+} from "../src/types/types.shared";
 import type { CollectionAction } from "../src/types/type.collection";
+import { isMutationValueProviderParams } from "../src/types/types.guards";
 
 function message(...items: any[]) {
   if (false) console.log(...items);
@@ -18,31 +22,44 @@ function makeCounter(initial = 0, name = "counter") {
       actions: new Map<string, CollectionAction<number>>([
         [
           "increment",
-          (branch) => {
-            if (!branch) return 1;
-            return branch.value + 1;
+          (collection) => {
+            collection.mutate(({ value }) => {
+              return value === undefined ? 1 : value + 1;
+            }, "increment");
           },
         ],
         [
           "decrement",
-          (branch) => {
-            if (!branch) return -1;
-            return branch.value - 1;
+          (collection) => {
+            collection.mutate(({ value }) => {
+              return value === undefined ? -1 : value - 1;
+            }, "increment");
           },
         ],
         [
           "add",
-          (branch, s) => {
-            if (!branch) return s as number;
-            return branch.value + (s as number);
+          (collection, n: number) => {
+            collection.mutate(
+              (params) => {
+                if (isMutationValueProviderParams(params)) {
+                  const { value, seed } = params;
+                  return value === undefined ? seed : value + seed;
+                }
+                return 0;
+              },
+              "add",
+              n
+            );
           },
         ],
-        ["zeroOut", () => 0],
+        ["zeroOut", (collection) => {
+          collection.next(0, 'zeroOut')
+        }],
       ]),
       cloneInterval: 6,
       serializer(params: ValueProviderParams<number>) {
-        const {value} = params;
-        return (value === undefined ? 0 : value)
+        const { value } = params;
+        return value === undefined ? 0 : value;
       },
       validator(v) {
         if (Number.isNaN(v)) throw new Error("must be a number");

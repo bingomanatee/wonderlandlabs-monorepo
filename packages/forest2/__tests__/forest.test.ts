@@ -9,10 +9,11 @@ function growBy(n: number): ChangeIF<Numeric> {
     mutator(mParams: ValueProviderParams<Numeric>) {
       if (isMutationValueProviderParams(mParams)) {
         const { value, seed } = mParams;
+
         if (value === undefined) return { num: Number(seed) };
-        return { num: Number(value + seed) };
+        return { num: Number(value.num + seed) };
       }
-      return mParams.value;
+      return { num: 0 };
     },
     seed: n,
     name: "growBy",
@@ -88,7 +89,6 @@ describe("Forest", () => {
           if (!(value.num % 3)) throw new Error("no values divisible by 3");
         },
       });
-
 
       const values: number[] = [];
       f.observe<Numeric>(t.name!).subscribe((v: Numeric) => {

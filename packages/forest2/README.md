@@ -160,6 +160,8 @@ Trees are made from(in) forest instances.
   parameters are:
   - validator?: (value: ValueType, tree: TreeIF<ValueTYpe>)
   - initial?: ValueType
+- `subscribe((value) => void) : Subscription
+  > an RxJS subscribe method. 
 - `name`: string
 - `value`: ValueType
   > shortcut to this.top?.value
@@ -168,9 +170,8 @@ Trees are made from(in) forest instances.
   > circumstances where the tree may be "without branches" -- if validators disallowed all submissions, or there is no initial parameter.
 - `next(nextValue: ValueType, cause?: string): void
   > sets the value of the tree to the defined overwrite; may throw if validators present.
-- `grow(change: ChangeIF): BranchIF<ValueType> (the top)
-  > contians a "mutator" function that parametrically derives its value
-  > based on a seed and previous branch
+- `mutate(mutator: ({value, seed, branch, tree}) => newValue, seed?, name?)
+  > pass a function that will produce a new value for the tree.
 - `valueAt(time: number) // the value of the branch "in history" at (or just before) the given time
 - `validate(value: ValueType) : {isValid, value, tree, error?: string}
   > if you want to "test an input" before committing it to state,
@@ -178,14 +179,20 @@ Trees are made from(in) forest instances.
   > but returns feedback in a handy object
 - `offshoots`: {time, errror, branch}[]
   > invalid branches removed during submission due to validation failures
+- `forEachDown((branch, count) => void | true, maxBranches?: number)
+  > iterate through the branches from most recent to oldest. 
 
+### Tree Validation {
+  if you add a validator, it will examine every value that is put in to the tree. If it throws, the tree's value will be the one the tree had before you fed
+  it crap data. 
+}
 ## Branch:
 
 Branches should in general not be messed with externally; their one outward facing field is `value` but that may as well be accessed indrectly, off their tree; the exception may be examining offshoots
 
-## changes
+## Changing a tree's state
 
-a "change" is an annotated action. It can be either a
+the methods `next(value)` or `tree.mutate(({value, seed) => newValue, seed)` will update the state of the tree. It is synchronous and will broadcast through subscriers. 
 
 ### Notes
 

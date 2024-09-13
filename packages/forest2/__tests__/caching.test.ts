@@ -1,7 +1,9 @@
 import { Forest } from "../src/Forest";
-import type { BranchIF, MutatorFn } from "../src/types/types.branch";
-import type { Mutator } from "../src/types/types.shared";
-import type { TreeIF } from "../src/types/types.trees";
+import type { BranchIF } from "../src/types/types.branch";
+import type {
+  MutationValueProviderFN,
+  Mutator,
+} from "../src/types/types.shared";
 
 describe("caching", () => {
   describe("tree trimming", () => {
@@ -23,7 +25,7 @@ describe("caching", () => {
       const branchValues = new Map<number, number>();
 
       const doublerGrower: Mutator<number> = {
-        mutator: ({value}) => {
+        mutator: ({ value }) => {
           if (value === undefined) return 1;
           return value * 2;
         },
@@ -50,6 +52,72 @@ describe("caching", () => {
       }
       const max = Math.max(...branchCount);
       expect(max).toBeLessThanOrEqual(MAX_BRANCHES);
+    });
+  });
+
+  describe("local caching", () => {
+    it("should only keep the latest value", () => {
+      const f = new Forest();
+
+      const t = f.addTree<number>("doubler", {
+        initial: 1,
+        validator(value) {
+          if (typeof value !== "number" || Number.isNaN(value))
+            throw new Error("not a number");
+        },
+      });
+
+      const mut: MutationValueProviderFN<number> = ({ value, seed }) =>
+        value ? seed * value : 1;
+
+      t.mutate(mut, 1);
+      t.mutate(mut, 2);
+      t.mutate(mut, 3);
+      t.mutate(mut, 4);
+      t.mutate(mut, 5);
+      t.mutate(mut, 6);
+      t.mutate(mut, 7);
+
+      let cachedCount = 0;
+      t.forEachDown((branch: BranchIF<number>) => {
+        branch.value;
+        if (branch.valueIsCached) {
+          cachedCount += 1;
+        }
+      });
+      expect(cachedCount).toBe(1);
+    });
+    it("should only keep the latest value with a validator ", () => {
+      const f = new Forest();
+
+      const t = f.addTree<number>("doubler", {
+        initial: 1,
+        validator(value) {
+          if (typeof value !== "number" || Number.isNaN(value))
+            throw new Error("not a number");
+        },
+      });
+
+      const mut: MutationValueProviderFN<number> = ({ value, seed }) =>
+        value ? seed * value : 1;
+
+      t.mutate(mut, 1);
+      t.mutate(mut, 2);
+      t.mutate(mut, null);
+      t.mutate(mut, 3);
+      t.mutate(mut, 4);
+      t.mutate(mut, 5);
+      t.mutate(mut, 6);
+      t.mutate(mut, 7);
+
+      let cachedCount = 0;
+      t.forEachDown((branch: BranchIF<number>) => {
+        branch.value;
+        if (branch.valueIsCached) {
+          cachedCount += 1;
+        }
+      });
+      expect(cachedCount).toBe(1);
     });
   });
 });

@@ -3,6 +3,7 @@ import type { OffshootIF } from "../types";
 import type { ForestIF } from "./types.forest";
 import type {
   ChangeIF,
+  MutationValueProviderFN,
   Notable,
   SubscribeFn,
   ValueProviderFN,
@@ -13,10 +14,15 @@ export type TreeName = string;
 
 export type TreeValuation<ValueType> = {
   value: ValueType;
-  tree: TreeIF<ValueType>;
+  tree: string;
   isValid: boolean;
   error?: string;
 };
+
+export type BranchIterFn<ValueType> = (
+  b: BranchIF<ValueType>,
+  count?: number | null
+) => true | void;
 
 export interface TreeIF<ValueType> extends Notable {
   name?: TreeName;
@@ -31,7 +37,12 @@ export interface TreeIF<ValueType> extends Notable {
    * note - the only advantage "grow" has over next is to assert a change function and parmeters for that function.
    */
   grow(change: ChangeIF<ValueType>): BranchIF<ValueType>;
-  next(value: ValueType, name?: string): void; // next will use the name "next" if not documented
+  next(value: ValueType, name?: string): void;
+  mutate(
+    mutator: MutationValueProviderFN<ValueType>,
+    seed?: any,
+    name?: string
+  ): void;
   value: ValueType;
   subject: Observable<ValueType>;
   subscribe(
@@ -42,6 +53,8 @@ export interface TreeIF<ValueType> extends Notable {
 
   validate(value: ValueType): TreeValuation<ValueType>;
   branchCount(upTo?: number): number;
+  forEachDown(iterator: BranchIterFn<ValueType>, maxBranches?: number): void;
+  forEachUp(iterator: BranchIterFn<ValueType>, maxBranches?: number): void;
 }
 
 export type ValidatorFn<TreeValueType> = (

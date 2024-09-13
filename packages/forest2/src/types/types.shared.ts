@@ -1,4 +1,4 @@
-import type { BranchIF, MutatorFn as MutatorFn } from "./types.branch";
+import type { BranchIF } from "./types.branch";
 import { isObj } from "./types.guards";
 import type { TreeIF } from "./types.trees";
 

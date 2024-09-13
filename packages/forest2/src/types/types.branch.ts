@@ -1,11 +1,6 @@
 import type { TreeIF } from "./types.trees";
 import type { ChangeIF } from "./types.shared";
 
-export type MutatorFn<ValueType> = (
-  prev: BranchIF<ValueType> | undefined,
-  seed?: any
-) => ValueType;
-
 export interface BranchIF<ValueType> {
   value: ValueType;
   cause: string; // the 'name' of the change
@@ -14,10 +9,9 @@ export interface BranchIF<ValueType> {
   next?: BranchIF<ValueType>;
   prev?: BranchIF<ValueType>;
   add(next: ChangeIF<ValueType>): BranchIF<ValueType>;
-  clone(toAssert?: boolean): BranchIF<ValueType>
+  clone(toAssert?: boolean): BranchIF<ValueType> // used in truncation -- don't call this yourself. 
   linkTo(branchB: BranchIF<ValueType> | undefined): void;
-
+  valueIsCached: boolean;
   toString(): string;
-
-  destroy(): void; // dereference anything you can possibly
+  destroy(): void; // used in truncation -- don't call this yourself. will delete all properties of the branch. 
 }

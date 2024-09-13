@@ -8,11 +8,13 @@ import type {
   TreeParams,
   TreeValuation,
 } from "./types/types.trees";
+import { ValueProviderContext } from "./types/types.shared";
 
 import type {
   ChangeIF,
   Info,
   InfoParams,
+  MutationValueProviderFN,
   NotesMap,
   SubscribeFn,
 } from "./types/types.shared";
@@ -21,6 +23,7 @@ import type { PartialObserver } from "rxjs";
 import { NotableHelper } from "./utils";
 import Beaver from "./Tree/Beaver";
 import { IttermittentCache } from "./Tree/IttermittentCache";
+import { isAssert, isMutator } from "./types/types.guards";
 
 export default class Tree<ValueType> implements TreeIF<ValueType> {
   constructor(
@@ -91,11 +94,49 @@ export default class Tree<ValueType> implements TreeIF<ValueType> {
     }
   }
 
+  mutate(
+    mutator: MutationValueProviderFN<ValueType>,
+    seed?: any,
+    name?: string
+  ): void {
+    if (!name) {
+      if (mutator.name) {
+        this.grow({ mutator, seed, name: mutator.name });
+      } else {
+        this.grow({ mutator, seed, name: "(mutation)" });
+      }
+    } else {
+      this.grow({ mutator, seed, name });
+    }
+  }
+
   offshoots?: OffshootIF<ValueType>[];
   root?: BranchIF<ValueType>;
   top?: BranchIF<ValueType>;
   grow(change: ChangeIF<ValueType>): BranchIF<ValueType> {
     return this.forest.do(() => {
+      if (this.params?.validator) {
+        if (isAssert(change)) {
+          const nextValue = change.assert;
+          const test = this.validate(nextValue);
+          if (!test.isValid) {
+            throw new Error(test.error ?? "invalid value");
+          }
+        } else if (isMutator(change)) {
+          const value = this.top?.value ?? this.params?.initial;
+          const nextValue = change.mutator({
+            value,
+            branch: this.top,
+            seed: change.seed,
+            tree: this,
+            context: ValueProviderContext.mutation,
+          });
+          const test = this.validate(nextValue);
+          if (!test.isValid) throw new Error(test.error ?? "invalid value");
+        } else {
+          console.warn("bad change: ", change);
+        }
+      }
       const next = new Branch<ValueType>(this, change);
       if (this.top) {
         this.top.linkTo(next);
@@ -103,12 +144,6 @@ export default class Tree<ValueType> implements TreeIF<ValueType> {
         this.root = next;
       }
       this.top = next;
-      if (this.params?.validator) {
-        const err = this.params.validator(next.value, this);
-        if (err) {
-          throw err;
-        }
-      }
 
       IttermittentCache.benchmark<ValueType>(this);
       Beaver.limitSize(this);
@@ -123,20 +158,24 @@ export default class Tree<ValueType> implements TreeIF<ValueType> {
       return {
         isValid: true,
         value,
-        tree: this,
+        tree: this.name,
       };
     }
-
     try {
       const err = this.params.validator(value, this);
       if (err) {
         return {
           isValid: false,
           value,
-          tree: this,
+          tree: this.name,
           error: err.message,
         };
       }
+      return {
+        isValid: true,
+        value,
+        tree: this.name,
+      };
     } catch (err) {
       let msg = "";
       if (err instanceof Error) {
@@ -148,7 +187,7 @@ export default class Tree<ValueType> implements TreeIF<ValueType> {
       }
       return {
         value,
-        tree: this,
+        tree: this.name,
         isValid: false,
         error: msg,
       };
@@ -246,5 +285,39 @@ export default class Tree<ValueType> implements TreeIF<ValueType> {
     }
 
     return count;
+  }
+
+  // #region iterators
+
+  forEachDown(
+    iterator: (b: BranchIF<ValueType>, count: number) => true | void,
+    maxBranches: number | null = null
+  ): void {
+    let b = this.top;
+    let count = 0;
+
+    while (b) {
+      let out = iterator(b, count);
+      if (out === true) break;
+      count += 1;
+      b = b.prev;
+      if (maxBranches !== null && count >= maxBranches) break;
+    }
+  }
+
+  forEachUp(
+    iterator: (b: BranchIF<ValueType>, count: number) => true | void,
+    maxBranches: number | null = null
+  ): void {
+    let b = this.root;
+    let count = 0;
+
+    while (b) {
+      let out = iterator(b, count);
+      if (out === true) break;
+      count += 1;
+      b = b.prev;
+      if (maxBranches !== null && count >= maxBranches) break;
+    }
   }
 }

@@ -3,12 +3,22 @@
 
 Caching is one of the tree hardest problems in computer science. 
 
-There are two circumstances where caching is important 
+There are 3 circumstances where caching is important to understand.
 
 1. the collection uses proxies; chaining proxies past a certain depth is unwise. 
 2. the collection has a series of mutators; in which chained functional callbacks is unwise.
 3. resursive proxies are also potentially problems due to functional depth, and should be 
    broken up by ittermittent caching to limit their depth. 
+
+## Local Caching (by default)
+
+The topmost branch always keeps a copy of its value, _if it is a mutator_. 
+That way if a branch is added after that branch and _it is also_ a mutator you don't enact a "chain of callbacks" - the value 
+is serialized and passed into the new top branch -- _and then it is flushed_. 
+
+So local caching is minimal;  even if you wait for a while to get the value of the topmost branch, and a series of mutators are called down the branches,
+all the other mutators will never cache their value - they will just return it to the caller, and the topmost value property method will cache it before its 
+returned. 
 
 ## Ittermittent caching -- by configuration
 

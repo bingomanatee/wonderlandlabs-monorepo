@@ -70,7 +70,11 @@ export class Branch<ValueType> implements BranchIF<ValueType> {
     this._hasBeenCached = true;
   }
 
-  _resetCache() {
+  get valueIsCached() {
+    return this._hasBeenCached === true;
+  }
+
+  _flushCache() {
     // clear out any non-top caches; use cached value one last time.
     const out = this._cached;
     delete this._cached;
@@ -99,12 +103,14 @@ export class Branch<ValueType> implements BranchIF<ValueType> {
   get value(): ValueType {
     if (!this.change)
       throw new Error("cannot get value of branch without change");
-    if (this._hasBeenCached === true) {
+    if (this._hasBeenCached) {
       if (this !== this.tree.top) {
-        return this._resetCache();
+        // only the top tre maintains a local cache; other branches return their cache but delete it
+        return this._flushCache();
       }
       return this._cached;
     }
+
     if (isAssert(this.change)) {
       return this.change.assert;
     }
@@ -116,10 +122,7 @@ export class Branch<ValueType> implements BranchIF<ValueType> {
          tree: this.tree,
           value: this.prev?.value
       });
-      if (this !== this.tree.top) {
-        // to reduce the number of unneede caches, don't cache any branches that are not currently top.
-        return value;
-      }
+
       if (this._hasBeenCached === false) {
         // stop trying to see if its cacheable or not, return directly
         return value;
@@ -129,11 +132,8 @@ export class Branch<ValueType> implements BranchIF<ValueType> {
         this._hasBeenCached = false; // stop trying to see if its cacheable or not.
         return value;
       }
-      if (isCacheable(value)) {
-        this._cacheValue(value);
-      } else {
-        this._hasBeenCached = false;
-      }
+       if (this === this.tree.top) this._cacheValue(value);
+   
       return value;
     }
     console.warn(

@@ -1,0 +1,16 @@
+{
+  "transform": {
+  
+       "^.+\\.ts$": [
+      "ts-jest",
+      {
+        "rootDir": "."
+      }
+    ]
+  },
+  "moduleNameMapper": {
+    "^lodash-es$": "lodash"
+},
+  "testRegex": "(/__tests__/.*|(\\.|/)(test|spec))\\.(t|j)s$",
+  "moduleFileExtensions": ["ts", "js", "json", "node"]
+}

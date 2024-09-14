@@ -1,1 +1,0 @@
-function isMutator(t){return!!(t&&"object"==typeof t&&"next"in t&&"function"==typeof t.next)}Object.defineProperty(exports,"__esModule",{value:!0}),exports.isMutator=isMutator;

@@ -1,1 +1,0 @@
-Object.defineProperty(exports,"__esModule",{value:!0}),exports.isWithCloner=isWithCloner;let types_formCollection_1=require("./collections/FormCollection/types.formCollection");function isWithCloner(e){return!!(0,types_formCollection_1.isObj)(e)&&"cloner"in e&&"cloneInterval"in e&&"function"==typeof e.cloner&&"number"==typeof e.cloneInterval}

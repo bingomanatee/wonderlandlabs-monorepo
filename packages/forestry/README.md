@@ -64,73 +64,36 @@ const f = new Forest();
 
 const t = f.addTree<number>("counter", { initial: 0 });
 t.subscribe((value: number) => {
-  console.log("tree change", t.top?.cause, ":", value);
+  message("tree change", t.top?.cause, ":", value);
 });
 
-const growBy = (n: number) => ({
-  mutator({value, seed }) {
-    return Number(seed + (value ?? 0));
-  },
-  seed: n,
-  name: "growBy " + n,
-});
+const growBy = ({ value, seed }) =>  seed + value;
 
-t.grow(growBy(3));
+t.mutate(growBy, 3, "growBy 3");
 
-// 'tree change growBy 3 : 3
+t.mutate(growBy, 4, "growBy 4");
 
-t.grow(growBy(4));
+t.next(100, "set to 100");
 
-
-// 'tree change growBy 4 : 7
-
-t.next(100, 'set to 100');
-
-// tree change set to 100 : 100
-
-```
-
-at any point you can "run back in time" through a tree's list:
-
-```
-let current = t.top;
-
-while (current) {
+t.forEachDown((branch, count) => {
   console.log(
+    count,
     "README.md -- at",
-    current.time,
+    branch.time,
     "cause:",
-    current.cause,
+    branch.cause,
     "value:",
-    current.value
+    branch.value
   );
-  current = current.prev;
-}
 });
 /**
-*
-*  -- at 7 cause: set to 100 value: 100
-* -- at 5 cause: growBy 4 value: 7
-* -- at 3 cause: growBy 3 value: 3
-* -- at 1 cause: initial value: 0
-*/
+  0 README.md -- at 7 cause: set to 100 value: 100
+  1 README.md -- at 5 cause: growBy 4 value: 4
+  2 README.md -- at 3 cause: growBy 3 value: 3
+  3 README.md -- at 1 cause: initial value: 0
+  */
 
 ```
-
-## Collections can use proxies to conserve memory
-
-Keeping large collections up to date with history can eat up memory. To make things less wasteful, engines can use proxies to create "tweaked versions" of historical data that are the same _except_ for a single key / value that was changed.
-
-for instances where available, the MapCollection's 'set' action creates a proxy of the previous edition that is the same, except that the size is changed and the value of a _single key_ is different when `value.get(key)` is called.
-
-this means that if you have a 500 item map and you set five keys to different values (one by one)
-your history is not 6 x 500 items big: it has one 500 item map as the initial value, and
-five fixed-size proxies to emulate maps with slightly different values.
-
-(see [README.caching.md](./README.caching.md)) to see how we can serialize proxies ittermittently
-to limit the callback depth of series of proxies)
-
-(also, for IE and other runtimes without proxying, non-proxy options are provided).
 
 # "Just enough API
 
@@ -233,94 +196,118 @@ have a simple "single tree" use case, a Collection will do just fine.
 
 ```
 
-    const f = new Forest();
+function makeCounter(initial = 0, name = "counter") {
+  const f = new Forest();
 
-    const counter = new Collection("counter", {
-      initial: 0,
-      actions: new Map<string, ChangeFN<number>>([
-        ["increment", (branch) => {
-            if (!branch) return 1;
-            return branch.value + 1;
-        }],
-        ["decrement", (branch) =>{
-            if (!branch) return -1;
-            return branch.value - 1;
-        }],
-        ["add", (branch,s) =>{
-            if (!branch) return s as number;
-            return branch.value + (s as number)
-        }],
-        ["zeroOut", () => 0],
+  return new Collection(
+    name,
+    {
+      initial,
+      actions: new Map<string, CollectionAction<number>>([
+        [
+          "increment",
+          (collection) => {
+            collection.mutate(({ value }) => {
+              return value === undefined ? 1 : value + 1;
+            }, "increment");
+          },
+        ],
+        [
+          "decrement",
+          (collection) => {
+            collection.mutate(({ value }) => {
+              return value === undefined ? -1 : value - 1;
+            }, "increment");
+          },
+        ],
+        [
+          "add",
+          (collection, n: number) => {
+            collection.mutate(
+              (params) => {
+                const { value, seed } = params;
+                return value === undefined ? seed : value + seed;
+              },
+              "add",
+              n
+            );
+          },
+        ],
+        [
+          "zeroOut",
+          (collection) => {
+            collection.next(0, "zeroOut");
+          },
+        ],
       ]),
+      cloneInterval: 6,
+      serializer(params: ValueProviderParams<number>) {
+        const { value } = params;
+        return value === undefined ? 0 : value;
+      },
       validator(v) {
         if (Number.isNaN(v)) throw new Error("must be a number");
         if (v !== Math.floor(v)) throw new Error("must be integer");
       },
+    },
+    f
+  );
+}
+
+
+   const counter = makeCounter(0, "counter:cached");
+
+    counter.act("increment");
+    counter.act("increment");
+    counter.act("increment");
+    counter.act("add", 100);
+    try  {
+     counter.act("add", 1.5)
+    } catch (e) {
+      console.log('--- error: ', e.message);
+    }
+  
+    counter.act("zeroOut");
+    counter.act("add", 300);
+    counter.act("increment");
+    counter.act("decrement");
+
+    counter.tree.forEachDown((branch, count) => {
+      console.log(branch.time, ":counter value: ", branch.value, "cause:", branch.cause);
     });
 
-    counter.subscribe((n: number) => console.log('collection is ', n, 'because of', counter.tree.top?.cause))
-
-    counter.act('increment');
-    counter.act('increment');
-    try {
-    counter.act('add', 1.5)
-    } catch (e) {
-      console.log("--- error:', e.message);
-    }
-    counter.act('increment');
-    counter.act('add', 100);
-    counter.act('zeroOut');
-    counter.act('add', 300);
-    counter.act('increment');
-    counter.act('decrement');
-    /**
-     *
-      collection is  0 because of initial
-      collection is  1 because of increment
-      collection is  2 because of increment
-      --- error: must be integer
-      collection is  3 because of increment
-      collection is  103 because of add
-      collection is  0 because of zeroOut
-      collection is  300 because of add
-      collection is  301 because of increment
-      collection is  300 because of decrement
-     */
+/**
+  *
+  28 :counter value:  0 cause: increment
+  25 :counter value:  1 cause: increment
+  --- error: must be integer
+  22 :counter value:  300 cause: !BENCHMARK!
+  21 :counter value:  300 cause: add
+  18 :counter value:  0 cause: zeroOut
+  13 :counter value:  103 cause: add
+  10 :counter value:  3 cause: increment
+  7 :counter value:  2 cause: increment
+  4 :counter value:  1 cause: increment
+  1 :counter value:  0 cause: initial
+  */
 
 ```
 
 since these mutation functions are **calling each other** through history, we set the collection to "hard cache" its value every six actions. What does that do? if we were to "crawl the history" we'll see the occasional "cache action":
+by un-commenting these properties:
+
+```
+cloneInterval: 6,
+serializer(params: ValueProviderParams<number>) {
+  const { value } = params;
+  return value === undefined ? 0 : value;
+}, 
+```
+resulting in an ittermittent serializer that creates a literal copy of the mutation chain every six branches:
 
 ```
 
-const f = new Forest();
 
-const counter = new Collection("counter", {
-  initial: 0,
-  actions: new Map<string, ChangeFN<number>>([
-    ["increment", (branch) => {
-        if (!branch) return 1;
-        return branch.value + 1;
-    }],
-    ["decrement", (branch) =>{
-        if (!branch) return -1;
-        return branch.value - 1;
-    }],
-    ["add", (branch,s) =>{
-        if (!branch) return s as number;
-        return branch.value + (s as number)
-    }],
-    ["zeroOut", () => 0],
-  ]),
-  cloneInterval: 6,
-  cloner(t: TreeIF<number>) {
-    return t.top ? t.top.value : 0;
-  },
-  validator(v) {
-    if (Number.isNaN(v)) throw new Error("must be a number");
-    if (v !== Math.floor(v)) throw new Error("must be integer");
-  },
-});
 
 counter.act('increment');
 counter.act('add', 100);

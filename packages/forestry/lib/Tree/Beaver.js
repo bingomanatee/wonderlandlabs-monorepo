@@ -16,8 +16,9 @@ class Beaver {
     trim(maxCount, firstTimeToSave, ignoreTime = false) {
         let fromBottom = this.tree.root;
         let fromTop = this.tree.top;
-        if (!ignoreTime && fromBottom.time >= firstTimeToSave)
+        if (!ignoreTime && fromBottom.time >= firstTimeToSave) {
             return;
+        }
         let count = 0;
         while (fromTop && count < maxCount) {
             fromTop = fromTop.prev;
@@ -29,8 +30,9 @@ class Beaver {
             }
             count += 1;
         }
-        if (!fromTop || count < maxCount)
+        if (!fromTop || count < maxCount) {
             return;
+        }
         // at this point if fromBottom exists it is at or a lttle past the earliest time.
         if (!ignoreTime) {
             while (fromBottom && fromBottom.time >= firstTimeToSave) {
@@ -48,8 +50,9 @@ class Beaver {
         }
     }
     trimBefore(branch) {
-        if (!branch || !branch.prev || branch.prev === this.tree.root)
+        if (!branch || !branch.prev || branch.prev === this.tree.root) {
             return;
+        }
         const oldRoot = this.tree.root;
         // create an artificial branch that has the value and time of the previous branch
         // but has an asserted not computed value.
@@ -70,8 +73,9 @@ class Beaver {
         // because destruction removes prev/next link we
         // presere the "next to destroy" before calling `destroy()`.
         while (fromBranch) {
-            if (fromBranch.time >= toBranch?.time)
+            if (fromBranch.time >= toBranch?.time) {
                 return;
+            }
             next = fromBranch.next;
             fromBranch.destroy();
             fromBranch = next;
@@ -83,14 +87,14 @@ class Beaver {
         }
         const { maxBranches, trimTo } = tree.params;
         if (trimTo >= maxBranches * 0.8) {
-            throw new Error("your trim size must be 80% of your maxBranches or less");
+            throw new Error('your trim size must be 80% of your maxBranches or less');
         }
         if (trimTo < 4) {
-            throw new Error("your maxBranches must be >= 4");
+            throw new Error('your maxBranches must be >= 4');
         }
         const activeTasks = tree.forest.activeTasks;
-        let endTime = tree.top.time;
-        let startTime = tree.root.time;
+        const endTime = tree.top.time;
+        const startTime = tree.root.time;
         const treeTime = endTime + startTime + 1;
         if (treeTime < maxBranches) {
             return; // its impossible for there to exist branch overflow if not enough time has passed

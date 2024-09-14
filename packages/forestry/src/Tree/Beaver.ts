@@ -1,7 +1,12 @@
-import { Branch } from '../Branch';
-import type { BranchIF } from '../types/types.branch';
-import type { TreeIF } from '../types/types.trees';
+import { Branch } from "../Branch";
+import type { BranchIF } from "../types/types.branch";
+import type { TreeIF } from "../types/types.trees";
+import { CLONE_NAME } from "./IttermittentCache";
 
+type ActiveTaskInfo = {
+  hasActiveTasks: boolean;
+  earliestActiveTask: number;
+};
 export default class Beaver<ValueType> {
   constructor(private tree: TreeIF<ValueType>) {}
 
@@ -13,47 +18,47 @@ export default class Beaver<ValueType> {
    *
    * We trim to the LOWEST of these two branches;
    */
-  public trim(maxCount: number, firstTimeToSave: number, ignoreTime = false) {
-    let fromBottom = this.tree.root;
-    let fromTop = this.tree.top;
+  public trim() {
+    let tooLongBranch: BranchIF<ValueType>;
 
-    if (!ignoreTime && fromBottom.time >= firstTimeToSave) {return;}
+    const { earliestActiveTask, hasActiveTasks } = this.activeTasks();
+    const { maxBranches, trimTo } = this.tree.params;
+
     let count = 0;
-
-    while (fromTop && count < maxCount) {
-      fromTop = fromTop.prev;
-      if (
-        !ignoreTime &&
-        fromBottom &&
-        fromBottom.time &&
-        fromBottom.time < firstTimeToSave
-      ) {
-        fromBottom = fromBottom.next;
+    this.tree.forEachDown((branch, c) => {
+      if (tooLongBranch) return;
+      if (c >= maxBranches - 1) {
+        if (hasActiveTasks) {
+          if (branch.time < earliestActiveTask) {
+            tooLongBranch = branch;
+            count = c;
+          }
+        } else {
+          tooLongBranch = branch;
+          count = c;
+        }
       }
-      count += 1;
+    }, maxBranches + 1);
+
+    if (!tooLongBranch || tooLongBranch === this.tree.root) {
+      return;
     }
-    if (!fromTop || count < maxCount) {return;}
 
-    // at this point if fromBottom exists it is at or a lttle past the earliest time.
+    let branch = tooLongBranch;
+    // go forward in time until you are at the trimTo point OR the next branch is the earliest active task.
+    while (branch && count >= trimTo) {
+      if (hasActiveTasks && branch.next?.time >= earliestActiveTask) {
+        // we cannot trim branches in an active task.
 
-    if (!ignoreTime) {
-      while (fromBottom && fromBottom.time >= firstTimeToSave) {
-        // ensure that we are preserving the branch BEFORE the eariest pending event
-        fromBottom = fromBottom.prev;
+        break;
       }
+      branch = branch.next;
+      count -= 1;
     }
 
-    if (ignoreTime || fromTop.time < firstTimeToSave) {
-      // we are trimming before or at the first event to save
-      this.trimBefore(fromTop);
-    } else {
-      // there is an event prior to the size-based cutoff; trim to that event
-      this.trimBefore(fromBottom);
+    if (!branch) {
+      return;
     }
-  }
-
-  public trimBefore(branch?: BranchIF<ValueType>) {
-    if (!branch || !branch.prev || branch.prev === this.tree.root) {return;}
     const oldRoot = this.tree.root;
 
     // create an artificial branch that has the value and time of the previous branch
@@ -79,49 +84,47 @@ export default class Beaver<ValueType> {
     // because destruction removes prev/next link we
     // presere the "next to destroy" before calling `destroy()`.
     while (fromBranch) {
-      if (fromBranch.time >= toBranch?.time) {return;}
+      if (fromBranch.time >= toBranch?.time) {
+        return;
+      }
       next = fromBranch.next;
       fromBranch.destroy();
       fromBranch = next;
     }
   }
 
-  static limitSize<ValueType>(tree: TreeIF<ValueType>) {
-    if (!(tree.top && tree.params?.serializer)) {
-      return;
-    }
-  
-    const { maxBranches, trimTo } = tree.params;
-    if (trimTo >= maxBranches * 0.8) {
-      throw new Error('your trim size must be 80% of your maxBranches or less');
-    }
-    if (trimTo < 4) {
-      throw new Error('your maxBranches must be >= 4');
-    }
-  
-    const activeTasks = tree.forest.activeTasks;
-  
-    const endTime = tree.top.time;
-    const startTime = tree.root.time;
-    const treeTime = endTime + startTime + 1;
-  
-    if (treeTime < maxBranches) {
-      return; // its impossible for there to exist branch overflow if not enough time has passed
-    }
-  
-    const count = tree.branchCount(maxBranches + 1);
-    if (count <= maxBranches) {
-      return;
-    }
-  
+  activeTasks(): ActiveTaskInfo {
+    const activeTasks = this.tree.forest.activeTasks;
     if (activeTasks.length) {
-      const firstTimeToSave = activeTasks.reduce((m, n) => {
+      const earliestActiveTask = activeTasks.reduce((m, n) => {
         return Math.min(m, n);
       }, Number.POSITIVE_INFINITY);
-  
-      new Beaver(tree).trim(trimTo, firstTimeToSave);
+
+      return { hasActiveTasks: true, earliestActiveTask };
     } else {
-      new Beaver(tree).trim(trimTo, Number.POSITIVE_INFINITY, true);
+      return {
+        hasActiveTasks: false,
+        earliestActiveTask: Number.POSITIVE_INFINITY,
+      };
     }
+  }
+
+  limitBranchLength() {
+    if (!(this.tree.top && this.tree.params?.serializer)) {
+      return;
+    }
+
+    const { maxBranches } = this.tree.params;
+
+    // perform some cursory computations to ensure the branch is potentially long enough to trim;
+    const endTime = this.tree.top.time;
+    const startTime = this.tree.root.time;
+    const branchDuration = endTime + startTime + 1;
+
+    if (branchDuration < maxBranches) {
+      return; // its impossible for there to exist branch overflow if not enough time has passed
+    }
+
+    this.trim();
   }
 }

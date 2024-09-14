@@ -47,22 +47,26 @@ function isMapKey(map, a) {
     return map instanceof Map && a in map;
 }
 function isMutationValueProviderParams(a) {
-    if (!isObj(a))
+    if (!isObj(a)) {
         return false;
-    return Boolean("context" in a && a.context === types_shared_1.ValueProviderContext.mutation);
+    }
+    return Boolean('context' in a && a.context === types_shared_1.ValueProviderContext.mutation);
 }
 function isLocalValueProviderParams(a) {
-    if (!isObj(a))
+    if (!isObj(a)) {
         return false;
-    return Boolean("context" in a && a.context === types_shared_1.ValueProviderContext.localCache);
+    }
+    return Boolean('context' in a && a.context === types_shared_1.ValueProviderContext.localCache);
 }
 function isTruncationValueProviderParams(a) {
-    if (!isObj(a))
+    if (!isObj(a)) {
         return false;
-    return Boolean("context" in a && a.context === types_shared_1.ValueProviderContext.truncation);
+    }
+    return Boolean('context' in a && a.context === types_shared_1.ValueProviderContext.truncation);
 }
 function isIttermittentCacheProviderParams(a) {
-    if (!isObj(a))
+    if (!isObj(a)) {
         return false;
-    return Boolean("context" in a && a.context === types_shared_1.ValueProviderContext.itermittentCache);
+    }
+    return Boolean('context' in a && a.context === types_shared_1.ValueProviderContext.itermittentCache);
 }

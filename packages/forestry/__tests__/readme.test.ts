@@ -1,10 +1,7 @@
 import { Forest } from "../src/Forest";
 import { Collection } from "../src/collections/Collection";
 import { expect, it, describe } from "@jest/globals";
-import type {
-  MutationValueProviderParams,
-  ValueProviderParams,
-} from "../src/types/types.shared";
+import type { ValueProviderParams } from "../src/types/types.shared";
 import type { CollectionAction } from "../src/types/type.collection";
 
 function message(...items: any[]) {
@@ -78,49 +75,32 @@ describe("README.md", () => {
       message("tree change", t.top?.cause, ":", value);
     });
 
-    const growBy = (n: number) => ({
-      mutator(mParams: MutationValueProviderParams<number>) {
-        const { value, seed } = mParams;
-        if (value === undefined) return seed;
-        return Number(seed + value);
-      },
-      seed: n,
-      name: "growBy " + n,
-    });
+    const growBy = ({ value, seed }: { value: number; seed?: number }) => {
+      return Number(seed ?? 0 + (value ?? 0));
+    };
 
-    t.grow(growBy(3));
+    t.mutate(growBy, 3, "growBy 3");
 
-    // 'tree change growBy 3 : 3
-
-    t.grow(growBy(4));
-
-    // 'tree change growBy 4 : 7
+    t.mutate(growBy, 4, "growBy 4");
 
     t.next(100, "set to 100");
 
-    // tree change set to 100 : 100
-
-    // (presuming the previous history)
-
-    let current = t.top;
-
-    while (current) {
-      message(
+    t.forEachDown((branch, count) => {
+      console.log(
+        count,
         "README.md -- at",
-        current.time,
+        branch.time,
         "cause:",
-        current.cause,
+        branch.cause,
         "value:",
-        current.value
+        branch.value
       );
-      current = current.prev;
-    }
+    });
     /**
-     *
-     *  -- at 7 cause: set to 100 value: 100
-     * -- at 5 cause: growBy 4 value: 7
-     * -- at 3 cause: growBy 3 value: 3
-     * -- at 1 cause: initial value: 0
+      0 README.md -- at 7 cause: set to 100 value: 100
+      1 README.md -- at 5 cause: growBy 4 value: 4
+      2 README.md -- at 3 cause: growBy 3 value: 3
+      3 README.md -- at 1 cause: initial value: 0
      */
   });
 
@@ -167,23 +147,23 @@ describe("README.md", () => {
     counter.act("increment");
     counter.act("decrement");
 
-    let t = counter.tree.top;
-    while (t) {
-      message(t.time, ":counter value: ", t.value, "cause:", t.cause);
-      t = t.prev;
-    }
+    counter.tree.forEachDown((branch, count) => {
+      message(branch.time, ":counter value: ", branch.value, "cause:", branch.cause);
+    });
+
     /**
      *   
-        29 :counter value:  300 cause: decrement
-        26 :counter value:  301 cause: increment
-        23 :counter value:  300 cause: !CLONE!
-        22 :counter value:  300 cause: add
-        19 :counter value:  0 cause: zeroOut
-        13 :counter value:  103 cause: add
-        10 :counter value:  3 cause: increment
-        7 :counter value:  2 cause: increment
-        4 :counter value:  1 cause: increment
-        1 :counter value:  0 cause: initial
+      28 :counter value:  0 cause: increment
+      25 :counter value:  1 cause: increment
+      22 :counter value:  0 cause: !BENCHMARK!
+      21 :counter value:  300 cause: add
+      18 :counter value:  0 cause: zeroOut
+      13 :counter value:  103 cause: add
+      10 :counter value:  3 cause: increment
+      7 :counter value:  2 cause: increment
+      4 :counter value:  1 cause: increment
+      1 :counter value:  0 cause: initial
+
      */
   });
 });

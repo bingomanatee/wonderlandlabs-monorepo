@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.IttermittentCache = exports.CLONE_NAME = void 0;
 const types_shared_1 = require("../types/types.shared");
-exports.CLONE_NAME = "!BENCHMARK!";
+exports.CLONE_NAME = '!BENCHMARK!';
 class IttermittentCache {
     static benchmark(tree) {
         if (!tree.top || !tree.params?.cloneInterval) {
@@ -27,7 +27,7 @@ class IttermittentCache {
                     tree.top = next;
                 }
                 catch (e) {
-                    console.warn("cannot clone! error is ", e);
+                    console.warn('cannot clone! error is ', e);
                 }
                 return;
             }

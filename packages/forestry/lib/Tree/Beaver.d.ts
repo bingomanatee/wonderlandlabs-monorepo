@@ -1,5 +1,5 @@
-import type { BranchIF } from "../types/types.branch";
-import type { TreeIF } from "../types/types.trees";
+import type { BranchIF } from '../types/types.branch';
+import type { TreeIF } from '../types/types.trees';
 export default class Beaver<ValueType> {
     private tree;
     constructor(tree: TreeIF<ValueType>);

@@ -1,5 +1,5 @@
-import type { BranchIF } from "./types.branch";
-import type { TreeIF } from "./types.trees";
+import type { BranchIF } from './types.branch';
+import type { TreeIF } from './types.trees';
 /**
  * a "literal replacement value"
  */

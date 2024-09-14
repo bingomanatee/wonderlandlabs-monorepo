@@ -11,7 +11,7 @@ describe("caching", () => {
       const f = new Forest();
 
       const MAX_BRANCHES = 10;
-      const doubler = f.addTree<number>("doubler", {
+      const doubler = f.addTree<number>("beaver-test", {
         maxBranches: MAX_BRANCHES,
         trimTo: 5,
         serializer: ({ value }) => {

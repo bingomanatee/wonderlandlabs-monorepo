@@ -1,7 +1,7 @@
-import type { BranchIF } from "./types/types.branch";
-import type { OffshootIF } from "./types";
-import type { TreeIF } from "./types/types.trees";
-import { type ChangeIF } from "./types/types.shared";
+import type { BranchIF } from './types/types.branch';
+import type { OffshootIF } from './types';
+import type { TreeIF } from './types/types.trees';
+import { type ChangeIF } from './types/types.shared';
 export declare class Branch<ValueType> implements BranchIF<ValueType> {
     readonly tree: TreeIF<ValueType>;
     readonly change: ChangeIF<ValueType>;

@@ -146,7 +146,7 @@ export default class Tree<ValueType> implements TreeIF<ValueType> {
       this.top = next;
 
       IttermittentCache.benchmark<ValueType>(this);
-      Beaver.limitSize(this);
+      new Beaver(this).limitBranchLength();
 
       this.stream.next(this.top);
       return this.top;

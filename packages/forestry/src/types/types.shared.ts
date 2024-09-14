@@ -1,6 +1,6 @@
-import type { BranchIF } from "./types.branch";
-import { isObj } from "./types.guards";
-import type { TreeIF } from "./types.trees";
+import type { BranchIF } from './types.branch';
+import { isObj } from './types.guards';
+import type { TreeIF } from './types.trees';
 
 /**
  * a "literal replacement value"
@@ -45,10 +45,10 @@ export interface Notable {
 export type NotesMap = Map<number, Info[]>;
 
 export const ValueProviderContext = {
-  mutation: "MUTATION",
-  localCache: "LOCAL_CACHE",
-  truncation: "TRUNCATION",
-  itermittentCache: "ITTERMITTENT_CACHE",
+  mutation: 'MUTATION',
+  localCache: 'LOCAL_CACHE',
+  truncation: 'TRUNCATION',
+  itermittentCache: 'ITTERMITTENT_CACHE',
 };
 
 export type VPRContextKeys = keyof typeof ValueProviderContext;

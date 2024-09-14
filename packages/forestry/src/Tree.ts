@@ -1,14 +1,14 @@
-import { Branch } from "./Branch";
-import type { BranchIF } from "./types/types.branch";
-import type { OffshootIF } from "./types";
-import type { ForestIF } from "./types/types.forest";
+import { Branch } from './Branch';
+import type { BranchIF } from './types/types.branch';
+import type { OffshootIF } from './types';
+import type { ForestIF } from './types/types.forest';
 import type {
   TreeIF,
   TreeName,
   TreeParams,
   TreeValuation,
-} from "./types/types.trees";
-import { ValueProviderContext } from "./types/types.shared";
+} from './types/types.trees';
+import { ValueProviderContext } from './types/types.shared';
 
 import type {
   ChangeIF,
@@ -17,13 +17,13 @@ import type {
   MutationValueProviderFN,
   NotesMap,
   SubscribeFn,
-} from "./types/types.shared";
-import { BehaviorSubject, filter, map } from "rxjs";
-import type { PartialObserver } from "rxjs";
-import { NotableHelper } from "./utils";
-import Beaver from "./Tree/Beaver";
-import { IttermittentCache } from "./Tree/IttermittentCache";
-import { isAssert, isMutator } from "./types/types.guards";
+} from './types/types.shared';
+import { BehaviorSubject, filter, map } from 'rxjs';
+import type { PartialObserver } from 'rxjs';
+import { NotableHelper } from './utils';
+import Beaver from './Tree/Beaver';
+import { IttermittentCache } from './Tree/IttermittentCache';
+import { isAssert, isMutator } from './types/types.guards';
 
 export default class Tree<ValueType> implements TreeIF<ValueType> {
   constructor(
@@ -31,12 +31,12 @@ export default class Tree<ValueType> implements TreeIF<ValueType> {
     public readonly name: TreeName,
     public readonly params?: TreeParams<ValueType>
   ) {
-    if (params && "initial" in params) {
+    if (params && 'initial' in params) {
       const { initial } = params;
       if (initial !== undefined) {
         this.root = new Branch<ValueType>(this, {
           assert: initial,
-          name: "initial",
+          name: 'initial',
         });
         this.top = this.root;
       }
@@ -56,7 +56,7 @@ export default class Tree<ValueType> implements TreeIF<ValueType> {
 
   private stream: BehaviorSubject<BranchIF<ValueType> | undefined>;
 
-  next(next: ValueType, name: string = "(next)") {
+  next(next: ValueType, name: string = '(next)') {
     this.grow({ assert: next, name });
   }
 
@@ -103,7 +103,7 @@ export default class Tree<ValueType> implements TreeIF<ValueType> {
       if (mutator.name) {
         this.grow({ mutator, seed, name: mutator.name });
       } else {
-        this.grow({ mutator, seed, name: "(mutation)" });
+        this.grow({ mutator, seed, name: '(mutation)' });
       }
     } else {
       this.grow({ mutator, seed, name });
@@ -120,7 +120,7 @@ export default class Tree<ValueType> implements TreeIF<ValueType> {
           const nextValue = change.assert;
           const test = this.validate(nextValue);
           if (!test.isValid) {
-            throw new Error(test.error ?? "invalid value");
+            throw new Error(test.error ?? 'invalid value');
           }
         } else if (isMutator(change)) {
           const value = this.top?.value ?? this.params?.initial;
@@ -132,9 +132,9 @@ export default class Tree<ValueType> implements TreeIF<ValueType> {
             context: ValueProviderContext.mutation,
           });
           const test = this.validate(nextValue);
-          if (!test.isValid) throw new Error(test.error ?? "invalid value");
+          if (!test.isValid) {throw new Error(test.error ?? 'invalid value');}
         } else {
-          console.warn("bad change: ", change);
+          console.warn('bad change: ', change);
         }
       }
       const next = new Branch<ValueType>(this, change);
@@ -177,10 +177,10 @@ export default class Tree<ValueType> implements TreeIF<ValueType> {
         tree: this.name,
       };
     } catch (err) {
-      let msg = "";
+      let msg = '';
       if (err instanceof Error) {
         msg = err.message;
-      } else if (typeof err == "string") {
+      } else if (typeof err == 'string') {
         msg = err;
       } else {
         msg = `${err}`;
@@ -226,7 +226,7 @@ export default class Tree<ValueType> implements TreeIF<ValueType> {
 
   get value() {
     if (!this.top) {
-      throw new Error("cannot get the value from an empty tree");
+      throw new Error('cannot get the value from an empty tree');
     }
     return this.top.value;
   }
@@ -275,7 +275,7 @@ export default class Tree<ValueType> implements TreeIF<ValueType> {
    * @returns
    */
   branchCount(upTo?: number): number {
-    if (!this.top) return 0;
+    if (!this.top) {return 0;}
 
     let count = 0;
     let current = this.top;
@@ -297,11 +297,11 @@ export default class Tree<ValueType> implements TreeIF<ValueType> {
     let count = 0;
 
     while (b) {
-      let out = iterator(b, count);
-      if (out === true) break;
+      const out = iterator(b, count);
+      if (out === true) {break;}
       count += 1;
       b = b.prev;
-      if (maxBranches !== null && count >= maxBranches) break;
+      if (maxBranches !== null && count >= maxBranches) {break;}
     }
   }
 
@@ -313,11 +313,11 @@ export default class Tree<ValueType> implements TreeIF<ValueType> {
     let count = 0;
 
     while (b) {
-      let out = iterator(b, count);
-      if (out === true) break;
+      const out = iterator(b, count);
+      if (out === true) {break;}
       count += 1;
       b = b.prev;
-      if (maxBranches !== null && count >= maxBranches) break;
+      if (maxBranches !== null && count >= maxBranches) {break;}
     }
   }
 }

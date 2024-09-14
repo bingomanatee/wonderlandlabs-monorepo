@@ -1,7 +1,7 @@
-import { ValueProviderContext } from "../types/types.shared";
-import type { TreeIF, TreeParams } from "../types/types.trees";
+import { ValueProviderContext } from '../types/types.shared';
+import type { TreeIF, TreeParams } from '../types/types.trees';
 
-export const CLONE_NAME = "!BENCHMARK!";
+export const CLONE_NAME = '!BENCHMARK!';
 
 export class IttermittentCache {
   static benchmark<ValueType>(tree: TreeIF<ValueType>) {
@@ -29,7 +29,7 @@ export class IttermittentCache {
           });
           tree.top = next;
         } catch (e) {
-          console.warn("cannot clone! error is ", e);
+          console.warn('cannot clone! error is ', e);
         }
         return;
       }

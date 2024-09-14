@@ -1,7 +1,7 @@
-import Tree from "./Tree";
+import Tree from './Tree';
 
-import type { ForestIF, TaskFn } from "./types/types.forest";
-import type { TreeName, TreeIF, TreeParams } from "./types/types.trees";
+import type { ForestIF, TaskFn } from './types/types.forest';
+import type { TreeName, TreeIF, TreeParams } from './types/types.trees';
 import {
   BehaviorSubject,
   combineLatest,
@@ -9,21 +9,21 @@ import {
   filter,
   map,
   distinctUntilChanged,
-} from "rxjs";
-import type { NotesMap, InfoParams, Info } from "./types/types.shared";
-import { NotableHelper } from "./utils";
-import { isEqual } from "lodash-es";
+} from 'rxjs';
+import type { NotesMap, InfoParams, Info } from './types/types.shared';
+import { NotableHelper } from './utils';
+import { isEqual } from 'lodash-es';
 
 function pad(n: number) {
   let str = `${n}`;
   while (str.length < 3) {
-    str = "0" + str;
+    str = '0' + str;
   }
   return str;
 }
 
 export class Forest implements ForestIF {
-  uniqueTreeName(basis: string = "tree"): string {
+  uniqueTreeName(basis: string = 'tree'): string {
     if (!this.hasTree(basis)) {
       return basis;
     }
@@ -54,7 +54,7 @@ export class Forest implements ForestIF {
 
   public addTree<ValueType>(name: TreeName, params?: TreeParams<ValueType>) {
     if (this.hasTree(name)) {
-      throw new Error("cannot redefine tree " + name);
+      throw new Error('cannot redefine tree ' + name);
     }
 
     const tree: TreeIF<ValueType> = new Tree<ValueType>(this, name, params);
@@ -74,7 +74,7 @@ export class Forest implements ForestIF {
   public activeTaskSubject = new BehaviorSubject<Set<number>>(new Set());
 
   get activeTasks() {
-    if (!this.activeTaskSubject.value.size) return [];
+    if (!this.activeTaskSubject.value.size) {return [];}
 
     return Array.from(this.activeTaskSubject.value.values());
   }
@@ -91,7 +91,7 @@ export class Forest implements ForestIF {
       this.trees.forEach((tree) => {
         tree.rollback(
           taskTime,
-          err instanceof Error ? err.message : "unknown error"
+          err instanceof Error ? err.message : 'unknown error'
         );
       });
       throw err;
@@ -119,21 +119,21 @@ export class Forest implements ForestIF {
    */
   observe<ValueType>(name: TreeName) {
     if (!this.hasTree(name)) {
-      throw new Error("cannot observe " + name + ": no tree by that name");
+      throw new Error('cannot observe ' + name + ': no tree by that name');
     }
 
     const tree = this.tree(name);
     if (!tree) {
       throw new Error(
-        "cannot observe " + name + ": no tree by that name exists"
+        'cannot observe ' + name + ': no tree by that name exists'
       );
     } // for typescript
 
-    return combineLatest([this.activeTaskSubject, tree.subject]).pipe(
-      filter(([depth]: [Set<number>, undefined]) => {
+    return combineLatest([ this.activeTaskSubject, tree.subject ]).pipe(
+      filter(([ depth ]: [Set<number>, undefined]) => {
         return depth.size === 0;
       }),
-      map(([, value]: [Set<number>, undefined]) => value),
+      map(([ , value ]: [Set<number>, undefined]) => value),
       distinctUntilChanged(isEqual)
     ) as Observable<ValueType>;
   }

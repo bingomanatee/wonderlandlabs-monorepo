@@ -1,6 +1,6 @@
-import { Branch } from "../Branch";
-import type { BranchIF } from "../types/types.branch";
-import type { TreeIF } from "../types/types.trees";
+import { Branch } from '../Branch';
+import type { BranchIF } from '../types/types.branch';
+import type { TreeIF } from '../types/types.trees';
 
 export default class Beaver<ValueType> {
   constructor(private tree: TreeIF<ValueType>) {}
@@ -17,7 +17,7 @@ export default class Beaver<ValueType> {
     let fromBottom = this.tree.root;
     let fromTop = this.tree.top;
 
-    if (!ignoreTime && fromBottom.time >= firstTimeToSave) return;
+    if (!ignoreTime && fromBottom.time >= firstTimeToSave) {return;}
     let count = 0;
 
     while (fromTop && count < maxCount) {
@@ -32,7 +32,7 @@ export default class Beaver<ValueType> {
       }
       count += 1;
     }
-    if (!fromTop || count < maxCount) return;
+    if (!fromTop || count < maxCount) {return;}
 
     // at this point if fromBottom exists it is at or a lttle past the earliest time.
 
@@ -53,7 +53,7 @@ export default class Beaver<ValueType> {
   }
 
   public trimBefore(branch?: BranchIF<ValueType>) {
-    if (!branch || !branch.prev || branch.prev === this.tree.root) return;
+    if (!branch || !branch.prev || branch.prev === this.tree.root) {return;}
     const oldRoot = this.tree.root;
 
     // create an artificial branch that has the value and time of the previous branch
@@ -79,7 +79,7 @@ export default class Beaver<ValueType> {
     // because destruction removes prev/next link we
     // presere the "next to destroy" before calling `destroy()`.
     while (fromBranch) {
-      if (fromBranch.time >= toBranch?.time) return;
+      if (fromBranch.time >= toBranch?.time) {return;}
       next = fromBranch.next;
       fromBranch.destroy();
       fromBranch = next;
@@ -87,41 +87,41 @@ export default class Beaver<ValueType> {
   }
 
   static limitSize<ValueType>(tree: TreeIF<ValueType>) {
-      if (!(tree.top && tree.params?.serializer)) {
-        return;
-      }
-  
-      const { maxBranches, trimTo } = tree.params;
-      if (trimTo >= maxBranches * 0.8) {
-        throw new Error("your trim size must be 80% of your maxBranches or less");
-      }
-      if (trimTo < 4) {
-        throw new Error("your maxBranches must be >= 4");
-      }
-  
-      const activeTasks = tree.forest.activeTasks;
-  
-      let endTime = tree.top.time;
-      let startTime = tree.root.time;
-      const treeTime = endTime + startTime + 1;
-  
-      if (treeTime < maxBranches) {
-        return; // its impossible for there to exist branch overflow if not enough time has passed
-      }
-  
-      const count = tree.branchCount(maxBranches + 1);
-      if (count <= maxBranches) {
-        return;
-      }
-  
-      if (activeTasks.length) {
-        const firstTimeToSave = activeTasks.reduce((m, n) => {
-          return Math.min(m, n);
-        }, Number.POSITIVE_INFINITY);
-  
-        new Beaver(tree).trim(trimTo, firstTimeToSave);
-      } else {
-        new Beaver(tree).trim(trimTo, Number.POSITIVE_INFINITY, true);
-      }
+    if (!(tree.top && tree.params?.serializer)) {
+      return;
     }
+  
+    const { maxBranches, trimTo } = tree.params;
+    if (trimTo >= maxBranches * 0.8) {
+      throw new Error('your trim size must be 80% of your maxBranches or less');
+    }
+    if (trimTo < 4) {
+      throw new Error('your maxBranches must be >= 4');
+    }
+  
+    const activeTasks = tree.forest.activeTasks;
+  
+    const endTime = tree.top.time;
+    const startTime = tree.root.time;
+    const treeTime = endTime + startTime + 1;
+  
+    if (treeTime < maxBranches) {
+      return; // its impossible for there to exist branch overflow if not enough time has passed
+    }
+  
+    const count = tree.branchCount(maxBranches + 1);
+    if (count <= maxBranches) {
+      return;
+    }
+  
+    if (activeTasks.length) {
+      const firstTimeToSave = activeTasks.reduce((m, n) => {
+        return Math.min(m, n);
+      }, Number.POSITIVE_INFINITY);
+  
+      new Beaver(tree).trim(trimTo, firstTimeToSave);
+    } else {
+      new Beaver(tree).trim(trimTo, Number.POSITIVE_INFINITY, true);
+    }
+  }
 }

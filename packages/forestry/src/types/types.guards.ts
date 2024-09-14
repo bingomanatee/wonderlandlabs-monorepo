@@ -51,17 +51,17 @@ export function isMapKey<MapType>(
 export function isMutationValueProviderParams<Value>(
   a: unknown
 ): a is MutationValueProviderParams<Value> {
-  if (!isObj(a)) return false;
-  return Boolean("context" in a && a.context === ValueProviderContext.mutation);
+  if (!isObj(a)) {return false;}
+  return Boolean('context' in a && a.context === ValueProviderContext.mutation);
 }
 
 
 export function isLocalValueProviderParams<Value>(
   a: unknown
 ): a is LocalValueProviderParams<Value> {
-  if (!isObj(a)) return false;
+  if (!isObj(a)) {return false;}
   return Boolean(
-    "context" in a && a.context === ValueProviderContext.localCache
+    'context' in a && a.context === ValueProviderContext.localCache
   );
 }
 
@@ -69,9 +69,9 @@ export function isLocalValueProviderParams<Value>(
 export function isTruncationValueProviderParams<Value>(
   a: unknown
 ): a is TruncationValueProviderParams<Value> {
-  if (!isObj(a)) return false;
+  if (!isObj(a)) {return false;}
   return Boolean(
-    "context" in a && a.context === ValueProviderContext.truncation
+    'context' in a && a.context === ValueProviderContext.truncation
   );
 }
 
@@ -79,8 +79,8 @@ export function isTruncationValueProviderParams<Value>(
 export function isIttermittentCacheProviderParams<Value>(
   a: unknown
 ): a is IttermittentCacheProviderParams<Value> {
-  if (!isObj(a)) return false;
+  if (!isObj(a)) {return false;}
   return Boolean(
-    "context" in a && a.context === ValueProviderContext.itermittentCache
+    'context' in a && a.context === ValueProviderContext.itermittentCache
   );
 }

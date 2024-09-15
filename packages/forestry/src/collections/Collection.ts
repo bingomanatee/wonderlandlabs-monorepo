@@ -1,4 +1,4 @@
-import  Forest  from '../Forest';
+import { Forest } from '../Forest';
 import type { CollectionAction, CollectionIF } from '../types/type.collection';
 import type {
   ChangeIF,
@@ -8,7 +8,6 @@ import type {
 import type { ForestIF } from '../types/types.forest';
 import type { TreeIF, TreeParams } from '../types/types.trees';
 import type { PartialObserver } from 'rxjs';
-
 
 export type CollectionParams<ValueType> = TreeParams<ValueType> & {
   actions?: Map<string, CollectionAction<ValueType>>;

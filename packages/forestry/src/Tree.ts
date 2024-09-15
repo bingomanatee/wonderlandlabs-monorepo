@@ -20,11 +20,11 @@ import type {
 import { BehaviorSubject, filter, map } from 'rxjs';
 import type { PartialObserver } from 'rxjs';
 import { NotableHelper } from './utils';
-import Beaver from './Tree/Beaver';
-import { PreValidator } from './Tree/PreValidator';
-import BenchMarker from './Tree/BenchMarker';
+import { Beaver } from './treeHelpers/Beaver';
+import { PreValidator } from './treeHelpers/PreValidator';
+import { BenchMarker } from './treeHelpers/BenchMarker';
 
-export default class Tree<ValueType> implements TreeIF<ValueType> {
+export class Tree<ValueType> implements TreeIF<ValueType> {
   constructor(
     public forest: ForestIF,
     public readonly name: TreeName,

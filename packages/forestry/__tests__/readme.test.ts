@@ -1,5 +1,4 @@
-import Forest  from "../src/Forest";
-import { Collection } from "../src/collections/Collection";
+import { Forest, Collection } from "../lib";
 import { expect, it, describe } from "@jest/globals";
 import type { ValueProviderParams } from "../src/types/types.shared";
 import type { CollectionAction } from "../src/types/type.collection";

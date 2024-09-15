@@ -1,4 +1,4 @@
-import Tree from './Tree';
+import { Tree } from './Tree';
 
 import type { ForestIF, TaskFn } from './types/types.forest';
 import type { TreeName, TreeIF, TreeParams } from './types/types.trees';
@@ -22,7 +22,7 @@ function pad(n: number) {
   return str;
 }
 
-export default class Forest implements ForestIF {
+export class Forest implements ForestIF {
   uniqueTreeName(basis: string = 'tree'): string {
     if (!this.hasTree(basis)) {
       return basis;
@@ -74,7 +74,9 @@ export default class Forest implements ForestIF {
   public activeTaskSubject = new BehaviorSubject<Set<number>>(new Set());
 
   get activeTasks() {
-    if (!this.activeTaskSubject.value.size) {return [];}
+    if (!this.activeTaskSubject.value.size) {
+      return [];
+    }
 
     return Array.from(this.activeTaskSubject.value.values());
   }

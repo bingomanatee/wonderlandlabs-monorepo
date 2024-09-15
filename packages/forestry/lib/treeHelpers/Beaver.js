@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.Beaver = void 0;
 const Branch_1 = require("../Branch");
 class Beaver {
+    tree;
     constructor(tree) {
         this.tree = tree;
     }

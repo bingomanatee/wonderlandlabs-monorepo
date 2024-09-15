@@ -1,6 +1,4 @@
-import  Forest from "../src/Forest";
-import type { BranchIF } from "../src/types/types.branch";
-import type { TreeIF } from "../src/types/types.trees";
+import { Forest } from "../lib";
 import { expect, it, describe } from "@jest/globals";
 
 describe("tree", () => {

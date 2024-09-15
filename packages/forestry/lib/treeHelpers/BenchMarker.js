@@ -5,6 +5,7 @@ const types_guards_1 = require("../types/types.guards");
 const ValueProviderContext_1 = require("../types/ValueProviderContext");
 exports.BENCHMARK_CAUSE = '!BENCHMARK!';
 class BenchMarker {
+    tree;
     constructor(tree) {
         this.tree = tree;
     }

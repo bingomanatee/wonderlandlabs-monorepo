@@ -1,4 +1,4 @@
-import Forest  from '../../Forest';
+import { Forest } from '../../Forest';
 import type {
   FieldIF,
   FieldError,

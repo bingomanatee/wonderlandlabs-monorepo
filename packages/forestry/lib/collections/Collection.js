@@ -1,15 +1,14 @@
 "use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Collection = void 0;
-const Forest_1 = __importDefault(require("../Forest"));
+const Forest_1 = require("../Forest");
 class Collection {
+    name;
+    params;
     constructor(name, params, forest) {
         this.name = name;
         this.params = params;
-        this.forest = forest ?? new Forest_1.default();
+        this.forest = forest ?? new Forest_1.Forest();
         if (this.forest.hasTree(name)) {
             if (params?.reuseTree) {
                 if (params.validator || params.initial) {
@@ -62,6 +61,7 @@ class Collection {
     subscribe(observer) {
         return this.subject.subscribe(observer);
     }
+    forest;
     get tree() {
         const tree = this.forest.tree(this.name);
         if (!tree) {

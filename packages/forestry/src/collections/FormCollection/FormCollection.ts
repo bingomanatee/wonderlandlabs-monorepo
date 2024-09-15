@@ -1,4 +1,4 @@
-import Forest  from '../../Forest';
+import { Forest } from '../../Forest';
 import type { ForestIF } from '../../types/types.forest';
 import type { SubscribeFn } from '../../types/types.shared';
 import { BehaviorSubject, map } from 'rxjs';
@@ -25,7 +25,7 @@ import { FormFieldMapCollection } from './FormFieldMapCollection';
 
 type FieldDef = FieldList | FieldRecord;
 
-export default class FormCollection implements FormCollectionIF {
+export class FormCollection implements FormCollectionIF {
   constructor(public name: string, fields: FieldDef, params?: Params) {
     this.forest = params?.forest ?? new Forest();
     this.initFields(fields);
@@ -128,7 +128,9 @@ export default class FormCollection implements FormCollectionIF {
     return this.fieldMapCollection?.has(name);
   }
   field(name: string): FieldIF | undefined {
-    if (!this.hasField(name)) {return undefined;}
+    if (!this.hasField(name)) {
+      return undefined;
+    }
     return this.fieldMapCollection?.get(name);
   }
 

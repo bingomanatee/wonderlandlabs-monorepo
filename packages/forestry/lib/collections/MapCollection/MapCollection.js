@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.MapCollection = void 0;
 exports.noSet = noSet;
 const utils_1 = require("../../utils");
 const Collection_1 = require("../Collection");
@@ -126,4 +127,4 @@ class MapCollection extends Collection_1.Collection {
         };
     }
 }
-exports.default = MapCollection;
+exports.MapCollection = MapCollection;

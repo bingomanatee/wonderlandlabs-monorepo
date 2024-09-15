@@ -1,6 +1,6 @@
-import  Forest  from "../src/Forest";
-import { BENCHMARK_CAUSE } from "../src/Tree/BenchMarker";
-import type { BranchIF } from "../src/types/types.branch";
+import { Forest } from "../lib";
+import { BENCHMARK_CAUSE } from "../lib/Tree/BenchMarker";
+import type { BranchIF } from "../lib/types/types.branch";
 import type {
   MutationValueProviderFN,
   Mutator,

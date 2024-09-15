@@ -5,7 +5,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.FormFieldMapCollection = void 0;
 const extendField_1 = __importDefault(require("./extendField"));
-const MapCollection_1 = __importDefault(require("../MapCollection/MapCollection"));
+const MapCollection_1 = require("../MapCollection/MapCollection");
 /**
  * this is a "utility sub-class" of FormCollection designed exclusively
  * to track the field properties of FormCollection's fields.
@@ -15,7 +15,9 @@ const MapCollection_1 = __importDefault(require("../MapCollection/MapCollection"
  * values, allowing for the initial statics and validators to
  * provide defaults for the transient properties.
  */
-class FormFieldMapCollection extends MapCollection_1.default {
+class FormFieldMapCollection extends MapCollection_1.MapCollection {
+    name;
+    formCollection;
     constructor(name, fields, formCollection) {
         const mappedFields = new Map();
         for (const [name, field] of fields) {

@@ -1,13 +1,12 @@
 import { Branch } from '../Branch';
 import type { BranchIF } from '../types/types.branch';
 import type { TreeIF } from '../types/types.trees';
-import { BENCHMARK_CAUSE } from './BenchMarker';
 
 type ActiveTaskInfo = {
   hasActiveTasks: boolean;
   earliestActiveTask: number;
 };
-export default class Beaver<ValueType> {
+export class Beaver<ValueType> {
   constructor(private tree: TreeIF<ValueType>) {}
 
   /**
@@ -26,7 +25,9 @@ export default class Beaver<ValueType> {
 
     let count = 0;
     this.tree.forEachDown((branch, c) => {
-      if (tooLongBranch) {return;}
+      if (tooLongBranch) {
+        return;
+      }
       if (c >= maxBranches - 1) {
         if (hasActiveTasks) {
           if (branch.time < earliestActiveTask) {

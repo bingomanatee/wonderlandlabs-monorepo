@@ -3,7 +3,7 @@ import type { SubscribeFn } from '../../types/types.shared';
 import type { PartialObserver, Unsubscribable } from 'rxjs';
 import type { FieldList, FieldRecord, FormSetIF, Params, FieldIF, BaseParamMap, FormCollectionIF, FieldMutatorFN } from './types.formCollection';
 type FieldDef = FieldList | FieldRecord;
-export default class FormCollection implements FormCollectionIF {
+export declare class FormCollection implements FormCollectionIF {
     name: string;
     constructor(name: string, fields: FieldDef, params?: Params);
     fieldBaseParams: BaseParamMap;

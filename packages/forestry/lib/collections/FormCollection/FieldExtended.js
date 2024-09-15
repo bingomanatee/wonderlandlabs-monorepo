@@ -9,13 +9,13 @@ const UNSET = Symbol('unset');
  * --- deprecated - we are using functions now to extend fields.
  */
 class FieldExtended {
+    field;
+    name;
+    formCollection;
     constructor(field, name, formCollection) {
         this.field = field;
         this.name = name;
         this.formCollection = formCollection;
-        this._props = UNSET;
-        this._validators = UNSET;
-        this._errors = UNSET;
     }
     get value() {
         return this.field.value;
@@ -23,6 +23,7 @@ class FieldExtended {
     get baseParamsLocal() {
         return this.formCollection.fieldBaseParams?.get(this.name) ?? {};
     }
+    _props = UNSET;
     get props() {
         if (this._props === UNSET) {
             this._props = [this.baseParamsLocal?.props, this.field.props].reduce((out, item) => {
@@ -34,6 +35,7 @@ class FieldExtended {
         }
         return typeof this._props === 'symbol' ? undefined : this._props;
     }
+    _validators = UNSET;
     get validators() {
         if (this._validators === UNSET) {
             this._validators = [
@@ -43,6 +45,7 @@ class FieldExtended {
         }
         return typeof this._validators === 'symbol' ? undefined : this._validators;
     }
+    _errors = UNSET;
     /**
      * summarizes all the errors in the
      * @returns FieldError[]

@@ -9,7 +9,7 @@ export function noSet() {
   throw new Error('forest maps are immutable');
 }
 
-export default class MapCollection<
+export class MapCollection<
   KeyType = unknown,
   ValueType = unknown
 > extends Collection<Map<KeyType, ValueType>> {
@@ -51,7 +51,9 @@ export default class MapCollection<
   }
 
   has(key: KeyType) {
-    if (!this.value) {return false;}
+    if (!this.value) {
+      return false;
+    }
     return this.value.has(key);
   }
 

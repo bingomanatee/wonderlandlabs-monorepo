@@ -4,7 +4,6 @@ import type { TreeIF } from './types/types.trees';
 import { type ChangeIF } from './types/types.shared';
 import { ValueProviderContext } from './types/ValueProviderContext';
 import { isAssert, isMutator } from './types/types.guards';
-import { isCacheable } from './isCacheable';
 
 export class Branch<ValueType> implements BranchIF<ValueType> {
   constructor(

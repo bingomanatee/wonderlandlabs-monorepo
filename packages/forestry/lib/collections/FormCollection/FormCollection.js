@@ -1,22 +1,20 @@
 "use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
-const Forest_1 = __importDefault(require("../../Forest"));
+exports.FormCollection = void 0;
+const Forest_1 = require("../../Forest");
 const rxjs_1 = require("rxjs");
 const types_formCollection_1 = require("./types.formCollection");
 const FormFieldMapCollection_1 = require("./FormFieldMapCollection");
 class FormCollection {
+    name;
     constructor(name, fields, params) {
         this.name = name;
-        this.fieldBaseParams = new Map();
-        // #region form
-        this.form = {};
-        this.forest = params?.forest ?? new Forest_1.default();
+        this.forest = params?.forest ?? new Forest_1.Forest();
         this.initFields(fields);
         this.initForm(params?.form);
     }
+    fieldBaseParams = new Map();
+    forest;
     /**
      * interprets fields into a fieldMap.
      * @param {FieldDef} fields
@@ -52,6 +50,9 @@ class FormCollection {
         const fcName = this.forest.uniqueTreeName(this.name + ':fields');
         this.fieldMapCollection = new FormFieldMapCollection_1.FormFieldMapCollection(fcName, fieldMap, this);
     }
+    fieldMapCollection;
+    // #region form
+    form = {};
     initForm(initialForm) {
         if (initialForm) {
             this.form = initialForm;
@@ -62,6 +63,7 @@ class FormCollection {
     get value() {
         return this.stream.value;
     }
+    _stream;
     get stream() {
         if (!this._stream) {
             this._stream = new rxjs_1.BehaviorSubject({
@@ -114,4 +116,4 @@ class FormCollection {
         return true;
     }
 }
-exports.default = FormCollection;
+exports.FormCollection = FormCollection;

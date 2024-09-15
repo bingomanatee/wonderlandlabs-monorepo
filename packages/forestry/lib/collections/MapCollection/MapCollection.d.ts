@@ -3,7 +3,7 @@ import type { IterFn } from '../../types/types.shared';
 import { Collection } from '../Collection';
 import type { CollectionParams } from '../Collection';
 export declare function noSet(): void;
-export default class MapCollection<KeyType = unknown, ValueType = unknown> extends Collection<Map<KeyType, ValueType>> {
+export declare class MapCollection<KeyType = unknown, ValueType = unknown> extends Collection<Map<KeyType, ValueType>> {
     constructor(name: string, params: CollectionParams<Map<KeyType, ValueType>>, forest?: ForestIF);
     has(key: KeyType): boolean;
     set(key: KeyType, value: ValueType): void;

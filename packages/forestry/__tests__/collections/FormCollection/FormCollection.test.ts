@@ -1,6 +1,5 @@
 import { expect, it, describe } from "@jest/globals";
-import  Forest  from "../../../src/Forest";
-import FormCollection from "../../../src/collections/FormCollection/FormCollection";
+import { Forest, FormCollection } from "../../../lib";
 import type {
   FieldError,
   FieldIF,

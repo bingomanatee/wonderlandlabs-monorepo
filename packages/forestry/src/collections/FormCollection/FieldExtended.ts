@@ -9,7 +9,6 @@ import type {
 } from './types.formCollection';
 
 type MessyValidator = FieldValidator | undefined;
-type MessyValidators = MessyValidator[];
 const UNSET = Symbol('unset');
 /**
  * FieldExtended blends the properties of the static props of the

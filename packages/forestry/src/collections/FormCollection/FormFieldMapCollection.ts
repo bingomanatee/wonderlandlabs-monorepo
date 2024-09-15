@@ -9,7 +9,7 @@ import type {
   FieldProps,
 } from './types.formCollection';
 import extendField from './extendField';
-import MapCollection from '../MapCollection/MapCollection';
+import { MapCollection } from '../MapCollection/MapCollection';
 
 /**
  * this is a "utility sub-class" of FormCollection designed exclusively
@@ -72,7 +72,9 @@ export class FormFieldMapCollection
   }
 
   updateFieldProperty(name: string, key: string, value: any) {
-    if (key === 'value') {return this.setFieldValue(name, value);}
+    if (key === 'value') {
+      return this.setFieldValue(name, value);
+    }
     if (!this.tree.top) {
       throw new Error('canot setFieldValue to empty FormFieldMapCollection');
     }
@@ -131,11 +133,12 @@ export class FormFieldMapCollection
         const currentProps = field.props ? field.props : {};
 
         const newProps = { ...basisProps, currentProps, props };
-        if (propsToDelete)
-        {for (const p of propsToDelete) {
-          delete newProps[p];
-        }}
-        return { props:newProps, ...field }; // updatedField will extend the field/update errors
+        if (propsToDelete) {
+          for (const p of propsToDelete) {
+            delete newProps[p];
+          }
+        }
+        return { props: newProps, ...field }; // updatedField will extend the field/update errors
       }
     );
   }

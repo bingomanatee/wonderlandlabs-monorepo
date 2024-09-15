@@ -1,4 +1,4 @@
-import type { ForestIF } from "../../types/types.forest";
+import type { ForestIF } from '../../types/types.forest';
 export type FieldProps = Record<string, any>;
 export type FieldValue = string | number;
 export type FieldMap = Map<string, FieldIF>;
@@ -12,6 +12,7 @@ export interface FieldIF {
     name: string;
     value: FieldValue;
     edited?: boolean;
+    committed?: boolean;
     errors?: FieldError[];
     props?: FieldProps;
     isRequired?: boolean;
@@ -21,7 +22,7 @@ export interface FieldIF {
     baseParams?: FieldBase;
 }
 export declare function isFieldIF(a: unknown): a is FieldIF;
-export type FieldBase = Partial<Omit<FieldIF, "baseParams" | "value">>;
+export type FieldBase = Partial<Omit<FieldIF, 'baseParams' | 'value'>>;
 export interface FormIF {
     name?: string;
     props?: Record<string, any>;
@@ -49,5 +50,8 @@ export interface FormCollectionIF {
     setFieldValue(name: string, value: string | number): void;
     updateFieldProperty(name: string, key: string, value: any): void;
     updateField(name: string, mutator: FieldMutatorFN): void;
+    hasField(name: string): boolean;
+    field(name: string): FieldIF | undefined;
+    commit(name?: string | boolean): void;
 }
 export type FieldMutatorFN = (field: FieldIF, formCollection: FormCollectionIF) => FieldIF;

@@ -101,6 +101,13 @@ const makeMockFormCollection = () => ({
     setFieldValue() { },
     updateFieldProperty() { },
     updateField() { },
+    commit() { },
+    hasField() {
+        return false;
+    },
+    field() {
+        return undefined;
+    },
     fieldBaseParams: new Map([
         [
             'username',

@@ -81,6 +81,15 @@ class FormCollection {
         // @s-expect-error TS2416
         return this.stream.subscribe(observer);
     }
+    hasField(name) {
+        return this.fieldMapCollection?.has(name);
+    }
+    field(name) {
+        if (!this.hasField(name)) {
+            return undefined;
+        }
+        return this.fieldMapCollection?.get(name);
+    }
     setFieldValue(name, value) {
         this.fieldMapCollection?.setFieldValue(name, value);
     }
@@ -89,6 +98,9 @@ class FormCollection {
     }
     updateField(name, mutator) {
         this.fieldMapCollection?.updateField(name, mutator);
+    }
+    commit(name = true) {
+        this.fieldMapCollection?.commit(name);
     }
     get isValid() {
         for (const [, field] of this.fieldMapCollection.value) {

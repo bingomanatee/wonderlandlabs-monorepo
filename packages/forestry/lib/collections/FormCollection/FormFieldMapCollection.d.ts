@@ -1,6 +1,6 @@
-import type { CollectionIF } from "../../types/type.collection";
-import type { FieldMap, FormCollectionIF, FieldIF, FieldMutatorFN, FieldProps } from "./types.formCollection";
-import MapCollection from "../MapCollection/MapCollection";
+import type { CollectionIF } from '../../types/type.collection';
+import type { FieldMap, FormCollectionIF, FieldIF, FieldMutatorFN, FieldProps } from './types.formCollection';
+import MapCollection from '../MapCollection/MapCollection';
 /**
  * this is a "utility sub-class" of FormCollection designed exclusively
  * to track the field properties of FormCollection's fields.
@@ -29,5 +29,6 @@ export declare class FormFieldMapCollection extends MapCollection<string, FieldI
      * @param mutator (field) => field
      */
     updateField(name: string, mutator: FieldMutatorFN): void;
+    commit(name: string | true): void;
     updateFieldProps(name: string, props: FieldProps, propsToDelete?: string[]): void;
 }

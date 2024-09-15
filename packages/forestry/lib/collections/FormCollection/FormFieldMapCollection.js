@@ -39,28 +39,29 @@ class FormFieldMapCollection extends MapCollection_1.default {
      */
     setFieldValue(name, value) {
         if (!this.tree.top) {
-            throw new Error("canot setFieldValue to empty FormFieldMapCollection");
+            throw new Error('canot setFieldValue to empty FormFieldMapCollection');
         }
         if (!this.tree.top.value.has(name)) {
-            throw new Error("no " + name + " in form");
+            throw new Error('no ' + name + ' in form');
         }
-        let field = this.get(name);
+        const field = this.get(name);
         const basis = this.formCollection.fieldBaseParams.get(name) ?? {};
-        let newField = { ...basis, ...field, value, edited: true };
+        const newField = (0, extendField_1.default)({ value, edited: true }, field, basis);
         this.set(name, newField);
     }
     updateFieldProperty(name, key, value) {
-        if (key === "value")
+        if (key === 'value') {
             return this.setFieldValue(name, value);
+        }
         if (!this.tree.top) {
-            throw new Error("canot setFieldValue to empty FormFieldMapCollection");
+            throw new Error('canot setFieldValue to empty FormFieldMapCollection');
         }
         if (!this.tree.top.value.has(name)) {
-            throw new Error("no " + name + " in form");
+            throw new Error('no ' + name + ' in form');
         }
-        let field = this.get(name);
+        const field = this.get(name);
         const basis = this.formCollection.fieldBaseParams.get(name) ?? {};
-        let newField = { ...basis, ...field, [key]: value };
+        const newField = (0, extendField_1.default)({ [key]: value }, field, basis);
         this.set(name, newField);
     }
     /**
@@ -71,16 +72,29 @@ class FormFieldMapCollection extends MapCollection_1.default {
      */
     updateField(name, mutator) {
         if (!this.tree.top) {
-            throw new Error("canot setFieldValue to empty FormFieldMapCollection");
+            throw new Error('canot setFieldValue to empty FormFieldMapCollection');
         }
         if (!this.tree.top.value.has(name)) {
-            throw new Error("no " + name + " in form");
+            throw new Error('no ' + name + ' in form');
         }
-        let field = this.get(name);
-        let updatedField = mutator(field, this.formCollection);
+        const field = this.get(name);
+        const updatedField = mutator(field, this.formCollection);
         const basis = this.formCollection.fieldBaseParams.get(name) ?? {};
-        let newField = { ...basis, ...updatedField };
+        const newField = (0, extendField_1.default)(updatedField, basis);
         this.set(name, newField);
+    }
+    commit(name) {
+        if (name === true) {
+            const self = this;
+            this.forest.do(() => {
+                for (const fieldName of self.keys()) {
+                    this.updateFieldProperty(fieldName, 'committed', true);
+                }
+            });
+        }
+        else {
+            this.updateFieldProperty(name, 'committed', true);
+        }
     }
     updateFieldProps(name, props, propsToDelete) {
         return this.updateField(name, (field, formCollection) => {
@@ -88,11 +102,12 @@ class FormFieldMapCollection extends MapCollection_1.default {
             const basisProps = basis.props ? basis.props : {};
             const currentProps = field.props ? field.props : {};
             const newProps = { ...basisProps, currentProps, props };
-            if (propsToDelete)
+            if (propsToDelete) {
                 for (const p of propsToDelete) {
                     delete newProps[p];
                 }
-            return { ...field, props: newProps };
+            }
+            return { props: newProps, ...field }; // updatedField will extend the field/update errors
         });
     }
 }

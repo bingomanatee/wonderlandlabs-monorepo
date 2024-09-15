@@ -1,6 +1,9 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-const Forest_1 = require("../../Forest");
+const Forest_1 = __importDefault(require("../../Forest"));
 const rxjs_1 = require("rxjs");
 const types_formCollection_1 = require("./types.formCollection");
 const FormFieldMapCollection_1 = require("./FormFieldMapCollection");
@@ -10,7 +13,7 @@ class FormCollection {
         this.fieldBaseParams = new Map();
         // #region form
         this.form = {};
-        this.forest = params?.forest ?? new Forest_1.Forest();
+        this.forest = params?.forest ?? new Forest_1.default();
         this.initFields(fields);
         this.initForm(params?.form);
     }

@@ -1,12 +1,15 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Collection = void 0;
-const Forest_1 = require("../Forest");
+const Forest_1 = __importDefault(require("../Forest"));
 class Collection {
     constructor(name, params, forest) {
         this.name = name;
         this.params = params;
-        this.forest = forest ?? new Forest_1.Forest();
+        this.forest = forest ?? new Forest_1.default();
         if (this.forest.hasTree(name)) {
             if (params?.reuseTree) {
                 if (params.validator || params.initial) {

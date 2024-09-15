@@ -1,4 +1,4 @@
-import { Forest } from '../Forest';
+import  Forest  from '../Forest';
 import type { CollectionAction, CollectionIF } from '../types/type.collection';
 import type {
   ChangeIF,

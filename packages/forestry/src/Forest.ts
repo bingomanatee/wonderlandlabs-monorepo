@@ -22,7 +22,7 @@ function pad(n: number) {
   return str;
 }
 
-export class Forest implements ForestIF {
+export default class Forest implements ForestIF {
   uniqueTreeName(basis: string = 'tree'): string {
     if (!this.hasTree(basis)) {
       return basis;

@@ -1,4 +1,4 @@
-import { Forest } from "../src/Forest";
+import  Forest  from "../src/Forest";
 import { BENCHMARK_CAUSE } from "../src/Tree/BenchMarker";
 import type { BranchIF } from "../src/types/types.branch";
 import type {

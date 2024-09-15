@@ -1,4 +1,4 @@
-import { Forest } from "../../src/Forest";
+import  Forest  from "../../src/Forest";
 import MapCollection from "../../src/collections/MapCollection/MapCollection";
 import {expect, it, describe} from '@jest/globals';
 

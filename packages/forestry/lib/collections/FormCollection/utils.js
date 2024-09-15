@@ -1,4 +1,7 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.makeMockFormCollection = exports.makeFields = exports.commonPasswords = exports.TOO_SHORT = exports.IS_REQUIRED = exports.IS_TOO_COMMON = exports.commonUserNames = exports.NO_EMPTY_CHARS = void 0;
 exports.isString = isString;
@@ -7,7 +10,7 @@ exports.isCommonUserName = isCommonUserName;
 exports.isRequired = isRequired;
 exports.isLongEnough = isLongEnough;
 exports.isNotCommonPassword = isNotCommonPassword;
-const Forest_1 = require("../../Forest");
+const Forest_1 = __importDefault(require("../../Forest"));
 function isString(field) {
     if (!field.value && !field.isRequired) {
         return null;
@@ -97,7 +100,7 @@ const makeFields = (values = {
 ]);
 exports.makeFields = makeFields;
 const makeMockFormCollection = () => ({
-    forest: new Forest_1.Forest(),
+    forest: new Forest_1.default(),
     setFieldValue() { },
     updateFieldProperty() { },
     updateField() { },

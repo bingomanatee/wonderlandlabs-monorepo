@@ -1,4 +1,4 @@
-import { Forest } from "../src/Forest";
+import Forest  from "../src/Forest";
 import { Collection } from "../src/collections/Collection";
 import { expect, it, describe } from "@jest/globals";
 import type { ValueProviderParams } from "../src/types/types.shared";

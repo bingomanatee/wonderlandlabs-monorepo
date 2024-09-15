@@ -1,4 +1,4 @@
-import { Forest } from '../../Forest';
+import Forest  from '../../Forest';
 import type { ForestIF } from '../../types/types.forest';
 import type { SubscribeFn } from '../../types/types.shared';
 import { BehaviorSubject, map } from 'rxjs';

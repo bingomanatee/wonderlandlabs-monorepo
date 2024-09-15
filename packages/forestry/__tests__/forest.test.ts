@@ -1,4 +1,4 @@
-import { Forest } from "../src/Forest";
+import  {Forest}  from "../lib";
 import { expect, it, describe } from "@jest/globals";
 import type {
   ChangeIF,

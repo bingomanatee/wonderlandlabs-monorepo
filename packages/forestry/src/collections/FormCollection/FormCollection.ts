@@ -2,7 +2,7 @@ import { Forest } from '../../Forest';
 import type { ForestIF } from '../../types/types.forest';
 import type { SubscribeFn } from '../../types/types.shared';
 import { BehaviorSubject, map } from 'rxjs';
-import type { SubjectLike, PartialObserver, Unsubscribable } from 'rxjs';
+import type { PartialObserver, Unsubscribable } from 'rxjs';
 import type {
   FieldList,
   FieldRecord,
@@ -14,6 +14,7 @@ import type {
   BaseParamMap,
   FormCollectionIF,
   FieldMap,
+  FieldMutatorFN,
 } from './types.formCollection';
 import {
   isFieldList,
@@ -34,7 +35,6 @@ export default class FormCollection implements FormCollectionIF {
   public fieldBaseParams: BaseParamMap = new Map();
 
   public forest: ForestIF;
-  private fieldMap: Map<string, FieldIF> = new Map();
 
   /**
    * interprets fields into a fieldMap.
@@ -124,8 +124,28 @@ export default class FormCollection implements FormCollectionIF {
     return this.stream.subscribe(observer) as Unsubscribable;
   }
 
+  hasField(name: string) {
+    return this.fieldMapCollection?.has(name);
+  }
+  field(name: string): FieldIF | undefined {
+    if (!this.hasField(name)) {return undefined;}
+    return this.fieldMapCollection?.get(name);
+  }
+
   setFieldValue(name: string, value: string | number) {
     this.fieldMapCollection?.setFieldValue(name, value);
+  }
+
+  updateFieldProperty(name: string, key: string, value: any) {
+    this.fieldMapCollection?.updateFieldProperty(name, key, value);
+  }
+
+  updateField(name: string, mutator: FieldMutatorFN) {
+    this.fieldMapCollection?.updateField(name, mutator);
+  }
+
+  commit(name: string | true = true) {
+    this.fieldMapCollection?.commit(name);
   }
 
   get isValid(): boolean {

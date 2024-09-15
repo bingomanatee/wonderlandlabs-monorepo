@@ -3,10 +3,13 @@ import type {
   FieldIF,
   FieldError,
   FormCollectionIF,
+  FieldMutatorFN,
 } from './types.formCollection';
 
 export function isString(field: FieldIF) {
-  if (!field.value && !field.isRequired) {return null;}
+  if (!field.value && !field.isRequired) {
+    return null;
+  }
   if (typeof field.value !== 'string') {
     return {
       message: 'must be a string',
@@ -33,7 +36,9 @@ export const commonUserNames = 'john,user,username,companyname'.split(',');
 export const IS_TOO_COMMON = 'is too common';
 export const IS_REQUIRED = 'required';
 export function isCommonUserName(field: FieldIF, errors: FieldError[]) {
-  if (errors.length) {return null;}
+  if (errors.length) {
+    return null;
+  }
   const { value } = field;
   const s = value as string;
   if (commonUserNames.includes(s.toLowerCase())) {
@@ -55,17 +60,22 @@ export function isRequired(field: FieldIF) {
 
 export const TOO_SHORT = 'field must be 8 or more characters';
 export function isLongEnough(field: FieldIF, errors: FieldError[]) {
-  if (errors.length || typeof field.value !== 'string') {return;}
-  if (field.value.length < 8)
-  {return {
-    message: TOO_SHORT,
-    severity: 5,
-  };}
+  if (errors.length || typeof field.value !== 'string') {
+    return;
+  }
+  if (field.value.length < 8) {
+    return {
+      message: TOO_SHORT,
+      severity: 5,
+    };
+  }
 }
 export const commonPasswords = 'password,abc123'.split(',');
 
 export function isNotCommonPassword(field: FieldIF, errors: FieldError[]) {
-  if (errors.length) {return null;}
+  if (errors.length) {
+    return null;
+  }
   const { value } = field;
   const s = value as string;
   if (commonPasswords.includes(s.toLowerCase())) {
@@ -94,6 +104,16 @@ export const makeFields = (
 
 export const makeMockFormCollection = (): FormCollectionIF => ({
   forest: new Forest(),
+  setFieldValue() {},
+  updateFieldProperty() {},
+  updateField() {},
+  commit() {},
+  hasField() {
+    return false;
+  },
+  field() {
+    return undefined;
+  },
   fieldBaseParams: new Map([
     [
       'username',

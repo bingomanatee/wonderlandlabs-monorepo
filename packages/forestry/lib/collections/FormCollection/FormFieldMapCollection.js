@@ -4,10 +4,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.FormFieldMapCollection = void 0;
-const Collection_1 = require("../Collection");
 const extendField_1 = __importDefault(require("./extendField"));
-const utils_1 = require("../../utils");
-const fieldMapSetValueProxy_1 = require("./fieldMapSetValueProxy");
+const MapCollection_1 = __importDefault(require("../MapCollection/MapCollection"));
 /**
  * this is a "utility sub-class" of FormCollection designed exclusively
  * to track the field properties of FormCollection's fields.
@@ -17,7 +15,7 @@ const fieldMapSetValueProxy_1 = require("./fieldMapSetValueProxy");
  * values, allowing for the initial statics and validators to
  * provide defaults for the transient properties.
  */
-class FormFieldMapCollection extends Collection_1.Collection {
+class FormFieldMapCollection extends MapCollection_1.default {
     constructor(name, fields, formCollection) {
         const mappedFields = new Map();
         for (const [name, field] of fields) {
@@ -41,33 +39,61 @@ class FormFieldMapCollection extends Collection_1.Collection {
      */
     setFieldValue(name, value) {
         if (!this.tree.top) {
-            throw new Error('canot setFieldValue to empty FormFieldMapCollection');
+            throw new Error("canot setFieldValue to empty FormFieldMapCollection");
         }
-        const map = this.tree.top.value;
-        if (!map.has(name)) {
-            throw new Error('FormFieldMapCollection does not have a field ' + name);
+        if (!this.tree.top.value.has(name)) {
+            throw new Error("no " + name + " in form");
         }
-        if (map.get(name).value === value) {
-            return;
-        } // unchanged value;
-        const basis = this.formCollection.fieldBaseParams.get(name);
-        // if we can use proxies, make a proxy of the map that returns a copy of the named field
-        // with a different value for the name field
-        // without exploding memory with duplicate maps all over the place.
-        if (utils_1.canProxy) {
-            const next = (0, fieldMapSetValueProxy_1.fieldMapSetValueProxy)(map, name, value, basis);
-            this.next(next, 'setFieldValue');
+        let field = this.get(name);
+        const basis = this.formCollection.fieldBaseParams.get(name) ?? {};
+        let newField = { ...basis, ...field, value, edited: true };
+        this.set(name, newField);
+    }
+    updateFieldProperty(name, key, value) {
+        if (key === "value")
+            return this.setFieldValue(name, value);
+        if (!this.tree.top) {
+            throw new Error("canot setFieldValue to empty FormFieldMapCollection");
         }
-        else {
-            const prev = map.get(name);
-            if (!prev) {
-                throw new Error('cannot get ' + name);
-            } // typescriptism
-            const next = (0, extendField_1.default)({ name, value }, prev, basis);
-            const newMap = new Map(map);
-            newMap.set(name, next);
-            this.next(newMap, 'setFieldValue');
+        if (!this.tree.top.value.has(name)) {
+            throw new Error("no " + name + " in form");
         }
+        let field = this.get(name);
+        const basis = this.formCollection.fieldBaseParams.get(name) ?? {};
+        let newField = { ...basis, ...field, [key]: value };
+        this.set(name, newField);
+    }
+    /**
+     * update a field parametrically with a mutation function
+     *
+     * @param name string
+     * @param mutator (field) => field
+     */
+    updateField(name, mutator) {
+        if (!this.tree.top) {
+            throw new Error("canot setFieldValue to empty FormFieldMapCollection");
+        }
+        if (!this.tree.top.value.has(name)) {
+            throw new Error("no " + name + " in form");
+        }
+        let field = this.get(name);
+        let updatedField = mutator(field, this.formCollection);
+        const basis = this.formCollection.fieldBaseParams.get(name) ?? {};
+        let newField = { ...basis, ...updatedField };
+        this.set(name, newField);
+    }
+    updateFieldProps(name, props, propsToDelete) {
+        return this.updateField(name, (field, formCollection) => {
+            const basis = formCollection.fieldBaseParams.get(name) ?? {};
+            const basisProps = basis.props ? basis.props : {};
+            const currentProps = field.props ? field.props : {};
+            const newProps = { ...basisProps, currentProps, props };
+            if (propsToDelete)
+                for (const p of propsToDelete) {
+                    delete newProps[p];
+                }
+            return { ...field, props: newProps };
+        });
     }
 }
 exports.FormFieldMapCollection = FormFieldMapCollection;

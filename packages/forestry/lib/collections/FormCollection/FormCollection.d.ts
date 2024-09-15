@@ -1,14 +1,13 @@
 import type { ForestIF } from '../../types/types.forest';
 import type { SubscribeFn } from '../../types/types.shared';
 import type { PartialObserver, Unsubscribable } from 'rxjs';
-import type { FieldList, FieldRecord, FormSetIF, Params, BaseParamMap, FormCollectionIF } from './types.formCollection';
+import type { FieldList, FieldRecord, FormSetIF, Params, BaseParamMap, FormCollectionIF, FieldMutatorFN } from './types.formCollection';
 type FieldDef = FieldList | FieldRecord;
 export default class FormCollection implements FormCollectionIF {
     name: string;
     constructor(name: string, fields: FieldDef, params?: Params);
     fieldBaseParams: BaseParamMap;
     forest: ForestIF;
-    private fieldMap;
     /**
      * interprets fields into a fieldMap.
      * @param {FieldDef} fields
@@ -22,6 +21,8 @@ export default class FormCollection implements FormCollectionIF {
     private get stream();
     subscribe(observer: PartialObserver<FormSetIF> | SubscribeFn<FormSetIF>): Unsubscribable;
     setFieldValue(name: string, value: string | number): void;
+    updateFieldProperty(name: string, key: string, value: any): void;
+    updateField(name: string, mutator: FieldMutatorFN): void;
     get isValid(): boolean;
 }
 export {};

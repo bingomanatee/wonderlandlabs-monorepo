@@ -1,8 +1,12 @@
-# Forest 3.0 : "Forestry"
+# Forestry 3.0
 
 Forest is an attempt to create a journalled, transactional synchronous, query based muuti collection ecosystem.
 
 It is intened as a Redis Killer for client side / react apps, but can have other applications.
+
+# STATUS: AlPHA
+
+currently Forestry is undergoing alpha testing. For a stable state system check out   `wonderlandlabs/forest`.
 
 ## Journeled
 

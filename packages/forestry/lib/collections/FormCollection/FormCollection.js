@@ -8,7 +8,6 @@ class FormCollection {
     constructor(name, fields, params) {
         this.name = name;
         this.fieldBaseParams = new Map();
-        this.fieldMap = new Map();
         // #region form
         this.form = {};
         this.forest = params?.forest ?? new Forest_1.Forest();
@@ -84,6 +83,12 @@ class FormCollection {
     }
     setFieldValue(name, value) {
         this.fieldMapCollection?.setFieldValue(name, value);
+    }
+    updateFieldProperty(name, key, value) {
+        this.fieldMapCollection?.updateFieldProperty(name, key, value);
+    }
+    updateField(name, mutator) {
+        this.fieldMapCollection?.updateField(name, mutator);
     }
     get isValid() {
         for (const [, field] of this.fieldMapCollection.value) {

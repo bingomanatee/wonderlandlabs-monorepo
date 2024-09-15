@@ -98,6 +98,9 @@ const makeFields = (values = {
 exports.makeFields = makeFields;
 const makeMockFormCollection = () => ({
     forest: new Forest_1.Forest(),
+    setFieldValue() { },
+    updateFieldProperty() { },
+    updateField() { },
     fieldBaseParams: new Map([
         [
             'username',

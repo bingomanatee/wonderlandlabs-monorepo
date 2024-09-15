@@ -1,4 +1,3 @@
-import type { CollectionIF } from '../../types/type.collection';
 import type { ForestIF } from '../../types/types.forest';
 import { isObj, isField } from '../../types/types.guards';
 
@@ -22,7 +21,8 @@ export interface FieldIF {
   value: FieldValue;
   // ^ ^ the only required values
 
-  edited?: boolean;
+  edited?: boolean; // has the value been changed
+  committed?: boolean; // has the field been "committed" (blur/tab/enter)
   errors?: FieldError[]; // transient - derived from validators if any.
 
   // v   v  v  values that are most likely NON chaqnging and present in baseParams.
@@ -109,4 +109,15 @@ export type BaseParamMap = Map<string, FieldBase>;
 export interface FormCollectionIF {
   forest: ForestIF;
   fieldBaseParams: BaseParamMap;
+  setFieldValue(name: string, value: string | number): void;
+  updateFieldProperty(name: string, key: string, value: any): void;
+  updateField(name: string, mutator: FieldMutatorFN): void;
+  hasField(name: string): boolean;
+  field(name: string): FieldIF | undefined;
+  commit(name?: string | boolean) : void;
 }
+
+export type FieldMutatorFN = (
+  field: FieldIF,
+  formCollection: FormCollectionIF
+) => FieldIF;

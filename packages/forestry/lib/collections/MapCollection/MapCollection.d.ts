@@ -1,9 +1,10 @@
-import type { IterFn } from '../../types/types.shared';
-import { Collection } from '../Collection';
-import type { CollectionParams } from '../Collection';
+import type { ForestIF } from "../../types/types.forest";
+import type { IterFn } from "../../types/types.shared";
+import { Collection } from "../Collection";
+import type { CollectionParams } from "../Collection";
 export declare function noSet(): void;
 export default class MapCollection<KeyType = unknown, ValueType = unknown> extends Collection<Map<KeyType, ValueType>> {
-    constructor(name: string, params: CollectionParams<Map<KeyType, ValueType>>);
+    constructor(name: string, params: CollectionParams<Map<KeyType, ValueType>>, forest?: ForestIF);
     set(key: KeyType, value: ValueType): void;
     delete(key: KeyType): void;
     deleteMany(keys: KeyType[]): void;

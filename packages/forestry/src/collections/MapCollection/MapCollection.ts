@@ -1,3 +1,4 @@
+import type { ForestIF } from '../../types/types.forest';
 import type { IterFn, ValueProviderParams } from '../../types/types.shared';
 import { canProxy } from '../../utils';
 import { Collection } from '../Collection';
@@ -12,7 +13,11 @@ export default class MapCollection<
   KeyType = unknown,
   ValueType = unknown
 > extends Collection<Map<KeyType, ValueType>> {
-  constructor(name: string, params: CollectionParams<Map<KeyType, ValueType>>) {
+  constructor(
+    name: string,
+    params: CollectionParams<Map<KeyType, ValueType>>,
+    forest?: ForestIF
+  ) {
     function mapCloner(
       cloneParams: ValueProviderParams<Map<KeyType, ValueType>>
     ): Map<KeyType, ValueType> {
@@ -34,11 +39,20 @@ export default class MapCollection<
 
     if (!(params.serializer && params.benchmarkInterval)) {
       {
-        super(name, { ...params, benchmarkInterval: 5, serializer: mapCloner });
+        super(
+          name,
+          { ...params, benchmarkInterval: 20, serializer: mapCloner },
+          forest
+        );
       }
     } else {
-      super(name, { ...params, serializer: mapCloner });
+      super(name, { ...params, serializer: mapCloner }, forest);
     }
+  }
+
+  has(key: KeyType) {
+    if (!this.value) {return false;}
+    return this.value.has(key);
   }
 
   set(key: KeyType, value: ValueType) {

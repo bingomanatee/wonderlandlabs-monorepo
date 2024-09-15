@@ -94,35 +94,88 @@ describe("FormCollection", () => {
     ]);
   });
 
-  it("can update with values", () => {
+  describe("setFieldValue", () => {
+    it("can update with values", () => {
+      const f = new Forest();
+
+      const fm = new FormCollection("comment", COMMENT_FIELDS, {
+        forest: f,
+      });
+      fm.setFieldValue("title", "Great Expectations");
+      fm.setFieldValue("authorEmail", "foo@bar.com");
+
+      expect([...fm.value.fields.keys()]).toEqual([
+        "content",
+        "title",
+        "authorEmail",
+      ]);
+
+      expect([...fm.value.fields.values()].map((f) => f.value)).toEqual([
+        "",
+        "Great Expectations",
+        "foo@bar.com",
+      ]);
+
+      expect([...fm.value.fields.values()].map((f) => f.edited)).toEqual([
+        undefined,
+        true,
+        true,
+      ]);
+      const errors = [...fm.value.fields.values()].map((f) => f.errors);
+      expect(errors).toEqual([
+        [{ message: "field must be 8 or more characters", severity: 5 }],
+        [],
+        [],
+      ]);
+    });
+  });
+
+  describe("updateFieldProperty", () => {
     const f = new Forest();
 
     const fm = new FormCollection("comment", COMMENT_FIELDS, {
       forest: f,
     });
-    fm.setFieldValue("title", "Great Expectations");
-    fm.setFieldValue("authorEmail", "foo@bar.com");
 
-    expect([...fm.value.fields.keys()]).toEqual([
-      "title",
-      "content",
-      "authorEmail",
-    ]);
-    expect([...fm.value.fields.values()].map((f) => f.value)).toEqual([
-      "Great Expectations",
-      "",
-      "foo@bar.com",
-    ]);
-    expect([...fm.value.fields.values()].map((f) => f.edited)).toEqual([
-      true,
-      undefined,
-      true,
-    ]);
-    const errors = [...fm.value.fields.values()].map((f) => f.errors);
-    expect(errors).toEqual([
-      [],
-      [{ message: "field must be 8 or more characters", severity: 5 }],
-      [],
-    ]);
+    fm.updateFieldProperty("content", "label", "Content");
+
+    expect(fm.field("content")?.label).toBe("Content");
+  });
+
+  describe("commit", () => {
+    it("should commit a single named field", () => {
+      const f = new Forest();
+
+      const fm = new FormCollection("comment", COMMENT_FIELDS, {
+        forest: f,
+      });
+      fm.commit("title");
+
+      expect([...fm.value.fields.keys()]).toEqual([
+        "content",
+        "authorEmail",
+        "title",
+      ]);
+
+      expect([...fm.value.fields.values()].map((f) => f.committed)).toEqual([
+        ,
+        ,
+        true,
+      ]);
+    });
+    it("should commit all fields without arguemnts", () => {
+      const f = new Forest();
+
+      const fm = new FormCollection("comment", COMMENT_FIELDS, {
+        forest: f,
+      });
+      fm.commit();
+
+      expect([...fm.value.fields.values()].map((f) => f.committed)).toEqual([
+        true,
+        true,
+        true,
+      ]);
+    });
   });
 });

@@ -1,11 +1,15 @@
 import type { CollectionIF } from '../../types/type.collection';
-import { Collection } from '../Collection';
 // import { map } from 'rxjs';
 
-import type { FieldMap, FormCollectionIF } from './types.formCollection';
+import type {
+  FieldMap,
+  FormCollectionIF,
+  FieldIF,
+  FieldMutatorFN,
+  FieldProps,
+} from './types.formCollection';
 import extendField from './extendField';
-import { canProxy } from '../../utils';
-import { fieldMapSetValueProxy } from './fieldMapSetValueProxy';
+import MapCollection from '../MapCollection/MapCollection';
 
 /**
  * this is a "utility sub-class" of FormCollection designed exclusively
@@ -17,8 +21,8 @@ import { fieldMapSetValueProxy } from './fieldMapSetValueProxy';
  * provide defaults for the transient properties.
  */
 export class FormFieldMapCollection
-  extends Collection<FieldMap>
-  implements CollectionIF<FieldMap>
+  extends MapCollection<string, FieldIF>
+  implements CollectionIF<Map<string, FieldIF>>
 {
   constructor(
     public name: string,
@@ -57,33 +61,82 @@ export class FormFieldMapCollection
     if (!this.tree.top) {
       throw new Error('canot setFieldValue to empty FormFieldMapCollection');
     }
-    const map = this.tree.top.value;
-    if (!map.has(name)) {
-      throw new Error('FormFieldMapCollection does not have a field ' + name);
+    if (!this.tree.top.value.has(name)) {
+      throw new Error('no ' + name + ' in form');
     }
-    if (map.get(name).value === value) {
-      return;
-    } // unchanged value;
 
-    const basis = this.formCollection.fieldBaseParams.get(name);
-    // if we can use proxies, make a proxy of the map that returns a copy of the named field
-    // with a different value for the name field
-    // without exploding memory with duplicate maps all over the place.
-    if (canProxy) {
-      const next = fieldMapSetValueProxy(map, name, value, basis);
-      this.next(next, 'setFieldValue');
+    const field = this.get(name);
+    const basis = this.formCollection.fieldBaseParams.get(name) ?? {};
+    const newField = extendField({ value, edited: true }, field, basis);
+    this.set(name, newField);
+  }
+
+  updateFieldProperty(name: string, key: string, value: any) {
+    if (key === 'value') {return this.setFieldValue(name, value);}
+    if (!this.tree.top) {
+      throw new Error('canot setFieldValue to empty FormFieldMapCollection');
+    }
+    if (!this.tree.top.value.has(name)) {
+      throw new Error('no ' + name + ' in form');
+    }
+
+    const field = this.get(name);
+    const basis = this.formCollection.fieldBaseParams.get(name) ?? {};
+    const newField = extendField({ [key]: value }, field, basis);
+    this.set(name, newField);
+  }
+
+  /**
+   * update a field parametrically with a mutation function
+   *
+   * @param name string
+   * @param mutator (field) => field
+   */
+  updateField(name: string, mutator: FieldMutatorFN) {
+    if (!this.tree.top) {
+      throw new Error('canot setFieldValue to empty FormFieldMapCollection');
+    }
+    if (!this.tree.top.value.has(name)) {
+      throw new Error('no ' + name + ' in form');
+    }
+
+    const field = this.get(name);
+    const updatedField = mutator(field, this.formCollection);
+    const basis = this.formCollection.fieldBaseParams.get(name) ?? {};
+    const newField = extendField(updatedField, basis);
+    this.set(name, newField);
+  }
+
+  commit(name: string | true) {
+    if (name === true) {
+      const self = this;
+      this.forest.do(() => {
+        for (const fieldName of self.keys()) {
+          this.updateFieldProperty(fieldName, 'committed', true);
+        }
+      });
     } else {
-      const prev = map.get(name);
-      if (!prev) {
-        throw new Error('cannot get ' + name);
-      } // typescriptism
-
-      const next = extendField({ name, value }, prev, basis);
-
-      const newMap = new Map(map);
-
-      newMap.set(name, next);
-      this.next(newMap, 'setFieldValue');
+      this.updateFieldProperty(name, 'committed', true);
     }
+  }
+
+  updateFieldProps(name: string, props: FieldProps, propsToDelete?: string[]) {
+    return this.updateField(
+      name,
+      (field: FieldIF, formCollection: FormCollectionIF) => {
+        const basis = formCollection.fieldBaseParams.get(name) ?? {};
+
+        const basisProps = basis.props ? basis.props : {};
+
+        const currentProps = field.props ? field.props : {};
+
+        const newProps = { ...basisProps, currentProps, props };
+        if (propsToDelete)
+        {for (const p of propsToDelete) {
+          delete newProps[p];
+        }}
+        return { props:newProps, ...field }; // updatedField will extend the field/update errors
+      }
+    );
   }
 }

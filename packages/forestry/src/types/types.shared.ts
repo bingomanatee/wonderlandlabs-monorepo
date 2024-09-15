@@ -1,7 +1,7 @@
-import type { BranchIF } from "./types.branch";
-import { isObj } from "./types.guards";
-import type { TreeIF } from "./types.trees";
-import type { ValueProviderContext } from "./ValueProviderContext";
+import type { BranchIF } from './types.branch';
+import { isObj } from './types.guards';
+import type { TreeIF } from './types.trees';
+import type { ValueProviderContext } from './ValueProviderContext';
 
 /**
  * a "literal replacement value"

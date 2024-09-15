@@ -1,7 +1,7 @@
-import { isAssert, isMutator } from "../types/types.guards";
-import type { ChangeIF } from "../types/types.shared";
-import { ValueProviderContext } from "../types/ValueProviderContext";
-import type { TreeIF } from "../types/types.trees";
+import { isAssert, isMutator } from '../types/types.guards';
+import type { ChangeIF } from '../types/types.shared';
+import { ValueProviderContext } from '../types/ValueProviderContext';
+import type { TreeIF } from '../types/types.trees';
 
 export class PreValidator {
   static validate<ValueType>(
@@ -12,7 +12,7 @@ export class PreValidator {
       const nextValue = change.assert;
       const test = tree.validate(nextValue);
       if (!test.isValid) {
-        throw new Error(test.error ?? "invalid value");
+        throw new Error(test.error ?? 'invalid value');
       }
     } else if (isMutator(change)) {
       const value = tree.top?.value;
@@ -25,10 +25,10 @@ export class PreValidator {
       });
       const test = tree.validate(nextValue);
       if (!test.isValid) {
-        throw new Error(test.error ?? "invalid value");
+        throw new Error(test.error ?? 'invalid value');
       }
     } else {
-      console.warn("bad change: ", change);
+      console.warn('bad change: ', change);
     }
   }
 }

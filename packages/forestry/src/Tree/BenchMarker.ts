@@ -1,10 +1,10 @@
-import type { BranchIF } from "../types/types.branch";
-import { isAssert, isMutator } from "../types/types.guards";
-import type { ChangeIF } from "../types/types.shared";
-import { ValueProviderContext } from "../types/ValueProviderContext";
-import type { TreeIF } from "../types/types.trees";
+import type { BranchIF } from '../types/types.branch';
+import { isAssert, isMutator } from '../types/types.guards';
+import type { ChangeIF } from '../types/types.shared';
+import { ValueProviderContext } from '../types/ValueProviderContext';
+import type { TreeIF } from '../types/types.trees';
 
-export const BENCHMARK_CAUSE = "!BENCHMARK!";
+export const BENCHMARK_CAUSE = '!BENCHMARK!';
 
 export default class BenchMarker<ValueType> {
   constructor(private tree: TreeIF<ValueType>) {}
@@ -12,11 +12,11 @@ export default class BenchMarker<ValueType> {
     tree: TreeIF<ValueType>,
     change: ChangeIF<ValueType>
   ) {
-    if (change.name === BENCHMARK_CAUSE) return false;
-    if (!tree.params) return false;
+    if (change.name === BENCHMARK_CAUSE) {return false;}
+    if (!tree.params) {return false;}
 
     const { benchmarkInterval, serializer } = tree.params;
-    if (!serializer) return false;
+    if (!serializer) {return false;}
 
     let isBenchmarked = false;
     let count;
@@ -28,7 +28,7 @@ export default class BenchMarker<ValueType> {
       count = c;
     }, benchmarkInterval);
 
-    if (count < benchmarkInterval - 1) return false;
+    if (count < benchmarkInterval - 1) {return false;}
     return !isBenchmarked;
   }
 
@@ -58,6 +58,6 @@ export default class BenchMarker<ValueType> {
       });
       this.tree.next(serialized, BENCHMARK_CAUSE);
     }
-    this.tree.addNote("benchmark serialized " + change.name);
+    this.tree.addNote('benchmark serialized ' + change.name);
   }
 }

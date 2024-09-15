@@ -1,5 +1,6 @@
 import type { BranchIF } from './types.branch';
 import type { TreeIF } from './types.trees';
+import type { ValueProviderContext } from './ValueProviderContext';
 /**
  * a "literal replacement value"
  */
@@ -36,12 +37,6 @@ export interface Notable {
     notes(fromTime: number, toTime?: number): Info[];
 }
 export type NotesMap = Map<number, Info[]>;
-export declare const ValueProviderContext: {
-    mutation: string;
-    localCache: string;
-    truncation: string;
-    itermittentCache: string;
-};
 export type VPRContextKeys = keyof typeof ValueProviderContext;
 export type ValueProviderContextType = typeof ValueProviderContext[VPRContextKeys];
 /**

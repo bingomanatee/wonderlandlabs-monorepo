@@ -12,15 +12,17 @@ class MapCollection extends Collection_1.Collection {
     constructor(name, params) {
         function mapCloner(cloneParams) {
             const { value } = cloneParams;
-            if (!(value instanceof Map)) {
-                throw new Error('cannot clone map');
+            if (!value[Symbol.iterator]) {
+                console.log('attepmt to clone : params', cloneParams, 'not a map:', value);
+                throw new Error('cannot clone map - not iterable');
             }
-            // @ts-expect-error 2769
-            return new Map(...value.entries());
+            const out = new Map();
+            value.forEach((v, k) => out.set(k, v));
+            return out;
         }
-        if (!(params.serializer && params.cloneInterval)) {
+        if (!(params.serializer && params.benchmarkInterval)) {
             {
-                super(name, { ...params, cloneInterval: 5, serializer: mapCloner });
+                super(name, { ...params, benchmarkInterval: 5, serializer: mapCloner });
             }
         }
         else {

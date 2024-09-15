@@ -1,5 +1,8 @@
-import type { BranchIF } from '../types/types.branch';
 import type { TreeIF } from '../types/types.trees';
+type ActiveTaskInfo = {
+    hasActiveTasks: boolean;
+    earliestActiveTask: number;
+};
 export default class Beaver<ValueType> {
     private tree;
     constructor(tree: TreeIF<ValueType>);
@@ -11,13 +14,14 @@ export default class Beaver<ValueType> {
      *
      * We trim to the LOWEST of these two branches;
      */
-    trim(maxCount: number, firstTimeToSave: number, ignoreTime?: boolean): void;
-    trimBefore(branch?: BranchIF<ValueType>): void;
+    trim(): void;
     /**
      * this method erases all references contained in branches from the parameter forward.
      *
      * @param fromBranch
      */
     private destoryOldData;
-    static limitSize<ValueType>(tree: TreeIF<ValueType>): void;
+    activeTasks(): ActiveTaskInfo;
+    limitBranchLength(): void;
 }
+export {};

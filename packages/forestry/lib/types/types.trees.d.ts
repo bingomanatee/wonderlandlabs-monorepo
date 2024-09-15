@@ -44,5 +44,5 @@ export type TreeParams<TreeValueType> = {
     trimTo?: number;
     validator?: ValidatorFn<TreeValueType>;
     serializer?: ValueProviderFN<TreeValueType>;
-    cloneInterval?: number;
+    benchmarkInterval?: number;
 };

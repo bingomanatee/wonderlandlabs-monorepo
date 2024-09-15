@@ -1,11 +1,5 @@
-export const TransStatus = {
-  active: 'active',
-  failed: 'failed',
-  completed: 'completed',
-};
+export const ACTION_NAME_INITIALIZER = "---- INITIALIZER ---";
 
-export const UpdateDir = {
-  up: 'up',
-  down: 'down',
-  new: 'new',
-};
+export const DELETED = Symbol("deleted");
+
+export const CACHE_TOP_ONLY = Symbol("cache-top-only");

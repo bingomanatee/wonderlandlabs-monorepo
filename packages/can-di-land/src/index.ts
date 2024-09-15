@@ -1,2 +1,2 @@
-export { CanDI } from './CanDI'
-export { PromiseQueue } from './PromiseQueue'
+export { CanDI } from "./CanDI";
+export { PromiseQueue } from "./PromiseQueue";

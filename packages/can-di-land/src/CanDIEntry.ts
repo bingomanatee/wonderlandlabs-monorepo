@@ -1,26 +1,25 @@
-import { CanDiType, GenFunction, Key, Config, Value, ValueMap } from './types'
-import { BehaviorSubject, map } from 'rxjs'
-import { ce } from './utils'
-
+import { CanDiType, GenFunction, Key, Config, Value, ValueMap } from "./types";
+import { BehaviorSubject, map } from "rxjs";
+import { ce } from "./utils";
 
 export default class CanDIEntry {
   constructor(
     private can: CanDiType,
     public key: Key,
     config: Config,
-    public resource: Value
+    public resource: Value,
   ) {
     const { type, async, final, deps, args } = config;
     this.deps = Array.isArray(deps) ? deps : [];
     this.type = type;
 
-    if (this.deps.length && this.type === 'value') {
+    if (this.deps.length && this.type === "value") {
       throw new Error(`cannot define dependencies on value types for ${key}`);
     }
 
     this.async = !!async;
     this.final = !!final;
-    this.args = args || []
+    this.args = args || [];
     this.stream = new BehaviorSubject(resource);
     this._watchResource();
   }
@@ -30,13 +29,13 @@ export default class CanDIEntry {
   public deps: Key[];
   type: string;
   final: boolean;
-  private stream: BehaviorSubject<any>
+  private stream: BehaviorSubject<any>;
 
   private _watchResource() {
     const self = this;
-    this.stream.pipe(
-      map((value) => self.transform(value))
-    ).subscribe((value) => this._onValue(value))
+    this.stream
+      .pipe(map((value) => self.transform(value)))
+      .subscribe((value) => this._onValue(value));
   }
 
   private fnArgs(map?: ValueMap) {
@@ -56,16 +55,16 @@ export default class CanDIEntry {
 
   computeFor(map: ValueMap) {
     const fn = this.value;
-    if (typeof fn !== 'function') {
+    if (typeof fn !== "function") {
       throw new Error(`${this.key} cannot computeFor -- non function`);
     }
     return this.fn(fn, map)();
   }
 
   next(value: Value) {
-    if(this.final && (this.can.has(this.key) || this._valueSent)) {
-      ce('attempt to update a finalized entry', this.key, 'with', value);
-      throw new Error(`cannot update finalized entry ${this.key}`)
+    if (this.final && (this.can.has(this.key) || this._valueSent)) {
+      ce("attempt to update a finalized entry", this.key, "with", value);
+      throw new Error(`cannot update finalized entry ${this.key}`);
     }
     this.stream.next(value);
   }
@@ -77,15 +76,15 @@ export default class CanDIEntry {
   transform(value: Value) {
     let out = value;
     switch (this.type) {
-      case 'value':
+      case "value":
         out = value;
         break;
 
-      case 'func':
+      case "func":
         out = this.fn(value);
         break;
 
-      case 'comp':
+      case "comp":
         out = this.fn(value)();
         break;
     }
@@ -97,7 +96,6 @@ export default class CanDIEntry {
    */
   public get active() {
     return !(this.final && this._valueSent);
-
   }
 
   /**
@@ -132,7 +130,7 @@ export default class CanDIEntry {
       this._valueSent = true;
       this.can.pq.set(this.key, value);
     } else {
-      this.can.events.next({ type: 'value', target: this.key, value })
+      this.can.events.next({ type: "value", target: this.key, value });
     }
     this._valueSent = true;
   }
@@ -142,16 +140,17 @@ export default class CanDIEntry {
       const entry = this.can.entries.get(key);
       if (!entry) return;
       if (entry.deps.includes(this.key)) {
-        throw new Error(`infinite dependency loop between ${this.key} and ${entry.key}`);
+        throw new Error(
+          `infinite dependency loop between ${this.key} and ${entry.key}`,
+        );
       }
       this.checkForLoop(entry); // check for deeper loops
-    }
+    };
 
     if (!subEntry) {
-      this.deps.forEach(checkEachKey)
+      this.deps.forEach(checkEachKey);
     } else {
-      subEntry.deps.forEach(checkEachKey)
+      subEntry.deps.forEach(checkEachKey);
     }
   }
-
 }

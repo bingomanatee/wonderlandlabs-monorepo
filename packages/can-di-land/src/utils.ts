@@ -9,12 +9,12 @@ export function compareArrays(a: any[], b: any[]) {
 }
 
 export function asArray(value: any) {
-  return Array.isArray(value) ? value : [value]
+  return Array.isArray(value) ? value : [value];
 }
 
 export function mergeMap(mapA: Map<any, any>, mapB: Map<any, any>) {
   const map = new Map(mapA);
-  mapB.forEach((v ,k) => map.set(k, v));
+  mapB.forEach((v, k) => map.set(k, v));
   return map;
 }
 
@@ -22,6 +22,6 @@ const TEST_MODE = false;
 
 export function ce(...args: any[]) {
   if (!TEST_MODE) {
-    console.error(...args)
+    console.error(...args);
   }
 }

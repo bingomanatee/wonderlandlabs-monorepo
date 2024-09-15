@@ -1,15 +1,22 @@
-import Forest from './../../lib/Forest';
+import Forest from "../Forest";
+import { dataEngineBasic } from "../engines/engineBasic";
 
-describe('forest', () => {
-  describe('Forest', () => {
-    describe('createBranch()', () => {
-      it('should describe a forest with a name in config', () => {
-        const f = new Forest();
+describe("Forest", () => {
+  describe(".tree", () => {
+    it("should throw if missing tree requested", () => {
+      const f = new Forest([dataEngineBasic]);
+      expect(() => f.tree("foo")).toThrow();
+    });
 
-        const br = f.createBranch({ name: 'point', $value: { x: 0, y: 0 } });
-
-        expect(br.name).toBe('point');
+    it("should define a tree if seeded", () => {
+      const f = new Forest([dataEngineBasic]);
+      const t = f.tree("foo", {
+        engineName: "basic",
+        val: "bar",
       });
+
+      expect(t).toBeTruthy();
+      expect(t.value).toBe("bar");
     });
   });
 });

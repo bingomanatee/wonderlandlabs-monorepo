@@ -1,0 +1,1 @@
+Object.defineProperty(exports,"__esModule",{value:!0}),exports.ValidatorError=void 0;class ValidatorError extends Error{constructor(r,o,e){r instanceof Error?super(r.message):super("string"==typeof r?r:"validation errror"),this.name=o.name||"validator",e&&(this.mutation=e)}}exports.ValidatorError=ValidatorError;

@@ -1,180 +1,117 @@
-import {
-  UpdateDirType,
-  BranchConfig,
-  BranchIF,
-  ForestIF,
-  ForestItemIF,
-  LeafConfig,
-  LeafIF,
-  TransID,
-  ChildConfigs,
-  childKey,
-  BranchConfigDoMethod,
-  DoMethod,
-} from './types';
-import { c } from '@wonderlandlabs/collect';
-import { FormEnum, type } from '@wonderlandlabs/walrus';
+import { ACTION_NAME_INITIALIZER, CACHE_TOP_ONLY } from "./constants";
+import { join } from "./join";
+import { MutatorArgs, MutatorIF, BranchIF, GenObj, TreeIF } from "./types";
 
-import Leaf from './Leaf';
-import Forest from './Forest';
-import ForestItem from './ForestItem';
-import { UpdateDir } from './constants';
-import { isBranchConfig, isChildConfigs } from './helpers';
+const CACHE_UNSET = Symbol("CACHE_UNSET");
 
-export default class Branch extends ForestItem implements BranchIF {
-  constructor(private config: BranchConfig, public forest: ForestIF) {
-    super(config.name, config.$value, forest);
-    this.registerInForest();
-
-    this._initLeaves();
-
-    this._initChildren();
-    if (typeof config.test === 'function') {
-      this.test = config.test;
-    }
-
-    this._initDo();
+export class Branch<ValueType = unknown> implements BranchIF<ValueType> {
+  constructor(
+    public tree: TreeIF<ValueType>,
+    public mutator: MutatorIF<ValueType>,
+    public input?: MutatorArgs // @TODO: maybe private?
+  ) {
+    this.isAlive = true;
+    this.id = tree.forest.nextID;
   }
 
-  // -------------- Leaves -----------------
+  isAlive: boolean;
+  isCached = false;
+  public readonly id: number;
 
-  public leaves: Map<string, LeafIF> = new Map();
+  private _cache: ValueType | typeof CACHE_UNSET = CACHE_UNSET;
+  get value(): ValueType {
+    if (!this.isAlive) throw new Error("cannot get value from dead branch");
+    // console.log("calling value from branch", this);
 
-  protected _initLeaves() {
-    if (this.config.leaves) {
-      c(this.config.leaves).forEach((leafConfig: LeafConfig, leafName) => {
-        this.addLeaf(leafConfig, leafName);
-      });
-    }
-  }
-
-  public addLeaf(config: LeafConfig, name: string) {
-    const leaf = new Leaf(this, config, name);
-    this.leaves.set(name, leaf);
-  }
-
-  // --------------------- value, updating -----------------
-
-  get(name: string) {
-    return c(this.value).get(name);
-  }
-
-  set(name: string, value: unknown) {
-    const val = c(this.value).clone();
-    if (val.family !== FormEnum.container) {
-      throw new Error('cannot set ' + name + ' to non-container');
-    }
-    if (this.hasChild(name)) {
-      const child = this.child(name);
-      if (child) {
-        child.value = value;
-      }
-    } else {
-      val.set(name, value);
-      this.value = val.value;
-    }
-  }
-
-  static create(config: BranchConfig, name?: string) {
-    const forest = new Forest();
-    return forest.createBranch(config, name);
-  }
-
-  pushTempValue(value: unknown, id: TransID, direction?: UpdateDirType) {
-    const val = c(value).clone();
-
-    if (val.family === FormEnum.container && this.children.size) {
-      for (const [ key, child ] of this.children) {
-        if (val.hasKey(key) && direction !== UpdateDir.down) {
-          child.pushTempValue(val.get(key), id, UpdateDir.up);
+    if (this.mutator.cacheable) {
+      if (!this.isCached) {
+        if (this.mutator.cacheable === CACHE_TOP_ONLY) {
+          if (this === this.tree.top) {
+            this.setCache();
+            if (this._cache !== CACHE_UNSET) return this._cache;
+          }
         } else {
-          val.set(key, child.value);
+          this.setCache();
+          if (this._cache !== CACHE_UNSET) return this._cache;
         }
+      } else {
+        if (this._cache !== CACHE_UNSET) return this._cache;
       }
     }
 
-    super.pushTempValue(val.value, id);
+    return this.mutator.get(this, this.input);
+  }
 
-    if (this.parent && direction !== UpdateDir.up) {
-      this.parent.pushTempValue(this.parent.value, id, UpdateDir.down);
+  private setCache() {
+    this._cache = this.mutator.get(this, this.input);
+    this.isCached = true;
+    if (this.mutator.cacheable === CACHE_TOP_ONLY) {
+      this.clearPrevCache();
     }
   }
 
-  public parent?: BranchIF;
-
-  validate(dir?: UpdateDirType) {
-    const value = this.value;
-    if (
-      type.describe(value, true) !== type.describe(this.committedValue, true)
-    ) {
-      throw new Error('Cannot change type of Branch');
-    }
-    if (dir !== UpdateDir.down) {
-      this.children.forEach((child) => {
-        child.validate(UpdateDir.up);
-      });
-
-      this.leaves.forEach((leaf) => leaf.validate());
-    }
-    super.validate();
-
-    if (this.parent && dir !== UpdateDir.up) {
-      this.parent.validate(UpdateDir.down);
-    }
+  clearCache() {
+    this._cache = CACHE_UNSET;
+    this.isCached = false;
   }
 
-  // ----------------------- children ------------------
+  clearPrevCache(clear = false) {
+    if (clear) {
+      this.clearCache();
+    }
+    this.prev?.clearPrevCache(true);
+  }
 
-  protected _initChildren() {
-    if (isChildConfigs(this.config.children)) {
-      this.addChildren(this.config.children);
+  prev?: BranchIF | undefined;
+  next?: BranchIF | undefined;
+
+  push(branch: BranchIF): void {
+    if (this.next) {
+      this.next.push(branch);
+    } else {
+      join(this, branch);
     }
   }
+  popMe(): BranchIF<ValueType> {
+    if (!this.isAlive) throw new Error("cannot pop a dead branch");
 
-  public child(name: childKey): ForestItemIF | undefined {
-    return this.children.get(name);
+    join(this.prev, this.next);
+    this.prev = undefined;
+    this.next = undefined;
+    this.isAlive = false;
+    return this;
   }
-
-  addChild(config: Partial<BranchConfig>, name: childKey) {
-    const newConfig = { ...config, name, parent: this };
-    if (!isBranchConfig(newConfig)) {
-      throw new Error('cannot create branch ' + name);
+  cutMe(errorId: number): BranchIF<ValueType> {
+    if (!this.isAlive) throw new Error("cannot cut a dead branch");
+    if (this.prev) {
+      this.prev.next = this.next;
+      this.prev = undefined;
     }
-    const child = new Branch(newConfig, this.forest);
-    this.children.set(name, child);
-    return child;
-    // @note: does not validate.
-  }
-
-  addChildren(children: ChildConfigs) {
-    c(children).forEach((config: Partial<BranchConfig>, name: string) => {
-      this.addChild(config, name);
+    this.tree.trimmed.push({
+      id: this.id,
+      mutator: this.mutator.name,
+      data: this.input,
+      errorId,
     });
+    return this;
   }
-
-  hasChild(name: childKey) {
-    return this.children.has(name);
-  }
-
-  public children: Map<childKey, BranchIF> = new Map();
-
-  // ------------------- actions ------------------------
-
-  do: Record<string, DoMethod> = {};
-
-  _initDo() {
-    this.do = {};
-
-    if (this.config.actions) {
-      c(this.config.actions).forEach(
-        (fn: BranchConfigDoMethod, name: string) => {
-          this.do[name] = (...args) => {
-            this.forest.trans(name, () => {
-              fn(this, ...args);
-            });
-          };
-        }
-      );
+  destroy(): void {
+    if (!this.isAlive) {
+      throw new Error("cannot destory a dead branch");
     }
+    this.popMe();
+    this._cache = CACHE_UNSET;
+    //@ts-expect-error
+    this.tree = undefined;
+  }
+
+  public get isTop(): boolean {
+    if (!this.isAlive) return false;
+    return !this.next;
+  }
+
+  public get isRoot(): boolean {
+    if (!this.isAlive) return false;
+    return this === this.tree.root;
   }
 }

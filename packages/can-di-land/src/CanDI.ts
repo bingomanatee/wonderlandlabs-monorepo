@@ -1,35 +1,44 @@
-import { BehaviorSubject, distinctUntilChanged, filter, first, map, Subject, Subscription } from 'rxjs'
+import {
+  BehaviorSubject,
+  distinctUntilChanged,
+  filter,
+  first,
+  map,
+  Subject,
+  Subscription,
+} from "rxjs";
 import {
   Config,
-  GenFunction, isEventError,
+  GenFunction,
+  isEventError,
   isEventInit,
-  isEventValue, isPromiseQueueMessage,
+  isEventValue,
+  isPromiseQueueMessage,
   Key,
   ResDef,
   ResEvent,
   ResourceType,
   Value,
-  ValueMap
-} from './types'
-import { PromiseQueue } from './PromiseQueue'
-import CanDIEntry from './CanDIEntry'
-import { ce } from './utils'
-import isEqual from 'lodash.isequal'
+  ValueMap,
+} from "./types";
+import { PromiseQueue } from "./PromiseQueue";
+import CanDIEntry from "./CanDIEntry";
+import { ce } from "./utils";
+import isEqual from "lodash.isequal";
 
 export class CanDI {
-
   constructor(values?: ResDef[], maxChangeLoops = 30) {
     this._initEvents();
     this._initPQ();
     values?.forEach((val) => {
-      this.events.next({ type: 'init', target: val.key, value: val })
+      this.events.next({ type: "init", target: val.key, value: val });
       // would it be better to initialize the can's props "en masse"?
     });
     this.maxChangeLoops = maxChangeLoops;
   }
 
   private maxChangeLoops: number;
-  public values = new BehaviorSubject<ValueMap>(new Map())
+  public values = new BehaviorSubject<ValueMap>(new Map());
   public entries = new Map<Key, CanDIEntry>();
   public events = new Subject<ResEvent>();
   public pq = new PromiseQueue();
@@ -39,23 +48,27 @@ export class CanDI {
   set(key: Key, value: Value) {
     const entry = this.entry(key);
     if (!entry) {
-      throw new Error(`cannot set value of entry: ${key}`)
+      throw new Error(`cannot set value of entry: ${key}`);
     }
     entry.next(value);
   }
 
   add(key: Key, value: Value, config?: Config | ResourceType): void {
     if (this.entries.has(key)) {
-      throw new Error(`cannot redefine entry ${key}`)
+      throw new Error(`cannot redefine entry ${key}`);
     }
     if (!config) {
-      return this.add(key, value, { type: 'value' })
+      return this.add(key, value, { type: "value" });
     }
-    if (typeof config === 'string') {
-      return this.add(key, value, { type: config })
+    if (typeof config === "string") {
+      return this.add(key, value, { type: config });
     }
 
-    this.events.next({ type: 'init', target: key, value: { key, value, config } })
+    this.events.next({
+      type: "init",
+      target: key,
+      value: { key, value, config },
+    });
   }
 
   // ------- introspection/querying --------------
@@ -66,7 +79,7 @@ export class CanDI {
   }
 
   gets(keys: Key[]): Value | undefined {
-    return keys.map(key => this.get(key))
+    return keys.map((key) => this.get(key));
   }
 
   has(key: Key | Key[]): boolean {
@@ -82,7 +95,7 @@ export class CanDI {
 
   when(deps: Key | Key[], once = true) {
     if (!deps) {
-      throw new Error('when requires non-empty criteria');
+      throw new Error("when requires non-empty criteria");
     }
     const fr = filter((vm: ValueMap) => {
       if (Array.isArray(deps)) {
@@ -98,7 +111,7 @@ export class CanDI {
     });
 
     if (once) {
-      return this.values.pipe(fr, mp, distinctUntilChanged(isEqual), first())
+      return this.values.pipe(fr, mp, distinctUntilChanged(isEqual), first());
     }
     return this.values.pipe(fr, mp, distinctUntilChanged(isEqual));
   }
@@ -107,27 +120,26 @@ export class CanDI {
    * this is an "old school" async function that returns a promise.
    * @param deps
    */
-  getAsync(deps: Key|Key[]) {
+  getAsync(deps: Key | Key[]) {
     return new Promise((done, fail) => {
       let sub: Subscription | undefined = undefined;
-      sub = this.when(deps)
-        .subscribe({
-          next(value) {
-            done(value);
-            sub?.unsubscribe();
-          },
-          error(err) {
-            fail(err);
-          }
-        })
-    })
+      sub = this.when(deps).subscribe({
+        next(value) {
+          done(value);
+          sub?.unsubscribe();
+        },
+        error(err) {
+          fail(err);
+        },
+      });
+    });
   }
 
   // --------------- event management -------------
   private _eventSubs: Subscription[] = [];
 
   public complete() {
-    this._eventSubs.forEach(sub => sub.unsubscribe())
+    this._eventSubs.forEach((sub) => sub.unsubscribe());
   }
 
   private _pqSub?: Subscription;
@@ -136,66 +148,50 @@ export class CanDI {
     const self = this;
     this._pqSub = this.pq.events.subscribe((eventOrError) => {
       if (isPromiseQueueMessage(eventOrError)) {
-        const {key, value} = eventOrError;
+        const { key, value } = eventOrError;
         self._onValue(key, value);
       } else {
-        const {key, error} = eventOrError;
-        self.events.next({target: key, type: 'async-error', value: error})
+        const { key, error } = eventOrError;
+        self.events.next({ target: key, type: "async-error", value: error });
       }
-    })
+    });
   }
 
   private _initEvents() {
     const self = this;
-    this._eventSubs
-      .push(
-        this.events
-          .pipe(
-            filter(isEventValue)
-          )
-          .subscribe({
-            next: (event) => self._onValue(event.target, event.value),
-            error: (err) => console.error('error on value event:', err)
-          })
-      )
+    this._eventSubs.push(
+      this.events.pipe(filter(isEventValue)).subscribe({
+        next: (event) => self._onValue(event.target, event.value),
+        error: (err) => console.error("error on value event:", err),
+      }),
+    );
 
-    this._eventSubs
-      .push(
-        this.events.pipe(
-          filter(isEventError)
-        )
-          .subscribe({
-            next(event) {
-              self._onAsyncError(event.target, event.value);
-            },
-            error(e) {
-              ce('error on async error', e);
-            }
-          })
-      );
+    this._eventSubs.push(
+      this.events.pipe(filter(isEventError)).subscribe({
+        next(event) {
+          self._onAsyncError(event.target, event.value);
+        },
+        error(e) {
+          ce("error on async error", e);
+        },
+      }),
+    );
 
-    this._eventSubs
-      .push(
-        this.events
-          .pipe(
-            filter(isEventInit)
-          )
-          .subscribe(
-            {
-              next: (event) => self._onInit(event.target, event.value),
-              error: (err) => ce('error on init event:', err)
-            }
-          )
-      )
+    this._eventSubs.push(
+      this.events.pipe(filter(isEventInit)).subscribe({
+        next: (event) => self._onInit(event.target, event.value),
+        error: (err) => ce("error on init event:", err),
+      }),
+    );
   }
 
   _onAsyncError(key: Key, error: any) {
-    ce('async error thrown for ', key, error);
+    ce("async error thrown for ", key, error);
   }
 
   _onInit(key: Key, data: ResDef) {
     if (this.entries.has(key)) {
-      ce('key', key, 'initialized twice');
+      ce("key", key, "initialized twice");
       return;
     }
 
@@ -203,25 +199,17 @@ export class CanDI {
     let myConfig = config;
     if (!myConfig) {
       if (!type) {
-        myConfig = { type: 'value' }
+        myConfig = { type: "value" };
       } else {
-        myConfig = { type }
+        myConfig = { type };
       }
     }
 
-    const entry = new CanDIEntry(
-      this,
-      key,
-      myConfig!,
-      value
-    )
+    const entry = new CanDIEntry(this, key, myConfig!, value);
 
     entry.checkForLoop();
 
-    this.entries.set(
-      key,
-      entry
-    )
+    this.entries.set(key, entry);
   }
 
   private _onValue(key: Key, value: any) {
@@ -270,7 +258,12 @@ export class CanDI {
       const dependants = this.entriesDepOn(key);
       dependants.forEach((entry) => {
         const entryKey = entry.key;
-        if (entry.deps.includes(key) && entry.type === 'comp' && entry.active && entry.resolved(map)) {
+        if (
+          entry.deps.includes(key) &&
+          entry.type === "comp" &&
+          entry.active &&
+          entry.resolved(map)
+        ) {
           const updatedValue = entry.computeFor(map);
           if (entry.async) {
             this.pq.set(entryKey, updatedValue);
@@ -282,7 +275,6 @@ export class CanDI {
               if (this.entriesDepOn(entryKey).length) {
                 changedKeys.push(entryKey);
               } // if no other comps are driven by the value of this entry, no reason to give it a while loop cycle,
-
             } // else -- the value of changed entry is already the same - no need to cascade compute derived comps
           } else {
             // initial set of new computed value
@@ -299,10 +291,9 @@ export class CanDI {
            */
         }
       });
-
     }
     if (changedKeys.length) {
-      ce('too many triggered changes for changing ', key, changedKeys);
+      ce("too many triggered changes for changing ", key, changedKeys);
     }
   }
 }

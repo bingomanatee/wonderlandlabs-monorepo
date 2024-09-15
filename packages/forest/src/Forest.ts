@@ -1,97 +1,132 @@
+import { BehaviorSubject } from "rxjs";
+import { Tree } from "./Tree";
 import {
-  BranchConfig,
-  BranchIF,
-  ForestId,
+  ATIDs,
+  EngineFactory,
+  EngineIF,
+  EngineName,
+  TransactionErrorIF,
+  EngineFactoryFn,
   ForestIF,
-  ForestItemIF,
-  ForestItemTransactionalIF,
-  TransFn,
-  TransIF,
-} from './types';
-import Branch from './Branch';
-import { Trans } from './Trans';
-import { isBranchConfig, isTransactionalIF } from './helpers';
+  isEngineFactory,
+  isEngineIF,
+  TransactFn,
+  TreeIF,
+  TreeName,
+  TreeSeed,
+} from "./types";
+import { errorMessage } from "./helpers";
+import { ValidatorError } from "./ValidatorError";
+
+export type DataEngineFactoryOrEngine = EngineIF | EngineFactory;
+type EngineArgs = EngineName | DataEngineFactoryOrEngine;
+
+type DataEngineFn = (tree: TreeIF) => EngineIF;
+
+function isDataEngineFn(a: unknown): a is DataEngineFn {
+  return typeof a === "function";
+}
 
 export default class Forest implements ForestIF {
-  items: Map<ForestId, ForestItemTransactionalIF> = new Map();
-
-  register(item: ForestItemTransactionalIF): void {
-    this.items.set(item.forestId, item);
-  }
-
-  createBranch(config: Partial<BranchConfig>, name?: string): BranchIF {
-    if (name) {
-      return this.createBranch({ ...config, name });
-    }
-    if (!isBranchConfig(config)) {
-      console.warn('bad configuration', config);
-      throw new Error('bad configuration');
-    }
-
-    const branch: BranchIF = new Branch(config, this);
-    this.register(branch); // redundant with branch constructor but why not
-    return branch;
-  }
-
-  pending: TransIF[] = [];
-
-  trans(name: string, fn: TransFn) {
-    const trans = new Trans({ name, forest: this });
-    this.pending.push(trans);
-    console.log('--- starting trans:', name);
-    try {
-      fn(trans);
-      this.removeTrans(trans);
-      if (this.pending.length <= 0) {
-        console.log('committing trans:', name);
-        this.commit();
+  constructor(engines: DataEngineFactoryOrEngine[]) {
+    engines.forEach((e) => {
+      if (isEngineFactory(e)) {
+        this.engines.set(e.name, e.factory);
+      } else if (isEngineIF(e)) {
+        this.engines.set(e.name, e);
       } else {
-        console.log(
-          'not committing ',
-          name,
-          this.pending.length,
-          'trans still in play'
-        );
+        throw new Error("strange engine");
       }
-    } catch (err) {
-      console.log('redacting trans:', name, (err as Error).message);
-      trans.fail(err as Error); // will removeTrans
-      this.removeTrans(trans);
-      console.log(
-        '---- after redacting',
-        name,
-        ' state is',
-        Array.from(this.items.values()).map((i: ForestItemIF) =>
-          JSON.stringify(i.report())
-        )
-      );
-      console.log('surviving pending trans:', this.pending.length);
-      this.pending.forEach((t: TransIF) => {
-        console.log('surviving transaction:', t.name, t.status);
+    });
+  }
+  readonly errors: TransactionErrorIF[] = [];
+  private trees: Map<TreeName, TreeIF> = new Map();
+  private engines: Map<EngineName, EngineIF | EngineFactoryFn> = new Map();
+
+  tree<ValueType, SeedType = TreeSeed>(
+    name: TreeName,
+    seed?: TreeSeed
+  ): TreeIF {
+    if (!seed) {
+      if (!this.trees.has(name)) throw new Error("cannot find tree " + name);
+      return this.trees.get(name)!;
+    }
+    if (this.trees.has(name)) throw new Error("cannot redefine tree " + name);
+    const newTree = new Tree<ValueType>(this, name, seed);
+    this.trees.set(name, newTree);
+    return newTree;
+  }
+  engine(nameOrEngine: EngineArgs, tree?: TreeIF): EngineIF {
+    if (typeof nameOrEngine === "string") {
+      if (!this.engines.has(nameOrEngine)) {
+        throw new Error("cannot find engine " + nameOrEngine);
+      }
+      let engine = this.engines.get(nameOrEngine)!;
+      if (isDataEngineFn(engine)) {
+        if (tree) return engine(tree);
+        throw new Error("dataEngine(<string>, <tree>) requires a tree arg");
+      }
+      if (isEngineIF(engine)) {
+        return engine;
+      }
+      throw new Error("strange engine for " + nameOrEngine);
+    } else if (isEngineFactory(nameOrEngine)) {
+      if (!tree) {
+        throw new Error("dataEngine(<string>, <tree>) requires a tree arg");
+      }
+      return nameOrEngine.factory(tree);
+    } else if (isEngineIF(nameOrEngine)) {
+      this.engines.set(nameOrEngine.name, nameOrEngine);
+      return nameOrEngine;
+    } else {
+      throw new Error("strange arg to dataEngine");
+    }
+  }
+
+  private _nextID = 0;
+
+  public get nextID() {
+    this._nextID += 1;
+    return this._nextID;
+  }
+
+  public activeTransactionIds = new BehaviorSubject<ATIDs>(new Set());
+
+  private changeActiveTransactionIDs(delta: (s: ATIDs) => ATIDs | void) {
+    const next = new Set(this.activeTransactionIds.value);
+    let out = delta(next);
+
+    this.activeTransactionIds.next(out || next);
+  }
+
+  public transact(fn: TransactFn) {
+    const transId = this.nextID;
+    this.changeActiveTransactionIDs((set: ATIDs) => {
+      set.add(transId);
+    });
+    try {
+      let out = fn(transId);
+      this.changeActiveTransactionIDs((set) => {
+        set.delete(transId);
       });
+      return out;
+    } catch (err) {
+      const validator =
+        err instanceof ValidatorError ? err.name : "transact error";
+      const mutation =
+        err instanceof ValidatorError ? err.mutation : "transact error";
+      const errorId = this.nextID;
+      this.errors.push({
+        id: errorId,
+        validator,
+        mutation,
+        message: errorMessage(err),
+      });
+      this.changeActiveTransactionIDs((set) => {
+        set.delete(transId);
+      });
+      this.trees.forEach((tree) => tree.trim(transId, errorId));
       throw err;
     }
-  }
-
-  removeTrans(trans: TransIF) {
-    const index = this.pending.findIndex((t) => t.id === trans.id);
-    if (index >= 0) {
-      const rejects = this.pending.slice(index);
-      this.pending = this.pending.slice(0, index);
-      rejects.forEach((t) => {
-        this.items.forEach((item: ForestItemIF) => {
-          if (isTransactionalIF(item)) {
-            item.removeTempValues(t.id);
-          }
-        });
-      });
-    }
-  }
-
-  commit() {
-    this.items.forEach((item) => {
-      item.commit();
-    });
-    this.items.forEach((item) => item.flushTemp());
   }
 }

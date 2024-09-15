@@ -1,0 +1,1 @@
+function join(e,o){e!==o&&(e&&(e.next=o),o)&&(o.prev=e)}Object.defineProperty(exports,"__esModule",{value:!0}),exports.join=join;

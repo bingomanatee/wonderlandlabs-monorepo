@@ -1,10 +1,18 @@
-import { BranchConfig, BranchIF, ForestId, ForestIF, ForestItemTransactionalIF, TransFn, TransIF } from './types';
+import { BehaviorSubject } from "rxjs";
+import { ATIDs, EngineFactory, EngineIF, EngineName, TransactionErrorIF, ForestIF, TransactFn, TreeIF, TreeName, TreeSeed } from "./types";
+export type DataEngineFactoryOrEngine = EngineIF | EngineFactory;
+type EngineArgs = EngineName | DataEngineFactoryOrEngine;
 export default class Forest implements ForestIF {
-    items: Map<ForestId, ForestItemTransactionalIF>;
-    register(item: ForestItemTransactionalIF): void;
-    createBranch(config: Partial<BranchConfig>, name?: string): BranchIF;
-    pending: TransIF[];
-    trans(name: string, fn: TransFn): void;
-    removeTrans(trans: TransIF): void;
-    commit(): void;
+    constructor(engines: DataEngineFactoryOrEngine[]);
+    readonly errors: TransactionErrorIF[];
+    private trees;
+    private engines;
+    tree(name: TreeName, seed?: TreeSeed): TreeIF;
+    engine(nameOrEngine: EngineArgs, tree?: TreeIF): EngineIF;
+    private _nextID;
+    get nextID(): number;
+    activeTransactionIds: BehaviorSubject<ATIDs>;
+    private changeActiveTransactionIDs;
+    transact(fn: TransactFn): unknown;
 }
+export {};

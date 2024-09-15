@@ -1,7 +1,8 @@
 import type { BranchIF } from './types/types.branch';
 import type { OffshootIF } from './types';
 import type { TreeIF } from './types/types.trees';
-import { ValueProviderContext, type ChangeIF } from './types/types.shared';
+import { type ChangeIF } from './types/types.shared';
+import { ValueProviderContext } from './types/ValueProviderContext';
 import { isAssert, isMutator } from './types/types.guards';
 import { isCacheable } from './isCacheable';
 

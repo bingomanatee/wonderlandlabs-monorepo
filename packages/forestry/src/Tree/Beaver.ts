@@ -1,7 +1,7 @@
 import { Branch } from "../Branch";
 import type { BranchIF } from "../types/types.branch";
 import type { TreeIF } from "../types/types.trees";
-import { CLONE_NAME } from "./IttermittentCache";
+import { BENCHMARK_CAUSE } from "./BenchMarker";
 
 type ActiveTaskInfo = {
   hasActiveTasks: boolean;
@@ -32,10 +32,12 @@ export default class Beaver<ValueType> {
           if (branch.time < earliestActiveTask) {
             tooLongBranch = branch;
             count = c;
+            return true;
           }
         } else {
           tooLongBranch = branch;
           count = c;
+          return true;
         }
       }
     }, maxBranches + 1);

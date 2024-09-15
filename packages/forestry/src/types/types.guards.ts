@@ -1,7 +1,8 @@
 import type {
   FieldIF,
 } from '../collections/FormCollection/types.formCollection';
-import { ValueProviderContext, type Assertion, type IttermittentCacheProviderParams, type LocalValueProviderParams, type MutationValueProviderParams, type Mutator, type TruncationValueProviderParams } from './types.shared';
+import { type Assertion, type IttermittentCacheProviderParams, type LocalValueProviderParams, type MutationValueProviderParams, type Mutator, type TruncationValueProviderParams } from './types.shared';
+import { ValueProviderContext } from './ValueProviderContext';
 
 export function isObj(a: unknown): a is object {
   return Boolean(a && typeof a === 'object');

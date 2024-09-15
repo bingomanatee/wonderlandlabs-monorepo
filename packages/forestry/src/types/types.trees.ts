@@ -1,14 +1,14 @@
-import type { BranchIF } from './types.branch';
-import type { OffshootIF } from '../types';
-import type { ForestIF } from './types.forest';
+import type { BranchIF } from "./types.branch";
+import type { OffshootIF } from "../types";
+import type { ForestIF } from "./types.forest";
 import type {
   ChangeIF,
   MutationValueProviderFN,
   Notable,
   SubscribeFn,
   ValueProviderFN,
-} from './types.shared';
-import { PartialObserver, Subscription, Observable } from 'rxjs';
+} from "./types.shared";
+import { PartialObserver, Subscription, Observable } from "rxjs";
 
 export type TreeName = string;
 
@@ -73,5 +73,5 @@ export type TreeParams<TreeValueType> = {
   trimTo?: number; // ... trim the tree history to this many branches;
   validator?: ValidatorFn<TreeValueType>;
   serializer?: ValueProviderFN<TreeValueType>;
-  cloneInterval?: number;
+  benchmarkInterval?: number;
 };

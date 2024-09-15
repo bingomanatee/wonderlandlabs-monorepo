@@ -52,7 +52,7 @@ function makeCounter(initial = 0, name = "counter") {
           },
         ],
       ]),
-      cloneInterval: 6,
+      benchmarkInterval: 6,
       serializer(params: ValueProviderParams<number>) {
         const { value } = params;
         return value === undefined ? 0 : value;
@@ -86,7 +86,7 @@ describe("README.md", () => {
     t.next(100, "set to 100");
 
     t.forEachDown((branch, count) => {
-      console.log(
+      message(
         count,
         "README.md -- at",
         branch.time,
@@ -148,7 +148,13 @@ describe("README.md", () => {
     counter.act("decrement");
 
     counter.tree.forEachDown((branch, count) => {
-      message(branch.time, ":counter value: ", branch.value, "cause:", branch.cause);
+      message(
+        branch.time,
+        ":counter value: ",
+        branch.value,
+        "cause:",
+        branch.cause
+      );
     });
 
     /**

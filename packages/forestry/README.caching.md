@@ -10,6 +10,9 @@ There are 3 circumstances where caching is important to understand.
 3. resursive proxies are also potentially problems due to functional depth, and should be 
    broken up by ittermittent caching to limit their depth. 
 
+Most of this caching info is _optional_ to comprehend; simple stores, and especially stores with a lot of `.next` calls and 
+few or no `.mutate()` calls, whill have very little need for manual caching. But ... _it couldn't hurt..._.
+
 ## Local Caching (by default)
 
 The topmost branch always keeps a copy of its value, _if it is a mutator_. 
@@ -20,20 +23,31 @@ So local caching is minimal;  even if you wait for a while to get the value of t
 all the other mutators will never cache their value - they will just return it to the caller, and the topmost value property method will cache it before its 
 returned. 
 
-## Ittermittent caching -- by configuration
+The upshot is you should see very few instances of nested callbacks with mutators; at most one or two functions deep in the callback chain.
 
-If your use pattern falls into one of these patterns then the you should apply ittermittent caching (as above) every 6-12 values. 
-* set a **cloneInterval** (positive number in the 6...20 range)
-* set a **cloner** (tree) => value. note - _not all trees have tops_ so provide a default value in the cloner if the tree has no branches. 
+## "Benchnmark" caching -- by configuration
 
-the cloner can be a simple destructuring
+If you use proxies or long series of mutators you may want to "break up" your branches every few branch with a simple "concrete" asserted value. This
+is analogous to how in video codecs most of the frames are "difference" modifications of the frame before, but every few frame, a solid edge-to-edge image is used
+for "sanity". 
+
+If (as is done in MapCollection) you use nested proxies, its good to break up the proxy chain with a "simple" value every 10 or 20 branches. 
+Breaking up large chains of mutators can have a "longer leash" - 20 - 40 branches. 
+
+To allow benchmarking (as above) every few values
+* set a **benchnmarkInterval** (positive number > 2; ideally 10 or 20)
+* set a **serializer** ({value, tree, branch}) => value. note - _not all trees have tops_ so provide a default value in the cloner if the tree has no branches. 
+
+the serializer can be a simple destructuring
 ```
-  (t: TreeIF<number>, branch?: BranchIF<number>) {
-    if (branch) return {... branch.value};
-    return t.top ? {... t.top.value} : {}
+  ({value}) {
+    if (value) return {...value};
+    return {};
   },
 ```
 or some other way to ensure simple pure JS values. 
+
+In 99.9% of the cases you do not have to worry about the lack of a value; however if the tree ever becomes _completely empty_ you may want to have a fallback initializer in the serializer. 
 
 ### Case Study: powers of 2
 
@@ -43,11 +57,11 @@ const f = new Forest;
 const adding2 = f.addTree('a2', {
 initial: 1,
 uncacheable,
-cloneInterval: 8,
-cloner((t, b) => {
-  if (b) return b.value)
-  if (t.top) return t.top.value;
-  return 1;
+benchmarkInterval: 8,
+serializer(({value}) => {
+  if (!value) return 1; 
+  return value; // basic values like numbers and strings don't require 
+  // fancy serializiation. 
 })
 
 const doubler = {
@@ -95,7 +109,7 @@ branch7:
 branch8: 
   chaneg: (doubler) <value 15>
 branch9:
-  change: {assert: 15, name: '!CLONE'}
+  change: {assert: 15, name: '!BENCHMARK!'}
 branch10: 
   change: (doubler) <value: 17>
 // ....
@@ -104,12 +118,12 @@ branch16:
 branch17 
   change: (doubler) <value: 31>
 branch18 
-  change: {assert: 31, name: '!CLONE}
+  change: {assert: 31, name: '!BENCHMARK!'}
 ```
 
-the cloneInterval value of 8 means that the maximum nesting depth is 8.
+the `benchmarkInterval` value of 8 means that the maximum nesting depth is 8.
 
-## Practical caching -- by default
+## Local caching -- by default
 
 Its assumed that simple values (basic strings, numbers, arrays of basic strings, and basic objects) are cacheable; even if you have a mutator, they will be locally cached by the branch to reduce calls to the mutators that are destined to return the same value. 
 
@@ -148,7 +162,7 @@ One of the down sides of mutators is that complex values will be unique every ti
 is better than direct inspection. Assertion doesn't have this problem so if you insist on direct access of the branch/tree values, use 
 isEqaul rather than === for comparison. 
 
-## OK BOOMER
+## Eager Beaver: truncating extra long branches. 
 
 most state system doesn't last that long. however in the unlikely event that a tree gets too
 long we have a "Terminal system" to trim really old branches. It limits the size of the branch tree and cauterizes older values. 
@@ -166,6 +180,18 @@ a useful example: maxBranches = 80, trimTo = 60. that is when the tree is 80 bra
 trim it to 60 branches. Meaning trimmig a large tree will occur on the 81st branch and 
 every 20 branches after that. The greater the difference is between trimTt and maxBranches, the less often 
 tree trimming will occur. 
+
+The definition of "too long" is _highly subjective_ -- I'd say 80 to 100 branches are ok 
+but you may find even smaller windows lower your memory consumption. 
+
+There should also be a _significant gap_ between the maxBranches and trimTo numbers; 
+if for instance `maxBranches` is 100 and `trimTo` is 95 you will 
+see truncation happen _every five branches_ which probably will degrade performance a bit. 
+
+the difference between trimTo and maxBranches determines the number of growths 
+that will include a truncation; for instance if you have `maxBranches` at 100 and 
+`trimTo` of 60, then you will see truncation occur every 40 branches -- a healthy pattern.
+(you of course will not see any truncation occur until you reach your initial maxBranches total, which may never happen...)
 
 ### Trimming and active events 
 
@@ -201,10 +227,22 @@ and it has a maxBranches/trimTo of 5 and 2; the progress would look like this:
  for efficiencies' sake. 
 
 
-# Some Very Technical details
+## Some Very Technical details
 
-# Trimming Trees: the "plus one" factor
+### the "plus one" factor
 
 In order to allow for the possibility that the "last branch" (according to the desired trimTo size) is a 
 mutator that plays off the previous value, when trimminc occurs, the previous branch to the last branch
-is cloned and converted to an assert -- and THAT branch is made into the root; the remaining branch (trimTo branches long (or more)) is placed after that assert branch.
+is cloned and converted to an assert -- and THAT branch is made into the root; the remaining branch.
+(trimTo branches long (or more)) is placed after that assert branch.
+
+## Truncation and serial callbacks
+
+If truncation occurs in a scenario where there is no benchmarking _and_ there are only mutators in the history,
+the first value retrieval _may_ trigger an extended chained series of function calls up the mutation chain. 
+this is _may_ not _will certainly_ because if there are local caches in place and they have been set, they will prevent
+nested function calls. But worst case scenario, this will only occur once, at which point a local cache will percolate upwards
+towards the top. this is a very rare occurance, but not one that should cause noticeable effects unless your mutators are
+exceptionally complex. 
+
+The point of this is: if you use truncation, you should also use benchmarks every 10 or 20 frames as well. 

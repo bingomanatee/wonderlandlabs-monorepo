@@ -1,4 +1,5 @@
 import { Forest } from "../src/Forest";
+import { BENCHMARK_CAUSE } from "../src/Tree/BenchMarker";
 import type { BranchIF } from "../src/types/types.branch";
 import type {
   MutationValueProviderFN,
@@ -6,7 +7,7 @@ import type {
 } from "../src/types/types.shared";
 
 describe("caching", () => {
-  describe("tree trimming", () => {
+  describe("Beaver", () => {
     it("should maintain a length of no longer than (maxLength + 1", () => {
       const f = new Forest();
 
@@ -118,6 +119,65 @@ describe("caching", () => {
         }
       });
       expect(cachedCount).toBe(1);
+    });
+  });
+
+  describe("Ittermittent Caching", () => {
+    const f = new Forest();
+
+    const t = f.addTree<number>("fib", {
+      initial: 0,
+      benchmarkInterval: 4,
+      serializer({ value }) {
+        return value;
+      },
+    });
+
+    const fib: MutationValueProviderFN<number> = ({ value, branch }) => {
+      if (branch?.prev) {
+        return value + branch.prev.value;
+      }
+      return value || 1;
+    };
+
+    t.mutate(fib);
+    t.mutate(fib);
+    t.mutate(fib);
+    t.mutate(fib);
+    t.mutate(fib);
+    t.mutate(fib);
+    t.mutate(fib);
+    t.mutate(fib);
+    t.mutate(fib);
+    t.mutate(fib);
+    t.mutate(fib);
+    t.mutate(fib);
+    t.mutate(fib);
+    t.mutate(fib);
+    t.mutate(fib);
+
+    const history: { value: number; cause: string }[] = [];
+
+    t.forEachUp((b, c) => {
+      history.push({ value: b.value, cause: b.cause });
+      if (b && b.prev && b.prev.prev) {
+        expect(b.value).toEqual(b.prev.value + b.prev.prev.value);
+      }
+    });
+
+    history.forEach(({ value, cause }, i) => {
+      if (cause === BENCHMARK_CAUSE) {
+        const preset = history.slice(
+          Math.max(0, i - (t.params?.benchmarkInterval ?? 0) - 1),
+          i
+        );
+        if (i > 4) {
+          expect(preset[0].cause).toBe(BENCHMARK_CAUSE);
+          expect(
+            preset.slice(1).every((bc) => bc.cause !== BENCHMARK_CAUSE)
+          ).toBeTruthy();
+        }
+      }
     });
   });
 });

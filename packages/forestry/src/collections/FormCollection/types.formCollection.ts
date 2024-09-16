@@ -26,7 +26,8 @@ export interface FieldIF {
   errors?: FieldError[]; // transient - derived from validators if any.
 
   // v   v  v  values that are most likely NON chaqnging and present in baseParams.
-
+  inputType?: string; // text, number, date, etc.
+  componentType?: string; // eg "input", "select", "textfield" ... or can be a custom compopnent you develop
   props?: FieldProps; // generic extension point for any needed info
   isRequired?: boolean;
   order?: number;

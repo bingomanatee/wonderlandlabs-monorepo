@@ -1,4 +1,4 @@
-\import extendField from '../../../../src/collections/FormCollection/extendField';
+import extendField from '../../../../src/collections/FormCollection/extendField';
 import {
   isLongEnough,
   isNotCommonPassword,

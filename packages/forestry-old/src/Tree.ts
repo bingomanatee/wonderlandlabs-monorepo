@@ -123,7 +123,7 @@ export class Tree<ValueType> implements TreeIF<ValueType> {
         BenchMarker.shouldBenchmark<ValueType>(this, change)
       ) {
         new BenchMarker<ValueType>(this).benchmark(change);
-        return this.top;
+        return;
       }
 
       const next = new Branch<ValueType>(this, change);

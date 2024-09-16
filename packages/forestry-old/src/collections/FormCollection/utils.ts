@@ -3,6 +3,7 @@ import type {
   FieldIF,
   FieldError,
   FormCollectionIF,
+  FieldMutatorFN,
 } from './types.formCollection';
 
 export function isString(field: FieldIF) {
@@ -15,7 +16,6 @@ export function isString(field: FieldIF) {
       severity: 10,
     };
   }
-  return null;
 }
 
 export const NO_EMPTY_CHARS = 'must not have empty characters';
@@ -31,9 +31,7 @@ export function isSingleWord(field: FieldIF, errors: FieldError[]) {
       severity: 2,
     };
   }
-  return null;
 }
-
 export const commonUserNames = 'john,user,username,companyname'.split(',');
 export const IS_TOO_COMMON = 'is too common';
 export const IS_REQUIRED = 'required';
@@ -49,7 +47,6 @@ export function isCommonUserName(field: FieldIF, errors: FieldError[]) {
       severity: 1,
     };
   }
-  return null;
 }
 
 export function isRequired(field: FieldIF) {
@@ -59,13 +56,12 @@ export function isRequired(field: FieldIF) {
       severity: 3,
     };
   }
-  return null;
 }
 
 export const TOO_SHORT = 'field must be 8 or more characters';
 export function isLongEnough(field: FieldIF, errors: FieldError[]) {
   if (errors.length || typeof field.value !== 'string') {
-    return null;
+    return;
   }
   if (field.value.length < 8) {
     return {
@@ -73,7 +69,6 @@ export function isLongEnough(field: FieldIF, errors: FieldError[]) {
       severity: 5,
     };
   }
-  return null;
 }
 export const commonPasswords = 'password,abc123'.split(',');
 
@@ -88,7 +83,6 @@ export function isNotCommonPassword(field: FieldIF, errors: FieldError[]) {
       message: IS_TOO_COMMON,
     };
   }
-  return null;
 }
 
 export const makeFields = (

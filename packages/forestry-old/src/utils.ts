@@ -1,4 +1,4 @@
-import type { InfoParams, NotesMap } from './types/types.shared';
+import type { Info, InfoParams, NotesMap } from './types/types.shared';
 
 export const canProxy = typeof Proxy === 'function';
 

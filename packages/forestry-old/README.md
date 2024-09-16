@@ -1,4 +1,4 @@
-# Forestry 3.0.x
+# Forestry 3.0
 
 Forest is an attempt to create a journalled, transactional synchronous, query based muuti collection ecosystem.
 

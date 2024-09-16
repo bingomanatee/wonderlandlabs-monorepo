@@ -32,7 +32,6 @@ export class BenchMarker<ValueType> {
         return true;
       }
       count = c;
-      return undefined;
     }, benchmarkInterval);
 
     if (count < benchmarkInterval - 1) {

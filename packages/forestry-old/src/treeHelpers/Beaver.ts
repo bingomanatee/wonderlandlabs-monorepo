@@ -26,7 +26,7 @@ export class Beaver<ValueType> {
     let count = 0;
     this.tree.forEachDown((branch, c) => {
       if (tooLongBranch) {
-        return undefined;
+        return;
       }
       if (c >= maxBranches - 1) {
         if (hasActiveTasks) {
@@ -41,7 +41,6 @@ export class Beaver<ValueType> {
           return true;
         }
       }
-      return undefined;
     }, maxBranches + 1);
 
     if (!tooLongBranch || tooLongBranch === this.tree.root) {

@@ -1,1 +1,1 @@
-export * from "./FormCollection/types.formCollection.js";
+export * from './FormCollection/types.formCollection.js';

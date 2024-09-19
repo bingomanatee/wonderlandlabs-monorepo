@@ -1,6 +1,6 @@
-import type { BranchIF } from './types.branch.ts';
-import type { TreeIF } from './types.trees.ts';
-import type { ValueProviderContext } from './ValueProviderContext.ts';
+import type { BranchIF } from './types.branch';
+import type { TreeIF } from './types.trees';
+import type { ValueProviderContext } from './ValueProviderContext';
 
 export interface OffshootIF<ValueType> {
   time: number;

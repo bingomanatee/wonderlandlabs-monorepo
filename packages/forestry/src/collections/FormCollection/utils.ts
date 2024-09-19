@@ -1,9 +1,9 @@
-import { Forest } from '../../Forest.ts';
+import { Forest } from '../../Forest';
 import type {
   FieldIF,
   FieldError,
   FormCollectionIF,
-} from './types.formCollection.ts';
+} from './types.formCollection';
 
 export function isString(field: FieldIF) {
   if (!field.value && !field.isRequired) {

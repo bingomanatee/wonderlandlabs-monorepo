@@ -1,5 +1,5 @@
-import type { Notable } from './types.shared.ts';
-import type { TreeName, TreeIF, TreeParams } from './types.trees.ts';
+import type { Notable } from './types.shared';
+import type { TreeName, TreeIF, TreeParams } from './types.trees';
 import type { Observable } from 'rxjs';
 
 export type TaskFn<ResultType> = (forest: ForestIF) => ResultType;
@@ -19,7 +19,7 @@ export interface ForestIF extends Notable {
   nextTime: number;
   time: number;
   readonly activeTasks: number[];
-  
+
   uniqueTreeName(basis: string): string;
 
   do<ResultType>(change: TaskFn<ResultType>): ResultType;

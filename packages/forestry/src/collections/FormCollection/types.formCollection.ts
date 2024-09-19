@@ -1,4 +1,4 @@
-import type { ForestIF } from "../../types/types.forest.ts";
+import type { ForestIF } from '../../types/types.forest';
 
 export type FieldProps = Record<string, any>;
 export type FieldValue = string | number;
@@ -37,7 +37,7 @@ export interface FieldIF {
 }
 
 // These are the "initial and default" values any field may define.
-export type FieldBase = Partial<Omit<FieldIF, "baseParams" | "value">>;
+export type FieldBase = Partial<Omit<FieldIF, 'baseParams' | 'value'>>;
 
 export interface FormIF {
   name?: string;

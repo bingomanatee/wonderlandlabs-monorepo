@@ -1,5 +1,5 @@
-import { PartialObserver, Subscription, Unsubscribable } from "rxjs";
-import type { MutationValueProviderFN, SubscribeFn } from "./types.shared.ts";
+import { PartialObserver, Subscription, Unsubscribable } from 'rxjs';
+import type { MutationValueProviderFN, SubscribeFn } from './types.shared';
 
 export interface CollectionIF<ValueType> {
   // abstract

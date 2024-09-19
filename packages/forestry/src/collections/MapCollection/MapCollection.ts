@@ -1,13 +1,13 @@
-import type { ForestIF } from "../../types/types.forest.ts";
-import type { IterFn, ValueProviderParams } from "../../types/types.shared.ts";
-import { canProxy } from "../../canProxy.ts";
-import { Collection } from "../Collection.ts";
-import type { CollectionParams } from "../Collection.ts";
-import { deleteProxyFor } from "./deleteProxyFor.ts";
-import { setProxyFor } from "./setProxyFor.ts";
+import type { ForestIF } from '../../types/types.forest';
+import type { IterFn, ValueProviderParams } from '../../types/types.shared';
+import { canProxy } from '../../canProxy';
+import { Collection } from '../Collection';
+import type { CollectionParams } from '../Collection';
+import { deleteProxyFor } from './deleteProxyFor';
+import { setProxyFor } from './setProxyFor';
 
 export function noSet() {
-  throw new Error("forest maps are immutable");
+  throw new Error('forest maps are immutable');
 }
 
 export class MapCollection<
@@ -25,12 +25,12 @@ export class MapCollection<
       const { value } = cloneParams;
       if (!value[Symbol.iterator]) {
         console.log(
-          "attepmt to clone : params",
+          'attepmt to clone : params',
           cloneParams,
-          "not a map:",
+          'not a map:',
           value
         );
-        throw new Error("cannot clone map - not iterable");
+        throw new Error('cannot clone map - not iterable');
       }
       const out = new Map() as Map<KeyType, ValueType>;
 
@@ -66,19 +66,19 @@ export class MapCollection<
           key,
           value,
         });
-        this.tree.next(next, "set");
+        this.tree.next(next, 'set');
       } else {
         const next = new Map(this.tree.top.value);
         next.set(key, value);
-        this.tree.next(next, "set");
+        this.tree.next(next, 'set');
       }
     } else {
-      this.tree.next(new Map([[key, value]]), "set");
+      this.tree.next(new Map([ [ key, value ] ]), 'set');
     }
   }
 
   delete(key: KeyType) {
-    return this.deleteMany([key]);
+    return this.deleteMany([ key ]);
   }
 
   deleteMany(keys: KeyType[]) {
@@ -91,13 +91,13 @@ export class MapCollection<
         keys,
       });
 
-      this.tree.next(next, "deleteMany");
+      this.tree.next(next, 'deleteMany');
     } else {
       const next = new Map(this.tree.top.value);
       for (const key of keys) {
         next.delete(key);
       }
-      this.tree.next(next, "deleteMany");
+      this.tree.next(next, 'deleteMany');
     }
   }
 
@@ -109,7 +109,7 @@ export class MapCollection<
   }
 
   replace(map: Map<KeyType, ValueType>) {
-    this.tree.next(map, "replace");
+    this.tree.next(map, 'replace');
   }
 
   clear() {

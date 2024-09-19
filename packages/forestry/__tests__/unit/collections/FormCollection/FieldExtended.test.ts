@@ -3,7 +3,7 @@ import { FieldExtended } from '../../../../src/collections/FormCollection/FieldE
 
 describe('FieldExtended', () => {
   it('should reflect simple qualities of the field', () => {
-    const testField = { name: 'comments', value: 'foo' };
+    const testField = { name: 'comme', value: 'foo' };
 
     const ex = new FieldExtended(testField, testField.name, {
       fieldBaseParams: new Map(),
@@ -19,16 +19,16 @@ describe('FieldExtended', () => {
 
   it('should reflect inherited properties of the static props of the parent', () => {
     const testField = {
-      name: 'comments',
+      name: 'comme',
       value: 'foo',
       props: { className: 'comment-class' },
     };
     const baseParams = {
-      label: 'Comments',
+      label: 'Comme',
       className: 'override-me',
     };
     const ex = new FieldExtended(testField, testField.name, {
-      fieldBaseParams: new Map([ [ 'comments', baseParams ] ]),
+      fieldBaseParams: new Map([ [ 'comme', baseParams ] ]),
     });
 
     expect(ex.name).toBe(testField.name);
@@ -37,6 +37,6 @@ describe('FieldExtended', () => {
     expect(ex.isRequired).toBeFalsy();
     expect(ex.order).toBeUndefined();
     expect(ex.props?.className).toBe(testField.props.className);
-    expect(ex.label).toBe('Comments');
+    expect(ex.label).toBe('Comme');
   });
 });

@@ -1,17 +1,17 @@
-import { isObj } from "../../types/types.guards.ts";
-import type { FieldIF } from "./types.formCollection.ts";
+import { isObj } from '../../types/types.guards';
+import type { FieldIF } from './types.formCollection';
 import type {
   FieldValue,
   FieldRecord,
   FieldList,
-} from "./types.formCollection.ts";
+} from './types.formCollection';
 
 export function isFieldList(a: unknown): a is FieldList {
   return Array.isArray(a) && a.every(isFieldIF);
 }
 
 export function isFieldValue(a: unknown): a is FieldValue {
-  return typeof a == "string" || typeof a === "number";
+  return typeof a == 'string' || typeof a === 'number';
 }
 
 export function isFieldRecord(a: unknown): a is FieldRecord {
@@ -23,7 +23,7 @@ export function isFieldRecord(a: unknown): a is FieldRecord {
     return false;
   }
   if (
-    !Array.from(Object.keys(o)).every((k: unknown) => typeof k === "string")
+    !Array.from(Object.keys(o)).every((k: unknown) => typeof k === 'string')
   ) {
     return false;
   }
@@ -38,9 +38,9 @@ export function isFieldIF(a: unknown): a is FieldIF {
 
   if (
     !(
-      "name" in o &&
-      "value" in o &&
-      typeof o.name === "string" &&
+      'name' in o &&
+      'value' in o &&
+      typeof o.name === 'string' &&
       isFieldValue(o.value)
     )
   ) {

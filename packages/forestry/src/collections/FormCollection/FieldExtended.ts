@@ -1,4 +1,4 @@
-import { isEqual } from "lodash-es";
+import { isEqual } from 'lodash-es';
 import type {
   FieldIF,
   FormCollectionIF,
@@ -6,9 +6,9 @@ import type {
   FieldError,
   FieldValidator,
   FieldBase,
-} from "./types.formCollection.ts";
+} from './types.formCollection';
 
-const UNSET = Symbol("unset");
+const UNSET = Symbol('unset');
 /**
  * FieldExtended blends the properties of the static props of the
  * transient field with the staticProps from the formCollection's map.
@@ -33,7 +33,7 @@ export class FieldExtended implements FieldIF {
   private _props: FieldProps | undefined | symbol = UNSET;
   get props() {
     if (this._props === UNSET) {
-      this._props = [this.baseParamsLocal?.props, this.field.props].reduce(
+      this._props = [ this.baseParamsLocal?.props, this.field.props ].reduce(
         (out: FieldProps, item: FieldProps | undefined) => {
           if (item) {
             return { ...out, ...item };
@@ -43,7 +43,7 @@ export class FieldExtended implements FieldIF {
         {}
       );
     }
-    return typeof this._props === "symbol" ? undefined : this._props;
+    return typeof this._props === 'symbol' ? undefined : this._props;
   }
 
   private _validators: FieldValidator[] | undefined | symbol = UNSET;
@@ -51,11 +51,11 @@ export class FieldExtended implements FieldIF {
   get validators() {
     if (this._validators === UNSET) {
       this._validators = [
-        this._blend("validators"),
+        this._blend('validators'),
         this.field.validators,
       ].flat();
     }
-    return typeof this._validators === "symbol" ? undefined : this._validators;
+    return typeof this._validators === 'symbol' ? undefined : this._validators;
   }
 
   private _errors: FieldError[] | symbol = UNSET;
@@ -101,14 +101,14 @@ export class FieldExtended implements FieldIF {
   }
 
   get isRequired() {
-    return this._blend("isRequired");
+    return this._blend('isRequired');
   }
 
   get order() {
-    return this._blend("order");
+    return this._blend('order');
   }
 
   get label() {
-    return this._blend("label");
+    return this._blend('label');
   }
 }

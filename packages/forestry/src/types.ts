@@ -1,7 +1,7 @@
-export * from "./types/types.branch.ts";
+export * from './types/types.branch';
 
-export * from "./types/types.branch.ts";
-export * from "./types/types.trees.ts";
-export * from "./types/types.forest.ts";
-export * from "./types/types.shared.ts";
-export * from "./collections/types.collections.ts";
+export * from './types/types.branch';
+export * from './types/types.trees';
+export * from './types/types.forest';
+export * from './types/types.shared';
+export * from './collections/types.collections';

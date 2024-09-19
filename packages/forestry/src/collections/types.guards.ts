@@ -1,1 +1,1 @@
-export * from "./FormCollection/types.guards.ts";
+export * from './FormCollection/types.guards';

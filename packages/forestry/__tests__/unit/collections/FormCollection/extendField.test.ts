@@ -1,15 +1,15 @@
-import extendField from "../../../../src/collections/FormCollection/extendField.ts";
+import extendField from '../../../../src/collections/FormCollection/extendField';
 import {
   isLongEnough,
   isNotCommonPassword,
   isString,
   TOO_SHORT,
-} from "../../../../src/collections/FormCollection/utils.ts";
-import { expect, it, describe } from "vitest";
+} from '../../../../src/collections/FormCollection/utils';
+import { expect, it, describe } from 'vitest';
 
-describe("extendField", () => {
-  it("should preserve a single field with no history", () => {
-    const testField = { name: "comments", value: "foo" };
+describe('extendField', () => {
+  it('should preserve a single field with no history', () => {
+    const testField = { name: 'comme', value: 'foo' };
 
     const ex = extendField(testField);
 
@@ -21,14 +21,14 @@ describe("extendField", () => {
     expect(ex.label).toBeUndefined();
   });
 
-  it("should reflect inherited properties of the static props of the parent", () => {
+  it('should reflect inherited properties of the static props of the parent', () => {
     const testField = {
-      name: "comments",
-      value: "foo",
-      props: { className: "comment-class" },
+      name: 'comme',
+      value: 'foo',
+      props: { className: 'comment-class' },
       baseParams: {
-        label: "Comments",
-        className: "override-me",
+        label: 'Comme',
+        className: 'override-me',
       },
     };
 
@@ -40,18 +40,18 @@ describe("extendField", () => {
     expect(ex.isRequired).toBeFalsy();
     expect(ex.order).toBeUndefined();
     expect(ex.props?.className).toBe(testField.props.className);
-    expect(ex.label).toBe("Comments");
+    expect(ex.label).toBe('Comme');
   });
 
-  it("should execute validators", () => {
+  it('should execute validators', () => {
     const testField = {
-      name: "password",
-      value: "foo",
-      props: { className: "comment-class" },
+      name: 'password',
+      value: 'foo',
+      props: { className: 'comment-class' },
       baseParams: {
-        label: "Comments",
-        className: "override-me",
-        validators: [isString, isLongEnough, isNotCommonPassword],
+        label: 'Comme',
+        className: 'override-me',
+        validators: [ isString, isLongEnough, isNotCommonPassword ],
       },
     };
 
@@ -59,10 +59,10 @@ describe("extendField", () => {
 
     expect(ex.name).toBe(testField.name);
     expect(ex.value).toBe(testField.value);
-    expect(ex.errors).toEqual([{ message: TOO_SHORT, severity: 5 }]);
+    expect(ex.errors).toEqual([ { message: TOO_SHORT, severity: 5 } ]);
     expect(ex.isRequired).toBeFalsy();
     expect(ex.order).toBeUndefined();
     expect(ex.props?.className).toBe(testField.props.className);
-    expect(ex.label).toBe("Comments");
+    expect(ex.label).toBe('Comme');
   });
 });

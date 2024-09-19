@@ -3,20 +3,26 @@ import type {
   FieldIF,
   FieldProps,
   FieldValidator,
-} from './types.formCollection.ts';
+} from './types.formCollection';
 import { uniqWith, isEqual } from 'lodash-es';
-import { isFieldIF } from './types.guards.ts';
+import { isFieldIF } from './types.guards';
 
 function a(arg: FieldValidator | FieldValidator[]): FieldValidator[] {
-  if (Array.isArray(arg)) {return arg;}
+  if (Array.isArray(arg)) {
+    return arg;
+  }
   return [ arg ];
 }
 
 type pProp = FieldProps | undefined;
 function p(...props: pProp[]) {
   return props.reduce((memo: FieldProps, next: pProp) => {
-    if (memo && next) {return { ...memo, ...next };}
-    if (next) {return next;}
+    if (memo && next) {
+      return { ...memo, ...next };
+    }
+    if (next) {
+      return next;
+    }
     return memo;
   }, {});
 }
@@ -33,7 +39,9 @@ export default function extendField(...fields: Param[]) {
   const history = fields.flat().reverse();
   const next: FieldIF | Partial<FieldIF> = history.reduce(
     (out: FieldIF, next: FieldIF | undefined) => {
-      if (!next) {return out;}
+      if (!next) {
+        return out;
+      }
       const nextOut = { ...out, ...next };
       nextOut.props = p(out.props, next.props);
       return nextOut;
@@ -63,15 +71,18 @@ function applyValidators(field: FieldIF): FieldIF {
         let e: FieldError | undefined;
         try {
           e = v(field, errs) || undefined;
-          if (e) {errs.push(e);}
+          if (e) {
+            errs.push(e);
+          }
         } catch (er) {
           if (er instanceof Error) {
             errs.push({
               message: er.message,
               severity: Number.MAX_SAFE_INTEGER - 1,
             });
-          } else
-          {errs.push({ message: `${er}`, severity: Number.MAX_SAFE_INTEGER });}
+          } else {
+            errs.push({ message: `${er}`, severity: Number.MAX_SAFE_INTEGER });
+          }
         }
         return errs;
       }, [])

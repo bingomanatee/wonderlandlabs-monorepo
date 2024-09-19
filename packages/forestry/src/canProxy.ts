@@ -1,1 +1,1 @@
-export const canProxy = typeof Proxy === "function";
+export const canProxy = typeof Proxy === 'function';

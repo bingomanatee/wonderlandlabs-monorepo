@@ -1,7 +1,7 @@
-import { isAssert, isMutator } from '../types/types.guards.ts';
-import type { ChangeIF } from '../types/types.shared.ts';
-import { ValueProviderContext } from '../types/ValueProviderContext.ts';
-import type { TreeIF } from '../types/types.trees.ts';
+import { isAssert, isMutator } from '../types/types.guards';
+import type { ChangeIF } from '../types/types.shared';
+import { ValueProviderContext } from '../types/ValueProviderContext';
+import type { TreeIF } from '../types/types.trees';
 
 export class PreValidator {
   static validate<ValueType>(

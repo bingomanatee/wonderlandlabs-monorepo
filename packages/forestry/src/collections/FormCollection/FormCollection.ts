@@ -1,8 +1,8 @@
-import { Forest } from "../../Forest.ts";
-import type { ForestIF } from "../../types/types.forest.ts";
-import type { SubscribeFn } from "../../types/types.shared.ts";
-import { BehaviorSubject, map } from "rxjs";
-import type { PartialObserver, Unsubscribable } from "rxjs";
+import { Forest } from '../../Forest';
+import type { ForestIF } from '../../types/types.forest';
+import type { SubscribeFn } from '../../types/types.shared';
+import { BehaviorSubject, map } from 'rxjs';
+import type { PartialObserver, Unsubscribable } from 'rxjs';
 import type {
   FieldList,
   FieldRecord,
@@ -15,10 +15,10 @@ import type {
   FormCollectionIF,
   FieldMap,
   FieldMutatorFN,
-} from "./types.formCollection.ts";
+} from './types.formCollection';
 
-import { FormFieldMapCollection } from "./FormFieldMapCollection.ts";
-import { isFieldList, isFieldRecord, isFieldValue } from "./types.guards.ts";
+import { FormFieldMapCollection } from './FormFieldMapCollection';
+import { isFieldList, isFieldRecord, isFieldValue } from './types.guards';
 
 type FieldDef = FieldList | FieldRecord;
 
@@ -62,15 +62,15 @@ export class FormCollection implements FormCollectionIF {
         const record: Partial<FieldIF> = fields[key];
         const { baseParams, value, ...rest } = record;
         if (!isFieldValue(value)) {
-          throw new Error("bad field value");
+          throw new Error('bad field value');
         }
         add(key, value, baseParams, rest);
       }
     } else {
-      throw new Error("bad feilds type in FormCollection");
+      throw new Error('bad feilds type in FormCollection');
     }
 
-    const fcName = this.forest.uniqueTreeName(this.name + ":fields");
+    const fcName = this.forest.uniqueTreeName(this.name + ':fields');
     this.fieldMapCollection = new FormFieldMapCollection(
       fcName,
       fieldMap,
@@ -114,7 +114,7 @@ export class FormCollection implements FormCollectionIF {
   }
   // @s-expect-error TS2416
   subscribe(observer: PartialObserver<FormSetIF> | SubscribeFn<FormSetIF>) {
-    if (typeof observer === "function") {
+    if (typeof observer === 'function') {
       observer = { next: observer };
     }
     // @s-expect-error TS2416
@@ -148,7 +148,7 @@ export class FormCollection implements FormCollectionIF {
   }
 
   get isValid(): boolean {
-    return [...this.fieldMapCollection.value.values()].every(
+    return [ ...this.fieldMapCollection.value.values() ].every(
       (field) => !field.errors || !field.errors.length
     );
   }

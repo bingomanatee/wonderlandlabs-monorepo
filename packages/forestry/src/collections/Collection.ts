@@ -1,12 +1,12 @@
-import { Forest } from '../Forest.ts';
-import type { CollectionAction, CollectionIF } from '../types/type.collection.ts';
+import { Forest } from '../Forest';
+import type { CollectionAction, CollectionIF } from '../types/type.collection';
 import type {
   ChangeIF,
   SubscribeFn,
   ValueProviderFN,
-} from '../types/types.shared.ts';
-import type { ForestIF } from '../types/types.forest.ts';
-import type { TreeIF, TreeParams } from '../types/types.trees.ts';
+} from '../types/types.shared';
+import type { ForestIF } from '../types/types.forest';
+import type { TreeIF, TreeParams } from '../types/types.trees';
 import type { PartialObserver } from 'rxjs';
 
 export type CollectionParams<ValueType> = TreeParams<ValueType> & {
@@ -32,7 +32,7 @@ export class Collection<ValueType> implements CollectionIF<ValueType> {
         // otherwise, allow Collection to exist
         return;
       } else {
-        throw new Error('cannot create collection - tree ' + name + ' exists');
+        throw new Error('cannot create collection - tree ' + name + ' exi');
       }
     } else {
       if (params) {

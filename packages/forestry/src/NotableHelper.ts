@@ -1,4 +1,4 @@
-import type { InfoParams, NotesMap } from "./types/types.shared.ts";
+import type { InfoParams, NotesMap } from './types/types.shared';
 
 export class NotableHelper {
   static addNote(
@@ -10,9 +10,9 @@ export class NotableHelper {
   ) {
     const info = { message, params, time: time, tree };
     if (!notes) {
-      notes = new Map([[time, [info]]]);
+      notes = new Map([ [ time, [ info ] ] ]);
     } else if (!notes.has(time)) {
-      notes.set(time, [info]);
+      notes.set(time, [ info ]);
     } else {
       notes.get(time).push(info);
     }

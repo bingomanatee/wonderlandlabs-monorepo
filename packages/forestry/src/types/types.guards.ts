@@ -1,4 +1,4 @@
-import type { FieldIF } from "../collections/FormCollection/types.formCollection.ts";
+import type { FieldIF } from '../collections/FormCollection/types.formCollection';
 import type {
   Assertion,
   IttermittentCacheProviderParams,
@@ -6,11 +6,11 @@ import type {
   MutationValueProviderParams,
   Mutator,
   TruncationValueProviderParams,
-} from "./types.shared.ts";
-import { ValueProviderContext } from "./ValueProviderContext.ts";
+} from './types.shared';
+import { ValueProviderContext } from './ValueProviderContext';
 
 export function isObj(a: unknown): a is object {
-  return Boolean(a && typeof a === "object");
+  return Boolean(a && typeof a === 'object');
 }
 
 export function isField(a: unknown): a is FieldIF {
@@ -20,10 +20,10 @@ export function isField(a: unknown): a is FieldIF {
   const o = a as object;
 
   return Boolean(
-    "name" in o &&
-      "value" in o &&
-      typeof o.name === "string" &&
-      (typeof o.value === "number" || typeof o.value === "string")
+    'name' in o &&
+      'value' in o &&
+      typeof o.name === 'string' &&
+      (typeof o.value === 'number' || typeof o.value === 'string')
   );
 }
 
@@ -35,9 +35,9 @@ export function isMutator<ValueType = unknown>(
   }
   return !!(
     a &&
-    typeof a === "object" &&
-    "mutator" in a &&
-    typeof a.mutator === "function"
+    typeof a === 'object' &&
+    'mutator' in a &&
+    typeof a.mutator === 'function'
   );
 }
 
@@ -48,7 +48,7 @@ export function isAssert<ValueType = unknown>(
     return false;
   }
   const o = a as Record<string | number | symbol, unknown>;
-  return Boolean("assert" in o);
+  return Boolean('assert' in o);
 }
 
 export function isMapKey<MapType>(
@@ -68,7 +68,7 @@ export function isMutationValueProviderParams<Value>(
   if (!isObj(a)) {
     return false;
   }
-  return Boolean("context" in a && a.context === ValueProviderContext.mutation);
+  return Boolean('context' in a && a.context === ValueProviderContext.mutation);
 }
 
 export function isLocalValueProviderParams<Value>(
@@ -78,7 +78,7 @@ export function isLocalValueProviderParams<Value>(
     return false;
   }
   return Boolean(
-    "context" in a && a.context === ValueProviderContext.localCache
+    'context' in a && a.context === ValueProviderContext.localCache
   );
 }
 
@@ -89,7 +89,7 @@ export function isTruncationValueProviderParams<Value>(
     return false;
   }
   return Boolean(
-    "context" in a && a.context === ValueProviderContext.truncation
+    'context' in a && a.context === ValueProviderContext.truncation
   );
 }
 
@@ -100,6 +100,6 @@ export function isIttermittentCacheProviderParams<Value>(
     return false;
   }
   return Boolean(
-    "context" in a && a.context === ValueProviderContext.itermittentCache
+    'context' in a && a.context === ValueProviderContext.itermittentCache
   );
 }

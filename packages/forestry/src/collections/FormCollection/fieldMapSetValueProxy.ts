@@ -1,12 +1,12 @@
-import type { IterFn } from '../../types/types.shared';
-import { noSet } from '../MapCollection/MapCollection';
-import extendField from './extendField';
+import type { IterFn } from "../../types/types.shared.ts";
+import { noSet } from "../MapCollection/MapCollection.ts";
+import extendField from "./extendField.ts";
 import type {
   FieldBase,
   FieldIF,
   FieldMap,
   FieldValue,
-} from './types.formCollection';
+} from "./types.formCollection.ts";
 
 function getter(
   map: FieldMap,
@@ -23,9 +23,9 @@ function getter(
 function makeIterator(map: FieldMap, name: string, newField: FieldIF) {
   return function* () {
     for (const list of map) {
-      const [ listKey ] = list;
+      const [listKey] = list;
       if (listKey === name) {
-        yield [ name, newField ];
+        yield [name, newField];
       } else {
         yield list;
       }
@@ -39,9 +39,9 @@ function makeEntriesIterator(map: FieldMap, name: string, newField: FieldIF) {
     [Symbol.iterator]: function* () {
       for (const k of map.keys()) {
         if (k === name) {
-          yield [ k, newField ];
+          yield [k, newField];
         } else {
-          yield [ k, map.get(k) ];
+          yield [k, map.get(k)];
         }
       }
     },
@@ -102,51 +102,51 @@ export function fieldMapSetValueProxy(
   const handler = {
     set() {
       throw new Error(
-        'forest field maps are immutable - cannot set any properties on field maps'
+        "forest field maps are immutable - cannot set any properties on field maps"
       );
     },
     get(target: FieldMap, method: keyof typeof target) {
       let out: any = undefined;
       switch (method) {
-      case 'get':
-        out = newGetter;
-        break;
+        case "get":
+          out = newGetter;
+          break;
 
-      case 'set':
-        out = noSet;
-        break;
+        case "set":
+          out = noSet;
+          break;
 
-      case 'clear':
-        out = noSet;
-        break;
+        case "clear":
+          out = noSet;
+          break;
 
-      case 'has':
-        out = (key: KeyType) => target.has(key);
-        break;
+        case "has":
+          out = (key: KeyType) => target.has(key);
+          break;
 
-      case 'forEach':
-        out = makeForEach(map, name, updatedField);
-        break;
+        case "forEach":
+          out = makeForEach(map, name, updatedField);
+          break;
 
-      case 'keys':
-        out = () => target.keys();
-        break;
+        case "keys":
+          out = () => target.keys();
+          break;
 
-      case 'values':
-        out = makeValueIterator(map, name, updatedField);
-        break;
+        case "values":
+          out = makeValueIterator(map, name, updatedField);
+          break;
 
-      case 'entries':
-        out = makeEntriesIterator(map, name, updatedField);
-        break;
+        case "entries":
+          out = makeEntriesIterator(map, name, updatedField);
+          break;
 
-      case 'size':
-        out = target.size;
-        break;
+        case "size":
+          out = target.size;
+          break;
 
-      case Symbol.iterator:
-        out = makeIterator(map, name, updatedField);
-        break;
+        case Symbol.iterator:
+          out = makeIterator(map, name, updatedField);
+          break;
       }
       return out;
     },

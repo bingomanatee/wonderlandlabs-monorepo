@@ -1,10 +1,10 @@
-import type { BranchIF } from '../types/types.branch';
-import { isAssert, isMutator } from '../types/types.guards';
-import type { ChangeIF } from '../types/types.shared';
-import { ValueProviderContext } from '../types/ValueProviderContext';
-import type { TreeIF } from '../types/types.trees';
+import type { BranchIF } from "../types/types.branch.ts";
+import { isAssert, isMutator } from "../types/types.guards.ts";
+import type { ChangeIF } from "../types/types.shared.ts";
+import { ValueProviderContext } from "../types/ValueProviderContext.ts";
+import type { TreeIF } from "../types/types.trees.ts";
 
-export const BENCHMARK_CAUSE = '!BENCHMARK!';
+export const BENCHMARK_CAUSE = "!BENCHMARK!";
 
 export class BenchMarker<ValueType> {
   constructor(private tree: TreeIF<ValueType>) {}
@@ -67,6 +67,6 @@ export class BenchMarker<ValueType> {
       });
       this.tree.next(serialized, BENCHMARK_CAUSE);
     }
-    this.tree.addNote('benchmark serialized ' + change.name);
+    this.tree.addNote("benchmark serialized " + change.name);
   }
 }

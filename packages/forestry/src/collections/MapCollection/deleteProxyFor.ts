@@ -1,5 +1,5 @@
-import type { IterFn } from '../../types/types.shared';
-import { noSet } from './MapCollection';
+import type { IterFn } from '../../types/types.shared.ts';
+import { noSet } from './MapCollection.ts';
 
 export type MapDeleteInfo<KeyType, ValueType> = {
   map: Map<KeyType, ValueType>;
@@ -13,7 +13,7 @@ function makeIterator<KeyType, ValueType>(
   return function* () {
     for (const list of map) {
       const [ listKey ] = list;
-      if (!keys.includes(listKey)) {
+      if (!keys.includes(listKey)) { 
         yield list;
       }
     }

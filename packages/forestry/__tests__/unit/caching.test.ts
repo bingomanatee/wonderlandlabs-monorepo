@@ -1,10 +1,10 @@
-import { Forest } from '../../src';
-import { BENCHMARK_CAUSE } from '../../src/treeHelpers/BenchMarker';
-import type { BranchIF } from '../../src/types/types.branch';
+import { Forest } from '../../src/Forest.ts';
+import { BENCHMARK_CAUSE } from '../../src/treeHelpers/BenchMarker.ts';
+import type { BranchIF } from '../../src/types/types.branch.ts';
 import type {
   MutationValueProviderFN,
   Mutator,
-} from '../../src/types/types.shared';
+} from '../../src/types/types.shared.ts';
 import { expect, it, describe } from 'vitest';
 
 describe('caching', () => {

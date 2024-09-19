@@ -1,4 +1,4 @@
-import type { CollectionIF } from '../../types/type.collection';
+import type { CollectionIF } from "../../types/type.collection.ts";
 // import { map } from 'rxjs';
 
 import type {
@@ -7,9 +7,9 @@ import type {
   FieldIF,
   FieldMutatorFN,
   FieldProps,
-} from './types.formCollection';
-import extendField from './extendField';
-import { MapCollection } from '../MapCollection/MapCollection';
+} from "./types.formCollection.ts";
+import extendField from "./extendField.ts";
+import { MapCollection } from "../MapCollection/MapCollection.ts";
 
 /**
  * this is a "utility sub-class" of FormCollection designed exclusively
@@ -31,7 +31,7 @@ export class FormFieldMapCollection
   ) {
     const mappedFields = new Map();
 
-    for (const [ name, field ] of fields) {
+    for (const [name, field] of fields) {
       if (field.baseParams) {
         formCollection.fieldBaseParams.set(name, field.baseParams);
         delete field.baseParams;
@@ -59,10 +59,10 @@ export class FormFieldMapCollection
    */
   setFieldValue(name: string, value: string | number) {
     if (!this.tree.top) {
-      throw new Error('canot setFieldValue to empty FormFieldMapCollection');
+      throw new Error("canot setFieldValue to empty FormFieldMapCollection");
     }
     if (!this.tree.top.value.has(name)) {
-      throw new Error('no ' + name + ' in form');
+      throw new Error("no " + name + " in form");
     }
 
     const field = this.get(name);
@@ -72,14 +72,14 @@ export class FormFieldMapCollection
   }
 
   updateFieldProperty(name: string, key: string, value: any) {
-    if (key === 'value') {
+    if (key === "value") {
       return this.setFieldValue(name, value);
     }
     if (!this.tree.top) {
-      throw new Error('canot setFieldValue to empty FormFieldMapCollection');
+      throw new Error("canot setFieldValue to empty FormFieldMapCollection");
     }
     if (!this.tree.top.value.has(name)) {
-      throw new Error('no ' + name + ' in form');
+      throw new Error("no " + name + " in form");
     }
 
     const field = this.get(name);
@@ -96,10 +96,10 @@ export class FormFieldMapCollection
    */
   updateField(name: string, mutator: FieldMutatorFN) {
     if (!this.tree.top) {
-      throw new Error('canot setFieldValue to empty FormFieldMapCollection');
+      throw new Error("canot setFieldValue to empty FormFieldMapCollection");
     }
     if (!this.tree.top.value.has(name)) {
-      throw new Error('no ' + name + ' in form');
+      throw new Error("no " + name + " in form");
     }
 
     const field = this.get(name);
@@ -114,11 +114,11 @@ export class FormFieldMapCollection
       const self = this;
       this.forest.do(() => {
         for (const fieldName of self.keys()) {
-          this.updateFieldProperty(fieldName, 'committed', true);
+          this.updateFieldProperty(fieldName, "committed", true);
         }
       });
     } else {
-      this.updateFieldProperty(name, 'committed', true);
+      this.updateFieldProperty(name, "committed", true);
     }
   }
 

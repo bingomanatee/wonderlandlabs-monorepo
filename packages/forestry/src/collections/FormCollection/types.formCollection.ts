@@ -1,5 +1,4 @@
-import type { ForestIF } from '../../types/types.forest';
-import { isObj, isField } from '../../types/types.guards';
+import type { ForestIF } from "../../types/types.forest.ts";
 
 export type FieldProps = Record<string, any>;
 export type FieldValue = string | number;
@@ -9,7 +8,7 @@ export type ErrorMessageMap = Map<number, string>;
 export type FieldValidator = (
   field: FieldIF,
   previousErrors: FieldError[]
-) => FieldError | void | false | null;
+) => FieldError | undefined | null | false;
 export type FieldError = {
   message: string;
   severity?: number; // "severity" is a subjective and optional property;
@@ -37,27 +36,8 @@ export interface FieldIF {
   baseParams?: FieldBase;
 }
 
-export function isFieldIF(a: unknown): a is FieldIF {
-  if (!isObj(a)) {
-    return false;
-  }
-  const o = a as Record<string, any>;
-
-  if (
-    !(
-      'name' in o &&
-      'value' in o &&
-      typeof o.name === 'string' &&
-      isFieldValue(o.value)
-    )
-  ) {
-    return false;
-  }
-  return true;
-}
-
 // These are the "initial and default" values any field may define.
-export type FieldBase = Partial<Omit<FieldIF, 'baseParams' | 'value'>>;
+export type FieldBase = Partial<Omit<FieldIF, "baseParams" | "value">>;
 
 export interface FormIF {
   name?: string;
@@ -80,29 +60,6 @@ export interface Params {
 export type FieldList = FieldIF[];
 export type FieldRecord = Record<string, Partial<FieldIF>>;
 
-export function isFieldList(a: unknown): a is FieldList {
-  return Array.isArray(a) && a.every(isField);
-}
-
-export function isFieldValue(a: unknown): a is FieldValue {
-  return typeof a == 'string' || typeof a === 'number';
-}
-
-export function isFieldRecord(a: unknown): a is FieldRecord {
-  if (!isObj(a)) {
-    return false;
-  }
-  const o = a as object;
-  if (!Array.from(Object.values(o)).every(isField)) {
-    return false;
-  }
-  if (
-    !Array.from(Object.keys(o)).every((k: unknown) => typeof k === 'string')
-  ) {
-    return false;
-  }
-  return true;
-}
 // #endregion
 
 export type BaseParamMap = Map<string, FieldBase>;
@@ -115,7 +72,7 @@ export interface FormCollectionIF {
   updateField(name: string, mutator: FieldMutatorFN): void;
   hasField(name: string): boolean;
   field(name: string): FieldIF | undefined;
-  commit(name?: string | boolean) : void;
+  commit(name?: string | boolean): void;
 }
 
 export type FieldMutatorFN = (

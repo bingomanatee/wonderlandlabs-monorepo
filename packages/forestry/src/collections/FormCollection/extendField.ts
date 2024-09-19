@@ -3,9 +3,9 @@ import type {
   FieldIF,
   FieldProps,
   FieldValidator,
-} from './types.formCollection';
-import { isFieldIF } from './types.formCollection';
+} from './types.formCollection.ts';
 import { uniqWith, isEqual } from 'lodash-es';
+import { isFieldIF } from './types.guards.ts';
 
 function a(arg: FieldValidator | FieldValidator[]): FieldValidator[] {
   if (Array.isArray(arg)) {return arg;}

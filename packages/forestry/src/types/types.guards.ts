@@ -1,11 +1,16 @@
+import type { FieldIF } from "../collections/FormCollection/types.formCollection.ts";
 import type {
-  FieldIF,
-} from '../collections/FormCollection/types.formCollection';
-import { type Assertion, type IttermittentCacheProviderParams, type LocalValueProviderParams, type MutationValueProviderParams, type Mutator, type TruncationValueProviderParams } from './types.shared';
-import { ValueProviderContext } from './ValueProviderContext';
+  Assertion,
+  IttermittentCacheProviderParams,
+  LocalValueProviderParams,
+  MutationValueProviderParams,
+  Mutator,
+  TruncationValueProviderParams,
+} from "./types.shared.ts";
+import { ValueProviderContext } from "./ValueProviderContext.ts";
 
 export function isObj(a: unknown): a is object {
-  return Boolean(a && typeof a === 'object');
+  return Boolean(a && typeof a === "object");
 }
 
 export function isField(a: unknown): a is FieldIF {
@@ -15,27 +20,35 @@ export function isField(a: unknown): a is FieldIF {
   const o = a as object;
 
   return Boolean(
-    'name' in o &&
-      'value' in o &&
-      typeof o.name === 'string' &&
-      (typeof o.value === 'number' || typeof o.value === 'string')
+    "name" in o &&
+      "value" in o &&
+      typeof o.name === "string" &&
+      (typeof o.value === "number" || typeof o.value === "string")
   );
 }
 
-export function isMutator<ValueType = unknown>(a: unknown): a is Mutator<ValueType> {
-  if (!isObj(a)) {return false;}
+export function isMutator<ValueType = unknown>(
+  a: unknown
+): a is Mutator<ValueType> {
+  if (!isObj(a)) {
+    return false;
+  }
   return !!(
     a &&
-    typeof a === 'object' &&
-    'mutator' in a &&
-    typeof a.mutator === 'function'
+    typeof a === "object" &&
+    "mutator" in a &&
+    typeof a.mutator === "function"
   );
 }
 
-export function isAssert<ValueType = unknown>(a: unknown): a is Assertion<ValueType> {
-  if (!isObj(a)) {return false;}
+export function isAssert<ValueType = unknown>(
+  a: unknown
+): a is Assertion<ValueType> {
+  if (!isObj(a)) {
+    return false;
+  }
   const o = a as Record<string | number | symbol, unknown>;
-  return Boolean('assert' in o);
+  return Boolean("assert" in o);
 }
 
 export function isMapKey<MapType>(
@@ -52,36 +65,41 @@ export function isMapKey<MapType>(
 export function isMutationValueProviderParams<Value>(
   a: unknown
 ): a is MutationValueProviderParams<Value> {
-  if (!isObj(a)) {return false;}
-  return Boolean('context' in a && a.context === ValueProviderContext.mutation);
+  if (!isObj(a)) {
+    return false;
+  }
+  return Boolean("context" in a && a.context === ValueProviderContext.mutation);
 }
-
 
 export function isLocalValueProviderParams<Value>(
   a: unknown
 ): a is LocalValueProviderParams<Value> {
-  if (!isObj(a)) {return false;}
+  if (!isObj(a)) {
+    return false;
+  }
   return Boolean(
-    'context' in a && a.context === ValueProviderContext.localCache
+    "context" in a && a.context === ValueProviderContext.localCache
   );
 }
-
 
 export function isTruncationValueProviderParams<Value>(
   a: unknown
 ): a is TruncationValueProviderParams<Value> {
-  if (!isObj(a)) {return false;}
+  if (!isObj(a)) {
+    return false;
+  }
   return Boolean(
-    'context' in a && a.context === ValueProviderContext.truncation
+    "context" in a && a.context === ValueProviderContext.truncation
   );
 }
-
 
 export function isIttermittentCacheProviderParams<Value>(
   a: unknown
 ): a is IttermittentCacheProviderParams<Value> {
-  if (!isObj(a)) {return false;}
+  if (!isObj(a)) {
+    return false;
+  }
   return Boolean(
-    'context' in a && a.context === ValueProviderContext.itermittentCache
+    "context" in a && a.context === ValueProviderContext.itermittentCache
   );
 }

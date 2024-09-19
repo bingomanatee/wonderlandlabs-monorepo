@@ -1,20 +1,23 @@
-import { expect, it, describe } from 'vitest';
-import { Forest, FormCollection } from '../../../../src';
+import { expect, it, describe } from "vitest";
+import { Forest } from "../../../../src/Forest.ts";
 import type {
   FieldError,
   FieldIF,
   FieldRecord,
-} from '../../../../src/collections/FormCollection/types.formCollection';
+} from "../../../../src/collections/FormCollection/types.formCollection.ts";
 import {
   isLongEnough,
   isString,
-} from '../../../../src/collections/FormCollection/utils';
+} from "../../../../src/collections/FormCollection/utils.ts";
+import { FormCollection } from "../../../../src/collections/FormCollection/FormCollection.ts";
 
 const MUST_BE_EMAIL = 'must be email format: "___@__.__';
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 function isEmail(f: FieldIF, errors: FieldError[]) {
-  if (errors.length) {return undefined;}
+  if (errors.length) {
+    return undefined;
+  }
 
   if (!EMAIL_RE.test(f.value as string)) {
     return {
@@ -27,61 +30,61 @@ function isEmail(f: FieldIF, errors: FieldError[]) {
 
 const COMMENT_FIELDS: FieldRecord = {
   title: {
-    name: 'title',
-    value: '',
+    name: "title",
+    value: "",
     baseParams: {
-      label: 'Message Title',
-      validators: [ isString, isLongEnough ],
+      label: "Message Title",
+      validators: [isString, isLongEnough],
       isRequired: true,
     },
   },
   content: {
-    name: 'content',
-    value: '',
+    name: "content",
+    value: "",
     baseParams: {
-      label: 'Message',
+      label: "Message",
       isRequired: true,
-      validators: [ isString, isLongEnough ],
+      validators: [isString, isLongEnough],
     },
   },
   authorEmail: {
-    name: 'authorEmail',
-    value: '',
+    name: "authorEmail",
+    value: "",
     baseParams: {
-      label: 'Author eMail',
+      label: "Author eMail",
       isRequired: true,
-      validators: [ isString, isEmail ],
+      validators: [isString, isEmail],
     },
   },
 };
-describe('FormCollection', () => {
-  it('has all the initial values', () => {
+describe("FormCollection", () => {
+  it("has all the initial values", () => {
     const f = new Forest();
 
-    const fm = new FormCollection('comment', COMMENT_FIELDS, {
+    const fm = new FormCollection("comment", COMMENT_FIELDS, {
       forest: f,
     });
 
-    expect([ ...fm.value.fields.keys() ]).toEqual([
-      'title',
-      'content',
-      'authorEmail',
+    expect([...fm.value.fields.keys()]).toEqual([
+      "title",
+      "content",
+      "authorEmail",
     ]);
-    expect([ ...fm.value.fields.values() ].map((f) => f.value)).toEqual([
-      '',
-      '',
-      '',
+    expect([...fm.value.fields.values()].map((f) => f.value)).toEqual([
+      "",
+      "",
+      "",
     ]);
-    expect([ ...fm.value.fields.values() ].map((f) => f.errors)).toEqual([
+    expect([...fm.value.fields.values()].map((f) => f.errors)).toEqual([
       [
         {
-          message: 'field must be 8 or more characters',
+          message: "field must be 8 or more characters",
           severity: 5,
         },
       ],
       [
         {
-          message: 'field must be 8 or more characters',
+          message: "field must be 8 or more characters",
           severity: 5,
         },
       ],
@@ -94,86 +97,86 @@ describe('FormCollection', () => {
     ]);
   });
 
-  describe('setFieldValue', () => {
-    it('can update with values', () => {
+  describe("setFieldValue", () => {
+    it("can update with values", () => {
       const f = new Forest();
 
-      const fm = new FormCollection('comment', COMMENT_FIELDS, {
+      const fm = new FormCollection("comment", COMMENT_FIELDS, {
         forest: f,
       });
-      fm.setFieldValue('title', 'Great Expectations');
-      fm.setFieldValue('authorEmail', 'foo@bar.com');
+      fm.setFieldValue("title", "Great Expectations");
+      fm.setFieldValue("authorEmail", "foo@bar.com");
 
-      expect([ ...fm.value.fields.keys() ]).toEqual([
-        'content',
-        'title',
-        'authorEmail',
+      expect([...fm.value.fields.keys()]).toEqual([
+        "content",
+        "title",
+        "authorEmail",
       ]);
 
-      expect([ ...fm.value.fields.values() ].map((f) => f.value)).toEqual([
-        '',
-        'Great Expectations',
-        'foo@bar.com',
+      expect([...fm.value.fields.values()].map((f) => f.value)).toEqual([
+        "",
+        "Great Expectations",
+        "foo@bar.com",
       ]);
 
-      expect([ ...fm.value.fields.values() ].map((f) => f.edited)).toEqual([
+      expect([...fm.value.fields.values()].map((f) => f.edited)).toEqual([
         undefined,
         true,
         true,
       ]);
-      const errors = [ ...fm.value.fields.values() ].map((f) => f.errors);
+      const errors = [...fm.value.fields.values()].map((f) => f.errors);
       expect(errors).toEqual([
-        [ { message: 'field must be 8 or more characters', severity: 5 } ],
+        [{ message: "field must be 8 or more characters", severity: 5 }],
         [],
         [],
       ]);
     });
   });
 
-  describe('updateFieldProperty', () => {
-    it('should update a field property', () => {
+  describe("updateFieldProperty", () => {
+    it("should update a field property", () => {
       const f = new Forest();
 
-      const fm = new FormCollection('comment', COMMENT_FIELDS, {
+      const fm = new FormCollection("comment", COMMENT_FIELDS, {
         forest: f,
       });
 
-      fm.updateFieldProperty('content', 'label', 'Content');
+      fm.updateFieldProperty("content", "label", "Content");
 
-      expect(fm.field('content')?.label).toBe('Content');
+      expect(fm.field("content")?.label).toBe("Content");
     });
   });
 
-  describe('commit', () => {
-    it('should commit a single named field', () => {
+  describe("commit", () => {
+    it("should commit a single named field", () => {
       const f = new Forest();
 
-      const fm = new FormCollection('comment', COMMENT_FIELDS, {
+      const fm = new FormCollection("comment", COMMENT_FIELDS, {
         forest: f,
       });
-      fm.commit('title');
+      fm.commit("title");
 
-      expect([ ...fm.value.fields.keys() ]).toEqual([
-        'content',
-        'authorEmail',
-        'title',
+      expect([...fm.value.fields.keys()]).toEqual([
+        "content",
+        "authorEmail",
+        "title",
       ]);
 
-      expect([ ...fm.value.fields.values() ].map((f) => f.committed)).toEqual([
+      expect([...fm.value.fields.values()].map((f) => f.committed)).toEqual([
         ,
         ,
         true,
       ]);
     });
-    it('should commit all fields without arguemnts', () => {
+    it("should commit all fields without arguemnts", () => {
       const f = new Forest();
 
-      const fm = new FormCollection('comment', COMMENT_FIELDS, {
+      const fm = new FormCollection("comment", COMMENT_FIELDS, {
         forest: f,
       });
       fm.commit();
 
-      expect([ ...fm.value.fields.values() ].map((f) => f.committed)).toEqual([
+      expect([...fm.value.fields.values()].map((f) => f.committed)).toEqual([
         true,
         true,
         true,

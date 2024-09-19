@@ -1,11 +1,7 @@
-import type { BranchIF } from './types/types.branch';
+export * from "./types/types.branch.ts";
 
-export type * as branchTypes from './types/types.branch';
-export type * as treeTypes from './types/types.trees';
-export interface OffshootIF<ValueType> {
-  time: number;
-  error: string;
-  branch: BranchIF<ValueType>;
-}
-
-export type * as forestTypes from './types/types.forest';
+export * from "./types/types.branch.ts";
+export * from "./types/types.trees.ts";
+export * from "./types/types.forest.ts";
+export * from "./types/types.shared.ts";
+export * from "./collections/types.collections.ts";

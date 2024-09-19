@@ -1,6 +1,6 @@
-import { Branch } from '../Branch';
-import type { BranchIF } from '../types/types.branch';
-import type { TreeIF } from '../types/types.trees';
+import { Branch } from "../Branch.ts";
+import type { BranchIF } from "../types/types.branch.ts";
+import type { TreeIF } from "../types/types.trees.ts";
 
 type ActiveTaskInfo = {
   hasActiveTasks: boolean;

@@ -1,5 +1,5 @@
-import type { TreeIF } from './types.trees';
-import type { ChangeIF } from './types.shared';
+import type { TreeIF } from './types.trees.ts';
+import type { ChangeIF } from './types.shared.ts';
 
 export interface BranchIF<ValueType> {
   value: ValueType;

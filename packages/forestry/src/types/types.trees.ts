@@ -1,14 +1,14 @@
-import type { BranchIF } from './types.branch';
-import type { OffshootIF } from '../types';
-import type { ForestIF } from './types.forest';
+import type { BranchIF } from "./types.branch.ts";
+import type { ForestIF } from "./types.forest.ts";
 import type {
   ChangeIF,
   MutationValueProviderFN,
   Notable,
+  OffshootIF,
   SubscribeFn,
   ValueProviderFN,
-} from './types.shared';
-import { PartialObserver, Subscription, Observable } from 'rxjs';
+} from "./types.shared.ts";
+import { PartialObserver, Subscription, Observable } from "rxjs";
 
 export type TreeName = string;
 

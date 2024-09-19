@@ -1,12 +1,12 @@
-import { Forest } from '../Forest';
-import type { CollectionAction, CollectionIF } from '../types/type.collection';
+import { Forest } from '../Forest.ts';
+import type { CollectionAction, CollectionIF } from '../types/type.collection.ts';
 import type {
   ChangeIF,
   SubscribeFn,
   ValueProviderFN,
-} from '../types/types.shared';
-import type { ForestIF } from '../types/types.forest';
-import type { TreeIF, TreeParams } from '../types/types.trees';
+} from '../types/types.shared.ts';
+import type { ForestIF } from '../types/types.forest.ts';
+import type { TreeIF, TreeParams } from '../types/types.trees.ts';
 import type { PartialObserver } from 'rxjs';
 
 export type CollectionParams<ValueType> = TreeParams<ValueType> & {

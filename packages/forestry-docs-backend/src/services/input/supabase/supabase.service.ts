@@ -5,9 +5,16 @@ import { createClient } from "@supabase/supabase-js";
 import type { Database } from "./supabase.types";
 import type { DataRecord } from "./record.types";
 import { Place } from "./Place";
+import dayjs from "dayjs";
 
 export type ByDateInsert = Database["public"]["Tables"]["bydate"]["Insert"];
+export type ByDateRow = Database["public"]["Tables"]["bydate"]["Row"];
 export type PlaceMap = Map<string, Place>;
+
+export type PlaceSelect = Database["public"]["Tables"]["bydate_places"]["Row"];
+
+export type PlaceDataL1 =
+  Database["public"]["Views"]["places_with_data_l1"]["Row"];
 @Injectable()
 export class SupabaseService {
   constructor(private configService: ConfigService) {
@@ -82,9 +89,32 @@ export class SupabaseService {
 
   async #savePlace(place: Place) {
     const value = place.valueOf();
-    const result = await this.conn
-      .from("bydate_places")
-      // @ts-expect-error
-      .upsert(place.valueOf(), { onConflict: ["id"] });
+    return (
+      this.conn
+        .from("bydate_places")
+        // @ts-expect-error
+        .upsert(value, { onConflict: ["id"] })
+    );
+  }
+
+  async places(level = 1) {
+    const { data, error } = await this.conn
+      .from("bydate_places") // Specify the table you want to query
+      .select("id, administrative_area_level,  bydate (date, deaths)") // Select all columns or specify particular columns
+      .eq("administrative_area_level", level)
+      .range(0, 5);
+    if (error) throw error;
+    return data;
+  }
+
+  /**
+   * returns all data for a place ordered by time
+   */
+  async placeData(level: number): Promise<PlaceDataL1[]> {
+    const { data, error } = await this.conn
+      .from("places_with_data_l" + level)
+      .select("*");
+    if (error) throw error;
+    return data;
   }
 }

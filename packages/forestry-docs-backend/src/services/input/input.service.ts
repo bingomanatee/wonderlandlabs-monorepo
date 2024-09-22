@@ -3,6 +3,7 @@ import { ConfigService } from "@nestjs/config";
 
 import { LevelReader } from "./LevelReader";
 import { SupabaseService } from "./supabase/supabase.service";
+import { DataReader } from "./DataReader";
 
 export const RCD = "raw-covid-data";
 
@@ -25,4 +26,13 @@ export class InputService {
   }
 
   private levelReaders: LevelReader[] = [];
+
+  async data(level = 1) {
+    const dataReader = new DataReader(
+      level,
+      this.configService,
+      this.supabaseService
+    );
+    return dataReader.data();
+  }
 }

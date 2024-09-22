@@ -45,6 +45,34 @@ export type Database = {
             referencedRelation: "bydate_places"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "bydate_place_fkey"
+            columns: ["place"]
+            isOneToOne: false
+            referencedRelation: "places_with_data"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bydate_place_fkey"
+            columns: ["place"]
+            isOneToOne: false
+            referencedRelation: "places_with_data_l1"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bydate_place_fkey"
+            columns: ["place"]
+            isOneToOne: false
+            referencedRelation: "places_with_data_l2"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bydate_place_fkey"
+            columns: ["place"]
+            isOneToOne: false
+            referencedRelation: "places_with_data_l3"
+            referencedColumns: ["id"]
+          },
         ]
       }
       bydate_places: {
@@ -88,7 +116,56 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      places_with_data: {
+        Row: {
+          administrative_area_level: number | null
+          administrative_area_level_1: string | null
+          administrative_area_level_2: string | null
+          administrative_area_level_3: string | null
+          dates: string[] | null
+          deaths: number[] | null
+          id: string | null
+        }
+        Relationships: []
+      }
+      places_with_data_l1: {
+        Row: {
+          administrative_area_level: number | null
+          administrative_area_level_1: string | null
+          administrative_area_level_2: string | null
+          administrative_area_level_3: string | null
+          confirmed: number[] | null
+          dates: string[] | null
+          deaths: number[] | null
+          id: string | null
+        }
+        Relationships: []
+      }
+      places_with_data_l2: {
+        Row: {
+          administrative_area_level: number | null
+          administrative_area_level_1: string | null
+          administrative_area_level_2: string | null
+          administrative_area_level_3: string | null
+          confirmed: number[] | null
+          dates: string[] | null
+          deaths: number[] | null
+          id: string | null
+        }
+        Relationships: []
+      }
+      places_with_data_l3: {
+        Row: {
+          administrative_area_level: number | null
+          administrative_area_level_1: string | null
+          administrative_area_level_2: string | null
+          administrative_area_level_3: string | null
+          dates: string[] | null
+          deaths: number[] | null
+          id: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       [_ in never]: never

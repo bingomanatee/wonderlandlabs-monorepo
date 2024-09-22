@@ -28,4 +28,14 @@ export class AppController {
       throw new Error("bad load level " + params.level);
     }
   }
+
+  @Get("/data/:level")
+  async getData(@Param() params: any) {
+    console.log("---data", params.level);
+    const loadNum = Number(params.level);
+    if ([1, 2, 3].includes(loadNum)) return this.inputService.data(loadNum);
+    else {
+      throw new Error("bad load level " + params.level);
+    }
+  }
 }

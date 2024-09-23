@@ -4,7 +4,6 @@
   font-weight: 400;
 
   color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -27,5 +26,14 @@ background-color: transparent;
   z-index: -1;
   left: 0;
   top: 0;
-  background-color: orange;
+  background-color: rgb(0, 64, 180);
+}
+
+th {
+  white-space: nowrap;
+}
+
+table {
+  text-align: left;
+  position: relative;
 }

@@ -1,6 +1,6 @@
 import { clamp } from "lodash-es";
 import { unit } from "./Background";
-import type { ScreenIF } from "./types.background";
+import type { ScreenIF } from "../types";
 
 export class Cell {
   constructor(public i: number, public j: number, public s: ScreenIF) {}

@@ -1,39 +1,20 @@
 import Two from "two.js";
 import dayjs from "dayjs";
-import type { Dayjs } from "dayjs";
 import { Screen } from "./Screen";
-import type {
-  Place,
-  DateInfo,
-  InfoMap,
-  Mortality,
-  CellIF,
-} from "./types.background";
+import type { DateInfo, CellIF, BasePlace } from "../types";
 import type { Group } from "two.js/src/group";
 import { Cell } from "./Cell";
-import { XYContainer } from "./XYContainer";
+import {
+  datesTree,
+  deathCollections,
+  placeCollection,
+} from "../CovidForestState";
+import { project } from "./project";
 let singleton: Background | null = null;
 
 const ns = "http://www.w3.org/2000/svg";
 const ISO_DATE = "YYYY-MM-DD";
 export const unit = 8;
-
-/**
- * translate a number from one min-max base
- * to a different min-max base
- */
-function project(
-  n: number,
-  min: number,
-  max: number,
-  min2: number,
-  max2: number
-) {
-  const domain = max - min;
-  const range = max2 - min2;
-  const extent = (n - min) / domain;
-  return extent * range + min2;
-}
 
 export class Background {
   #node?: HTMLElement;
@@ -44,80 +25,37 @@ export class Background {
 
   constructor() {
     this.#init();
-    this.#loadData();
+    this.process();
   }
 
-  async #loadData() {
-    const response = await fetch("http://localhost:3000/data/1");
-    if (!response.ok) {
-      console.warn("cannot get data:", response);
-    } else {
-      const data = await response.json();
-      this.#process(data);
-    }
-  }
-
-  #process(data: Place[]) {
+  process() {
     //   const container = new XYContainer();
     //   for (const p of data) {
     //     container.add(p.longitude, p.latitude);
     //   }
     //   console.log("lat lon range:", container);
-
-    const dateSet = data.reduce((dateSet: Set<string>, place: Place) => {
-      for (const d of place.dates) {
-        dateSet.add(d);
-      }
-      return dateSet;
-    }, new Set());
-
-    const dates = Array.from(dateSet.values())
+    const dates = Array.from(datesTree.value)
       .map((d: string) => ({
         string: d,
         date: dayjs(d, ISO_DATE),
       }))
       .sort((d1: DateInfo, d2: DateInfo) => d1.date.diff(d2.date, "d"));
+    console.log("#process()", dates);
 
     console.log("dates are ", dates.slice(0, 4));
-    this.#mergeData(dates, data);
+    this.#drawInfo(dates);
   }
 
-  #mergeData(dates: DateInfo[], data: Place[]) {
-    let infoMap: InfoMap = new Map();
-
-    for (const place of data) {
-      place.dates.forEach((dateString: string, i: number) => {
-        const deaths = place.deaths[i];
-        const confirmed = place.confirmed[i];
-        const dateInfo = dates.find((d) => d.string === dateString);
-        if (!dateInfo) return;
-
-        if (!infoMap.has(dateInfo)) {
-          infoMap.set(dateInfo, new Map());
-        }
-
-        let dataMap = infoMap.get(dateInfo);
-        if (dataMap) {
-          dataMap.set(place.id, { deaths, confirmed, place });
-        }
-      });
-    }
-
-    this.#info = infoMap;
-    this.drawInfo();
-  }
-
-  #info?: InfoMap;
-
-  #placeToIJ(place: Place) {
+  #placeToIJ(place: BasePlace) {
     const { latitude, longitude } = place;
 
-    const i = Math.floor(
-      project(latitude, -180, 180, 0, this.#screen?.iCount ?? 0)
-    );
-    const j = Math.floor(
-      project(longitude, -90, 90, 0, this.#screen?.jCount ?? 0)
-    );
+    const iCount = this.#screen?.iCount ?? 0;
+    const jCount = this.#screen?.jCount ?? 0;
+
+    console.log("p2ij: ", iCount, jCount);
+
+    const j = Math.floor(project(latitude, 90, -90, 0, jCount));
+    const i = Math.floor(project(longitude, -180, 180, 0, iCount));
     console.log(
       "place",
       place,
@@ -132,49 +70,50 @@ export class Background {
     return { i, j };
   }
 
-  drawInfo() {
+  #drawInfo(dates: DateInfo[]) {
     console.log("drawInfo()");
 
-    if (!this.#info) return;
-
-    const lastDate = Array.from(this.#info.keys()).pop();
+    const lastDate = dates[dates.length - 1];
     if (!lastDate) return;
 
-    const lastInfo = this.#info.get(lastDate);
+    this.circleGroup?.remove(this.circleGroup.children);
+    this.textGroup?.remove(this.textGroup.children);
 
-    console.log("drawInfo for date", lastDate, "info", lastInfo);
-    lastInfo?.forEach((mortality) => {
-      const { i, j } = this.#placeToIJ(mortality.place);
+    Array.from(placeCollection.values()).forEach((place: BasePlace) => {
+      const { i, j } = this.#placeToIJ(place);
       const cell = this.#screen?.cell(i, j);
-      if (!cell) {
-        console.log(
-          "place",
-          mortality.place.id,
-          "i j = ",
-          i,
-          j,
-          "screen:",
-          this.#screen,
-          "cell",
-          cell
-        );
-      }
 
       if (cell) {
-        const radius = Math.pow(mortality.deaths, 1 / 3);
-        this.#addCircle(cell, radius, mortality);
+        const deaths = deathCollections.get(place.id)?.get(lastDate.string);
+        if (!deaths) return;
+        const radius = deaths ? Math.pow(deaths, 1 / 3) : 0;
+        this.#addCircle(cell, radius);
+        this.#addText(place.iso_alpha_3 + ":" + deaths, cell);
       }
     });
   }
 
-  #addCircle(cell: CellIF, radius: number, mortality: Mortality) {
+  #addText(label: string, cell: CellIF) {
+    if (!this.#two) return;
+    if (!this.textGroup) {
+      this.#initGroups();
+    }
+    const text = this.#two.makeText(label, cell.x, cell.y, {
+      fontSize: "0.5rem",
+      fontWeight: "bold",
+      textAlign: "left",
+    });
+    this.textGroup?.add(text);
+  }
+
+  #addCircle(cell: CellIF, radius: number) {
     if (!this.#two) return;
     if (!this.rectGroup) {
       this.#initGroups();
     }
     console.log("adding circle at", cell.x, cell.y, "with radius", radius);
     const circle = this.#two.makeCircle(cell.x, cell.y, radius);
-    circle.fill = "red";
+    circle.fill = "rgba(255,0,0,0.2)";
     circle.stroke = "transparent";
     if (cell.circle) {
       this.circleGroup?.remove(cell.circle);
@@ -235,8 +174,9 @@ export class Background {
     return singleton;
   }
 
-  rectGroup: null | Group;
-  circleGroup: null | Group;
+  rectGroup?: null | Group;
+  circleGroup?: null | Group;
+  textGroup?: null | Group;
 
   #initGroups() {
     if (!this.#two) return;
@@ -245,6 +185,9 @@ export class Background {
     }
     if (!this.circleGroup) {
       this.circleGroup = this.#two?.makeGroup();
+    }
+    if (!this.textGroup) {
+      this.textGroup = this.#two?.makeGroup();
     }
   }
 

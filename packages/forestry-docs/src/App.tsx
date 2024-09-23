@@ -1,40 +1,64 @@
-import { useState, useEffect } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
+import { useState, useEffect, useRef } from 'react'
 import style from './App.module.css'
-import {Background} from './helpers/Background';
+import { datesTree, loadPlaceData, placeCollection } from './CovidForestState';
+import * as PIXI from 'pixi.js'
+import {
+  combineLatest,
+  debounceTime
+} from 'rxjs';
+import { Stage, } from '@pixi/react';
+
+import { useWindowSize } from './helpers/useWindowSize';
+import { useWindowSizeWithRxJS } from './helpers/resizeDebounce';
+import { NationMask } from './helpers/NationMask';
+import type { BasePlace } from './types';
+import { PlaceRollover } from './helpers/PlaceRollover';
 
 function App() {
-  const [count, setCount] = useState(0);
+
+  const [places, setPlaces] = useState<BasePlace[]>([]);
+  const { width, height } = useWindowSize();
 
   useEffect(() => {
-    console.log(Background.singleton());
-  })
+
+    const sub3 =
+      placeCollection.tree.subject.pipe(debounceTime(500))
+        .subscribe((pm) => {
+          console.log('setting places from ', Array.from(pm.values()));
+          setPlaces(
+            //@ts-expect-error
+            Array.from(pm.values()));
+        });
+
+    loadPlaceData();
+    return () => {
+      sub3?.unsubscribe();
+    }
+  }, [])
+
+  const resize = useWindowSizeWithRxJS();
 
   return (
-    <>
-      <div className={style.container}>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
+
+    <div className={style.container}>
+      {
+        <Stage
+          options={{
+            backgroundColor: new PIXI.Color({ r: 0, g: 64, b: 180 }).toNumber(), resizeTo: window
+          }}
+          width={width} height={height}>
+          <NationMask
+            width={width} height={height} />
+          {places.map((p) => (
+            <PlaceRollover key={p.id} place={p} width={width} height={height} />
+          ))}
+        </Stage>
+      }
+
+    </div>
+
   )
 }
 
-export default App
+export default App;
+

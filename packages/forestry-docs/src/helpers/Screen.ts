@@ -1,5 +1,5 @@
 import { unit } from "./Background";
-import type { CellFactory, CellIF } from "./types.background";
+import type { CellFactory, CellIF } from "../types";
 
 export class Screen {
   constructor(

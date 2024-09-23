@@ -10,8 +10,12 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@pixi/react": "7",
+    "@wonderlandlabs/forestry": "workspace:^",
     "dayjs": "^1.11.13",
     "lodash-es": "^4.17.21",
+    "pixi.js": "7",
+    "proj4": "^2.12.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "two.js": "^0.8.14"
@@ -19,6 +23,7 @@
   "devDependencies": {
     "@eslint/js": "^9.9.0",
     "@types/lodash-es": "^4.17.12",
+    "@types/proj4": "^2",
     "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",
     "@vitejs/plugin-react": "^4.3.1",

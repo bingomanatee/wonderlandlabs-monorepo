@@ -1,0 +1,104 @@
+.container {
+    background-color: var(--highlight-container);
+    transition: background-color;
+    transition-duration: 1s;
+    padding-bottom: 1rem;
+    border-radius: 0.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: stretch;
+    --blur: 2px;
+    --blur-heavy: 8px;
+    --highlight-title-color: rgba(255, 255, 255, 0.5);
+    --highlight-title-color-over: var(--text-color);
+    --highlight-container: rgba(179, 209, 194, 0.5);
+    --highlight-container-hover: rgba(230, 255, 240, 1);
+    backdrop-filter: blur(var(--blur));
+    /* Adjust the blur radius */
+    -webkit-backdrop-filter: blur(var(--blur));
+    /* For Safari support */
+
+}
+
+@media (min-width: 600px) {
+    .container {
+        max-width: 250px;
+    }
+}
+
+.container:hover, .container-hovered {
+    background-color: var(--highlight-container-hover);
+    backdrop-filter: blur(var(--blur-heavy));
+    /* Adjust the blur radius */
+    -webkit-backdrop-filter: blur(var(--blur-heavy));
+    /* For Safari support */
+
+    box-shadow: 5px -3px 10px rgba(0, 0, 0, 0.5);
+}
+
+.container>h2 {
+    font-size: 1.5rem;
+    color: var(--highlight-title-color);
+    font-family: var(--title-font);
+    font-weight: 300;
+    text-align: left;
+    line-height: 110%;
+    margin: 0;
+    margin-top: 1rem;
+    padding: 0 2rem;
+}
+
+.container:hover>h2, .container-hovered>h2{
+    color: var(--highlight-title-color-over);
+}
+
+.content {
+    margin-top: 1rem;
+    padding: 0 2rem;
+    display: flex;
+    flex-direction: column;
+    align-content: stretch;
+    flex: 1;
+}
+
+.content>p {
+    font-family: var(--text-font);
+    color: var(--text-color);
+    font-size: 1rem;
+    line-height: 135%;
+    font-weight: 500;
+}
+
+@media (min-width: 600px) {
+    .content>p {
+        font-weight: 400;
+    }
+}
+
+.more-button {
+    all: unset;
+    font-family: var(--text-font);
+    font-size: 1rem;
+    color: var(--link-color-light);
+    padding: 10px;
+    padding-right: 30px;
+    font-weight: 400;
+    background-repeat: no-repeat;
+    background-position: right center;
+    background-color: transparent;
+    text-align: right;
+    text-transform: uppercase;
+    background-size: 50px 25px;
+    flex: 0;
+    margin-right: 1rem;
+}
+
+.container:hover>.more-button {
+    background-image: url('/icons/more-light.png');
+}
+
+.container:hover>.more-button:hover {
+    background-image: url('/icons/more.png');
+    color: var(--link-color)
+}

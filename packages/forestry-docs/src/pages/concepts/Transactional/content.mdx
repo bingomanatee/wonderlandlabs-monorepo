@@ -1,0 +1,156 @@
+This means you don't end up with "half changed" state from nested actions,
+and you can trap errors at any stage to continue with the previous state.
+
+## Setup Code
+
+This code sets up a system wherein the egg array requires each egg to be 1+ days left
+("expiration date"). if an egg is bad the whole carton cannot be submitted.
+
+The actions allow us to "take a day off each egg."
+
+```JavaScript
+
+const f = new Forest();
+
+type Egg = {
+  id: string;
+  daysLeft: number;
+};
+
+const EXPIRED_MSG = 'Egg has expired';
+const eggValidator = (e: Egg) => {
+  if (e.daysLeft <= 0) {
+    throw new Error(EXPIRED_MSG);
+  }
+};
+const eggsValidator = (es: Egg[]) => {
+  for (const e of es) {
+    eggValidator(e);
+  }
+};
+
+const INITIAL = [
+  { id: 'alpha', daysLeft: 4 },
+  { id: 'beta', daysLeft: 3 },
+  { id: 'gamma', daysLeft: 2 },
+];
+
+
+const eggs = new Collection<Egg[]>(
+  'eggs',
+  {
+    initial: INITIAL,
+    validator: eggsValidator,
+    actions: {
+      removeADay(coll: CollectionIF<Egg[]>) {
+        for (const egg of coll.value) {
+          coll.act('removeEggDay', egg.id);
+        }
+      },
+      removeEggDay(coll: CollectionIF<Egg[]>, id: string) {
+        const eggs: Egg[] = coll.value.map((egg) => {
+          if (egg.id === id) {
+            return { ...egg, daysLeft: egg.daysLeft - 1 };
+          }
+          return egg;
+        });
+        coll.next(eggs);
+      },
+      removeEgg(coll: CollectionIF<Egg[]>, id: string) {
+        coll.mutate(({ value }) => {
+          const out = value.filter((egg: Egg) => egg.id !== id);
+          return out;
+        }, 'removing egg ' + id);
+      },
+      removeADayWithCatch(coll: CollectionIF<Egg[]>) {
+        for (const egg of coll.value) {
+          try {
+            coll.act('removeEggDay', egg.id);
+          } catch (error) {
+            if (error instanceof Error
+             && error.message === EXPIRED_MSG) {
+              coll.act('removeEgg', egg.id);
+            } else {
+              throw error;
+            }
+          }
+        }
+      },
+    },
+  },
+  f
+);
+```
+
+The `removeADay` action lowers the day of each egg by one
+
+--- with a looping sub-action that changes each egg incrementally.
+
+This means four sub-actions advance the state of individual eggs --
+and given `removeEggDay' can throw, this might mean the carton gets "out of sync".
+
+But because of actions' transactional wrapping, the state is wholly reverted on a throw,
+which collappsed the `removeADay` changes -- wholesale.
+
+however, `removeADayWithCatch` will interrupt the rollback to only allow a rollback of the
+one (or more) bad eggs, and instead, removes that egg and loops forward.
+
+```JavaScript
+// ---- intial value
+console.log(eggs.value);
+/**
+[
+  { id: 'alpha', daysLeft: 4 },
+  { id: 'beta', daysLeft: 3 },
+  { id: 'gamma', daysLeft: 2 },
+];
+*/
+
+// --- less one day for all eggs
+eggs.act('removeADay');
+
+console.log(eggs.value);
+/**
+[
+  { id: 'alpha', daysLeft: 3 },
+  { id: 'beta', daysLeft: 2 },
+  { id: 'gamma', daysLeft: 1 },
+]
+*/
+
+// --- "bad action" - state is neutralized, and
+// kept at origianl value
+
+try {eggs.act('removeADay') } catch (err) {
+  console.log('error:',  err.message);
+  /**
+  'error: Egg has expired';
+  */
+}
+console.log(eggs.value);
+/**
+[
+  { id: 'alpha', daysLeft: 3 },
+  { id: 'beta', daysLeft: 2 },
+  { id: 'gamma', daysLeft: 1 },
+]
+*/
+
+// ---- insulated action - sub-process is trapped,
+// and "bad egg" is removed from carton
+
+eggs.act('removeADayWithCatch');
+console.log(eggs.value);
+
+/**
+[
+  { id: 'alpha', daysLeft: 2 },
+  { id: 'beta', daysLeft: 1 },
+]
+*/
+
+```
+
+So, if the validator throws and collapses an action,
+you are "back to square one". However if you trap a thrown sub-action,
+you can continue on with your processes.

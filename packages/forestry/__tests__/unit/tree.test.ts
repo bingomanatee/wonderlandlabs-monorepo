@@ -71,7 +71,7 @@ describe('tree', () => {
       expect(out).toEqual([ 100, 300 ]);
     });
 
-    it('should allow subscription on an unpopulted tree', () => {
+    it('should allow subscription on an unpopulated tree', () => {
       const f = new Forest();
 
       const t = f.addTree<number>('bar', {});
@@ -80,10 +80,10 @@ describe('tree', () => {
 
       t.subscribe((v: number) => out.push(v));
 
-      expect(out).toEqual([]);
+      expect(out).toEqual([ undefined ]);
 
       t.next(300);
-      expect(out).toEqual([ 300 ]);
+      expect(out).toEqual([ undefined, 300 ]);
     });
   });
 
@@ -159,6 +159,48 @@ describe('tree', () => {
         { time: 1, message: 'starts blank', tree: 'foo', params: undefined },
         { time: 5, message: 'is at b', tree: 'foo', params: undefined },
       ]);
+    });
+  });
+
+  describe('rollback', () => {
+    it('should reset the tree to its intial value on a rollback', () => {
+      const f = new Forest();
+
+      const t = f.addTree('foo', { initial: 100 });
+
+      t.next(200);
+      t.next(300);
+
+      t.rollback(-1, 'wipe everything');
+      expect(t.value).toBe(100);
+    });
+  });
+
+  describe('initial invalid', () => {
+    it('should have an undefined value for an initial if the initial is invalid', () => {
+      const f = new Forest();
+
+      const t = f.addTree('whole numbers', {
+        initial: -1,
+        validator(v) {
+          if (typeof v !== 'number' || v < 0) {
+            throw new Error('not a whole number');
+          }
+          if (v % 0) {
+            throw new Error('not a whole number');
+          }
+        },
+      });
+
+      expect(t.value).toBeUndefined();
+
+      t.next(2);
+      t.next(3);
+
+      expect(t.value).toBe(3);
+
+      t.rollback(-1, 'clear out values');
+      expect(t.value).toBeUndefined();
     });
   });
 });

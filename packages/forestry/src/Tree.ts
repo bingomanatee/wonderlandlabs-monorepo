@@ -21,26 +21,30 @@ import type {
 } from './types';
 import { NotableHelper } from './NotableHelper';
 
+export const INITIAL_VALUE = 'INITIAL VALUE';
 export class Tree<ValueType> implements TreeIF<ValueType> {
   constructor(
     public forest: ForestIF,
     public readonly name: TreeName,
     public readonly params?: TreeParams<ValueType>
   ) {
-    if (params && 'initial' in params) {
-      const { initial } = params;
-      if (initial !== undefined) {
-        this.root = new Branch<ValueType>(this, {
-          assert: initial,
-          name: 'initial',
-        });
-        this.top = this.root;
-      }
-    }
+    this.initialize();
 
-    this.stream = new BehaviorSubject<BranchIF<ValueType> | undefined>(
-      this.top
-    );
+    this.stream = new BehaviorSubject<BranchIF<ValueType> | undefined>(this.top);
+  }
+
+  private initialize() {
+    const initial = this.params?.initial ?? undefined;
+    if (this.validate(initial).isValid) {
+      this.root = new Branch<ValueType>(this, {
+        assert: initial,
+        name: INITIAL_VALUE,
+      });
+      this.top = this.root;
+    } else {
+      this.root = undefined;
+      this.top = undefined;
+    }
   }
 
   get isUncacheable(): boolean {
@@ -85,16 +89,11 @@ export class Tree<ValueType> implements TreeIF<ValueType> {
     if (last) {
       last.next = undefined;
     } else {
-      this.root = undefined;
-      this.top = undefined;
+      this.initialize();
     }
   }
 
-  mutate(
-    mutator: MutationValueProviderFN<ValueType>,
-    seed?: any,
-    name?: string
-  ): void {
+  mutate(mutator: MutationValueProviderFN<ValueType>, seed?: any, name?: string): void {
     if (!name) {
       if (mutator.name) {
         this.grow({ mutator, seed, name: mutator.name });
@@ -115,10 +114,7 @@ export class Tree<ValueType> implements TreeIF<ValueType> {
         PreValidator.validate(change, this);
       }
 
-      if (
-        this.params?.benchmarkInterval &&
-        BenchMarker.shouldBenchmark<ValueType>(this, change)
-      ) {
+      if (this.params?.benchmarkInterval && BenchMarker.shouldBenchmark<ValueType>(this, change)) {
         new BenchMarker<ValueType>(this).benchmark(change);
         return this.top;
       }
@@ -211,7 +207,7 @@ export class Tree<ValueType> implements TreeIF<ValueType> {
 
   get value() {
     if (!this.top) {
-      throw new Error('cannot get the value from an empty tree');
+      return undefined;
     }
     return this.top.value;
   }
@@ -224,13 +220,7 @@ export class Tree<ValueType> implements TreeIF<ValueType> {
     if (!this._notes) {
       this._notes = new Map();
     }
-    NotableHelper.addNote(
-      this.forest.time,
-      this._notes,
-      message,
-      params,
-      this.name
-    );
+    NotableHelper.addNote(this.forest.time, this._notes, message, params, this.name);
   }
 
   hasNoteAt(time: number) {

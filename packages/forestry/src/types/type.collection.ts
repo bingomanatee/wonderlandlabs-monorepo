@@ -4,10 +4,11 @@ import type { MutationValueProviderFN, SubscribeFn } from './types.shared';
 export interface CollectionIF<ValueType> {
   // abstract
   value: ValueType;
-  next(value: ValueType, name: string): CollectionIF<ValueType>;
+  act(name: string, seed?: any): any;
+  next(value: ValueType, name?: string): CollectionIF<ValueType>;
   mutate<ParamType = unknown>(
     coll: MutationValueProviderFN<ValueType>,
-    name: string,
+    name?: string,
     seed?: ParamType
   ): CollectionIF<ValueType>;
   subscribe(
@@ -15,7 +16,4 @@ export interface CollectionIF<ValueType> {
   ): Subscription | Unsubscribable;
 }
 
-export type CollectionAction<ValueType> = (
-  collection: CollectionIF<ValueType>,
-  seed?: any
-) => any;
+export type CollectionAction<ValueType> = (collection: CollectionIF<ValueType>, seed?: any) => any;

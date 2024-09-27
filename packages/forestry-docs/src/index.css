@@ -1,5 +1,5 @@
 :root {
-  font-family: "Helvetica neue", Helvetica, Arial, sans-serif;
+  font-family: 'Helvetica neue', Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
 
@@ -9,35 +9,43 @@
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  z-index: 1; 
-  --playfair-font: "Playfair Display", georgia, serif;
-  --header-font: "Montserrat", Helvetica, sans-serif;
-  --text-callout-font: "Playfair Display", georgia, serif;
-  --logo-title-font: "Archivo Black", Helvetica, sans-serif;
-  --title-font: "Montserrat", Helvetica, sans-serif;
-  --text-font: "Montserrat", Helvetica, sans-serif
-  --link-color: rgb(0, 55, 127)  ;
+  z-index: 1;
+  --playfair-font: 'Playfair Display', georgia, serif;
+  --header-font: 'Montserrat', Helvetica, sans-serif;
+  --text-callout-font: 'Playfair Display', georgia, serif;
+  --logo-title-font: 'Archivo Black', Helvetica, sans-serif;
+  --title-font: 'Montserrat', Helvetica, sans-serif;
+  --text-font: 'Montserrat', Helvetica, sans-serif;
+  --link-color: rgb(0, 55, 127);
   --link-color-light: rgba(0, 55, 127, 0.5);
-
 }
 
-body, html, #root, #background {
+body,
+html,
+#root {
+  background-color: transparent;
   width: 100%;
-  height: 100%;
-padding: 0;
-margin: 0;
-overflow: hidden;
-background-color: rgb(69,98,79);
+  padding: 0;
+  margin: 0;
   --small-window: 500px;
   --large-desktop: 1024px;
 }
+/*
+body {
+  background-color: rgb(69, 98, 79);
+  background-attachment: fixed !important;
+  background-image: url('/img/forestry-2.png') !important;
+  background-size: cover !important;
+  background-position: center !important;
+  backdrop-filter: blur(3px);
+} */
 
 #background {
   position: absolute;
   z-index: -1;
   left: 0;
   top: 0;
-  background-color: rgb(69,98,79);
+  background-color: rgb(69, 98, 79);
 }
 
 th {
@@ -51,5 +59,13 @@ table {
 
 p {
   margin: 0;
-  padding: 0
+  padding: 0;
+}
+
+.summary-box p {
+  color: white;
+}
+
+.textual p {
+  margin-bottom: 1em;
 }

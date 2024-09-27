@@ -27,7 +27,6 @@ export function PlaceRollover({ place, width, height }: {
         g.removeAllListeners();
         g.clear();
         if (!geoDataMap.has(place.iso_alpha_3)) {
-            console.log('no geometry for ', place.iso_alpha_3)
             return;
         }
         g.interactive = true;

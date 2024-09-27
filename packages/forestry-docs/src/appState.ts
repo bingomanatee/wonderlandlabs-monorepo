@@ -56,9 +56,6 @@ export class State {
     } catch (err) {
       console.log("error:", err);
     }
-
-    console.log("blurred at", Date.now());
-    console.log("value is now:", this.value);
     this.delay(() => this.rotate(), LONG_DELAY);
   }
 

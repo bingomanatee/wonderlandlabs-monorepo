@@ -48,19 +48,15 @@ const eggs = new Collection<Egg[]>(
         }
       },
       removeEggDay(coll: CollectionIF<Egg[]>, id: string) {
-        const eggs: Egg[] = coll.value.map((egg) => {
+        coll.mutate(({value}) => (coll.value.map((egg) => {
           if (egg.id === id) {
             return { ...egg, daysLeft: egg.daysLeft - 1 };
           }
           return egg;
-        });
-        coll.next(eggs);
+        }));
       },
       removeEgg(coll: CollectionIF<Egg[]>, id: string) {
-        coll.mutate(({ value }) => {
-          const out = value.filter((egg: Egg) => egg.id !== id);
-          return out;
-        }, 'removing egg ' + id);
+        coll.mutate(({ value }) => (value.filter((egg: Egg) => egg.id !== id)));
       },
       removeADayWithCatch(coll: CollectionIF<Egg[]>) {
         for (const egg of coll.value) {

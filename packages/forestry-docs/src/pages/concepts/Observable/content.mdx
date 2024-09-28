@@ -1,0 +1,423 @@
+Forestry conforms to the basic `Subscribable` model - trees can be
+subscribed to and provide a subject that can be `.pipe`d with any number
+of modifiers.
+
+Further the Forest exposes an observable for any named tree that only eimits when all
+nested transations have emptied; so, you can observe trees on a change by change basis,
+or you can observe only the validated complete actions after every topmost action has
+completed, reducing transitional noise of sub-actions.
+
+## Example: counting your eggs
+
+This is a variation of the eggs example from [concepts: Transactional](/concepts/transactional).
+
+The setup and actions is the same, except now we are subscribing to the activity at both
+the tree and Forest level and echoing the result at the end.
+
+```JavaScript
+
+  const f = new Forest();
+
+  const EXPIRED_MSG = 'Egg has expired';
+  const eggValidator = (e: Egg) => {
+    if (e.daysLeft <= 0) {
+      throw new Error(EXPIRED_MSG);
+    }
+  };
+  const eggsValidator = (es: Egg[]) => {
+    for (const e of es) {
+      eggValidator(e);
+    }
+  };
+
+  const INITIAL = [
+    { id: 'alpha', daysLeft: 4 },
+    { id: 'beta', daysLeft: 3 },
+    { id: 'gamma', daysLeft: 2 },
+  ];
+
+  const eggsCollection = new Collection<Egg[]>(
+    'eggs',
+    {
+      initial: INITIAL,
+      validator: eggsValidator,
+      actions: {
+        removeADay(coll: CollectionIF<Egg[]>) {
+          for (const egg of coll.value) {
+            coll.act('removeEggDay', egg.id);
+          }
+        },
+        removeEggDay(coll: CollectionIF<Egg[]>, id: string) {
+          coll.mutate(({value}) => (coll.value.map((egg) => {
+            if (egg.id === id) {
+              return { ...egg, daysLeft: egg.daysLeft - 1 };
+            }
+            return egg;
+          }));
+        },
+        removeEgg(coll: CollectionIF<Egg[]>, id: string) {
+          coll.mutate(({ value }) => (value.filter((egg: Egg) => egg.id !== id)));
+        },
+        removeADayWithCatch(coll: CollectionIF<Egg[]>) {
+          for (const egg of coll.value) {
+            try {
+              coll.act('removeEggDay', egg.id);
+            } catch (error) {
+              if (error instanceof Error && error.message === EXPIRED_MSG) {
+                coll.act('removeEgg', egg.id);
+              } else {
+                throw error;
+              }
+            }
+          }
+        },
+      },
+    },
+    f
+  );
+```
+
+This time, we are subscxribing to a summary of our eggs, with two subscribers. (RxJS tech note - in production,
+save the subcribers so you can cancel them later)
+
+```
+  type EggSummary = Record<string, number>;
+
+  function summary(eggs: Egg[]): EggSummary {
+    const out: EggSummary = {};
+    for (const egg of eggs) {
+      out[egg.id] = egg.daysLeft;
+    }
+    return out;
+  }
+
+  type EggTimer = {
+    time: number;
+    eggs: EggSummary;
+    source: string;
+    act: string;
+  };
+  const log: EggTimer[] = [];
+
+  f.observe('eggs').subscribe((eggs: Egg[]) => {
+    log.push({
+      eggs: summary(eggs),
+      time: f.time,
+      source: 'observe',
+      act: eggsCollection.tree.top?.cause,
+    });
+  });
+
+  eggsCollection.tree.subscribe((eggs: Egg[]) => {
+    log.push({
+      eggs: summary(eggs),
+      time: f.time,
+      source: 'tree.subscribe',
+      act: eggsCollection.tree.top?.cause,
+    });
+  });
+
+  //
+  eggsCollection.act('removeADay');
+  try { eggsCollection.act('removeADay')} catch (err) {console.log(err.message)}
+  eggsCollection.act('removeADayWithCatch');
+
+
+  console.log('----- logs ----- ', JSON.stringify(log, true, 2));
+```
+
+Note how much more verbose the Tree data is - good for diagnosis, not so much
+for application development.
+
+```
+ /**
+
+'Egg has expired'
+
+ [
+    {
+      eggs: {
+        alpha: 4,
+        beta: 3,
+        gamma: 2,
+      },
+      time: 1,
+      source: 'observe',
+      act: 'INITIAL VALUE',
+    },
+    {
+      eggs: {
+        alpha: 4,
+        beta: 3,
+        gamma: 2,
+      },
+      time: 1,
+      source: 'tree.subscribe',
+      act: 'INITIAL VALUE',
+    },
+    {
+      eggs: {
+        alpha: 3,
+        beta: 3,
+        gamma: 2,
+      },
+      time: 5,
+      source: 'tree.subscribe',
+      act: '(next)',
+    },
+    {
+      eggs: {
+        alpha: 3,
+        beta: 2,
+        gamma: 2,
+      },
+      time: 8,
+      source: 'tree.subscribe',
+      act: '(next)',
+    },
+    {
+      eggs: {
+        alpha: 3,
+        beta: 2,
+        gamma: 1,
+      },
+      time: 11,
+      source: 'tree.subscribe',
+      act: '(next)',
+    },
+    {
+      eggs: {
+        alpha: 3,
+        beta: 2,
+        gamma: 1,
+      },
+      time: 11,
+      source: 'observe',
+      act: '(next)',
+    },
+    {
+      eggs: {
+        alpha: 2,
+        beta: 2,
+        gamma: 1,
+      },
+      time: 15,
+      source: 'tree.subscribe',
+      act: '(next)',
+    },
+    {
+      eggs: {
+        alpha: 2,
+        beta: 1,
+        gamma: 1,
+      },
+      time: 18,
+      source: 'tree.subscribe',
+      act: '(next)',
+    },
+    {
+      eggs: {
+        alpha: 2,
+        beta: 1,
+        gamma: 1,
+      },
+      time: 20,
+      source: 'observe',
+      act: '(next)',
+    },
+    {
+      eggs: {
+        alpha: 2,
+        beta: 2,
+        gamma: 1,
+      },
+      time: 24,
+      source: 'tree.subscribe',
+      act: '(next)',
+    },
+    {
+      eggs: {
+        alpha: 2,
+        beta: 1,
+        gamma: 1,
+      },
+      time: 27,
+      source: 'tree.subscribe',
+      act: '(next)',
+    },
+    {
+      eggs: {
+        alpha: 2,
+        beta: 1,
+      },
+      time: 32,
+      source: 'tree.subscribe',
+      act: 'removing egg gamma',
+    },
+    {
+      eggs: {
+        alpha: 2,
+        beta: 1,
+      },
+      time: 32,
+      source: 'observe',
+      act: 'removing egg gamma',
+    },
+  ]
+  */
+
+```
+
+## All Roads Lead to React
+
+This is how things play out in React.js:
+
+```JavaScript
+  function MyComponent() {
+
+
+  const state = useRef<State>(appState());
+
+  const [value, setValue] = useState(state.current.value);
+
+  useEffect(() => {
+    state.current?.subscribe((v) => setValue(v));
+    () => state.current.destroy();
+  }, []);
+  ...}
+
+```
+
+the appState uses a simple wrapper around a tree; because there is very little
+complexity and no real need for transactional locking here, we skip the whole
+Component route; other use cases (like egg counting) may benefit from Collection
+utility. There are also "special collections" for forms and Map handling in the library
+you may find useful for component state.
+
+This specific state is responsible for rotating the concepts panels on the home page
+when they are not being interacted with, and freezing on the hovered-over panel
+if the user moves the mouse over a panel.
+
+```JavaScript
+import { Forest } from "@wonderlandlabs/forestry";
+import type { SubscribeFn } from "@wonderlandlabs/forestry/build/src/types/types.shared";
+import type { TreeIF } from "@wonderlandlabs/forestry/build/src/types/types.trees";
+import { debounce } from "lodash-es";
+import type { PartialObserver } from "rxjs";
+
+const SECONDS = 1000;
+const LONG_DELAY = 5 * SECONDS;
+const SHORT_DELAY = 2 * SECONDS;
+
+export interface StateIF {
+  target: string | null;
+  time: number;
+  list: string[];
+  isLocked: boolean;
+}
+
+function setTarget(target: string, isLocked: boolean | null = null) {
+  return ({ value }: { value: StateIF }) => {
+    return {
+      ...value,
+      target,
+      time: Date.now(),
+      isLocked: isLocked === null ? value.isLocked : isLocked,
+    };
+  };
+}
+
+// note - this is a simple "wrapper around a tree" -
+export class State {
+  constructor(public tree: TreeIF<StateIF>) {
+    // begins rotation after the last panel registers it as a target to be rotated to
+    this.#init = debounce(() => this.init(), SHORT_DELAY);
+  }
+
+  // adds a candidate to be focused by name.
+  register(target: string) {
+    this.tree.mutate(({ value }) => ({
+      ...value,
+      list: [...value.list, target],
+    }));
+
+    this.#init?.();
+  }
+
+  handleHover(target: string | null) {
+    clearInterval(this.#interval);
+    this.tree.mutate(setTarget(target ?? "", true));
+  }
+
+// un-lock the state allowing passive rotate when the user leaves a panel
+  blur() {
+      this.tree.mutate(({ value }) => ({
+        ...value,
+        isLocked: false,
+        target: "",
+      }));
+    this.delay(() => this.rotate(), LONG_DELAY);
+  }
+
+// focus on the next panel
+  rotate(isLocked = false) {
+    if (this.value.isLocked) return;
+    const target = this.nextTarget();
+
+    this.tree.mutate(({ value }) => ({
+      ...value,
+      target,
+      time: Date.now(),
+      isLocked,
+    }));
+
+    this.delay(() => this.rotate(), SHORT_DELAY);
+  }
+
+  #interval: any;
+
+  // attempts to prevent any "dying gasp" actions if the page is left.
+  destroy() {
+    clearInterval(this.#interval);
+  }
+
+  // does an action later... only one delayed action at a time,
+  // any previously queued action is cancelled.
+
+  delay(f: () => void, delay: number) {
+    clearInterval(this.#interval);
+    this.#interval = setInterval(f, delay);
+  }
+
+  #init?: () => void;
+  init() {
+    this.delay(() => this.rotate(), LONG_DELAY);
+  }
+
+  // the name of the target after the current one.
+  nextTarget() {
+    const { list, target } = this.tree.value;
+    if (!list.length) return "";
+    const i = list.findIndex((t) => t === target) + 1;
+    if (i >= list.length) return list[0];
+    return list[i];
+  }
+  get value() {
+    return this.tree.value;
+  }
+
+  subscribe(s: PartialObserver<StateIF> | SubscribeFn<StateIF>) {
+    return this.tree.forest.observe(this.tree.name!)?.subscribe(s);
+  }
+}
+
+export function appState() {
+  const f = new Forest();
+
+  const tree = f.addTree<StateIF>("state", {
+    initial: { target: null, time: 0, list: [], isLocked: false },
+  });
+
+  return new State(tree);
+}
+```

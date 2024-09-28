@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState, type PropsWithChildren, type ReactNode } from 'react';
 import style from './Highlight.module.css';
-import type { State, StateIF } from '../../appState';
+import type { State, StateIF } from '../../pages/home/appState';
 import { useNavigate } from 'react-router-dom';
 import { Box, Heading, Text } from '@chakra-ui/react';
 
@@ -55,7 +55,7 @@ export function Highlight({ title, name, children, state, url }: PropsWithChildr
     >
       <Box paddingX={6}>
         {title ? (
-          <Heading as="H2" variant="highlight">
+          <Heading as="h2" variant="highlight">
             {title}
           </Heading>
         ) : (

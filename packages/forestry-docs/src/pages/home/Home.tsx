@@ -2,7 +2,8 @@ import { useState, useEffect, useRef } from 'react';
 import style from './Home.module.css';
 
 import { Highlight } from '../../helpers/Highlight/Highlight';
-import { appState, State } from '../../appState';
+import { appState, State } from './appState';
+import { Heading } from '@chakra-ui/react';
 
 function Home() {
   const state = useRef<State>(appState());
@@ -15,9 +16,11 @@ function Home() {
   }, []);
 
   return (
-    <div className={style.container}>
+    <>
       <div className={style.header}>
-        <h1 className={style.title}>FORESTRY</h1>
+        <Heading as="h1" size="xl" variant="titleLogo">
+          FORESTRY
+        </Heading>
       </div>
       <div className={style.content}>
         <p className={style.description}>
@@ -37,18 +40,18 @@ function Home() {
             <Highlight title="Transactional" name="trans" url="transactional" state={state.current}>
               Actions are either fully executed, or revert to the previous state
             </Highlight>
-            <Highlight title="Observable" name="obs" state={state.current}>
+            <Highlight title="Observable" name="obs" state={state.current} url="observable">
               Built on RxJS, Forestry allows for observation of changes system wide as well as
               piping to all RxJS modifiers
             </Highlight>
-            <Highlight title="Synchronous" name="sync" state={state.current}>
+            <Highlight title="Synchronous" name="sync" state={state.current} url="synchronous">
               Changes occur in real time
             </Highlight>
           </section>
         ) : null}
       </div>
-    </div>
+    </>
   );
 }
 
-export default App;
+export default Home;

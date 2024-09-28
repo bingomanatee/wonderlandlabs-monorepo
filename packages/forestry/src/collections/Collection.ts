@@ -77,7 +77,7 @@ export class Collection<ValueType> implements CollectionIF<ValueType> {
   }
 
   subscribe(observer: PartialObserver<ValueType> | SubscribeFn<ValueType>) {
-    return this.subject.subscribe(observer);
+    return this.forest.observe(this.tree.name).subscribe(observer);
   }
 
   public forest: ForestIF;

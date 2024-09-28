@@ -18,34 +18,34 @@
   --text-font: 'Montserrat', Helvetica, sans-serif;
   --link-color: rgb(0, 55, 127);
   --link-color-light: rgba(0, 55, 127, 0.5);
+  --code-color: hsl(100, 33%, 90%);
+  --variable-color: hsl(100, 33%, 50%);
+  --nav-button-height: calc(max(300px, 100vh / 2));
+  --nav-button-width: 40px;
+  --nav-button-color: rgb(178, 228, 224);
+}
+
+.navButton {
+  fill: var(--nav-button-color);
+  opacity: 20%;
+}
+.navButton:hover {
+  opacity: 100%;
 }
 
 body,
 html,
 #root {
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+  position: relative;
   background-color: transparent;
   width: 100%;
   padding: 0;
   margin: 0;
   --small-window: 500px;
   --large-desktop: 1024px;
-}
-/*
-body {
-  background-color: rgb(69, 98, 79);
-  background-attachment: fixed !important;
-  background-image: url('/img/forestry-2.png') !important;
-  background-size: cover !important;
-  background-position: center !important;
-  backdrop-filter: blur(3px);
-} */
-
-#background {
-  position: absolute;
-  z-index: -1;
-  left: 0;
-  top: 0;
-  background-color: rgb(69, 98, 79);
 }
 
 th {
@@ -68,4 +68,13 @@ p {
 
 .textual p {
   margin-bottom: 1em;
+}
+
+.chakra-text > span.chakra-text {
+  font-size: 1em !important;
+  color: var(--variable-color);
+}
+
+.codeBlock > span.chakra-text {
+  color: var(--code-color) !important;
 }

@@ -5,7 +5,7 @@ import { ConceptPage } from '../ConceptPage';
 console.log('content is ', Content);
 export function Journaled() {
   return (
-    <ConceptPage summary={Summary} image="/pictures/journaling.png" title="Journaled">
+    <ConceptPage summary={Summary} image="/pictures/journaled.png" title="Journaled">
       <Content />
     </ConceptPage>
   );

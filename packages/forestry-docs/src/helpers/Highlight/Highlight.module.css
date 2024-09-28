@@ -8,11 +8,11 @@
   flex-direction: column;
   align-items: stretch;
   justify-content: stretch;
-  --blur: 2px;
+  --blur: 4px;
   --blur-heavy: 8px;
   --highlight-title-color: rgba(255, 255, 255, 0.5);
   --highlight-title-color-over: var(--text-color);
-  --highlight-container: rgba(179, 209, 194, 0.5);
+  --highlight-container: hsla(203, 34%, 65%, 0.5);
   --highlight-container-hover: rgba(230, 255, 240, 1);
   backdrop-filter: blur(var(--blur));
   /* Adjust the blur radius */

@@ -3,7 +3,8 @@ import type { CollectionIF } from '@wonderlandlabs/forestry/build/src/types/type
 import { useRef, useEffect, useState, type ReactNode } from 'react';
 import { Outlet } from 'react-router-dom';
 import { ConceptsLayoutState, INITIAL, type ConceptsLayoutStateValue } from './ConceptsLayoutState';
-
+import { navigator } from '../../lib/navigation';
+import { Helmet } from 'react-helmet';
 const TITLE = 'Forestry Concepts';
 const IMAGE_SIZE = { base: '150px', sm: '150px', md: '200px', lg: '250px' };
 
@@ -22,34 +23,57 @@ function Summary({ value }: { value: string | ReactNode }) {
     </Box>
   );
 }
+const PAGES = [
+  '/concepts/journaled',
+  '/concepts/transactional',
+  '/concepts/observable',
+  '/concepts/synchronous',
+];
 
 export function Concepts() {
   const state = useRef<CollectionIF<ConceptsLayoutStateValue>>(new ConceptsLayoutState());
   const [value, setValue] = useState<ConceptsLayoutStateValue>(INITIAL);
   useEffect(() => {
+    navigator.setPages(PAGES);
+    navigator.setParent('/');
     const sub = state.current.subscribe((v: ConceptsLayoutStateValue) => setValue(v));
-    return () => sub?.unsubscribe();
+    return () => {
+      sub?.unsubscribe();
+      navigator.setPages([]);
+      navigator.setParent('');
+    };
   }, []);
 
   return (
-    <Box as="section" id="concepts-layout" layerStyle="pageColumnContainer">
-      <Box layerStyle="pageColumn" id="pageColumn">
-        {value.image ? (
-          <Box layerStyle="pageImage">
-            <Image src={value.image} width={IMAGE_SIZE} height={IMAGE_SIZE} />
+    <>
+      <Helmet>
+        <style>
+          {`      body {
+          background-image: url('/pictures/blue-forest-up.png')!important;
+          background-position: top center;
+        }
+        `}
+        </style>
+      </Helmet>
+      <Box as="section" id="pageColumnContainer" layerStyle="pageColumnContainer">
+        <Box layerStyle="pageColumn" id="pageColumn">
+          {value.image ? (
+            <Box layerStyle="pageImage">
+              <Image src={value.image} width={IMAGE_SIZE} height={IMAGE_SIZE} />
+            </Box>
+          ) : null}
+          <Box as="header" layerStyle="pageColumnHeader">
+            <Text textStyle="pageTitlePrefix">{value.title ? TITLE + ':' : ''}</Text>
+            <Heading as="h1" variant="pageTitle">
+              {value.title ? value.title : TITLE}
+            </Heading>
+            {<Summary value={value.summary} />}
           </Box>
-        ) : null}
-        <Box as="header" layerStyle="pageColumnHeader">
-          <Text textStyle="pageTitlePrefix">{value.title ? TITLE + ':' : ''}</Text>
-          <Heading as="h1" variant="pageTitle">
-            {value.title ? value.title : TITLE}
-          </Heading>
-          {<Summary value={value.summary} />}
-        </Box>
-        <Box as="article" layerStyle="pageColumnBody">
-          <Outlet context={{ state: state.current }} />
+          <Box as="article" layerStyle="pageColumnBody">
+            <Outlet context={{ state: state.current }} />
+          </Box>
         </Box>
       </Box>
-    </Box>
+    </>
   );
 }

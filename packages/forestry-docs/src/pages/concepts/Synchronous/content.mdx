@@ -1,0 +1,36 @@
+Asyncronous behavior is necessary when waiting for delayed action such as a
+request/response cycle.
+
+Tree and collection values can be inspected in real time after any action or sub-action.
+So any computation you want to make on state values can always be made in real time.
+
+```JavaScript
+
+const f = new Forest();
+const t = f.addTree<number>('counter', {initial: 0});
+
+console.log('tree starts at ', t.value);
+t.next(100));
+console.log('tree is now', t.value);
+
+/**
+  tree starts at 0
+  tree is now 100
+*/
+
+```
+
+## Hooked on hooks
+
+However hooks have gotten people habituated to the idea
+that they need to wait for results to be circulated.
+
+Hooks depend on the render cycle to circulate changes. That means that by definition,
+you are waiting for the _slowest possible activity_ to update values. And in your effects,
+you can never be sure _what the state really is_ or _what it is to become_ as changes may be queued
+up by other processes to change or re-change the state in a seperate update pass.
+
+This is not the kind of system you want to build applications around.
+
+Forestry operates at its own tempo, expressing value immediately, not when a DOM-dependent
+activity cycle has been completed.

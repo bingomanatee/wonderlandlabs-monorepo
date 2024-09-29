@@ -16,7 +16,7 @@ export type CollectionParams<
 };
 
 export class Collection<ValueType, SelfClass = CollectionIF<ValueType>>
-  implements CollectionIF<ValueType>
+implements CollectionIF<ValueType>
 {
   constructor(
     public name: string,
@@ -63,7 +63,6 @@ export class Collection<ValueType, SelfClass = CollectionIF<ValueType>>
     // @ts-expect-error
     const collection = this as SelfClass;
     return this.forest.do(() => {
-      // @ts-expect-error
       return fn(collection, seed);
     });
   }

@@ -2,10 +2,10 @@ import Summary from './summary.mdx';
 import Content from './content.mdx';
 import { ConceptPage } from '../ConceptPage';
 
-console.log('content is ', Content);
-export function Observable() {
+export default function Observable({name}: {name: string}) {
+  console.log('---- rendering observable')
   return (
-    <ConceptPage summary={Summary} image="/pictures/observable.png" title="Observable">
+    <ConceptPage summary={Summary} name={name}>
       <Content />
     </ConceptPage>
   );

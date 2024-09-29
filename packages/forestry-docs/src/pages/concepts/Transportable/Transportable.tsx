@@ -2,10 +2,9 @@ import Summary from './summary.mdx';
 import Content from './content.mdx';
 import { ConceptPage } from '../ConceptPage';
 
-export function Transportable() {
+export default function Transportable({ name }: { name: string }) {
   return (
-    <ConceptPage summary={Summary} image="/pictures/transportable.png" 
-    title="Transportable">
+    <ConceptPage summary={Summary} name={name}>
       <Content />
     </ConceptPage>
   );

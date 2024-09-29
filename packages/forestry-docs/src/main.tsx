@@ -1,4 +1,4 @@
-import { StrictMode } from 'react';
+import { lazy, StrictMode, Suspense, type FC } from 'react';
 import { createRoot } from 'react-dom/client';
 import Home from './pages/home/Home.tsx';
 import * as styles from './index.css';
@@ -7,14 +7,21 @@ console.log('styles imprted as', styles);
 
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import './index.css';
-import { Journaled } from './pages/concepts/Journaled/Journaled.tsx';
 import { Concepts } from './pages/concepts/ConceptsLayout.tsx';
-import { Transactional } from './pages/concepts/Transactional/Transactional.tsx';
 import { Base } from './pages/Base.tsx';
-import { Observable } from './pages/concepts/Observable/Observable.tsx';
-import { Synchronous } from './pages/concepts/Synchronous/Synchronous.tsx';
-import { Transportable } from './pages/concepts/Transportable/Transportable.tsx';
-import { Typescript } from './pages/concepts/Typescript/Typescript.tsx';
+
+import { conceptsState } from './lib/concepts.state.ts';
+import { upperFirst } from 'lodash-es';
+const conceptComponents = conceptsState.value.concepts.reduce(
+  (acc, concept) => {
+    acc[concept.name] = lazy(
+      () => import(`./pages/concepts/${upperFirst(concept.name)}/${upperFirst(concept.name)}.tsx`)
+    );
+    return acc;
+  },
+  {} as Record<string, FC>
+);
+
 const router = createBrowserRouter([
   {
     path: '',
@@ -27,32 +34,17 @@ const router = createBrowserRouter([
       {
         path: '/concepts',
         element: <Concepts />,
-        children: [
-          {
-            path: 'journaled',
-            element: <Journaled />,
-          },
-
-          {
-            path: 'transactional',
-            element: <Transactional />,
-          },
-          {
-            path: 'observable',
-            element: <Observable />,
-          },
-          {
-            path: 'synchronous',
-            element: <Synchronous />,
-          },
-          {
-            path: 'transportable',
-            element: <Transportable />,
-          },    {
-            path: 'typescript',
-            element: <Typescript />,
-          },
-        ],
+        children: conceptsState.value.concepts.map((concept) => {
+          const Component = conceptComponents[concept.name as keyof typeof conceptComponents];
+          return {
+            path: concept.name,
+            element: (
+              <Suspense fallback={<div>Loading...</div>}>
+                {Component ? <Component name={concept.name} /> : <div>Component not found</div>}
+              </Suspense>
+            ),
+          };
+        }) as { path: string; element: JSX.Element }[],
       },
     ],
   },

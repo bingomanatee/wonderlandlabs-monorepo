@@ -1,11 +1,11 @@
 import { useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { navigator } from '../navigation';
 import { Portal, Box } from '@chakra-ui/react';
+import { conceptsState } from '../../lib/concepts.state';
 
-export const NextPage = () => {
+export const NextPage = ({ current }: { current: string }) => {
   const navigate = useNavigate();
-  const next = useCallback(() => navigator.nextPage(navigate), [navigate]);
+  const next = useCallback(() => conceptsState.goNext(current, navigate), [current, navigate]);
   return (
     <Portal>
       <Box layerStyle="nextButton" onClick={next}>

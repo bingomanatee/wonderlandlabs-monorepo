@@ -1,11 +1,11 @@
 import { useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { navigator } from '../navigation';
 import { Portal, Box } from '@chakra-ui/react';
+import { conceptsState } from '../../lib/concepts.state';
 
-export const BackPage = () => {
+export const BackPage = ({ current }: { current: string }) => {
   const navigate = useNavigate();
-  const back = useCallback(() => navigator.backPage(navigate), [navigate]);
+  const back = useCallback(() => conceptsState.goBack(current, navigate), [current, navigate]);
   return (
     <Portal>
       <Box layerStyle="prevButton" onClick={back}>

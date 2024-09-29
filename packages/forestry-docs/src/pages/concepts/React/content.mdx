@@ -1,0 +1,366 @@
+## Local State with Forest
+
+Here is a basic pattern for _local_ insertion of state in React:
+
+```JavaScript
+
+  type StateValues = {
+    username: '',
+    password: '',
+  }
+
+  function MyComponent() {
+
+  const state = useRef<TreeIF<StateValues>>(appState());
+
+  const [value, setValue] = useState(state.current.value);
+
+  useEffect(() => {
+    const sub = state.current?.subscribe((v) => setValue(v));
+    () => sub?.unsubscribe();
+  }, []);
+
+      return (
+        <div>
+          <div>
+            <label>Username</label>
+            <input name="username" value={value.username}
+            onChange={(e) => state.next({...state.value, username: e.target.value}))} />
+          </div>
+          <div>
+            <label>Password</label>
+            <input name="password" type="password" value={value.password}
+            onChange={(e) => state.next({...state.value, password: e.target.value}))} />
+          </div>
+
+        </div>
+      )
+
+  }
+
+  function appState () {
+    const f = new Forest();
+
+    t = f.addTree<StateValues>('login', {
+      initial: {username: '', password: ''}
+    })
+
+    return tree;
+  }
+
+```
+
+## Globaal Resources
+
+The same pattern can be used for a global state instance.
+The only difference is that the state is no longer instantiated as a reference,
+it is imported from a remote module. Any number of components can subscribe to it
+or call it's methods.
+
+````JavaScript
+import {state, type StateValue} from '/lib/state';
+
+  function MyComponent() {
+
+    const [value, setValue] = useState(state.current.value);
+
+    useEffect(() => {
+      const sub = state.current?.subscribe((v) => setValue(v));
+      () => sub?.unsubscribe();
+    }, []);
+
+      return (
+        <div>
+          <div>
+            <label>Username</label>
+            <input name="username" value={value.username}
+            onChange={(e) => state.next({...state.value, username: e.target.value}))} />
+          </div>
+          <div>
+            <label>Password</label>
+            <input name="password" type="password" value={value.password}
+            onChange={(e) => state.next({...state.value, password: e.target.value}))} />
+          </div>
+
+        </div>
+      )
+
+  }
+
+// ---- mystate.ts
+
+  // - this resource can be used for repeated instantiation of
+  // an app state for unit testing
+
+  export type StateValues = {
+    username: '',
+    password: '',
+  }
+
+  export function appState () {
+    const f = new Forest();
+
+    t = f.addTree<StateValues>('login', {
+      initial: {username: '', password: ''}
+    })
+
+    return tree;
+  }
+
+  export const state = appState();
+
+
+## Creating shared actions for a global resource
+
+Although the Component class has a solution for attached functions,
+you can also build a function library in your global state if you want
+for basic tree mutation.
+
+```JavaScript
+import {state, inputToUsername, type StateValue} from '/lib/state';
+
+  function MyComponent() {
+
+    const [value, setValue] = useState(state.current.value);
+
+    useEffect(() => {
+      const sub = state.current?.subscribe((v) => setValue(v));
+      () => sub?.unsubscribe();
+    }, []);
+
+      return (
+        <div>
+          <div>
+            <label>Username</label>
+            <input name="username" value={value.username}
+            onChange={inputToUsername} />
+          </div>
+          <div>
+            <label>Password</label>
+            <input name="password" type="password" value={value.password}
+            onChange={inputToPassword} />
+          </div>
+
+        </div>
+      )
+
+  }
+
+// ---- mystate.ts
+
+  // - this resource can be used for repeated instantiation of
+  // an app state for unit testing
+
+  export type StateValues = {
+    username: '',
+    password: '',
+  }
+
+  export function appState () {
+    const f = new Forest();
+
+    t = f.addTree<StateValues>('login', {
+      initial: {username: '', password: ''}
+    })
+
+    return tree;
+  }
+
+export const inputToUsername = (e) => state.next({...state.value, username: e.target.value}))
+export const inputToPassword = (e) => state.next({...state.value, password: e.target.value}))
+export const state = appState();
+
+## A more involved example
+
+This specific state is responsible for rotating the concepts panels on the home page
+when they are not being interacted with, and freezing on the hovered-over panel
+if the user moves the mouse over a panel.
+
+```JavaScript
+
+// -- the rotating panels on this site's home page
+
+import { useCallback, useEffect, useState, type PropsWithChildren, type ReactNode } from 'react';
+import style from './Highlight.module.css';
+import type { state, StateIF } from '../appState';
+import { useNavigate } from 'react-router-dom';
+import { Box, Heading, Text } from '@chakra-ui/react';
+
+type Props = {
+  title: ReactNode;
+  name: string;
+  url?: string;
+};
+
+const CATS = /^concepts/i;
+const SLASHES = /^\//;
+
+function formattedUrl(s: string) {
+  if (SLASHES.test(s)) return formattedUrl(s.replace(SLASHES, ''));
+  if (CATS.test(s)) return formattedUrl(s.replace(CATS, ''));
+  return '/concepts/' + s;
+}
+export function Highlight({ title, name, children, state, url }: PropsWithChildren<Props>) {
+  const [stateValue, setStateValue] = useState<StateIF>(state.value);
+
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    state.register(name);
+
+    const sub = state.subscribe({ next: (value: StateIF) => setStateValue(value) });
+
+    return () => sub?.unsubscribe();
+  }, [state]);
+
+  const localHandleHover = useCallback(() => {
+    state.handleHover(name);
+  }, [state]);
+
+  const localBlur = useCallback(() => state.blur(), [state]);
+
+  const handleClick = useCallback(() => {
+    if (url) navigate(formattedUrl(url));
+  }, [url, navigate]);
+
+  return (
+    <Box
+      as="section"
+      className={
+        stateValue.target === name
+          ? `${style.container} ${style['container-hovered']}`
+          : style.container
+      }
+      onMouseLeave={localBlur}
+      onClick={handleClick}
+      onMouseEnter={localHandleHover}
+      layerStyle="highlight"
+    >
+      {title ? (
+        <Heading as="h2" variant="highlight">
+          {title}
+        </Heading>
+      ) : null}
+      <Box layerStyle="highlightText">
+        <Text textStyle="highlightText">{children}</Text>
+      </Box>
+    </Box>
+  );
+}
+
+
+// -- lib/state.js
+
+import { Forest } from "@wonderlandlabs/forestry";
+import type { SubscribeFn } from "@wonderlandlabs/forestry/build/src/types/types.shared";
+import type { TreeIF } from "@wonderlandlabs/forestry/build/src/types/types.trees";
+import { debounce } from "lodash-es";
+import type { PartialObserver } from "rxjs";
+
+const SECONDS = 1000;
+const LONG_DELAY = 5 * SECONDS;
+const SHORT_DELAY = 2 * SECONDS;
+
+export interface StateIF {
+  target: string | null;
+  list: string[];
+  isLocked: boolean;
+}
+
+export state = appState();
+
+export class StateManager {
+  constructor(public tree: TreeIF<StateIF>) {
+    // begins rotation after the last panel registers it as a target to be rotated to
+  }
+
+  // adds a candidate to be focused by name.
+  register(target: string) {
+    this.tree.mutate(({ value }) => ({
+      ...value,
+      list: [...value.list, target],
+    }));
+
+    this.init();
+  }
+
+  handleHover(target: string | null) {
+    clearInterval(this.#interval);
+    this.tree.mutate( ({ value, seed: target }: { value: StateIF }) => ({
+        ...value,
+        target,
+        isLocked: isLocked === null ? value.isLocked : isLocked,
+    }), target);
+  }
+
+// un-lock the state allowing passive rotate when the user leaves a panel
+  blur() {
+      this.tree.mutate(({ value }) => ({
+        ...value,
+        isLocked: false,
+        target: "",
+      }));
+    this.delay(() => this.rotate(), LONG_DELAY);
+  }
+
+// focus on the next panel
+  rotate(isLocked = false) {
+    if (this.value.isLocked) return;
+    const target = this.nextTarget();
+
+    this.tree.mutate(({ value }) => ({
+      ...value,
+      target,
+      isLocked,
+    }));
+
+    this.delay(() => this.rotate(), SHORT_DELAY);
+  }
+
+  #interval: any;
+
+  // attempts to prevent any "dying gasp" actions if the page is left.
+  destroy() {
+    clearInterval(this.#interval);
+  }
+
+  // does an action later... only one delayed action at a time,
+  // any previously queued action is cancelled.
+
+  delay(f: () => void, delay: number) {
+    clearInterval(this.#interval);
+    this.#interval = setInterval(f, delay);
+  }
+  // may  be called more than once;
+  // will eventually rotate to the first item in the list
+  init() {
+    this.delay(() => this.rotate(), LONG_DELAY);
+  }
+
+  // the name of the target after the current one.
+  nextTarget() {
+    const { list, target } = this.tree.value;
+    if (!list.length) return "";
+    const i = list.findIndex((t) => t === target) + 1;
+    if (i >= list.length) return list[0];
+    return list[i];
+  }
+  get value() {
+    return this.tree.value;
+  }
+
+  subscribe(s: PartialObserver<StateIF> | SubscribeFn<StateIF>) {
+    return this.tree.forest.observe(this.tree.name!)?.subscribe(s);
+  }
+}
+
+export function appState() {
+  const f = new Forest();
+
+  const tree = f.addTree<StateIF>("state", {
+    initial: { target: null, list: [], isLocked: false },
+  });
+
+  return new State(tree);
+}
+````

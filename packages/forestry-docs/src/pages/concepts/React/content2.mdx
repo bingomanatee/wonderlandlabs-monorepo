@@ -1,0 +1,123 @@
+
+## Global Resources
+
+The same pattern can be used for a global state instance.
+The only difference is that the state is no longer instantiated as a reference,
+it is imported from a remote module. Any number of components can subscribe to it
+or call it's methods.
+
+```JavaScript
+
+import {state, type StateValue} from '/lib/state';
+
+function MyComponent() {
+
+  const [value, setValue] = useState(state.current.value);
+
+  useEffect(() => {
+    const sub = state.current?.subscribe((v) => setValue(v));
+    () => sub?.unsubscribe();
+  }, []);
+
+    return (
+      <div>
+        <div>
+          <label>Username</label>
+          <input name="username" value={value.username}
+          onChange={(e) => state.next({...state.value, username: e.target.value}))} />
+        </div>
+        <div>
+          <label>Password</label>
+          <input name="password" type="password" value={value.password}
+          onChange={(e) => state.next({...state.value, password: e.target.value}))} />
+        </div>
+
+      </div>
+    )
+
+}
+
+// ---- mystate.ts
+
+  // - this resource can be used for repeated instantiation of
+  // an app state for unit testing
+
+  export type StateValues = {
+    username: '',
+    password: '',
+  }
+
+  export function appState () {
+    const f = new Forest();
+
+    t = f.addTree<StateValues>('login', {
+      initial: {username: '', password: ''}
+    })
+
+    return tree;
+  }
+
+  export const state = appState();
+
+```
+
+## Creating shared actions for a global resource
+
+Although the Component class has a solution for attached functions,
+you can also build a function library in your global state if you want
+for basic tree mutation.
+
+```JavaScript
+import {state, inputToUsername, type StateValue} from '/lib/state';
+
+  function MyComponent() {
+
+    const [value, setValue] = useState(state.current.value);
+
+    useEffect(() => {
+      const sub = state.current?.subscribe((v) => setValue(v));
+      () => sub?.unsubscribe();
+    }, []);
+
+      return (
+        <div>
+          <div>
+            <label>Username</label>
+            <input name="username" value={value.username}
+            onChange={inputToUsername} />
+          </div>
+          <div>
+            <label>Password</label>
+            <input name="password" type="password" value={value.password}
+            onChange={inputToPassword} />
+          </div>
+
+        </div>
+      )
+
+  }
+
+// ---- mystate.ts
+
+  // - this resource can be used for repeated instantiation of
+  // an app state for unit testing
+
+  export type StateValues = {
+    username: '',
+    password: '',
+  }
+
+  export function appState () {
+    const f = new Forest();
+
+    t = f.addTree<StateValues>('login', {
+      initial: {username: '', password: ''}
+    })
+
+    return tree;
+  }
+
+export const inputToUsername = (e) => state.next({...state.value, username: e.target.value}))
+export const inputToPassword = (e) => state.next({...state.value, password: e.target.value}))
+export const state = appState();
+```

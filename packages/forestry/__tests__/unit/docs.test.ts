@@ -122,7 +122,7 @@ describe('concepts', () => {
         { id: 'beta', daysLeft: 3 },
         { id: 'gamma', daysLeft: 2 },
       ];
-      
+
       const eggsCollection = new Collection<Egg[]>(
         'eggs',
         {
@@ -146,7 +146,6 @@ describe('concepts', () => {
             removeEgg(coll: CollectionIF<Egg[]>, id: string) {
               coll.mutate(({ value }) => {
                 const out = value.filter((egg: Egg) => egg.id !== id);
-                console.log('out after rmoving', id, 'is', out);
                 return out;
               }, 'removing egg ' + id);
             },
@@ -207,135 +206,43 @@ describe('concepts', () => {
       eggsCollection.act('removeADay');
       eggsCollection.act('removeADayWithCatch');
 
+
       expect(log).toEqual([
+        { eggs: { alpha: 4, beta: 3, gamma: 2 }, time: 1, source: 'observe', act: 'INITIAL VALUE' },
         {
-          eggs: {
-            alpha: 4,
-            beta: 3,
-            gamma: 2,
-          },
-          time: 1,
-          source: 'observe',
-          act: 'INITIAL VALUE',
-        },
-        {
-          eggs: {
-            alpha: 4,
-            beta: 3,
-            gamma: 2,
-          },
+          eggs: { alpha: 4, beta: 3, gamma: 2 },
           time: 1,
           source: 'tree.subscribe',
           act: 'INITIAL VALUE',
         },
+        { eggs: { alpha: 3, beta: 3, gamma: 2 }, time: 5, source: 'tree.subscribe', act: '(next)' },
+        { eggs: { alpha: 3, beta: 2, gamma: 2 }, time: 8, source: 'tree.subscribe', act: '(next)' },
         {
-          eggs: {
-            alpha: 3,
-            beta: 3,
-            gamma: 2,
-          },
-          time: 5,
-          source: 'tree.subscribe',
-          act: '(next)',
-        },
-        {
-          eggs: {
-            alpha: 3,
-            beta: 2,
-            gamma: 2,
-          },
-          time: 8,
-          source: 'tree.subscribe',
-          act: '(next)',
-        },
-        {
-          eggs: {
-            alpha: 3,
-            beta: 2,
-            gamma: 1,
-          },
+          eggs: { alpha: 3, beta: 2, gamma: 1 },
           time: 11,
           source: 'tree.subscribe',
           act: '(next)',
         },
+        { eggs: { alpha: 3, beta: 2, gamma: 1 }, time: 11, source: 'observe', act: '(next)' },
         {
-          eggs: {
-            alpha: 3,
-            beta: 2,
-            gamma: 1,
-          },
-          time: 11,
-          source: 'observe',
-          act: '(next)',
-        },
-        {
-          eggs: {
-            alpha: 2,
-            beta: 2,
-            gamma: 1,
-          },
+          eggs: { alpha: 2, beta: 2, gamma: 1 },
           time: 15,
           source: 'tree.subscribe',
           act: '(next)',
         },
         {
-          eggs: {
-            alpha: 2,
-            beta: 1,
-            gamma: 1,
-          },
+          eggs: { alpha: 2, beta: 1, gamma: 1 },
           time: 18,
           source: 'tree.subscribe',
           act: '(next)',
         },
         {
-          eggs: {
-            alpha: 2,
-            beta: 1,
-            gamma: 1,
-          },
-          time: 20,
-          source: 'observe',
-          act: '(next)',
-        },
-        {
-          eggs: {
-            alpha: 2,
-            beta: 2,
-            gamma: 1,
-          },
-          time: 24,
-          source: 'tree.subscribe',
-          act: '(next)',
-        },
-        {
-          eggs: {
-            alpha: 2,
-            beta: 1,
-            gamma: 1,
-          },
-          time: 27,
-          source: 'tree.subscribe',
-          act: '(next)',
-        },
-        {
-          eggs: {
-            alpha: 2,
-            beta: 1,
-          },
-          time: 32,
+          eggs: { alpha: 2, beta: 1 },
+          time: 23,
           source: 'tree.subscribe',
           act: 'removing egg gamma',
         },
-        {
-          eggs: {
-            alpha: 2,
-            beta: 1,
-          },
-          time: 32,
-          source: 'observe',
-          act: 'removing egg gamma',
-        },
+        { eggs: { alpha: 2, beta: 1 }, time: 23, source: 'observe', act: 'removing egg gamma' },
       ]);
     });
   });

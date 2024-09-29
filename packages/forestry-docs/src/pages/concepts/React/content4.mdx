@@ -1,0 +1,185 @@
+this state manages tracking the "concepts" panels. first you seed it with data
+for each panel...
+
+```
+conceptsState.addConcept({
+name: 'transactional',
+title: 'Transactional',
+blurb: `Actions are either fully executed,
+  or revert to the previous state`,
+art: '/pictures/transactional.png',
+});
+
+conceptsState.addConcept({
+name: 'journaled',
+title: 'Journaled',
+blurb: `Every change and action is logged and timestamped,
+  even across multiple state collections,
+   for easy diagnosis.`,
+art: '/pictures/transactional.png',
+});
+
+conceptsState.addConcept({
+name: 'observable',
+title: 'Observable',
+blurb: `Built on RxJS, Forestry allows for observation
+  of changes system wide as well as piping to all
+      RxJS modifiers.`,
+art: '/pictures/observable.png',
+});
+
+conceptsState.addConcept({
+name: 'synchronous',
+title: 'Synchronous',
+blurb: `Changes occur in real time.`,
+art: '/pictures/synchronous.png',
+});
+
+conceptsState.addConcept({
+name: 'transportable',
+title: 'Transportable',
+blurb: ` State value and actions are contained
+  within single instances, for ease of test and global access.`,
+art: '/pictures/synchronous.png',
+});
+
+conceptsState.addConcept({
+name: 'typescript',
+title: 'Typescript Friendly',
+blurb: `Forestry classes and methods can be keyed to define
+  the type of value managed by the state.`,
+art: '/pictures/typescript.png',
+});
+
+conceptsState.addConcept({
+name: 'react',
+title: 'Enhances React Development',
+blurb: `Designed for global or local state,
+  Forestry allows a single-system
+  state tool for all scopes of a React application.`,
+art: '/pictures/react.png',
+});
+
+```
+
+... then you can iterate over its values in the home page to display the highlights with data
+from the collection.
+
+```
+
+import { Highlight } from './Highlight/Highlight';
+import { Heading, Box, Text, useBreakpointValue, SimpleGrid } from '@chakra-ui/react';
+import { conceptsState } from '../concepts/concepts.state';
+
+function Home() {
+const [value, setValue] = useState(conceptsState.value);
+
+useEffect(() => {
+const sub = conceptsState.subscribe((v) => setValue(v));
+() => sub?.unsubscribe();
+}, []);
+const highlightsLayerType = useBreakpointValue(
+{
+base: 'highlightsColumn',
+sm: 'highlights',
+},
+{
+ssr: false,
+fallback: 'base',
+}
+);
+const highlights = value.concepts.map((concept) => <Highlight concept={concept} />);
+return (
+
+<>
+  <Box as="header" layerStyle="homeHeader">
+    <Heading as="h1" size="xl" variant="titleLogo">
+      FORESTRY
+    </Heading>
+    <Text textStyle="logoSubtext">
+      A Journaled, Transactional state system
+      <br />
+      for JavaScript and React
+    </Text>
+  </Box>
+  <Box layerStyle="highlightContainer" id="highlightContainer">
+    {highlightsLayerType === 'highlights' ? (
+      <SimpleGrid
+        minChildWidth={{ base: '150px', sm: '150px', md: '200px' }}
+        spacing={{ base: '5px', sm: '5px', md: '6px', lg: '7px', xl: '8px' }}
+      >
+        {highlights}
+      </SimpleGrid>
+    ) : (
+      <Box layerStyle={highlightsLayerType}>{highlights}</Box>
+    )}
+  </Box>
+</>
+); }
+
+export default Home;
+```
+
+You can even interoperate with the React Router to lazy-load all the components dynamically.
+
+```
+import { lazy, StrictMode, Suspense, type FC } from 'react';
+import { createRoot } from 'react-dom/client';
+import Home from './pages/home/Home.tsx';
+import * as styles from './index.css';
+import { Chakra } from './lib/chakra/chakra.tsx';
+
+import { createBrowserRouter, RouterProvider } from 'react-router-dom';
+import './index.css';
+import { Concepts } from './pages/concepts/ConceptsLayout.tsx';
+import { Base } from './pages/Base.tsx';
+
+import { conceptsState } from './pages/concepts/concepts.state.ts';
+import { upperFirst } from 'lodash-es';
+
+const conceptComponents = conceptsState.value.concepts.reduce(
+  (acc, concept) => {
+    acc[concept.name] = lazy(
+      () => import(`./pages/concepts/${upperFirst(concept.name)}/${upperFirst(concept.name)}.tsx`)
+    );
+    return acc;
+  },
+  {} as Record<string, FC>
+);
+
+const router = createBrowserRouter([
+  {
+    path: '',
+    element: <Base />,
+    children: [
+      {
+        path: '/',
+        element: <Home />,
+      },
+      {
+        path: '/concepts',
+        element: <Concepts />,
+        children: conceptsState.value.concepts.map((concept) => {
+          const Component = conceptComponents[concept.name as keyof typeof conceptComponents];
+          return {
+            path: concept.name,
+            element: (
+              <Suspense fallback={<div>Loading...</div>}>
+                {Component ? <Component name={concept.name} /> : <div>Component not found</div>}
+              </Suspense>
+            ),
+          };
+        }) as { path: string; element: JSX.Element }[],
+      },
+    ],
+  },
+]);
+
+createRoot(document.getElementById('root')!).render(
+  <StrictMode>
+    <Chakra>
+      <RouterProvider router={router} />
+    </Chakra>
+  </StrictMode>
+);
+```

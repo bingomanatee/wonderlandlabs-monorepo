@@ -5,15 +5,22 @@ import type { ForestIF } from '../types/types.forest';
 import type { TreeIF, TreeParams } from '../types/types.trees';
 import type { PartialObserver } from 'rxjs';
 
-export type CollectionParams<ValueType> = TreeParams<ValueType> & {
-  actions?: Map<string, CollectionAction<ValueType>> | Record<string, CollectionAction<ValueType>>;
+export type CollectionParams<
+  ValueType,
+  CollectionType = CollectionIF<ValueType>,
+> = TreeParams<ValueType> & {
+  actions?:
+    | Map<string, CollectionAction<ValueType, CollectionType>>
+    | Record<string, CollectionAction<ValueType, CollectionType>>;
   reuseTree?: boolean;
 };
 
-export class Collection<ValueType> implements CollectionIF<ValueType> {
+export class Collection<ValueType, SelfClass = CollectionIF<ValueType>>
+  implements CollectionIF<ValueType>
+{
   constructor(
     public name: string,
-    private params?: CollectionParams<ValueType>,
+    private params?: CollectionParams<ValueType, SelfClass>,
     forest?: ForestIF
   ) {
     this.forest = forest ?? new Forest();
@@ -53,8 +60,12 @@ export class Collection<ValueType> implements CollectionIF<ValueType> {
     if (!fn) {
       throw new Error('cannot perform action ' + name + ': not in colletion');
     }
-    const collection = this;
-    return this.forest.do(() => fn(collection, seed));
+    // @ts-expect-error
+    const collection = this as SelfClass;
+    return this.forest.do(() => {
+      // @ts-expect-error
+      return fn(collection, seed);
+    });
   }
 
   next(next: ValueType, name: string): CollectionIF<ValueType> {

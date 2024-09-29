@@ -11,6 +11,7 @@ export const MARKDOWN_COMPONENTS = {
       className="codeBlock"
       layerStyle="mdCode"
       marginX={8}
+      marginBottom={'30px'}
       style={{
         color: 'var(--code-color)!important',
         backgroundColor: 'rgba(0,0,0,0.75)',

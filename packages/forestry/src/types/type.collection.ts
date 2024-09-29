@@ -16,4 +16,4 @@ export interface CollectionIF<ValueType> {
   ): Subscription | Unsubscribable;
 }
 
-export type CollectionAction<ValueType> = (collection: CollectionIF<ValueType>, seed?: any) => any;
+export type CollectionAction<ValueType, CollectionType = CollectionIF<ValueType>> = (collection: CollectionType, seed?: any) => any;

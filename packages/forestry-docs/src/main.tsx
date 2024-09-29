@@ -3,7 +3,6 @@ import { createRoot } from 'react-dom/client';
 import Home from './pages/home/Home.tsx';
 import * as styles from './index.css';
 import { Chakra } from './lib/chakra/chakra.tsx';
-console.log('styles imprted as', styles);
 
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import './index.css';

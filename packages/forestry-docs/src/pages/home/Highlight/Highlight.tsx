@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState, type PropsWithChildren, type ReactNode } from 'react';
 import style from './Highlight.module.css';
-import type { State, StateIF } from '../../pages/home/appState';
+import type { State, StateIF } from '../appState';
 import { useNavigate } from 'react-router-dom';
 import { Box, Heading, Text } from '@chakra-ui/react';
 
@@ -43,7 +43,8 @@ export function Highlight({ title, name, children, state, url }: PropsWithChildr
   }, [url, navigate]);
 
   return (
-    <section
+    <Box
+      as="section"
       className={
         stateValue.target === name
           ? `${style.container} ${style['container-hovered']}`
@@ -52,19 +53,16 @@ export function Highlight({ title, name, children, state, url }: PropsWithChildr
       onMouseLeave={localBlur}
       onClick={handleClick}
       onMouseEnter={localHandleHover}
+      layerStyle="highlight"
     >
-      <Box paddingX={6}>
-        {title ? (
-          <Heading as="h2" variant="highlight">
-            {title}
-          </Heading>
-        ) : (
-          ''
-        )}
-        <div className={style.content}>
-          {typeof children === 'string' ? <Text>{children}</Text> : children}
-        </div>
+      {title ? (
+        <Heading as="h2" variant="highlight">
+          {title}
+        </Heading>
+      ) : null}
+      <Box layerStyle="highlightText">
+        <Text textStyle="highlightText">{children}</Text>
       </Box>
-    </section>
+    </Box>
   );
 }

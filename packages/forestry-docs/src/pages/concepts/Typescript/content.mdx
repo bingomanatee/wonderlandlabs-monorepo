@@ -1,0 +1,22 @@
+The `addTree<T>(name, params)` method returns a tree
+whose value is defined by the generator key. All subscribers will be informed
+as to what type of value is managed by the tree.
+
+While the dynamic nature of Collection actions make it impossible to define
+the parameters of actions, you can define your own methods by extending Collections
+to create custom accessors to your actions and define the interfaces to tree updates.
+
+```JavaScript
+
+const f = new Forest();
+
+const INITIAL: DataType = {...};
+const t: treeIF<DataType> = f.addTree<DataType>('myTree', {initialValue: INITIAL});
+
+// --- or ---
+
+const coll : CollectionIF<DataType> = new Collection<DataType>('myColl', {initialValue: INITIAL});
+
+const sub = f.observe<DataType>('myTree', (value: DataType) => {...});
+
+```

@@ -2,7 +2,7 @@ import { extendBaseTheme, theme as chakraTheme } from '@chakra-ui/react';
 import { defineStyle, defineStyleConfig } from '@chakra-ui/react';
 import { textStyles } from './textStyles';
 import { layerStyles } from './layerStyles';
-import { BG_HUE, BG_SAT, BG_LIGHT, TITLE_TEXT_SHADOW } from './themeConstants';
+import { BG_HUE, BG_SAT, BG_LIGHT, TITLE_TEXT_SHADOW, scale } from './themeConstants';
 
 const { Button } = chakraTheme.components; // Only need to extract Button here
 
@@ -15,12 +15,12 @@ const headingTheme = defineStyleConfig({
     p: 0,
   },
   variants: {
-    pageTitle: defineStyle({
+    conceptsTitle: defineStyle({
       lineHeight: '90%',
       textTransform: 'upperCase',
       fontFamily: 'logoHeading',
       textShadow: TITLE_TEXT_SHADOW,
-      fontSize: { base: '2.5rem', sm: '2.5rem', md: '3rem', lg: '3.5rem' }, // Responsive font size
+      fontSize: { base: '2rem', sm: '2.25rem', md: '2.5rem', lg: '3.25rem' }, // Responsive font size
       color: 'pageTitle', // Reference color from theme
     }),
     titleLogo: defineStyle({
@@ -28,16 +28,18 @@ const headingTheme = defineStyleConfig({
       textAlign: 'center',
       textTransform: 'upperCase',
       fontFamily: 'logoHeading',
-      fontSize: { base: '2.5rem', sm: '2.5rem', md: '3rem', lg: '3.5rem' }, // Responsive font size
+      fontSize: scale(2.5, 'rem'), // Responsive font size
       color: 'pageTitle', // Reference color from theme
     }),
+
+    mdh1: { fontSize: scale(1.5, 'rem') },
+    mdH2: { fontSize: scale(1.25, 'rem') },
     highlight: defineStyle({
-      fontSize: { base: '1.2rem', xl: '1.25rem' },
+      fontSize: scale(0.8, 'rem'),
       color: 'highlightTitle',
       fontFamily: 'heading',
       fontWeight: 600,
       lineHeight: '100%',
-      marginTop: 6,
     }),
   },
 });
@@ -83,11 +85,14 @@ export const theme = extendBaseTheme({
     pageTitle: 'rgb(225, 255, 230)', // Color for page titles
     pageColumnTransparent: `hsla(${BG_HUE}, ${BG_SAT}%,  ${BG_LIGHT}%, 0)`,
     pageColumn: `hsla(${BG_HUE}, ${BG_SAT}%, ${BG_LIGHT}%, 0.8)`,
-    content: `hsla(${BG_HUE}, ${BG_SAT}%, ${BG_LIGHT}%, 1)`,
-    contentText: 'rgba(255,255,255,0.9)',
+    content: `hsl(180, 40%, 80%)`,
+    contentInset: `hsla(180, 40%, 80%, 0.8)`,
+    contentBackground: `hsla(180, 40%, 80%, 0.9)`,
+    summaryText: 'rgba(255,250,245,0.9)',
+    contentText: 'rgba(0, 0, 0,0.9)',
     contentTransparent: `hsla(${BG_HUE}, ${BG_SAT}%, ${BG_LIGHT}%, 0)`,
     code: 'hsl(200, 90%, 90%)',
-    variable: 'var(---variable-color)',
+    variable: 'hsl(170, 80%, 0%)',
     logoCircle: 'rgba(0,0,0,0.6)',
   },
 });

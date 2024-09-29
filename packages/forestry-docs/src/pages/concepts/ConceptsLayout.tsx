@@ -6,19 +6,19 @@ import { ConceptsLayoutState, INITIAL, type ConceptsLayoutStateValue } from './C
 import { navigator } from '../../lib/navigation';
 import { Helmet } from 'react-helmet';
 const TITLE = 'Forestry Concepts';
-const IMAGE_SIZE = { base: '150px', sm: '150px', md: '200px', lg: '250px' };
+const IMAGE_SIZE = { base: '150px', sm: '175px', md: '180px', lg: '200px' };
 
 function Summary({ value }: { value: string | ReactNode }) {
   if (!value) return null;
   if (typeof value === 'string') {
     return (
-      <Box className="textual" layerStyle="pageTitleSummary">
-        <Text textStyle="pageTitleSummary">{value}</Text>
+      <Box className="textual" layerStyle="conceptsSummary">
+        <Text textStyle="conceptsSummary">{value}</Text>
       </Box>
     );
   }
   return (
-    <Box className="textual" textStyle="pageTitleSummary" layerStyle="pageTitleSummary">
+    <Box className="textual" textStyle="conceptsSummary" layerStyle="conceptsSummary">
       {value}
     </Box>
   );
@@ -28,6 +28,8 @@ const PAGES = [
   '/concepts/transactional',
   '/concepts/observable',
   '/concepts/synchronous',
+  '/concepts/transportable',
+  '/concepts/typescript',
 ];
 
 export function Concepts() {
@@ -59,18 +61,26 @@ export function Concepts() {
         <Box layerStyle="pageColumn" id="pageColumn">
           {value.image ? (
             <Box layerStyle="pageImage">
-              <Image src={value.image} width={IMAGE_SIZE} height={IMAGE_SIZE} />
+              <Image
+                style={{ opacity: 0.85 }}
+                src={value.image}
+                width={IMAGE_SIZE}
+                height={IMAGE_SIZE}
+              />
             </Box>
           ) : null}
-          <Box as="header" layerStyle="pageColumnHeader">
+          <Box as="header" layerStyle="conceptsHeader">
             <Text textStyle="pageTitlePrefix">{value.title ? TITLE + ':' : ''}</Text>
-            <Heading as="h1" variant="pageTitle">
+            <Heading as="h1" variant="conceptsTitle">
               {value.title ? value.title : TITLE}
             </Heading>
             {<Summary value={value.summary} />}
           </Box>
           <Box as="article" layerStyle="pageColumnBody">
-            <Outlet context={{ state: state.current }} />
+            <Box layerStyle="contentBackground" />
+            <Box position="relative" zIndex={2}>
+              <Outlet context={{ state: state.current }} />
+            </Box>
           </Box>
         </Box>
       </Box>

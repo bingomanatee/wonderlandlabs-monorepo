@@ -1,29 +1,90 @@
+import { textStyles } from './textStyles';
 import {
   IMAGE_OS,
   LOGO_SIZE,
   SUMMARY_LM,
-  TEXT_SIZE_EXTRA,
-  MIN_HEADER_SIZE,
-  scale,
   scaleRem,
   u,
   LOGO_MARGIN_SIZE,
+  IMAGE_TOP_OS,
 } from './themeConstants';
 
+const BUTTON_X = { base: '15px', md: '30px', lg: '50px' };
+
 export const layerStyles = {
+  homeHeader: {
+    paddingX: { base: u(100), sm: u(120), md: u(200), lg: u(250), xl: u(300) },
+    paddingTop: { base: u(10), sm: u(16), md: u(25) },
+    bgGradient: `linear(var(--home-header-bg1) 0%,
+     var(--home-header-bg2) 20px,
+     var(--home-header-bg3) 50px,
+      var(--home-header-bg4) 80%)`.replace(/\n/g, ''),
+  },
+  highlight: {
+    paddingX: { base: 2, sm: 4, md: 5, lg: 5, xl: 6 },
+    paddingY: { base: 4, sm: 5, md: 6, lg: 6, xl: 8 },
+    borderRadius: { base: 'sm', md: 'md' },
+  },
+  highlightText: {
+    marginTop: '0.5rem',
+  },
+  highlights: {
+    display: 'flex',
+    maxWidth: u(1024),
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'stretch',
+    alignContent: 'stretch',
+    width: '100%',
+    gap: '5px',
+    flexWrap: { base: 'nowrap', sm: 'wrap' },
+    flex: 1,
+  },
+  highlightsColumn: {
+    width: '100%',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '2px',
+    alignItems: 'stretch',
+    paddingX: { base: 2, sm: 2, md: 5 },
+  },
+  highlightContainer: {
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignContent: 'stretch',
+    width: '100%',
+    marginY: { base: '1rem', sm: '2rem' },
+    paddingX: { base: '2px', sm: '1rem', md: '2rem', lg: '5rem' },
+  },
   nextButton: {
     position: 'fixed',
-    right: '25px',
-    top: 'calc((100% - var(--nav-button-height))/2)',
-    height: `var(--nav-button-height)`,
-    width: `var(--nav-button-width)`,
+    right: BUTTON_X,
+    cursor: 'pointer',
+    top: {
+      base: 'calc((100% - var(--nav-button-height-sm))/2)',
+      md: 'calc((100% - var(--nav-button-height))/2)',
+    },
+    height: {
+      base: `var(--nav-button-height-sm)`,
+      md: `var(--nav-button-height)`,
+    },
+    width: { base: `var(--nav-button-width-sm)`, md: `var(--nav-button-width)` },
   },
   prevButton: {
+    cursor: 'pointer',
     position: 'fixed',
-    left: '25px',
-    top: 'calc((100% - var(--nav-button-height))/2)',
-    height: `var(--nav-button-height)`,
-    width: `var(--nav-button-width)`,
+    zIndex: 20,
+    left: BUTTON_X,
+    top: {
+      base: 'calc((100% - var(--nav-button-height-sm))/2)',
+      md: 'calc((100% - var(--nav-button-height))/2)',
+    },
+    height: {
+      base: `var(--nav-button-height-sm)`,
+      md: `var(--nav-button-height)`,
+    },
+    width: { base: `var(--nav-button-width-sm)`, md: `var(--nav-button-width)` },
   },
   logo: {
     position: 'fixed',
@@ -58,37 +119,35 @@ export const layerStyles = {
   },
   content: {
     paddingX: { base: '10px', md: '1rem', lg: '1.5rem', xl: '2rem' },
-    paddingY: scale(7, false),
-    bgGradient: `linear(var(--chakra-colors-contentTransparent) 0px, 
-      var(--chakra-colors-content) 100px, 
-      var(--chakra-colors-content) calc(100% - 150px), 
-      var(--chakra-colors-contentTransparent) 100%)`.replace(/\n/g, ' '),
+    paddingY: '30px',
     color: 'contentText',
     display: 'block',
   },
-  pageTitleSummary: {
-    fontSize: TEXT_SIZE_EXTRA,
-    lineHeight: '160%',
+  conceptsSummary: {
+    ...textStyles.conceptsSummary,
     marginLeft: SUMMARY_LM,
     marginTop: 3,
     maxWidth: '600px',
   },
   pageImage: {
     position: 'absolute',
+    top: IMAGE_TOP_OS,
+    display: { base: 'none', sm: 'none', md: 'block' },
     left: IMAGE_OS,
-    top: IMAGE_OS,
     zIndex: 5,
     borderRadius: '50%',
     overflow: 'hidden',
   },
-  pageColumnHeader: {
-    marginLeft: SUMMARY_LM,
-    minHeight: MIN_HEADER_SIZE,
-    marginBottom: 4,
+  conceptsHeader: {
+    marginLeft: { base: '50px', sm: '80px', md: '100px' },
+    marginBottom: 2,
     zIndex: 10,
   },
   pageColumnBody: {
     position: 'relative',
+    backgroundColor: 'contentBackground',
+    boxShadow: `0 0 10px 2px var(--chakra-colors-content),
+    0 0 50px 100px var(--chakra-colors-contentInset) inset`.replace(/\n/g, ''),
   },
   pageColumnContainer: {
     width: '100%',
@@ -99,6 +158,10 @@ export const layerStyles = {
     flexBasis: 0,
     alignContent: 'stretch',
     justifyContent: 'center',
+    bgGradient: `linear(var(--home-header-bg1) 0%,
+    var(--home-header-bg2) 50px,
+    var(--home-header-bg3) 80px,
+     var(--home-header-bg4) 80%)`.replace(/\n/g, ''),
   },
   pageColumn: {
     position: 'relative',
@@ -108,12 +171,12 @@ export const layerStyles = {
     flexBasis: 0,
     paddingX: { base: '25px', md: '2rem', lg: '3rem', xl: '5rem' },
     display: 'flex',
-    bgGradient: `linear(
+    /* bgGradient: `linear(
     90deg, 
     var(--chakra-colors-pageColumnTransparent) 0px,
     var(--chakra-colors-pageColumn) 20px,
     var(--chakra-colors-pageColumn) calc(100% - 20px),
-    var(--chakra-colors-pageColumnTransparent)  100%)`.replace(/\n/g, ''),
+    var(--chakra-colors-pageColumnTransparent)  100%)`.replace(/\n/g, ''), */
   },
   conceptsImage: {
     width: '100%',

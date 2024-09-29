@@ -19,15 +19,21 @@
   --link-color: rgb(0, 55, 127);
   --link-color-light: rgba(0, 55, 127, 0.5);
   --code-color: hsl(100, 33%, 90%);
-  --variable-color: hsl(100, 33%, 50%);
-  --nav-button-height: calc(max(300px, 100vh / 2));
-  --nav-button-width: 40px;
-  --nav-button-color: rgb(178, 228, 224);
+  --variable-color: hsl(33, 100%, 30%);
+  --nav-button-height-sm: 80px;
+  --nav-button-height: 120px;
+  --nav-button-width: 30px;
+  --nav-button-width-sm: 25px;
+  --nav-button-color: rgb(59, 94, 91);
+  --home-header-bg1: hsla(200, 90%, 8%, 1);
+  --home-header-bg2: hsla(200, 90%, 8%, 0.5);
+  --home-header-bg3: hsla(200, 90%, 8%, 0.2);
+  --home-header-bg4: hsla(200, 90%, 8%, 0);
 }
 
 .navButton {
   fill: var(--nav-button-color);
-  opacity: 20%;
+  opacity: 30%;
 }
 .navButton:hover {
   opacity: 100%;
@@ -77,4 +83,9 @@ p {
 
 .codeBlock > span.chakra-text {
   color: var(--code-color) !important;
+}
+
+a {
+  text-decoration: underline !important;
+  font-weight: 600;
 }

@@ -8,7 +8,7 @@ export const BackPage = () => {
   const back = useCallback(() => navigator.backPage(navigate), [navigate]);
   return (
     <Portal>
-      <Box layerStyle="prevButton">
+      <Box layerStyle="prevButton" onClick={back}>
         <svg
           width="100%"
           height="100%"
@@ -38,15 +38,16 @@ export const BackPage = () => {
               <rect x={250} y={-346.211} width={80} height={410} />
             </clipPath>
             <g clipPath="url(#_clip1)">
-              <g transform="matrix(-1,0,0,1,580,0.789484)">
+              <g transform="matrix(-1,0,0,1,580,0)">
                 <path
-                  d="M250,7.197L308,-142L250,-290.053L250,-346.211L330,-142L250,63.789L250,7.197Z"
+                  d="M250,-244.895L250,-346.211L330,-142L250,63.789L250,-39.895L290,-142.789L250,-244.895Z"
                   className="navButton"
                 />
               </g>
             </g>
           </g>
         </svg>
+        ;
       </Box>
     </Portal>
   );

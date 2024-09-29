@@ -13,6 +13,8 @@ import { Transactional } from './pages/concepts/Transactional/Transactional.tsx'
 import { Base } from './pages/Base.tsx';
 import { Observable } from './pages/concepts/Observable/Observable.tsx';
 import { Synchronous } from './pages/concepts/Synchronous/Synchronous.tsx';
+import { Transportable } from './pages/concepts/Transportable/Transportable.tsx';
+import { Typescript } from './pages/concepts/Typescript/Typescript.tsx';
 const router = createBrowserRouter([
   {
     path: '',
@@ -42,6 +44,13 @@ const router = createBrowserRouter([
           {
             path: 'synchronous',
             element: <Synchronous />,
+          },
+          {
+            path: 'transportable',
+            element: <Transportable />,
+          },    {
+            path: 'typescript',
+            element: <Typescript />,
           },
         ],
       },

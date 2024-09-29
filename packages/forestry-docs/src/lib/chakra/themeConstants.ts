@@ -5,18 +5,24 @@ export const TEXT_SIZE_EXTRA = {
   lg: '1.15rem',
 };
 
+export const IMAGE_TOP_OS = {
+  base: '-20px',
+  sm: '-20px',
+  md: '-22px',
+  lg: '-25px',
+};
 export const IMAGE_OS = {
   base: '-40px',
   sm: '-40px',
-  md: '-50px',
-  lg: '-80px',
+  md: '-40px',
+  lg: '-60px',
 };
 
 export const SUMMARY_LM = {
-  base: '50px',
-  sm: '50px',
-  md: '60px',
-  lg: '80px',
+  base: '20px',
+  sm: '20px',
+  md: '40px',
+  lg: '40px',
 };
 
 export const MIN_HEADER_SIZE = {
@@ -28,13 +34,14 @@ export const MIN_HEADER_SIZE = {
 
 export const LOGO_SIZE = 40;
 export const LOGO_MARGIN_SIZE = 20;
-export const BG_HUE = 193;
-export const BG_SAT = 92;
+export const BG_HUE = 200;
+export const BG_SAT = 50;
 export const BG_LIGHT = 25;
 
-const SMALL_SCALE = 0.8;
-const LARGE_SCALE = 1.2;
-const XL_SCALE = 1.333;
+const BASE_SCALE = 0.8;
+const SMALL_SCALE = 0.9;
+const LARGE_SCALE = 1.1;
+const XL_SCALE = 1.25;
 
 export function u(value: number, unit: string | false = 'px') {
   if (unit === false) return value;
@@ -42,7 +49,7 @@ export function u(value: number, unit: string | false = 'px') {
 }
 export function scale(value: number, unit: string | false = 'px') {
   return {
-    base: u(value, unit),
+    base: u(value * BASE_SCALE, unit),
     sm: u(value * SMALL_SCALE, unit),
     md: u(value, unit),
     lg: u(value * LARGE_SCALE, unit),

@@ -2,9 +2,10 @@ import Summary from './summary.mdx';
 import Content from './content.mdx';
 import { ConceptPage } from '../ConceptPage';
 
-export function Synchronous() {
+export function Transportable() {
   return (
-    <ConceptPage summary={Summary} image="/pictures/synchronous.png" title="Synchronous">
+    <ConceptPage summary={Summary} image="/pictures/transportable.png" 
+    title="Transportable">
       <Content />
     </ConceptPage>
   );

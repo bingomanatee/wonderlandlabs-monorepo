@@ -4,19 +4,19 @@ type AnyProps = Record<string, any>;
 
 export const MARKDOWN_COMPONENTS = {
   p: (props: AnyProps) => <Text textStyle="mdParagraph" as="p" {...props} />,
-  h1: (props: AnyProps) => <Heading my={4} size="lg" as="h1" {...props} />,
-  h2: (props: AnyProps) => <Heading my={2} size="md" as="h2" {...props} />,
+  h1: (props: AnyProps) => <Heading my={4} variant="mdH1" as="h1" {...props} />,
+  h2: (props: AnyProps) => <Heading my={2} variant="mdH2" as="h2" {...props} />,
   pre: (props: AnyProps) => (
     <Box
       className="codeBlock"
       layerStyle="mdCode"
+      marginX={8}
       style={{
         color: 'var(--code-color)!important',
-        backgroundColor: 'rgba(0,0,0,0.15)',
+        backgroundColor: 'rgba(0,0,0,0.75)',
         borderImageSource: 'url("/frames/code-frame.svg")',
-        borderImageSlice: '5 5 5 10',
-        borderImageWidth: '2.5px 2.5px 2.5px 5px',
-        borderImageOutset: '0px 0px 0px 0px',
+        borderImageSlice: '8',
+        borderImageWidth: '2px 4px 4px 1px',
         borderImageRepeat: 'stretch stretch',
         borderStyle: 'solid',
       }}

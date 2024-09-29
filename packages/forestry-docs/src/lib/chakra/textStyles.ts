@@ -1,4 +1,4 @@
-import { scale, TITLE_TEXT_SHADOW } from './themeConstants';
+import { scale, scaleRem, TEXT_SIZE_EXTRA, TITLE_TEXT_SHADOW } from './themeConstants';
 
 export const textStyles = {
   pageTitlePrefix: {
@@ -6,17 +6,31 @@ export const textStyles = {
     fontFamily: 'heading',
     lineHeight: '90%',
     fontWeight: 500,
-    fontSize: scale(1, 'rem'), // Responsive font size
+    fontSize: scaleRem(1), // Responsive font size
     color: 'pageTitle', // Reference color from theme
     textShadow: TITLE_TEXT_SHADOW,
   },
-  pageTitleSummary: {
+  logoSubtext: {
+    fontSize: scaleRem(1),
     color: 'pageTitle',
+    textAlign: 'center',
+    lineHeight: '110%',
+    font: 'heading',
+    fontWeight: 500,
+  },
+  highlightText: {
+    fontSize: { base: '0.6rem', sm: '0.7rem', md: '0.75rem', lg: '0.8rem' },
+    lineHeight: '120%',
+  },
+  conceptsSummary: {
+    fontSize: TEXT_SIZE_EXTRA,
+    color: 'summaryText',
     fontFamily: 'body',
-    fontWeight: 400,
+    fontWeight: 500,
   },
   mdParagraph: {
     marginBottom: '1em',
+    fontSize: scale(0.9, 'rem'),
     color: 'contentText',
   },
   mdPre: {

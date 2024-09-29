@@ -5,13 +5,12 @@ and each branch is a time series stamped record of the next value - or a paramet
 function to generate a value from the previous branch.
 
 This means that as long as you create multiple collections from the same Forest instance,
-you can compare what the values of any two Trees were at a particualar moment in time (`myTree.vavlueAt(10)`)
+you can compare what the values of any two Trees were at a particualar moment in time
+(`myTree.valueAt(10)`)
 
-so if you wanted to you could reset an entire forest back to a given time by
-looping over each tree and asserting (`myTree.next(myTree.valueAt(100))`).
-
-Even rejected values are stored in an `.offshoots` array if you want to inspect submitted
-changes that were rejected as invalid.
+Even rejected values are stored in an `.offshoots` array
+if you want to inspect submitted changes that were rejected by
+the tree's validators.
 
 In most cases the size of the journal is not an issue but if you want, you can define the
 meximum branch size of a tree and "trim" content beyond that size to limit memory consumption

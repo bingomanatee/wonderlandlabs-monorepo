@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import style from './Highlight.module.css';
 import { useNavigate } from 'react-router-dom';
 import { Box, Heading, Text } from '@chakra-ui/react';
-import { ConceptsState, conceptsState, type Concept } from '../../../lib/concepts.state';
+import { ConceptsState, conceptsState, type Concept } from '../../concepts/concepts.state';
 
 export function Highlight({ concept }: { concept: Concept }) {
   const navigate = useNavigate();

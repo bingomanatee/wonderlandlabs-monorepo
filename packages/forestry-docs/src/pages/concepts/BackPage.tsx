@@ -1,7 +1,7 @@
 import { useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Portal, Box } from '@chakra-ui/react';
-import { conceptsState } from '../../lib/concepts.state';
+import { conceptsState } from './concepts.state';
 
 export const BackPage = ({ current }: { current: string }) => {
   const navigate = useNavigate();

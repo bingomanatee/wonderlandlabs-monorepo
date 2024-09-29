@@ -10,7 +10,7 @@ import './index.css';
 import { Concepts } from './pages/concepts/ConceptsLayout.tsx';
 import { Base } from './pages/Base.tsx';
 
-import { conceptsState } from './lib/concepts.state.ts';
+import { conceptsState } from './pages/concepts/concepts.state.ts';
 import { upperFirst } from 'lodash-es';
 const conceptComponents = conceptsState.value.concepts.reduce(
   (acc, concept) => {

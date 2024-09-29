@@ -9,7 +9,7 @@ import {
 } from 'react';
 import { useOutlet, useOutletContext } from 'react-router-dom';
 import type { ConceptsLayoutState } from './ConceptsLayoutState';
-import { conceptsState } from '../../lib/concepts.state';
+import { conceptsState } from './concepts.state';
 import type { CollectionIF } from '@wonderlandlabs/forestry/build/src/types/type.collection';
 
 type Props = { name: string; summary: FC };

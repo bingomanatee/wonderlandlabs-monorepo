@@ -3,7 +3,7 @@ import './Home.module.css';
 
 import { Highlight } from './Highlight/Highlight';
 import { Heading, Box, Text, useBreakpointValue, SimpleGrid } from '@chakra-ui/react';
-import { conceptsState } from '../../lib/concepts.state';
+import { conceptsState } from '../concepts/concepts.state';
 
 function Home() {
   const [value, setValue] = useState(conceptsState.value);

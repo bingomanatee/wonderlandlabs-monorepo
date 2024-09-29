@@ -2,7 +2,7 @@ import { Box, Heading, Text, Image } from '@chakra-ui/react';
 import { type ReactNode, useEffect, useMemo, useRef, useState } from 'react';
 import { Outlet, useOutletContext } from 'react-router-dom';
 import { Helmet } from 'react-helmet';
-import { conceptsState, type Concept } from '../../lib/concepts.state';
+import { conceptsState, type Concept } from './concepts.state';
 import { NextPage } from './NextPage';
 import { BackPage } from './BackPage';
 import { Collection } from '@wonderlandlabs/forestry';
@@ -48,7 +48,7 @@ export function Concepts() {
     <>
       <Helmet>
         <style>
-          {`      body {
+          {`body {
           background-image: url('/pictures/blue-forest-up.png')!important;
           background-position: top center;
         }

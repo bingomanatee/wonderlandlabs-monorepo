@@ -52,7 +52,7 @@ export async function loadPlaceData() {
         (deathCollection: MapCollection<string, number>) => {
           if (!deathCollection.has(date)) {
             for (let index = i - 1; index >= 0; index -= 1) {
-              let earlierDate = dates[index];
+              const earlierDate = dates[index];
 
               if (deathCollection.has(earlierDate)) {
                 deathCollection.set(date, deathCollection.get(earlierDate)!);

@@ -1,12 +1,11 @@
-import { unit } from "./Background";
-import type { CellFactory, CellIF } from "../types";
+import { unit } from './Background';
+import type { CellFactory, CellIF } from '../types';
 
 export class Screen {
   constructor(
     public width: number,
     public height: number,
-    private cellFactory: CellFactory,
-    prevScreen?: Screen
+    private cellFactory: CellFactory
   ) {
     this.initTiles();
   }

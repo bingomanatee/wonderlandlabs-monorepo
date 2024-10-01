@@ -29,7 +29,7 @@ class SectionsCollection extends Collection<Sections, SectionsCollection> {
   currentPage() {
     if (!this.value.current) return undefined;
     return this.value.sections.find((p) => {
-      p.name === this.value.current;
+      return p.name === this.value.current;
     });
   }
 }

@@ -1,4 +1,4 @@
-import type { Dayjs } from "dayjs";
+import type { Dayjs } from 'dayjs';
 export type DateInfo = {
   string: string;
   date: Dayjs;
@@ -31,8 +31,8 @@ export interface CellIF {
   y: number;
   i: number;
   j: number;
-  rect: any;
-  circle: any;
+  rect: unknown;
+  circle: unknown;
   iAngle: number;
   color: string;
   jGrad: number;

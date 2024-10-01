@@ -1,9 +1,13 @@
-import { clamp } from "lodash-es";
-import { unit } from "./Background";
-import type { ScreenIF } from "../types";
+import { clamp } from 'lodash-es';
+import { unit } from './Background';
+import type { ScreenIF } from '../types';
 
 export class Cell {
-  constructor(public i: number, public j: number, public s: ScreenIF) {}
+  constructor(
+    public i: number,
+    public j: number,
+    public s: ScreenIF
+  ) {}
 
   get iAngle() {
     return (Math.PI * this.i) / this.s.iCount;
@@ -13,9 +17,9 @@ export class Cell {
     return (this.j / this.s.jCount - 0.25) * 2;
   }
 
-  rect: any;
+  rect: unknown;
 
-  circle: any;
+  circle: unknown;
 
   private get opacity() {
     const op = Math.sin(this.iAngle);

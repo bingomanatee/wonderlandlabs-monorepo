@@ -1,19 +1,14 @@
-import Two from "two.js";
-import dayjs from "dayjs";
-import { Screen } from "./Screen";
-import type { DateInfo, CellIF, BasePlace } from "../types";
-import type { Group } from "two.js/src/group";
-import { Cell } from "./Cell";
-import {
-  datesTree,
-  deathCollections,
-  placeCollection,
-} from "../CovidForestState";
-import { project } from "./project";
+import Two from 'two.js';
+import dayjs from 'dayjs';
+import { Screen } from './Screen';
+import type { DateInfo, CellIF, BasePlace } from '../types';
+import type { Group } from 'two.js/src/group';
+import { Cell } from './Cell';
+import { datesTree, deathCollections, placeCollection } from '../CovidForestState';
+import { project } from './project';
 let singleton: Background | null = null;
 
-const ns = "http://www.w3.org/2000/svg";
-const ISO_DATE = "YYYY-MM-DD";
+const ISO_DATE = 'YYYY-MM-DD';
 export const unit = 8;
 
 export class Background {
@@ -39,10 +34,10 @@ export class Background {
         string: d,
         date: dayjs(d, ISO_DATE),
       }))
-      .sort((d1: DateInfo, d2: DateInfo) => d1.date.diff(d2.date, "d"));
-    console.log("#process()", dates);
+      .sort((d1: DateInfo, d2: DateInfo) => d1.date.diff(d2.date, 'd'));
+    console.log('#process()', dates);
 
-    console.log("dates are ", dates.slice(0, 4));
+    console.log('dates are ', dates.slice(0, 4));
     this.#drawInfo(dates);
   }
 
@@ -52,26 +47,17 @@ export class Background {
     const iCount = this.#screen?.iCount ?? 0;
     const jCount = this.#screen?.jCount ?? 0;
 
-    console.log("p2ij: ", iCount, jCount);
+    console.log('p2ij: ', iCount, jCount);
 
     const j = Math.floor(project(latitude, 90, -90, 0, jCount));
     const i = Math.floor(project(longitude, -180, 180, 0, iCount));
-    console.log(
-      "place",
-      place,
-      "lat long = ",
-      latitude,
-      longitude,
-      "i j = ",
-      i,
-      j
-    );
+    console.log('place', place, 'lat long = ', latitude, longitude, 'i j = ', i, j);
 
     return { i, j };
   }
 
   #drawInfo(dates: DateInfo[]) {
-    console.log("drawInfo()");
+    console.log('drawInfo()');
 
     const lastDate = dates[dates.length - 1];
     if (!lastDate) return;
@@ -88,7 +74,7 @@ export class Background {
         if (!deaths) return;
         const radius = deaths ? Math.pow(deaths, 1 / 3) : 0;
         this.#addCircle(cell, radius);
-        this.#addText(place.iso_alpha_3 + ":" + deaths, cell);
+        this.#addText(place.iso_alpha_3 + ':' + deaths, cell);
       }
     });
   }
@@ -99,9 +85,9 @@ export class Background {
       this.#initGroups();
     }
     const text = this.#two.makeText(label, cell.x, cell.y, {
-      fontSize: "0.5rem",
-      fontWeight: "bold",
-      textAlign: "left",
+      fontSize: '0.5rem',
+      fontWeight: 'bold',
+      textAlign: 'left',
     });
     this.textGroup?.add(text);
   }
@@ -111,10 +97,10 @@ export class Background {
     if (!this.rectGroup) {
       this.#initGroups();
     }
-    console.log("adding circle at", cell.x, cell.y, "with radius", radius);
+    console.log('adding circle at', cell.x, cell.y, 'with radius', radius);
     const circle = this.#two.makeCircle(cell.x, cell.y, radius);
-    circle.fill = "rgba(255,0,0,0.2)";
-    circle.stroke = "transparent";
+    circle.fill = 'rgba(255,0,0,0.2)';
+    circle.stroke = 'transparent';
     if (cell.circle) {
       this.circleGroup?.remove(cell.circle);
     }
@@ -124,18 +110,18 @@ export class Background {
 
   #init() {
     this.#initCells();
-    console.log("background rendered");
+    console.log('background rendered');
   }
 
   #initCells() {
-    const node = document.getElementById("background");
+    const node = document.getElementById('background');
     if (!node) return;
     this.#node = node;
     if (!this.#node) return;
 
     this.#resizeObserver = new ResizeObserver((entries) => {
       if (!this.#node) return;
-      for (let entry of entries) {
+      for (const entry of entries) {
         this.#initScreen(entry);
       }
     });
@@ -146,14 +132,9 @@ export class Background {
   #initScreen(entry: ResizeObserverEntry) {
     const width = entry.contentRect.width;
     const height = entry.contentRect.height;
-    let lastScreen = this.#screen;
-    console.log("initialiaing screen", width, height);
-    this.#screen = new Screen(
-      width,
-      height,
-      (i, j, s) => new Cell(i, j, s),
-      lastScreen
-    );
+    const lastScreen = this.#screen;
+    console.log('initialiaing screen', width, height);
+    this.#screen = new Screen(width, height, (i, j, s) => new Cell(i, j, s), lastScreen);
     if (!this.#two) this.#initTwo();
     this.render();
   }
@@ -161,7 +142,7 @@ export class Background {
   #initTwo() {
     if (!this.#node || !this.#screen) return;
     const types = Two.Types;
-    console.log("types are ", types);
+    console.log('types are ', types);
     this.#two = new Two({
       autostart: true,
       fitted: true,
@@ -193,11 +174,7 @@ export class Background {
 
   render() {
     if (!this.#screen || !this.#two) {
-      console.warn(
-        "cannot render without screen and two:",
-        this.#screen,
-        this.#two
-      );
+      console.warn('cannot render without screen and two:', this.#screen, this.#two);
       return;
     }
     if (!this.rectGroup) {
@@ -209,9 +186,9 @@ export class Background {
         cell.rect = this.#two.makeRectangle(cell.x, cell.y, unit, unit);
       }
       cell.rect.fill = cell.color;
-      cell.rect.stroke = "transparent";
+      cell.rect.stroke = 'transparent';
       this.rectGroup?.add(cell.rect);
     });
-    console.log("rendered");
+    console.log('rendered');
   }
 }

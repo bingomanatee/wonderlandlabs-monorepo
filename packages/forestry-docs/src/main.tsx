@@ -1,11 +1,10 @@
-import { lazy, StrictMode, Suspense, type FC } from 'react';
+import { type FC, lazy, StrictMode, Suspense } from 'react';
 import { createRoot } from 'react-dom/client';
 import Home from './pages/home/Home.tsx';
 import './index.css';
 import { Chakra } from './lib/chakra/chakra.tsx';
 
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
-import './index.css';
 import { Concepts } from './pages/concepts/ConceptsLayout.tsx';
 import { Base } from './pages/Base.tsx';
 
@@ -13,6 +12,8 @@ import { conceptsState } from './pages/concepts/concepts.state.ts';
 import { upperFirst } from 'lodash-es';
 import ApiBase from './pages/api/ApiLayout.tsx';
 import ApiMenu from './pages/api/ApiMenu.tsx';
+import { Named } from './named.tsx';
+
 const conceptComponents = conceptsState.value.concepts.reduce(
   (acc, concept) => {
     acc[concept.name] = lazy(
@@ -64,12 +65,6 @@ const router = createBrowserRouter([
     ],
   },
 ]);
-
-function Named({ Component, name }: { Component: FC; name: string }) {
-  const AsNamed = Component as FC<{ name: string }>;
-
-  return <AsNamed name={name} />;
-}
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

@@ -1,5 +1,5 @@
-import type { GeoJsonGeometryPolygon } from "./geojson.types";
-import data from "./custom.geo.json";
+import type { GeoJsonGeometryPolygon } from './geojson.types';
+import data from './custom.geo.json';
 export const geoDataMap: Map<string, GeoJsonGeometryPolygon> = new Map();
 
 type Feature = {
@@ -9,7 +9,7 @@ type Feature = {
 };
 
 data.features.forEach(
-  // @ts-expect-error
+  // @ts-expect-error TS2345
   (feature: Feature) => {
     const { properties, geometry } = feature;
     if (properties.adm0_a3) {

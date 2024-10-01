@@ -1,6 +1,6 @@
 import { Text, Heading, Box } from '@chakra-ui/react';
 
-type AnyProps = Record<string, any>;
+type AnyProps = Record<string, unknown>;
 
 export const MARKDOWN_COMPONENTS = {
   p: (props: AnyProps) => <Text textStyle="mdParagraph" as="p" {...props} />,

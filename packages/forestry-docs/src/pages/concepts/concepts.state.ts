@@ -91,9 +91,9 @@ export class ConceptsState extends Collection<ConceptInfo> {
     this.delay(() => this.rotate(), LONG_DELAY);
   }
 
-  #interval: any;
+  #interval?: NodeJS.Timeout;
 
-  delay(action: () => any, delay: number = 0) {
+  delay(action: () => unknown, delay: number = 0) {
     clearInterval(this.#interval);
     this.#interval = setTimeout(action, delay);
   }

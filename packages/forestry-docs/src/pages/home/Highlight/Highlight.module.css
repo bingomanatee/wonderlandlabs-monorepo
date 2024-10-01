@@ -1,5 +1,3 @@
-// @eslint-
-
 .container:hover,
 .container-hovered {
   background-color: var(--chakra-colors-highlightContainerHover);

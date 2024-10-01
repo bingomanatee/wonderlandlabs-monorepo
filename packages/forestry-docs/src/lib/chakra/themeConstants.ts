@@ -40,8 +40,8 @@ export const BG_LIGHT = 25;
 
 const BASE_SCALE = 0.8;
 const SMALL_SCALE = 0.9;
-const LARGE_SCALE = 1.1;
-const XL_SCALE = 1.25;
+const LARGE_SCALE = 1;
+const XL_SCALE = 1.125;
 
 export function u(value: number, unit: string | false = 'px') {
   if (unit === false) return value;
@@ -61,4 +61,5 @@ export function scaleRem(value: number) {
   return scale(value, 'rem');
 }
 
-export const TITLE_TEXT_SHADOW = '2px 1px 2px rgba(0,0,0,0.5)';
+export const TITLE_TEXT_SHADOW =
+  '1px 1px 1px rgba(0,0,0,0.25),1px 2px 1px rgba(0,0,0,0.25),0 0 2px rgba(0,0,0,0.66)';

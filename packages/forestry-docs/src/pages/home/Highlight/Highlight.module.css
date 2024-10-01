@@ -1,28 +1,14 @@
-.container {
-  background-color: var(--highlight-container);
-  transition: background-color;
-  transition-duration: 1s;
-  --blur: 4px;
-  --blur-heavy: 8px;
-  --highlight-title-color: rgba(255, 255, 255, 0.5);
-  --highlight-title-color-over: var(--text-color);
-  --highlight-container: hsla(203, 34%, 65%, 0.75);
-  --highlight-container-hover: rgba(230, 255, 240, 1);
-  backdrop-filter: blur(var(--blur));
-  /* Adjust the blur radius */
-  -webkit-backdrop-filter: blur(var(--blur));
-  /* For Safari support */
-}
+// @eslint-
 
 .container:hover,
 .container-hovered {
-  background-color: var(--highlight-container-hover);
+  background-color: var(--chakra-colors-highlightContainerHover);
   backdrop-filter: blur(var(--blur-heavy));
   /* Adjust the blur radius */
   -webkit-backdrop-filter: blur(var(--blur-heavy));
   /* For Safari support */
 
-  box-shadow: 2px 1px 10px rgba(0, 0, 0, 0.25);
+  /*box-shadow: 2px 1px 10px rgba(0, 0, 0, 0.25);*/
 }
 
 .container:hover > h2,

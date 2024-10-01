@@ -1,7 +1,7 @@
 import { lazy, StrictMode, Suspense, type FC } from 'react';
 import { createRoot } from 'react-dom/client';
 import Home from './pages/home/Home.tsx';
-import * as styles from './index.css';
+import './index.css';
 import { Chakra } from './lib/chakra/chakra.tsx';
 
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
@@ -11,6 +11,8 @@ import { Base } from './pages/Base.tsx';
 
 import { conceptsState } from './pages/concepts/concepts.state.ts';
 import { upperFirst } from 'lodash-es';
+import ApiBase from './pages/api/ApiLayout.tsx';
+import ApiMenu from './pages/api/ApiMenu.tsx';
 const conceptComponents = conceptsState.value.concepts.reduce(
   (acc, concept) => {
     acc[concept.name] = lazy(
@@ -39,15 +41,35 @@ const router = createBrowserRouter([
             path: concept.name,
             element: (
               <Suspense fallback={<div>Loading...</div>}>
-                {Component ? <Component name={concept.name} /> : <div>Component not found</div>}
+                {Component ? (
+                  <Named Component={Component} name={concept.name} />
+                ) : (
+                  <div>Component not found</div>
+                )}
               </Suspense>
             ),
           };
         }) as { path: string; element: JSX.Element }[],
       },
+      {
+        path: 'api',
+        element: <ApiBase />,
+        children: [
+          {
+            path: '',
+            element: <ApiMenu />,
+          },
+        ],
+      },
     ],
   },
 ]);
+
+function Named({ Component, name }: { Component: FC; name: string }) {
+  const AsNamed = Component as FC<{ name: string }>;
+
+  return <AsNamed name={name} />;
+}
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

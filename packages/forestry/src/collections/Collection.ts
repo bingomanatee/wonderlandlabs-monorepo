@@ -1,22 +1,14 @@
 import { Forest } from '../Forest';
-import type { CollectionAction, CollectionIF } from '../types/type.collection';
-import type { ChangeIF, SubscribeFn, ValueProviderFN } from '../types/types.shared';
+import type { CollectionIF } from '../types/type.collection';
+import type { SubscribeFn, UpdaterValueProviderFN, ValueProviderFN } from '../types/types.shared';
 import type { ForestIF } from '../types/types.forest';
-import type { TreeIF, TreeParams } from '../types/types.trees';
+import type { TreeIF } from '../types/types.trees';
 import type { PartialObserver } from 'rxjs';
-
-export type CollectionParams<
-  ValueType,
-  CollectionType = CollectionIF<ValueType>,
-> = TreeParams<ValueType> & {
-  actions?:
-    | Map<string, CollectionAction<ValueType, CollectionType>>
-    | Record<string, CollectionAction<ValueType, CollectionType>>;
-  reuseTree?: boolean;
-};
+import { upperFirst } from 'lodash-es';
+import type { CollectionParams } from './types.collections';
 
 export class Collection<ValueType, SelfClass = CollectionIF<ValueType>>
-implements CollectionIF<ValueType>
+  implements CollectionIF<ValueType>
 {
   constructor(
     public name: string,
@@ -67,19 +59,37 @@ implements CollectionIF<ValueType>
     });
   }
 
-  next(next: ValueType, name: string): CollectionIF<ValueType> {
+  next(next: ValueType, name: string) {
     this.tree.next(next, name);
-    return this;
   }
 
-  mutate<SeedType>(mutator: ValueProviderFN<ValueType>, name: string, seed?: SeedType) {
-    const change: ChangeIF<ValueType> = {
-      name,
-      seed,
-      mutator,
-    };
-    this.tree.grow(change);
-    return this;
+  revise<ParamType = unknown>(name: string, seed?: ParamType) {
+    const fn =
+      this.params?.revisions instanceof Map
+        ? this.params?.revisions?.get(name)
+        : this.params?.revisions?.[name];
+    if (!fn) {
+      throw new Error('cannot perform revision ' + name + '; not in connection');
+    }
+
+    this.forest.do(() => {
+      this.update<ParamType>(fn, seed);
+    });
+  }
+
+  mutate<SeedType>(
+    mutator: ValueProviderFN<ValueType, SeedType>,
+    seed?: SeedType,
+    name: string = '(mutate)'
+  ) {
+    this.tree.mutate<SeedType>(mutator, seed, name);
+  }
+
+  update<ParamType = unknown>(
+    updaterFn: UpdaterValueProviderFN<ValueType, ParamType>,
+    seed?: ParamType
+  ) {
+    this.tree.mutate(({ value }) => updaterFn(value, seed));
   }
 
   protected get subject() {
@@ -99,4 +109,47 @@ implements CollectionIF<ValueType>
     }
     return tree;
   }
+
+  private actionNames(): string[] {
+    if (this.params?.actions) {
+      if (this.params?.actions instanceof Map) {
+        return [...this.params.actions.keys()].filter((a) => typeof a === 'string');
+      } else {
+        return [...Object.keys(this.params.actions)].filter((a) => typeof a === 'string');
+      }
+    } else {
+      return [];
+    }
+  }
+  superClassMe(superClassName: string, typeName: string, includeImports = true) {
+    return `
+   ${includeImports ? 'import {Collection, Forest } from "@wonderlandlabs/forestry";' : ''}
+    ${this.actionNames().map(actionTypeTemplate)}
+    
+   export class ${superClassName} extends Collection<${typeName}> {
+
+        constructor(f?: Forest) {
+          super('${this.name}', {/** insert base collection params here */}, f);
+        }
+
+        ${this.actionNames().map(actionsTemplate)}
+
+          // insert custom selectors here 
+
+    }`;
+  }
+}
+
+function actionTypeTemplate(name: string) {
+  return `
+    type ${upperFirst(name)}Param = {/**param def here; delete this line if no arguments */}
+  `;
+}
+
+function actionsTemplate(name: string) {
+  return `
+  ${name}(seed: ${upperFirst(name)}Param) {
+    return this.act('${name}', seed);
+  }
+`;
 }

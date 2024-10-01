@@ -52,8 +52,7 @@ export type NotesMap = Map<number, Info[]>;
 
 export type VPRContextKeys = keyof typeof ValueProviderContext;
 
-export type ValueProviderContextType =
-  typeof ValueProviderContext[VPRContextKeys];
+export type ValueProviderContextType = (typeof ValueProviderContext)[VPRContextKeys];
 /**
  * export const TypeEnum : {
   string : 'string',
@@ -83,24 +82,23 @@ export type BaseValueProviderParams<Value> = {
   context: ValueProviderContextType;
 };
 
-export type MutationValueProviderParams<Value> =
-  BaseValueProviderParams<Value> & {
-    branch: BranchIF<Value> | undefined;
-    value: Value | undefined;
-    seed?: any;
-  };
+export type MutationValueProviderParams<
+  Value,
+  ParamType = unknown,
+> = BaseValueProviderParams<Value> & {
+  branch: BranchIF<Value> | undefined;
+  value: Value | undefined;
+  seed?: ParamType;
+};
 
-export type LocalValueProviderParams<Value> =
-  BaseValueProviderParams<Value> & {};
+export type LocalValueProviderParams<Value> = BaseValueProviderParams<Value> & {};
 
-export type TruncationValueProviderParams<Value> =
-  BaseValueProviderParams<Value> & {};
+export type TruncationValueProviderParams<Value> = BaseValueProviderParams<Value> & {};
 
-export type IttermittentCacheProviderParams<Value> =
-  BaseValueProviderParams<Value> & {};
+export type IttermittentCacheProviderParams<Value> = BaseValueProviderParams<Value> & {};
 
-export type ValueProviderParams<Value = undefined> =
-  | MutationValueProviderParams<Value>
+export type ValueProviderParams<Value = unknown, ParamType = unknown> =
+  | MutationValueProviderParams<Value, ParamType>
   | LocalValueProviderParams<Value>
   | TruncationValueProviderParams<Value>
   | IttermittentCacheProviderParams<Value>;
@@ -125,10 +123,15 @@ export type ValueProviderParams<Value = undefined> =
  *
  *
  */
-export type ValueProviderFN<Value = unknown> = (
-  params: ValueProviderParams<Value>
+export type ValueProviderFN<Value = unknown, ParamType = any> = (
+  params: ValueProviderParams<Value, ParamType>
 ) => Value;
 
-export type MutationValueProviderFN<Value = unknown> = (
-  params: MutationValueProviderParams<Value>
+export type MutationValueProviderFN<Value = unknown, ParamType = any> = (
+  params: MutationValueProviderParams<Value, ParamType>
+) => Value;
+
+export type UpdaterValueProviderFN<Value = unknown, SeedType = any> = (
+  value: Value,
+  seed?: SeedType
 ) => Value;

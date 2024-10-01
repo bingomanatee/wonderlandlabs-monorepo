@@ -1,0 +1,30 @@
+import { BG_HUE, BG_SAT, BG_LIGHT } from './themeConstants';
+
+export const colors = {
+  code: 'hsl(200, 90%, 90%)',
+  content: `hsl(180, 40%, 90%)`,
+  contentBackground: `hsla(180, 40%, 90%, 1)`,
+  contentInset: `hsla(180, 40%, 95%, 0.8)`,
+  contentShadow: `hsla(180, 40%, 20%, 0.5)`,
+  contentText: 'rgba(0, 0, 0,0.9)',
+  contentTransparent: `hsla(${BG_HUE}, ${BG_SAT}%, ${BG_LIGHT}%, 0)`,
+  highlightContainerHover: 'hsl(144,100%,95%)',
+  highlightTitle: 'black',
+  highlightTitleOver: 'rgba(0,0,0, 1)',
+  logoCircle: 'rgba(0,0,0,0.6)',
+  menuContainer: 'hsla(203, 34%, 85%, 0.85)',
+  menuTitle: 'hsla(203, 34%, 20%)',
+  pageColumn: `hsla(${BG_HUE}, ${BG_SAT}%, ${BG_LIGHT}%, 0.8)`, // Color for page titles
+  pageColumnTransparent: `hsla(${BG_HUE}, ${BG_SAT}%,  ${BG_LIGHT}%, 0)`,
+  pageTitle: 'rgb(225, 255, 230)',
+  sectionIcon1: 'hsla(280, 23%,25%, 0.25)',
+  sectionIcon2: 'hsla(280, 23%,25%, 0.5)',
+  sectionIcon3: 'hsla(280, 23%,25%, 0.3)',
+  sectionIconActive: 'hsla(280, 23%,25%, 1)',
+  sectionIconBorder: 'rgba(0,0,0,0.3)',
+  sectionIconTitle: 'hsla(280, 5%, 90%, 0.7)',
+  sectionIconTitleActive: 'hsla(280, 15%, 90%, 1)',
+  sectionTitle: 'hsla(180, 20%, 10%, 0.9)',
+  summaryText: 'rgba(255,250,245,0.9)',
+  variable: 'hsl(170, 80%, 0%)',
+};

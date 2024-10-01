@@ -1,20 +1,12 @@
-import { Box, Image, Portal, Text } from '@chakra-ui/react';
+import { Box, Image, Text } from '@chakra-ui/react';
 import { Outlet, useNavigate } from 'react-router-dom';
 import { LOGO_SIZE } from '../lib/chakra/themeConstants';
-import { useCallback, useEffect, useState } from 'react';
-import { NavValue, navigator } from '../lib/navigation';
+import { useCallback } from 'react';
 
 export function Base() {
   const navigate = useNavigate();
 
   const goHome = useCallback(() => navigate('/'), [navigate]);
-
-  const [nav, setNav] = useState<NavValue>(navigator.value);
-
-  useEffect(() => {
-    const sub = navigator.subscribe((value) => setNav(value));
-    return () => sub?.unsubscribe();
-  });
 
   return (
     <Box layerStyle="root">

@@ -8,7 +8,7 @@ const SHORT_DELAY = 2 * SECONDS;
 const f = new Forest();
 
 export type Concept = PageDef;
-type ConceptInfo = {
+export type ConceptInfo = {
   concepts: Concept[];
   target: string;
   isLocked: boolean;
@@ -22,26 +22,25 @@ export class ConceptsState extends Collection<ConceptInfo> {
         initial: { concepts: [], target: '', isLocked: false },
         actions: {
           setIsLocked(concepts, isLocked = true) {
-            concepts.mutate(({ value }) => ({ ...value, isLocked }));
+            concepts.update<boolean>((value) => ({ ...value, isLocked: !!isLocked }));
           },
           addConcept(concepts, concept: Concept) {
-            concepts.mutate(
-              ({ value, seed: concept }) => ({
+            concepts.update<Concept>(
+              (value, concept) => ({
                 ...value,
-                concepts: [...value.concepts, concept],
+                concepts: [...value.concepts, concept!],
               }),
-              'addConcept',
               concept
             );
           },
           setTarget(concepts, target: string) {
-            concepts.mutate(
+            concepts.mutate<string>(
               ({ value, seed }) => ({
                 ...value,
-                target: seed,
+                target: seed ?? '',
               }),
-              'addTarget',
-              target
+              target,
+              'addTarget'
             );
           },
           rotate(concepts) {
@@ -142,7 +141,7 @@ conceptsState.addConcept({
   blurb: `Every change and action is logged and timestamped, 
   even across multiple state collections,
    for easy diagnosis.`,
-  art: '/pictures/transactional.png',
+  art: '/pictures/journaled.png',
 });
 
 conceptsState.addConcept({
@@ -166,7 +165,7 @@ conceptsState.addConcept({
   title: 'Transportable',
   blurb: ` State value and actions are contained 
   within single instances, for ease of test and global access.`,
-  art: '/pictures/synchronous.png',
+  art: '/pictures/transportable.png',
 });
 
 conceptsState.addConcept({

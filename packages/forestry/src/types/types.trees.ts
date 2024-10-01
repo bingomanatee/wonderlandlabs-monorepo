@@ -6,6 +6,7 @@ import type {
   Notable,
   OffshootIF,
   SubscribeFn,
+  UpdaterValueProviderFN,
   ValueProviderFN,
 } from './types.shared';
 import { PartialObserver, Subscription, Observable } from 'rxjs';
@@ -38,16 +39,18 @@ export interface TreeIF<ValueType> extends Notable {
    */
   grow(change: ChangeIF<ValueType>): BranchIF<ValueType>;
   next(value: ValueType, name?: string): void;
-  mutate(
-    mutator: MutationValueProviderFN<ValueType>,
+  mutate<ParamType = unknown>(
+    mutator: MutationValueProviderFN<ValueType, ParamType>,
     seed?: any,
     name?: string
-  ): void;
+  ): TreeIF<ValueType>;
+  update<ParamType = unknown>(
+    updaterFn: UpdaterValueProviderFN<ValueType, ParamType>,
+    seed?: ParamType
+  ): TreeIF<ValueType>;
   value: ValueType;
   subject: Observable<ValueType>;
-  subscribe(
-    observer: PartialObserver<ValueType> | SubscribeFn<ValueType>
-  ): Subscription;
+  subscribe(observer: PartialObserver<ValueType> | SubscribeFn<ValueType>): Subscription;
 
   valueAt(at: number): ValueType | undefined;
 
@@ -62,9 +65,7 @@ export type ValidatorFn<TreeValueType> = (
   tree: TreeIF<TreeValueType>
 ) => Error | void | undefined; // also throws
 
-export type TreeClonerFn<TreeValueType> = (
-  branch?: BranchIF<TreeValueType>
-) => TreeValueType;
+export type TreeClonerFn<TreeValueType> = (branch?: BranchIF<TreeValueType>) => TreeValueType;
 
 export type TreeParams<TreeValueType> = {
   initial?: TreeValueType;

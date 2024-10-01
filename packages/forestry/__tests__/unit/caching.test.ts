@@ -1,10 +1,7 @@
 import { Forest } from '../../src/Forest';
 import { BENCHMARK_CAUSE } from '../../src/treeHelpers/BenchMarker';
 import type { BranchIF } from '../../src/types/types.branch';
-import type {
-  MutationValueProviderFN,
-  Mutator,
-} from '../../src/types/types.shared';
+import type { MutationValueProviderFN, Mutator } from '../../src/types/types.shared';
 import { expect, it, describe } from 'vitest';
 
 describe('caching', () => {
@@ -72,7 +69,7 @@ describe('caching', () => {
         },
       });
 
-      const mut: MutationValueProviderFN<number> = ({ value, seed }) =>
+      const mut: MutationValueProviderFN<number, number> = ({ value, seed }) =>
         value ? seed * value : 1;
 
       t.mutate(mut, 1);
@@ -85,7 +82,6 @@ describe('caching', () => {
 
       let cachedCount = 0;
       t.forEachDown((branch: BranchIF<number>) => {
-        
         // eslint-disable-next-line @typescript-eslint/no-unused-expressions
         branch.value;
         if (branch.valueIsCached) {
@@ -106,7 +102,7 @@ describe('caching', () => {
         },
       });
 
-      const mut: MutationValueProviderFN<number> = ({ value, seed }) =>
+      const mut: MutationValueProviderFN<number, number> = ({ value, seed }) =>
         value ? seed * value : 1;
 
       t.mutate(mut, 1);
@@ -176,16 +172,11 @@ describe('caching', () => {
 
       history.forEach(({ cause }, i) => {
         if (cause === BENCHMARK_CAUSE) {
-          const preset = history.slice(
-            Math.max(0, i - (t.params?.benchmarkInterval ?? 0) - 1),
-            i
-          );
+          const preset = history.slice(Math.max(0, i - (t.params?.benchmarkInterval ?? 0) - 1), i);
           if (i > 4) {
             expect(preset[0].cause).toBe(BENCHMARK_CAUSE);
             // eslint-disable @typescript-eslint/no-unused-expressions
-            expect(
-              preset.slice(1).every((bc) => bc.cause !== BENCHMARK_CAUSE)
-            ).toBeTruthy();
+            expect(preset.slice(1).every((bc) => bc.cause !== BENCHMARK_CAUSE)).toBeTruthy();
             // eslint-enable @typescript-eslint/no-unused-expressions
           }
         }

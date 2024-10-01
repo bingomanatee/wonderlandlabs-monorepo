@@ -1,12 +1,10 @@
 import { Box, Heading, Text, Image } from '@chakra-ui/react';
 import { type ReactNode, useEffect, useMemo, useRef, useState } from 'react';
-import { Outlet, useOutletContext } from 'react-router-dom';
-import { Helmet } from 'react-helmet';
+import { Outlet } from 'react-router-dom';
 import { conceptsState, type Concept } from './concepts.state';
 import { NextPage } from './NextPage';
 import { BackPage } from './BackPage';
 import { Collection } from '@wonderlandlabs/forestry';
-import { summary } from 'framer-motion/client';
 const TITLE = 'Forestry Concepts';
 const IMAGE_SIZE = { base: '150px', sm: '175px', md: '180px', lg: '200px' };
 
@@ -46,15 +44,6 @@ export function Concepts() {
 
   return (
     <>
-      <Helmet>
-        <style>
-          {`body {
-          background-image: url('/pictures/blue-forest-up.png')!important;
-          background-position: top center;
-        }
-        `}
-        </style>
-      </Helmet>
       <Box as="section" id="pageColumnContainer" layerStyle="pageColumnContainer">
         <Box layerStyle="pageColumn" id="pageColumn">
           {currentItem?.art ? (

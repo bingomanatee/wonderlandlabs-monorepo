@@ -7,9 +7,8 @@ import {
   type PropsWithChildren,
   type ReactNode,
 } from 'react';
-import { useOutlet, useOutletContext } from 'react-router-dom';
-import type { ConceptsLayoutState } from './ConceptsLayoutState';
-import { conceptsState } from './concepts.state';
+import { useOutletContext } from 'react-router-dom';
+import { conceptsState, type ConceptInfo } from './concepts.state';
 import type { CollectionIF } from '@wonderlandlabs/forestry/build/src/types/type.collection';
 
 type Props = { name: string; summary: FC };
@@ -19,7 +18,7 @@ export const ConceptPage = function ({
   summary: Summary,
   children,
 }: PropsWithChildren<Props>) {
-  const [value, setValue] = useState(conceptsState.value);
+  const [_V, setValue] = useState<ConceptInfo>(conceptsState.value);
 
   useEffect(() => {
     const sub = conceptsState.subscribe(setValue);

@@ -8,7 +8,7 @@ import { expect, it, describe } from 'vitest';
 type Numeric = { num: number };
 function growBy(n: number): ChangeIF<Numeric> {
   return {
-    mutator(mParams: MutationValueProviderParams<Numeric>) {
+    mutator(mParams: MutationValueProviderParams<Numeric, number>) {
       const { value, seed } = mParams;
 
       if (value === undefined) {

@@ -147,7 +147,7 @@ describe('concepts', () => {
               coll.mutate(({ value }) => {
                 const out = value.filter((egg: Egg) => egg.id !== id);
                 return out;
-              }, 'removing egg ' + id);
+              },null, 'removing egg ' + id);
             },
             removeADayWithCatch(coll: CollectionIF<Egg[]>) {
               for (const egg of coll.value) {

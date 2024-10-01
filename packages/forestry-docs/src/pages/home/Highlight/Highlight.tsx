@@ -21,6 +21,7 @@ export function Highlight({ concept }: { concept: Concept }) {
   return (
     <Box
       as="section"
+      position="relative"
       className={
         value.target === concept.name
           ? `${style.container} ${style['container-hovered']}`
@@ -31,6 +32,20 @@ export function Highlight({ concept }: { concept: Concept }) {
       onMouseEnter={() => conceptsState.focus(concept.name)}
       layerStyle="highlight"
     >
+      <Box
+        w="100%"
+        h="100%"
+        position="absolute"
+        backgroundImage={`url("${concept.art}")`}
+        backgroundSize="cover"
+        backgroundRepeat="no-repeat"
+        opacity={0}
+        left={0}
+        top={0}
+        right={0}
+        bottom={0}
+        display={concept.name === value.target ? 'none' : 'block'}
+      />
       {concept.title ? (
         <Heading as="h2" variant="highlight">
           {concept.title}

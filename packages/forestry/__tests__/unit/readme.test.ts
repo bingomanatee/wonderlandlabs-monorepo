@@ -1,7 +1,7 @@
 import { Forest, Collection } from '../../src/index';
 import { expect, it, describe } from 'vitest';
-import type { ValueProviderParams } from '../../src/types/types.shared';
-import type { CollectionAction } from '../../src/types/type.collection';
+import type { MutationValueProviderFN, ValueProviderParams } from '../../src/types/types.shared';
+import type { CollectionActFn } from '../../src/types/type.collection';
 
 function message(...items: any[]) {
   //  eslint-disable-next-line no-constant-condition
@@ -17,7 +17,7 @@ function makeCounter(initial = 0, name = 'counter') {
     name,
     {
       initial,
-      actions: new Map<string, CollectionAction<number>>([
+      actions: new Map<string, CollectionActFn<number>>([
         [
           'increment',
           (collection) => {
@@ -37,13 +37,13 @@ function makeCounter(initial = 0, name = 'counter') {
         [
           'add',
           (collection, n: number) => {
-            collection.mutate(
+            collection.mutate<number>(
               (params) => {
                 const { value, seed } = params;
                 return value === undefined ? seed : value + seed;
               },
-              'add',
-              n
+              n,
+              'add'
             );
           },
         ],
@@ -81,13 +81,13 @@ describe('README.md', () => {
       message('tree change', t.top?.cause, ':', value);
     });
 
-    const growBy = ({ value, seed }: { value: number; seed?: number }) => {
+    const growBy: MutationValueProviderFN<number, number> = ({ value, seed }) => {
       return Number(seed ?? 0 + (value ?? 0));
     };
 
-    t.mutate(growBy, 3, 'growBy 3');
+    t.mutate<number>(growBy, 3, 'growBy 3');
 
-    t.mutate(growBy, 4, 'growBy 4');
+    t.mutate<number>(growBy, 4, 'growBy 4');
 
     t.next(100, 'set to 100');
     expect(t.value).toBe(100);
@@ -155,13 +155,7 @@ describe('README.md', () => {
     counter.act('decrement');
 
     counter.tree.forEachDown((branch) => {
-      message(
-        branch.time,
-        ':counter value: ',
-        branch.value,
-        'cause:',
-        branch.cause
-      );
+      message(branch.time, ':counter value: ', branch.value, 'cause:', branch.cause);
     });
 
     /**

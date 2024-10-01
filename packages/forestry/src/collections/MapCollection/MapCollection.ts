@@ -2,9 +2,9 @@ import type { ForestIF } from '../../types/types.forest';
 import type { IterFn, ValueProviderParams } from '../../types/types.shared';
 import { canProxy } from '../../canProxy';
 import { Collection } from '../Collection';
-import type { CollectionParams } from '../Collection';
 import { deleteProxyFor } from './deleteProxyFor';
 import { setProxyFor } from './setProxyFor';
+import type { CollectionParams } from '../types.collections';
 
 export function noSet() {
   throw new Error('forest maps are immutable');

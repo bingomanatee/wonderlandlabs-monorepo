@@ -18,6 +18,7 @@ import type {
   NotesMap,
   InfoParams,
   Info,
+  UpdaterValueProviderFN,
 } from './types';
 import { NotableHelper } from './NotableHelper';
 
@@ -93,7 +94,11 @@ export class Tree<ValueType> implements TreeIF<ValueType> {
     }
   }
 
-  mutate(mutator: MutationValueProviderFN<ValueType>, seed?: any, name?: string): void {
+  mutate<ParamType = unknown>(
+    mutator: MutationValueProviderFN<ValueType, ParamType>,
+    seed?: any,
+    name?: string
+  ) {
     if (!name) {
       if (mutator.name) {
         this.grow({ mutator, seed, name: mutator.name });
@@ -103,6 +108,28 @@ export class Tree<ValueType> implements TreeIF<ValueType> {
     } else {
       this.grow({ mutator, seed, name });
     }
+    return this;
+  }
+
+  update<ParamType = unknown>(
+    updaterFn: UpdaterValueProviderFN<ValueType, ParamType>,
+    seed?: ParamType,
+    name = ''
+  ): TreeIF<ValueType> {
+    const mutator: MutationValueProviderFN<ValueType, ParamType> = ({ value, seed }) =>
+      updaterFn(value, seed);
+
+    let growName: string = name ?? '';
+    if (!growName && updaterFn.name) {
+      growName = updaterFn.name;
+    }
+    if (!growName) {
+      growName = '(update)';
+    }
+
+    this.grow({ mutator, seed, name: growName });
+
+    return this;
   }
 
   offshoots?: OffshootIF<ValueType>[];

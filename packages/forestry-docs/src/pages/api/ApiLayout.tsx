@@ -18,25 +18,14 @@ export default function ApiBase() {
   const atMenu = useMemo(() => !currentPage || currentPage?.name === 'api', [currentPage]);
 
   return (
-    <>
-      {/* <Helmet>
-        <style>
-          {`body {
-          background-image: url('/pictures/blue-forest-up.png')!important;
-          background-position: top center;
-        }
-        `}
-        </style>
-      </Helmet>*/}
-      <Box as="main" layerStyle="pageColumnContainer">
-        <Box as="section" id="pageColumn" layerStyle="pageColumn">
-          <Box as="header">
-            {!atMenu ? <Text textStyle="pageTitlePrefix">{TITLE}</Text> : null}
-            <Heading variant="titleLogo">{!atMenu ? currentPage!.title : TITLE}</Heading>
-          </Box>
-          <Outlet />
+    <Box as="main" layerStyle="pageColumnContainer">
+      <Box as="section" id="pageColumn" layerStyle="pageColumn">
+        <Box as="header">
+          {!atMenu ? <Text textStyle="pageTitlePrefix">{TITLE}</Text> : null}
+          <Heading variant="titleLogo">{!atMenu ? currentPage!.title : TITLE}</Heading>
         </Box>
+        <Outlet />
       </Box>
-    </>
+    </Box>
   );
 }

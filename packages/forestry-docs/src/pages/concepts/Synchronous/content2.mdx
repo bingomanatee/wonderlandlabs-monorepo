@@ -1,0 +1,19 @@
+import {BuyEggsAndHam} from './BuyEggsAndHam';
+import {BuyEggsAndHamWithForestry} from './BuyEggsAndHamWithForestry';
+
+Seems straight forward right? buy eggs or ham if you can afford it.
+
+Here's what you get:
+
+<BuyEggsAndHam />
+
+Not only is the balance value in the receipts table wonky you end up
+with a balance of -2. How is this possible? we check the balance
+every time we make a purchase. But balance is changed twice parametrically
+in two effects, giving you two simultaneous purchases that are unaware of each other.
+
+## Eggs and Ham in Forestry
+
+Here is what the same problem looks like in Forestry:
+
+<BuyEggsAndHamWithForestry />

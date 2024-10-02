@@ -1,12 +1,13 @@
 import { Text, Heading, Box } from '@chakra-ui/react';
-
+import type { PropsWithChildren } from 'react';
 type AnyProps = Record<string, unknown>;
 
 export const MARKDOWN_COMPONENTS = {
-  p: (props: AnyProps) => <Text textStyle="mdParagraph" as="p" {...props} />,
-  h1: (props: AnyProps) => <Heading my={4} variant="mdH1" as="h1" {...props} />,
-  h2: (props: AnyProps) => <Heading my={2} variant="mdH2" as="h2" {...props} />,
-  pre: (props: AnyProps) => (
+  p: (props: PropsWithChildren<AnyProps>) => <Text textStyle="mdParagraph" as="p" {...props} />,
+  h1: (props: PropsWithChildren<AnyProps>) => <Heading my={4} variant="mdH1" as="h1" {...props} />,
+  h2: (props: PropsWithChildren<AnyProps>) => <Heading my={2} variant="mdH2" as="h2" {...props} />,
+  ol: (props: PropsWithChildren<AnyProps>) => <Box as="ol" layerStyle="list" {...props} />,
+  pre: (props: PropsWithChildren<AnyProps>) => (
     <Box
       className="codeBlock"
       layerStyle="mdCode"

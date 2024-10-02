@@ -1,4 +1,6 @@
-Asyncronous behavior is necessary when waiting for delayed action such as a
+import {SeeMore} from "../../../components/SeeMore";
+
+Asynchronous behavior is necessary when waiting for delayed action such as a
 request/response cycle.
 
 Tree and collection values can be inspected in real time after any action or sub-action.
@@ -28,9 +30,14 @@ that they need to wait for results to be circulated.
 Hooks depend on the render cycle to circulate changes. That means that by definition,
 you are waiting for the _slowest possible activity_ to update values. And in your effects,
 you can never be sure _what the state really is_ or _what it is to become_ as changes may be queued
-up by other processes to change or re-change the state in a seperate update pass.
+up by other processes to change or re-change the state in a separate update pass.
 
 This is not the kind of system you want to build applications around.
 
 Forestry operates at its own tempo, expressing value immediately, not when a DOM-dependent
 activity cycle has been completed.
+
+## Hamming it Up
+
+Say you have a component in which you buy much eggs and ham as you can
+with the money in your wallet and add receipts to your receipt collection:

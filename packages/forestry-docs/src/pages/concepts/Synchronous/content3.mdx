@@ -1,0 +1,10 @@
+
+
+note - we always dump Forestry state into useState to ensure
+the component re-renders every time the state changes. In this case
+we don't use it in the effects but this is a standard of using
+Forestry in [React](/concepts/react).
+
+The complexity of the `makeNumbersState()` function is due
+to the fact that "double loading" leaves the `Forest` instance
+in the reference.

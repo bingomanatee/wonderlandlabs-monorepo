@@ -13,6 +13,7 @@ import {
 const BUTTON_X = { base: '15px', md: '30px', lg: '50px' };
 const CALLOUT_PADDING_Y = { base: 3, md: 3.5, xl: 4 };
 const CALLOUT_PADDING_X = { base: 4, sm: 4, md: 5, xl: 6 };
+const SEE_MORE_BORDER = '1px solid var(--chakra-colors-blackAlpha-100)';
 const HIGHLIGHT_SHADOW =
   'rgba(0, 0, 0, 0.15) 0px 4px 6px -1px, rgba(0, 0, 0, 0.06) 0px 2px 4px -1px;';
 export const layerStyles = {
@@ -88,6 +89,9 @@ export const layerStyles = {
     paddingX: { base: 2, sm: 2, md: 5 },
   },
   homeHeader: {},
+  list: {
+    paddingLeft: 8,
+  },
   logo: {
     position: 'fixed',
     right: `calc(10px - ${u(LOGO_MARGIN_SIZE)})`,
@@ -136,7 +140,10 @@ export const layerStyles = {
       base: `var(--nav-button-height-sm)`,
       md: `var(--nav-button-height)`,
     },
-    width: { base: `var(--nav-button-width-sm)`, md: `var(--nav-button-width)` },
+    width: {
+      base: `var(--nav-button-width-sm)`,
+      md: `var(--nav-button-width)`,
+    },
   },
   pageColumn: {
     position: 'relative',
@@ -269,5 +276,45 @@ export const layerStyles = {
     display: 'flex',
     flexDirection: 'column',
     gap: 2,
+  },
+  seeMoreNavbar: {
+    bgGradient: 'linear(to-b, gray.300, gray.100 8px, white 30px)',
+    display: 'flex',
+    flexDirection: 'row',
+    paddingX: 6,
+    paddingY: 3,
+    gap: 3,
+    borderTopLeftRadius: 'lg',
+    borderTopRightRadius: 'lg',
+    justifyContent: 'space-between',
+    borderLeft: SEE_MORE_BORDER,
+    borderRight: SEE_MORE_BORDER,
+    borderTop: SEE_MORE_BORDER,
+  },
+  seeMoreNavbarOpen: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'stretch',
+  },
+  seeMoreNavbarFooter: {
+    display: 'flex',
+    flexDirection: 'row',
+    paddingX: 6,
+    paddingY: 3,
+    marginBottom: 2,
+    borderBottomLeftRadius: 'lg',
+    borderBottomRightRadius: 'lg',
+    justifyContent: 'space-between',
+    borderLeft: SEE_MORE_BORDER,
+    borderRight: SEE_MORE_BORDER,
+    borderBottom: SEE_MORE_BORDER,
+    backgroundColor: 'white',
+  },
+  seeMoreOverlay: {
+    p: 3,
+    px: 8,
+    borderLeft: SEE_MORE_BORDER,
+    borderRight: SEE_MORE_BORDER,
+    backgroundColor: 'white',
   },
 };

@@ -46,6 +46,14 @@ export const heading = defineStyleConfig({
       fontWeight: 600,
       lineHeight: '100%',
     }),
+    seeMore: defineStyle({
+      fontSize: scale(0.8, 'rem'),
+      fontFamily: 'heading',
+      fontWeight: 600,
+      lineHeight: '100%',
+      textAlign: 'left',
+      flex: 1,
+    }),
     pageTitle: defineStyle({
       lineHeight: '90%',
       textTransform: 'uppercase',

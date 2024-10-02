@@ -1,0 +1,27 @@
+.Eggs h1 {
+font-weight: bold;
+margin-bottom: 10px;
+}
+
+.Eggs {
+font-family: sans-serif;
+text-align: center;
+display: flex;
+flex-direction: column;
+align-items: center;
+    margin: 2rem;
+    border: 1px solid black;
+    padding: 1rem;
+}
+
+.Eggs   th, td {
+max-width: 200px;
+padding:  0 0.5rem ;
+font-size: 0.8rem;
+}
+
+.Eggs p {
+    margin-bottom: 3px;
+    text-align: left;
+    font-size: 0.8rem;
+}

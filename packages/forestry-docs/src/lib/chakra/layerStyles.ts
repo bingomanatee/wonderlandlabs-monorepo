@@ -91,6 +91,7 @@ export const layerStyles = {
   homeHeader: {},
   list: {
     paddingLeft: 8,
+    marginBottom: '1em',
   },
   logo: {
     position: 'fixed',

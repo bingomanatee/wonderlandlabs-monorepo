@@ -1,7 +1,7 @@
 import { Forest, Collection } from '../../src/index';
 import { expect, it, describe } from 'vitest';
 import type { MutationValueProviderFN, ValueProviderParams } from '../../src/types/types.shared';
-import type { CollectionActFn } from '../../src/types/type.collection';
+import type { CollectionActFn } from '../../src/types/types.collections';
 
 function message(...items: any[]) {
   //  eslint-disable-next-line no-constant-condition
@@ -128,7 +128,7 @@ describe('README.md', () => {
     counter.act('increment');
     counter.act('decrement');
     /**
-     *      
+     *
       collection is  0 because of initial
       collection is  1 because of increment
       collection is  2 because of increment
@@ -159,7 +159,7 @@ describe('README.md', () => {
     });
 
     /**
-     *   
+     *
       28 :counter value:  0 cause: increment
       25 :counter value:  1 cause: increment
       22 :counter value:  0 cause: !BENCHMARK!

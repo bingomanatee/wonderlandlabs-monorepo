@@ -1,5 +1,10 @@
+import type {
+  MutationValueProviderFN,
+  SubscribeFn,
+  TreeParams,
+  UpdaterValueProviderFN,
+} from '../types';
 import { PartialObserver, Subscription, Unsubscribable } from 'rxjs';
-import type { MutationValueProviderFN, SubscribeFn, UpdaterValueProviderFN } from './types.shared';
 
 export interface CollectionIF<ValueType> {
   // abstract
@@ -9,15 +14,15 @@ export interface CollectionIF<ValueType> {
   mutate<ParamType = unknown>(
     mutatorFn: MutationValueProviderFN<ValueType, ParamType>,
     seed?: ParamType,
-    name?: string
+    name?: string,
   ): void;
   revise<ParamType = unknown>(name: string, seed?: ParamType): void;
   update<ParamType = unknown>(
     updaterFn: UpdaterValueProviderFN<ValueType, ParamType>,
-    seed?: ParamType
+    seed?: ParamType,
   ): void;
   subscribe(
-    observer: PartialObserver<ValueType> | SubscribeFn<ValueType>
+    observer: PartialObserver<ValueType> | SubscribeFn<ValueType>,
   ): Subscription | Unsubscribable;
 }
 
@@ -27,3 +32,20 @@ export type CollectionActFn<
   ParamType = any,
   ReturnType = any,
 > = (collection: CollectionType, seed?: ParamType) => ReturnType;
+
+export type CollectionParams<
+  ValueType,
+  CollectionType = CollectionIF<ValueType>,
+> = TreeParams<ValueType> & {
+  actions?:
+    | Map<string, CollectionActFn<ValueType, CollectionType>>
+    | Record<string, CollectionActFn<ValueType, CollectionType>>;
+  revisions?:
+    | Map<string, UpdaterValueProviderFN<ValueType>>
+    | Record<string, UpdaterValueProviderFN<ValueType>>;
+
+  reuseTree?: boolean;
+};
+
+type DoFn<Seed = unknown, Response = unknown> = (Seed?: Seed) => Response;
+export type DoRecord = Record<string, DoFn>;

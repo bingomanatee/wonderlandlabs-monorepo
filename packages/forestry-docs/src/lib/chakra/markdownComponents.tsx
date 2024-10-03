@@ -7,6 +7,7 @@ export const MARKDOWN_COMPONENTS = {
   h1: (props: PropsWithChildren<AnyProps>) => <Heading my={4} variant="mdH1" as="h1" {...props} />,
   h2: (props: PropsWithChildren<AnyProps>) => <Heading my={2} variant="mdH2" as="h2" {...props} />,
   ol: (props: PropsWithChildren<AnyProps>) => <Box as="ol" layerStyle="list" {...props} />,
+  ul: (props: PropsWithChildren<AnyProps>) => <Box as="ul" layerStyle="list" {...props} />,
   pre: (props: PropsWithChildren<AnyProps>) => (
     <Box
       className="codeBlock"

@@ -25,8 +25,8 @@ export const heading = defineStyleConfig({
       lineHeight: '100%',
       textTransform: 'uppercase',
     }),
-    mdH2: { fontSize: scale(1.25, 'rem') },
-    mdh1: { fontSize: scale(1.5, 'rem') },
+    mdH2: { fontSize: scale(1.1, 'rem'), fontWeight: 500 },
+    mdH1: { fontSize: scale(1.5, 'rem'), fontWeight: 500 },
 
     menuHead: {
       textTransform: 'uppercase',

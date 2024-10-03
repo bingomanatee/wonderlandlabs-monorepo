@@ -1,7 +1,7 @@
 import { expect, it, describe } from 'vitest';
 import { Forest } from '../../src/Forest';
 import { Collection } from '../../src';
-import type { CollectionIF } from '../../src/types/type.collection';
+import { CollectionIF } from '../../src/types/types.collections';
 
 type Egg = {
   id: string;

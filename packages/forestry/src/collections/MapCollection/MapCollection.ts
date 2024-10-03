@@ -4,7 +4,7 @@ import { canProxy } from '../../canProxy';
 import { Collection } from '../Collection';
 import { deleteProxyFor } from './deleteProxyFor';
 import { setProxyFor } from './setProxyFor';
-import type { CollectionParams } from '../types.collections';
+import type { CollectionParams } from '../../types/types.collections';
 
 export function noSet() {
   throw new Error('forest maps are immutable');
@@ -12,15 +12,15 @@ export function noSet() {
 
 export class MapCollection<
   KeyType = unknown,
-  ValueType = unknown
+  ValueType = unknown,
 > extends Collection<Map<KeyType, ValueType>> {
   constructor(
     name: string,
     params: CollectionParams<Map<KeyType, ValueType>>,
-    forest?: ForestIF
+    forest?: ForestIF,
   ) {
     function mapCloner(
-      cloneParams: ValueProviderParams<Map<KeyType, ValueType>>
+      cloneParams: ValueProviderParams<Map<KeyType, ValueType>>,
     ): Map<KeyType, ValueType> {
       const { value } = cloneParams;
       if (!value[Symbol.iterator]) {
@@ -28,7 +28,7 @@ export class MapCollection<
           'attepmt to clone : params',
           cloneParams,
           'not a map:',
-          value
+          value,
         );
         throw new Error('cannot clone map - not iterable');
       }
@@ -43,7 +43,7 @@ export class MapCollection<
         super(
           name,
           { ...params, benchmarkInterval: 20, serializer: mapCloner },
-          forest
+          forest,
         );
       }
     } else {

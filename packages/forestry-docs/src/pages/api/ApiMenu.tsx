@@ -2,7 +2,7 @@ import { Heading, Box } from '@chakra-ui/react';
 import { MenuSection } from '../../components/MenuSection/MenuSection.tsx';
 import { HighlightContainer } from '../../components/HighlightContainer.tsx';
 import { PropsWithChildren } from 'react';
-
+import ApiContent from './content.mkd';
 function ApiMenuHead({ children }: PropsWithChildren) {
   return (
     <Box display="flex" flexDirection="row" justifyContent="center">
@@ -37,6 +37,8 @@ export default function ApiMenu() {
           Synchronizes collection transactions and bridges connections between Trees
         </MenuSection>
       </HighlightContainer>
+
+      <ApiContent />
     </>
   );
 }

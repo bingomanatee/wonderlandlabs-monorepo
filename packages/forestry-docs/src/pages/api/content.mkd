@@ -1,0 +1,41 @@
+
+# "High Speed" outline of primary utilites on Collections and Trees
+
+There is a basic hierarchy of `Forest` ... `Tree` ... `Collection`.
+
+* `Collections` are "managed states" with embedded actions. They have an internally managed
+  tree that they use to store data. The `Collection` class and any other classes that inherit from it
+  manage and reflect a _single tree_. Custom collections like `FormCollection` may manage multiple trees.
+* A `Tree` is a single atomic value manager.
+* `Forests` coordinate updates between multiple `Tree` instances. They maintain a single map of
+  trees, indexed by name.
+
+A Tree is a "raw" Collection; if all you want is a utility to set and get state from and want to
+externalize all your change functions, this will let you have a basic transportable state. Collections
+give you the ability to attach change functions to your instance.
+
+## Updating from Collection and Tree instances
+
+`Tree` and `Collection` instances share the same interface for updates:
+
+* `next(nextValue)` simply sets the next value to a concrete replacement.
+* `update((value, seed) => nextValue, seed)` updates the state with a function (and optional argument).
+* `mutate(({value, branch, seed}) => nextValue, seed)` is like update but gives you access to the Tree
+  (and by extension the forest and other trees in it) if you need more insight into the overall application
+
+`Collection` instances have `actions` and `revisions` which are "canned" mutators and/or selectors to get and/or
+update the value of the collection. Revisions are essentially "named updates" where actions are functions
+that take the collection itself as an argument; their output is returned to the calling context but does not
+update the `Collection` instance itself.
+
+## Getting information from `Collection` and `Tree` instances
+
+* `.value` has the current value of a `Tree` or `Collection` instance.
+* `.subscribe((value) => {...})` feeds you the most recent value from a Tree or Collection instance.
+  This follows [RxJS Observable pattern](https://rxjs.dev/guide/overview)
+  and returns a [`Subscription`](https://rxjs.dev/guide/subscription) instance that you can call `.unsubscribe()`
+  on to terminate updates.
+
+## Collection Actions
+
+Collections have several ways to "bake" change and utility methods to the

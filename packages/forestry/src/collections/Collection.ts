@@ -1,14 +1,39 @@
 import { Forest } from '../Forest';
-import type { CollectionIF } from '../types/type.collection';
-import type { SubscribeFn, UpdaterValueProviderFN, ValueProviderFN } from '../types/types.shared';
+import type {
+  SubscribeFn,
+  UpdaterValueProviderFN,
+  ValueProviderFN,
+} from '../types/types.shared';
 import type { ForestIF } from '../types/types.forest';
 import type { TreeIF } from '../types/types.trees';
 import type { PartialObserver } from 'rxjs';
 import { upperFirst } from 'lodash-es';
-import type { CollectionParams } from './types.collections';
+import type {
+  CollectionIF,
+  CollectionParams,
+  DoRecord,
+} from '../types/types.collections';
+import { canProxy } from '../canProxy';
 
+function keysOf(
+  subject?: Map<unknown, unknown> | Record<string, unknown>
+): string[] {
+  if (subject) {
+    if (subject instanceof Map) {
+      return [ ...this.params.actions.keys() ].filter(
+        (a) => typeof a === 'string'
+      );
+    } else {
+      return [ ...Object.keys(this.params.actions) ].filter(
+        (a) => typeof a === 'string'
+      );
+    }
+  } else {
+    return [];
+  }
+}
 export class Collection<ValueType, SelfClass = CollectionIF<ValueType>>
-  implements CollectionIF<ValueType>
+implements CollectionIF<ValueType>
 {
   constructor(
     public name: string,
@@ -40,6 +65,76 @@ export class Collection<ValueType, SelfClass = CollectionIF<ValueType>>
     }
   }
 
+  _doProxy(): DoRecord {
+    const out: unknown = new Proxy(this, {
+      get(target: Collection<ValueType, SelfClass>, key: string) {
+        if (
+          target.actionNames().includes(key) &&
+          target.revisionNames().includes(key)
+        ) {
+          console.warn(
+            'warning: action and revisions both have method ',
+            key,
+            'results may be ambiguous; calling the action'
+          );
+        }
+        if (target.actionNames().includes(key)) {
+          return (seed?: unknown) => target.act(key, seed);
+        }
+
+        if (target.revisionNames().includes(key)) {
+          return (seed?: unknown) => {
+            target.revise(key, seed);
+          };
+        }
+
+        throw new Error('cannot find action or revision named ' + key);
+      },
+    });
+
+    return out as DoRecord;
+  }
+
+  _doObject() {
+    const out: DoRecord = {};
+
+    for (const key of this.revisionNames()) {
+      out[key] = (seed?: unknown) => {
+        return this.revise(key, seed);
+      };
+    }
+
+    for (const key of this.actionNames()) {
+      const warn = this.revisionNames().includes(key)
+        ? () => {
+          console.warn(
+            'warning: action and revisions both have method ',
+            key,
+            'results may be ambiguous; calling the action'
+          );
+        }
+        : undefined;
+      out[key] = (seed?: unknown) => {
+        warn?.();
+        return this.act(key, seed);
+      };
+    }
+
+    return out;
+  }
+
+  private _do: DoRecord;
+  get do(): DoRecord {
+    if (!this._do) {
+      if (canProxy) {
+        this._do = this._doProxy();
+      } else {
+        this._do = this._doObject();
+      }
+    }
+    return this._do as DoRecord;
+  }
+
   get value(): ValueType {
     return this.tree.value;
   }
@@ -50,7 +145,7 @@ export class Collection<ValueType, SelfClass = CollectionIF<ValueType>>
         ? this.params?.actions?.get(name)
         : this.params?.actions?.[name];
     if (!fn) {
-      throw new Error('cannot perform action ' + name + ': not in colletion');
+      throw new Error('cannot perform action ' + name + ': not in collection');
     }
     // @ts-expect-error
     const collection = this as SelfClass;
@@ -69,12 +164,18 @@ export class Collection<ValueType, SelfClass = CollectionIF<ValueType>>
         ? this.params?.revisions?.get(name)
         : this.params?.revisions?.[name];
     if (!fn) {
-      throw new Error('cannot perform revision ' + name + '; not in connection');
+      throw new Error(
+        'cannot perform revision ' + name + '; not in connection'
+      );
     }
 
     this.forest.do(() => {
       this.update<ParamType>(fn, seed);
     });
+  }
+
+  revisionNames(): string[] {
+    return keysOf(this.params?.revisions);
   }
 
   mutate<SeedType>(
@@ -111,21 +212,17 @@ export class Collection<ValueType, SelfClass = CollectionIF<ValueType>>
   }
 
   private actionNames(): string[] {
-    if (this.params?.actions) {
-      if (this.params?.actions instanceof Map) {
-        return [...this.params.actions.keys()].filter((a) => typeof a === 'string');
-      } else {
-        return [...Object.keys(this.params.actions)].filter((a) => typeof a === 'string');
-      }
-    } else {
-      return [];
-    }
+    return keysOf(this.params?.actions);
   }
-  superClassMe(superClassName: string, typeName: string, includeImports = true) {
+  superClassMe(
+    superClassName: string,
+    typeName: string,
+    includeImports = true
+  ) {
     return `
    ${includeImports ? 'import {Collection, Forest } from "@wonderlandlabs/forestry";' : ''}
     ${this.actionNames().map(actionTypeTemplate)}
-    
+
    export class ${superClassName} extends Collection<${typeName}> {
 
         constructor(f?: Forest) {
@@ -134,7 +231,7 @@ export class Collection<ValueType, SelfClass = CollectionIF<ValueType>>
 
         ${this.actionNames().map(actionsTemplate)}
 
-          // insert custom selectors here 
+          // insert custom selectors here
 
     }`;
   }

@@ -1,6 +1,3 @@
-import type { CollectionIF } from '../../types/type.collection';
-// import { map } from 'rxjs';
-
 import type {
   FieldMap,
   FormCollectionIF,
@@ -10,6 +7,7 @@ import type {
 } from './types.formCollection';
 import extendField from './extendField';
 import { MapCollection } from '../MapCollection/MapCollection';
+import type { CollectionIF } from '../../types/types.collections';
 
 /**
  * this is a "utility sub-class" of FormCollection designed exclusively
@@ -27,7 +25,7 @@ export class FormFieldMapCollection
   constructor(
     public name: string,
     fields: FieldMap,
-    private formCollection: FormCollectionIF
+    private formCollection: FormCollectionIF,
   ) {
     const mappedFields = new Map();
 
@@ -38,7 +36,7 @@ export class FormFieldMapCollection
       }
       mappedFields.set(
         name,
-        extendField(field, formCollection.fieldBaseParams.get(name))
+        extendField(field, formCollection.fieldBaseParams.get(name)),
       );
     }
 
@@ -47,7 +45,7 @@ export class FormFieldMapCollection
       {
         initial: mappedFields,
       },
-      formCollection.forest
+      formCollection.forest,
     );
   }
 
@@ -139,7 +137,7 @@ export class FormFieldMapCollection
           }
         }
         return { props: newProps, ...field }; // updatedField will extend the field/update errors
-      }
+      },
     );
   }
 }

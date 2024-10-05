@@ -1,7 +1,7 @@
-import type { TreeIF, TreeParams } from './types/types.trees';
-import { Tree } from './Tree';
-import type { ForestIF } from './types/types.forest';
-import { Forest } from './Forest';
+import type { TreeIF, TreeParams } from '../types/types.trees';
+import { Tree } from '../Tree';
+import type { ForestIF } from '../types/types.forest';
+import { Forest } from '../Forest';
 
 type ActsInput<ValueType, Acts> = {
   [K in keyof Acts]: (this: TreeIF<ValueType>, ...args: any[]) => any;

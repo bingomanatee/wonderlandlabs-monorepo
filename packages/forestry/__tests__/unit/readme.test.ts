@@ -62,7 +62,7 @@ describe('README.md', () => {
 
     const t = f.addTree<number>('counter', { initial: 0 });
     t.subscribe((value: number) => {
-      message('tree change', t.top?.cause, ':', value);
+      message('$tree change', t.top?.cause, ':', value);
     });
 
     const growBy: MutationValueProviderFN<number, number> = ({ value, seed }) => {

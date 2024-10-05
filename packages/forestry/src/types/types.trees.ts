@@ -31,7 +31,7 @@ export interface TreeIF<ValueType> extends Notable {
   top?: BranchIF<ValueType>;
   readonly params?: TreeParams<ValueType>;
   forest: ForestIF;
-  readonly isUncacheable?: boolean;
+  readonly dontCache?: boolean;
   offshoots?: OffshootIF<ValueType>[];
   rollback(time: number, message: string): void;
   /**
@@ -68,10 +68,10 @@ export type ValidatorFn<TreeValueType> = (
 export type TreeClonerFn<TreeValueType> = (branch?: BranchIF<TreeValueType>) => TreeValueType;
 
 export type TreeParams<TreeValueType> = {
-  initial?: TreeValueType;
-  uncacheable?: boolean;
+  initial: TreeValueType;
+  dontCache?: boolean;
   maxBranches?: number; // if your history gets REALLY LONG (over say 200)...
-  trimTo?: number; // ... trim the tree history to this many branches;
+  trimTo?: number; // ... trim the $tree history to this many branches;
   validator?: ValidatorFn<TreeValueType>;
   serializer?: ValueProviderFN<TreeValueType>;
   benchmarkInterval?: number;

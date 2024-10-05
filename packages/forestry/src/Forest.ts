@@ -54,7 +54,7 @@ export class Forest implements ForestIF {
 
   public addTree<ValueType>(name: TreeName, params?: TreeParams<ValueType>) {
     if (this.hasTree(name)) {
-      throw new Error('cannot redefine tree ' + name);
+      throw new Error('cannot redefine $tree ' + name);
     }
 
     const tree: TreeIF<ValueType> = new Tree<ValueType>(this, name, params);
@@ -113,7 +113,7 @@ export class Forest implements ForestIF {
   }
 
   /**
-   * observes value changes for a tree when all 'do()' actions have completed.
+   * observes value changes for a $tree when all 'do()' actions have completed.
    * meaning, if any errors are thrown and reset the values, no emissions are made.
    * distinct values mean that only values that are different are emitted.
    * @param name {string}
@@ -121,13 +121,13 @@ export class Forest implements ForestIF {
    */
   observe<ValueType>(name: TreeName) {
     if (!this.hasTree(name)) {
-      throw new Error('cannot observe ' + name + ': no tree by that name');
+      throw new Error('cannot observe ' + name + ': no $tree by that name');
     }
 
     const tree = this.tree(name);
     if (!tree) {
       throw new Error(
-        'cannot observe ' + name + ': no tree by that name exi'
+        'cannot observe ' + name + ': no $tree by that name exi'
       );
     } // for typescript
 

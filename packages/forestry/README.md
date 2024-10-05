@@ -11,7 +11,7 @@ currently Forestry is undergoing alpha testing. For a stable state system check 
 ## Journeled
 
 every collection -- 'Tree' -- has an initial k/v store. Every update is a linked list that defines the key/values that are added or deleted.
-These changes are synchronous - that is, the update is appended to the tree and creates a subsitute value(values) for the base.
+These changes are synchronous - that is, the update is appended to the $tree and creates a subsitute value(values) for the base.
 
 This means, you can observe not only what the state of an individual collection was at a specific time, but what the state of the entire ecosystem _was_ at a given point, and annotate each change with a name to allow for bug tracking as far back in time as you want to go.
 
@@ -19,8 +19,8 @@ This means, you can observe not only what the state of an individual collection 
 
 Collections assert changes inside of a "do closure" (in the Forest they originate from) and run all validators on changed trees before each closure is completed.
 Trees with invalid data are "trimmed" - changes are retained in each trees' `offshoots` property for inspection.
-This means, you can write validators which can traverse an entire (pending) tree in committable state and interrupt a trees' status, trimming
-bad data off the tree before any changes are broadcast. This allows you
+This means, you can write validators which can traverse an entire (pending) $tree in committable state and interrupt a trees' status, trimming
+bad data off the $tree before any changes are broadcast. This allows you
 to validate collections not only based on their current state but on their
 relationship with other collections.
 
@@ -30,12 +30,12 @@ All trees express the Observable interface of RxJS, including an exposed subject
 
 ## Customizable
 
-You can write a completely unique "engine" on top of a tree collection
+You can write a completely unique "engine" on top of a $tree collection
 that uses one or multiple trees to define an ecosystem. A form can be modeled using the provided engine which blends a collection for fields with a collection of form parameters with open customization.
 
 ## Open-ended
 
-Any type of data you wish can be contained with in a Tree; Maps, DOM, database connections, Immer instances, etc. As long as you can define how you want your data to change and it can be held by a javascript reference, it can be managed with a tree.
+Any type of data you wish can be contained with in a Tree; Maps, DOM, database connections, Immer instances, etc. As long as you can define how you want your data to change and it can be held by a javascript reference, it can be managed with a $tree.
 
 # The Forest Contract
 
@@ -61,14 +61,14 @@ Trees are contained within a **Forest** which manages a namespace of Tree instan
 ## A quick example
 
 you can grow by adding a "Growth function" which returns a dynamic value
-based on the linked list chain, or force a value into a tree with the `next` method.
+based on the linked list chain, or force a value into a $tree with the `next` method.
 
 ```
 const f = new Forest();
 
 const t = f.addTree<number>("counter", { initial: 0 });
 t.subscribe((value: number) => {
-  message("tree change", t.top?.cause, ":", value);
+  message("$tree change", t.top?.cause, ":", value);
 });
 
 const growBy = ({ value, seed }) =>  seed + value;
@@ -111,13 +111,13 @@ error, all the trees are reset to their pre-function state.
 - `hasTree(name: string)`: boolean
 - `uniqueTreeName(likeName: string)`: string
   > if you want to produce a new unique name for addTree
-- `tree<ValueType>(name: string) : TreeIF<ValueType> | undefined
-  > retrieve a previous tree _if it exists_
+- `$tree<ValueType>(name: string) : TreeIF<ValueType> | undefined
+  > retrieve a previous $tree _if it exists_
 - do<ResultType>( doFn) : ResultType
   > (throws) perform any actions and emit a single change to any previously defined observers: synchronous
   > doFn = (f: Forest) => ResultType
 - `observe<ValueType>(name: string)`: SubjectLike<ValueType>
-  > returns a subscription to a named tree, that only emits after all do()'s are complete.
+  > returns a subscription to a named $tree, that only emits after all do()'s are complete.
 
 ## Tree:
 
@@ -125,7 +125,7 @@ Trees are made from(in) forest instances.
 
 - (constructor): (name: string, params: TreeParams)
   parameters are:
-  - validator?: (value: ValueType, tree: TreeIF<ValueTYpe>)
+  - validator?: (value: ValueType, $tree: TreeIF<ValueTYpe>)
   - initial?: ValueType
 - `subscribe((value) => void) : Subscription
   > an RxJS subscribe method. 
@@ -133,14 +133,14 @@ Trees are made from(in) forest instances.
 - `value`: ValueType
   > shortcut to this.top?.value
 - top?: BranchIF<ValueType>.
-  > while any tree with an initial value will have a top there are some
-  > circumstances where the tree may be "without branches" -- if validators disallowed all submissions, or there is no initial parameter.
+  > while any $tree with an initial value will have a top there are some
+  > circumstances where the $tree may be "without branches" -- if validators disallowed all submissions, or there is no initial parameter.
 - `next(nextValue: ValueType, cause?: string): void
-  > sets the value of the tree to the defined overwrite; may throw if validators present.
-- `mutate(mutator: ({value, seed, branch, tree}) => newValue, seed?, name?)
-  > pass a function that will produce a new value for the tree.
+  > sets the value of the $tree to the defined overwrite; may throw if validators present.
+- `mutate(mutator: ({value, seed, branch, $tree}) => newValue, seed?, name?)
+  > pass a function that will produce a new value for the $tree.
 - `valueAt(time: number) // the value of the branch "in history" at (or just before) the given time
-- `validate(value: ValueType) : {isValid, value, tree, error?: string}
+- `validate(value: ValueType) : {isValid, value, $tree, error?: string}
   > if you want to "test an input" before committing it to state,
   > validate tries the value against any validators; doesn't throw,
   > but returns feedback in a handy object
@@ -150,31 +150,31 @@ Trees are made from(in) forest instances.
   > iterate through the branches from most recent to oldest. 
 
 ### Tree Validation {
-  if you add a validator, it will examine every value that is put in to the tree. If it throws, the tree's value will be the one the tree had before you fed
+  if you add a validator, it will examine every value that is put in to the $tree. If it throws, the $tree's value will be the one the $tree had before you fed
   it crap data. 
 }
 ## Branch:
 
-Branches should in general not be messed with externally; their one outward facing field is `value` but that may as well be accessed indrectly, off their tree; the exception may be examining offshoots
+Branches should in general not be messed with externally; their one outward facing field is `value` but that may as well be accessed indrectly, off their $tree; the exception may be examining offshoots
 
-## Changing a tree's state
+## Changing a $tree's state
 
-the methods `next(value)` or `tree.mutate(({value, seed) => newValue, seed)` will update the state of the tree. It is synchronous and will broadcast through subscriers. 
+the methods `next(value)` or `$tree.mutate(({value, seed) => newValue, seed)` will update the state of the $tree. It is synchronous and will broadcast through subscriers. 
 
 ### Notes
 
-If you want to throw a message into the history of the tree (or forest),
-you can call the `.addNote(message: string, Params?: {})` method of a tree or forest and add a viewable memo. Trees or forests' notes can be accessed off the `.notes(time)` or `notes(time, time)` method to view
+If you want to throw a message into the history of the $tree (or forest),
+you can call the `.addNote(message: string, Params?: {})` method of a $tree or forest and add a viewable memo. Trees or forests' notes can be accessed off the `.notes(time)` or `notes(time, time)` method to view
 any annotations.
 
 next/grow do not by design add to the notes collection to avoid duplication, but branch-scouring in combination with manual annotation
 may be useful.
 
-The notes list in forest and that in individual trees are distinct and unrelated; tree notes will include the name of the tree.
+The notes list in forest and that in individual trees are distinct and unrelated; $tree notes will include the name of the $tree.
 
-# What can you put in a tree?
+# What can you put in a $tree?
 
-Forest puts no limit on what a tree can store. That being said - _simple values_ make the best candidate for a tree. As a rule of thumb if it can be processed by JSON.stringify, or is a
+Forest puts no limit on what a $tree can store. That being said - _simple values_ make the best candidate for a $tree. As a rule of thumb if it can be processed by JSON.stringify, or is a
 Map of things that are "stringifiable" and keyed by strings or numbers.
 
 Class instances, functions, DOM fragments all are not good candidates for Tree storage; its best to find some other way of storing these things such as keeping them in a seperate map
@@ -186,17 +186,17 @@ Objects and arrays are valid, but ideally are not deeply nested or overlong.
 
 An collection is a "class that uses Forest". It can add, manipulate and filter
 trees. Collections that are based on the Collection class (and satisfy the CollectionIF) is based on a specific (single)
-tree and will allow for controlled manipulaition of its values.
+$tree and will allow for controlled manipulaition of its values.
 
 - a MapCollection uses proxied maps and exposes "mappy" methods.
-- a FormCollection is a "multi-tree" engine that puts form-centric properties in one tree and a map of detailed form-centric fields. Its validators, unlike Forest validators, express errors for "bad values" without throwing/pruning trees, allowing the user to enter values for fields as they may and providing real time feedback for field falidation.
+- a FormCollection is a "multi-$tree" engine that puts form-centric properties in one $tree and a map of detailed form-centric fields. Its validators, unlike Forest validators, express errors for "bad values" without throwing/pruning trees, allowing the user to enter values for fields as they may and providing real time feedback for field falidation.
 
 ## Custom Collections
 
-You can create any class you like around a tree/forest paradigm. you can create "change methods" in any manner you like. However, the Collection class has a custom "actions" property in its parameter that lets you define methods as you will, wrapping each in a transaction (`do()`) wrapper for sanitation.
+You can create any class you like around a $tree/forest paradigm. you can create "change methods" in any manner you like. However, the Collection class has a custom "actions" property in its parameter that lets you define methods as you will, wrapping each in a transaction (`do()`) wrapper for sanitation.
 
 Collections will create a forest if not injeted as a parameter; if you
-have a simple "single tree" use case, a Collection will do just fine.
+have a simple "single $tree" use case, a Collection will do just fine.
 
 ```
 
@@ -276,7 +276,7 @@ function makeCounter(initial = 0, name = "counter") {
     counter.act("increment");
     counter.act("decrement");
 
-    counter.tree.forEachDown((branch, count) => {
+    counter.$tree.forEachDown((branch, count) => {
       console.log(branch.time, ":counter value: ", branch.value, "cause:", branch.cause);
     });
 
@@ -320,7 +320,7 @@ counter.act('add', 300);
 counter.act('increment');
 counter.act('decrement');
 
-let t = counter.tree.top;
+let t = counter.$tree.top;
 while (t) {
   console.log(t.time, ":counter value: ", t.value, "cause:", t.cause);
   t = t.prev;
@@ -353,8 +353,8 @@ Well, as we added this to the constructor:
 }
 ```
 
-note- the cloner may either target a specific branch's value (if the second parameter is present) or the tree's top branch (if there is no second parameter); and there is
-also the possiblity that _both_ branch and tree.top is absent. (see above example)
+note- the cloner may either target a specific branch's value (if the second parameter is present) or the $tree's top branch (if there is no second parameter); and there is
+also the possiblity that _both_ branch and $tree.top is absent. (see above example)
 
 every six changes, the cloner adds a hard value so that the mutators don't callback too deeply. Mutation functions are nice in that they can reduce memory from history, but if there
 are too many of them you want to break the callback chain with an asserted literal value.

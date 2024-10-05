@@ -131,7 +131,7 @@ export class Branch<ValueType> implements BranchIF<ValueType> {
         return value;
       }
 
-      if (this.tree.isUncacheable) {
+      if (this.tree.dontCache) {
         this._hasBeenCached = false; // stop trying to see if its cacheable or not.
         return value;
       }

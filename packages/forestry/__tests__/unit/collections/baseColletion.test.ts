@@ -83,6 +83,9 @@ describe('Collection', () => {
         initial: 1,
 
         actions: {
+          multValue(coll, mult: number){
+            return coll.value * mult;
+          },
           increment(coll) {
             coll.mutate(({ value }) => value + 1, 'increment');
           },
@@ -90,6 +93,8 @@ describe('Collection', () => {
       }, // >>> end copy here
       new Forest()
     );
+
+    // @ts-ignore
 
     if (fs.existsSync(TMP_DIR + FILE_NAME)) {
       fs.unlinkSync(TMP_DIR + FILE_NAME);

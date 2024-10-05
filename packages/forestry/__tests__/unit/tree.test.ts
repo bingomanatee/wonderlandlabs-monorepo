@@ -54,7 +54,7 @@ describe('tree', () => {
   });
 
   describe('subscribe', () => {
-    it('should allow subscription on a populated tree', () => {
+    it('should allow subscription on a populated $tree', () => {
       const f = new Forest();
 
       const t = f.addTree<number>('bar', {
@@ -69,21 +69,6 @@ describe('tree', () => {
 
       t.next(300);
       expect(out).toEqual([ 100, 300 ]);
-    });
-
-    it('should allow subscription on an unpopulated tree', () => {
-      const f = new Forest();
-
-      const t = f.addTree<number>('bar', {});
-
-      const out: number[] = [];
-
-      t.subscribe((v: number) => out.push(v));
-
-      expect(out).toEqual([ undefined ]);
-
-      t.next(300);
-      expect(out).toEqual([ undefined, 300 ]);
     });
   });
 
@@ -163,7 +148,7 @@ describe('tree', () => {
   });
 
   describe('rollback', () => {
-    it('should reset the tree to its intial value on a rollback', () => {
+    it('should reset the $tree to its intial value on a rollback', () => {
       const f = new Forest();
 
       const t = f.addTree('foo', { initial: 100 });

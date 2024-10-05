@@ -1,7 +1,7 @@
 
 # Caching
 
-Caching is one of the tree hardest problems in computer science. 
+Caching is one of the $tree hardest problems in computer science. 
 
 There are 3 circumstances where caching is important to understand.
 
@@ -36,7 +36,7 @@ Breaking up large chains of mutators can have a "longer leash" - 20 - 40 branche
 
 To allow benchmarking (as above) every few values
 * set a **benchnmarkInterval** (positive number > 2; ideally 10 or 20)
-* set a **serializer** ({value, tree, branch}) => value. note - _not all trees have tops_ so provide a default value in the cloner if the tree has no branches. 
+* set a **serializer** ({value, $tree, branch}) => value. note - _not all trees have tops_ so provide a default value in the cloner if the $tree has no branches. 
 
 the serializer can be a simple destructuring
 ```
@@ -47,7 +47,7 @@ the serializer can be a simple destructuring
 ```
 or some other way to ensure simple pure JS values. 
 
-In 99.9% of the cases you do not have to worry about the lack of a value; however if the tree ever becomes _completely empty_ you may want to have a fallback initializer in the serializer. 
+In 99.9% of the cases you do not have to worry about the lack of a value; however if the $tree ever becomes _completely empty_ you may want to have a fallback initializer in the serializer. 
 
 ### Case Study: powers of 2
 
@@ -56,7 +56,7 @@ const f = new Forest;
 
 const adding2 = f.addTree('a2', {
 initial: 1,
-uncacheable,
+dontCache,
 benchmarkInterval: 8,
 serializer(({value}) => {
   if (!value) return 1; 
@@ -89,7 +89,7 @@ adding2.mutate(doubler);
 
 ```
 
-because the `uncacheable` flag is true, every time adding2.value is referenced, each branch's mutator is called based on the previous branch, meaning twelve nested function calls; while javascript does have a decent threshold for recursion its not really great on the memory. But the presence of cacheInterval means that every eight branches will be truned an assertion; this looks (with simplifiation) like 
+because the `dontCache` flag is true, every time adding2.value is referenced, each branch's mutator is called based on the previous branch, meaning twelve nested function calls; while javascript does have a decent threshold for recursion its not really great on the memory. But the presence of cacheInterval means that every eight branches will be truned an assertion; this looks (with simplifiation) like 
 
 ```
 branch1: 
@@ -127,7 +127,7 @@ the `benchmarkInterval` value of 8 means that the maximum nesting depth is 8.
 
 Its assumed that simple values (basic strings, numbers, arrays of basic strings, and basic objects) are cacheable; even if you have a mutator, they will be locally cached by the branch to reduce calls to the mutators that are destined to return the same value. 
 
-put another way, every mutator in a given branch that returns a simple serializable value will only be called once. Its value will be saved and returned on subsequent calls to `.value` in all circumstances. If for some reason you _want_ to always generate a value then pass `{...uncacheable: true}` 
+put another way, every mutator in a given branch that returns a simple serializable value will only be called once. Its value will be saved and returned on subsequent calls to `.value` in all circumstances. If for some reason you _want_ to always generate a value then pass `{...dontCache: true}` 
 as a constructor params. When present, no effort will be made to cache a mutator response and 
 mutators will _always be called_ any time a value is referenced. 
 
@@ -159,15 +159,15 @@ function calls even if the values are serialized, unless they are destructured b
 # References and Forest
 
 One of the down sides of mutators is that complex values will be unique every time you pull them down. That is why using observer patterns 
-is better than direct inspection. Assertion doesn't have this problem so if you insist on direct access of the branch/tree values, use 
+is better than direct inspection. Assertion doesn't have this problem so if you insist on direct access of the branch/$tree values, use 
 isEqaul rather than === for comparison. 
 
 ## Eager Beaver: truncating extra long branches. 
 
-most state system doesn't last that long. however in the unlikely event that a tree gets too
-long we have a "Terminal system" to trim really old branches. It limits the size of the branch tree and cauterizes older values. 
+most state system doesn't last that long. however in the unlikely event that a $tree gets too
+long we have a "Terminal system" to trim really old branches. It limits the size of the branch $tree and cauterizes older values. 
 
-Two properties in a tree's parameters enable a limited branch length:
+Two properties in a $tree's parameters enable a limited branch length:
 
 * `maxBranches` -- the maximum number of branches to retain. Should be large (50 or 100) but not too large...
 * `trimTo` -- when trimming occurs keep this many branches. 
@@ -176,10 +176,10 @@ Two properties in a tree's parameters enable a limited branch length:
 
 trimTo must be at least 4 and up to 80% of it. otherwise trimming becomes too frequent. 
 
-a useful example: maxBranches = 80, trimTo = 60. that is when the tree is 80 branches or more 
-trim it to 60 branches. Meaning trimmig a large tree will occur on the 81st branch and 
+a useful example: maxBranches = 80, trimTo = 60. that is when the $tree is 80 branches or more 
+trim it to 60 branches. Meaning trimmig a large $tree will occur on the 81st branch and 
 every 20 branches after that. The greater the difference is between trimTt and maxBranches, the less often 
-tree trimming will occur. 
+$tree trimming will occur. 
 
 The definition of "too long" is _highly subjective_ -- I'd say 80 to 100 branches are ok 
 but you may find even smaller windows lower your memory consumption. 
@@ -196,11 +196,11 @@ that will include a truncation; for instance if you have `maxBranches` at 100 an
 ### Trimming and active events 
 
 While a "do" event is active thre is always a possible rollback to before it. So regardless
-of branch count, the tree is never trimmed to before the branch _before_ the earliest event has occurred. 
+of branch count, the $tree is never trimmed to before the branch _before_ the earliest event has occurred. 
 
 ### An artificial example
 
-For practical purposes say we have a tree that goes up by 1 with each branch 
+For practical purposes say we have a $tree that goes up by 1 with each branch 
 and it has a maxBranches/trimTo of 5 and 2; the progress would look like this:
 
 ```

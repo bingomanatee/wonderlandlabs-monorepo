@@ -4,23 +4,18 @@ import { Branch } from './Branch';
 import { Beaver } from './treeHelpers/Beaver';
 import { BenchMarker } from './treeHelpers/BenchMarker';
 import { PreValidator } from './treeHelpers/PreValidator';
-import type {
-  TreeIF,
-  ForestIF,
-  TreeName,
-  TreeParams,
-  BranchIF,
-  OffshootIF,
-  MutationValueProviderFN,
-  ChangeIF,
-  TreeValuation,
-  SubscribeFn,
-  NotesMap,
-  InfoParams,
-  Info,
-  UpdaterValueProviderFN,
-} from './types';
+
 import { NotableHelper } from './NotableHelper';
+import type { TreeIF, TreeName, TreeParams, TreeValuation } from './types/types.trees';
+import type { ForestIF } from './types/types.forest';
+import type { BranchIF } from './types/types.branch';
+import type {
+  ChangeIF, Info, InfoParams,
+  MutationValueProviderFN, NotesMap,
+  OffshootIF,
+  SubscribeFn,
+  UpdaterValueProviderFN,
+} from './types/types.shared';
 
 export const INITIAL_VALUE = 'INITIAL VALUE';
 export class Tree<ValueType> implements TreeIF<ValueType> {
@@ -48,11 +43,11 @@ export class Tree<ValueType> implements TreeIF<ValueType> {
     }
   }
 
-  get isUncacheable(): boolean {
+  get dontCache(): boolean {
     if (!this.params) {
       return false;
     }
-    return Boolean(this.params.uncacheable);
+    return Boolean(this.params.dontCache);
   }
 
   private stream: BehaviorSubject<BranchIF<ValueType> | undefined>;
@@ -94,9 +89,9 @@ export class Tree<ValueType> implements TreeIF<ValueType> {
     }
   }
 
-  mutate<ParamType = unknown>(
-    mutator: MutationValueProviderFN<ValueType, ParamType>,
-    seed?: any,
+  mutate(
+    mutator: MutationValueProviderFN<ValueType>,
+    seed?: unknown,
     name?: string
   ) {
     if (!name) {
@@ -111,12 +106,13 @@ export class Tree<ValueType> implements TreeIF<ValueType> {
     return this;
   }
 
-  update<ParamType = unknown>(
-    updaterFn: UpdaterValueProviderFN<ValueType, ParamType>,
-    seed?: ParamType,
+  update(
+    updater: UpdaterValueProviderFN<ValueType, any>,
+    seed: any,
     name = ''
-  ): TreeIF<ValueType> {
-    const mutator: MutationValueProviderFN<ValueType, ParamType> = ({ value, seed }) =>
+  ) {
+    const updaterFn = updater as UpdaterValueProviderFN<ValueType, typeof seed>;
+    const mutator: MutationValueProviderFN<ValueType, typeof seed> = ({ value, seed }) =>
       updaterFn(value, seed);
 
     let growName: string = name ?? '';
@@ -265,8 +261,8 @@ export class Tree<ValueType> implements TreeIF<ValueType> {
 
   /**
    *
-   * returns the size of the tree (number of branches)
-   * because _in theory_ a branch tree can be enormous, we provide an upTo
+   * returns the size of the $tree (number of branches)
+   * because _in theory_ a branch $tree can be enormous, we provide an upTo
    * value - past which branches are not counted. For instance if upTo = 50
    * then the return value is going to be 0...50.
    *

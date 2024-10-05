@@ -198,7 +198,7 @@ describe('concepts', () => {
         log.push({
           eggs: summary(eggs),
           time: f.time,
-          source: 'tree.subscribe',
+          source: '$tree.subscribe',
           act: eggsCollection.tree.top?.cause,
         });
       });
@@ -212,34 +212,34 @@ describe('concepts', () => {
         {
           eggs: { alpha: 4, beta: 3, gamma: 2 },
           time: 1,
-          source: 'tree.subscribe',
+          source: '$tree.subscribe',
           act: 'INITIAL VALUE',
         },
-        { eggs: { alpha: 3, beta: 3, gamma: 2 }, time: 5, source: 'tree.subscribe', act: '(next)' },
-        { eggs: { alpha: 3, beta: 2, gamma: 2 }, time: 8, source: 'tree.subscribe', act: '(next)' },
+        { eggs: { alpha: 3, beta: 3, gamma: 2 }, time: 5, source: '$tree.subscribe', act: '(next)' },
+        { eggs: { alpha: 3, beta: 2, gamma: 2 }, time: 8, source: '$tree.subscribe', act: '(next)' },
         {
           eggs: { alpha: 3, beta: 2, gamma: 1 },
           time: 11,
-          source: 'tree.subscribe',
+          source: '$tree.subscribe',
           act: '(next)',
         },
         { eggs: { alpha: 3, beta: 2, gamma: 1 }, time: 11, source: 'observe', act: '(next)' },
         {
           eggs: { alpha: 2, beta: 2, gamma: 1 },
           time: 15,
-          source: 'tree.subscribe',
+          source: '$tree.subscribe',
           act: '(next)',
         },
         {
           eggs: { alpha: 2, beta: 1, gamma: 1 },
           time: 18,
-          source: 'tree.subscribe',
+          source: '$tree.subscribe',
           act: '(next)',
         },
         {
           eggs: { alpha: 2, beta: 1 },
           time: 23,
-          source: 'tree.subscribe',
+          source: '$tree.subscribe',
           act: 'removing egg gamma',
         },
         { eggs: { alpha: 2, beta: 1 }, time: 23, source: 'observe', act: 'removing egg gamma' },

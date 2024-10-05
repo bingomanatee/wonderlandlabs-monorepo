@@ -48,7 +48,7 @@ asked for, otherwise return the target's `get(key)` result.
 Making each change of the map mutator produce a proxy means that you end up rolling forward a heavily 
 wrapped proxy that returns the values of the frequently changed keys relatively fast, but is slightly 
 slower for the unchanged keys of the original "initial" map. The gain is that the net memory burden
-of the entire tree is much smaller than it would be if each branch had a brand new copy of the map - 
+of the entire $tree is much smaller than it would be if each branch had a brand new copy of the map - 
 it would cost `(branch x keys) x averge key and value size` to store the entire history. 
 Storing a nested proxy in the local cache, on the other hand, adds nearly no extra memory overhead 
 per extra branch - just enough to maintain the storage and closure of the proxy factory. 

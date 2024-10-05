@@ -6,7 +6,7 @@ describe('Collection', () => {
   it('allows update', () => {
     const f = new Forest();
 
-    const c = new Collection('incdec', { initial: 1 }, f);
+    const c = new Collection('incdec', { initial: 1, actions: {} }, f);
 
     expect(c.value).toBe(1);
 
@@ -23,6 +23,7 @@ describe('Collection', () => {
     const c = new Collection<number>(
       'incdec',
       {
+        actions: {},
         initial: 1,
         revisions: {
           inc: (value) => value + 1,
@@ -45,7 +46,7 @@ describe('Collection', () => {
   });
 
   it('allows SuperClass to be extended', () => {
-    class SuperClass extends Collection<number, SuperClass> {
+    class SuperClass extends Collection<number> {
       constructor() {
         super(
           'superClass!',
@@ -54,7 +55,6 @@ describe('Collection', () => {
 
             actions: {
               increment(coll) {
-                expect(coll.increment).toBeTypeOf('function');
                 coll.mutate(({ value }) => value + 1, 'increment');
               },
             },

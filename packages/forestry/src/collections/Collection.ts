@@ -11,9 +11,7 @@ import { upperFirst } from 'lodash-es';
 import type {
   CollectionIF,
   CollectionParams,
-  DoRecord,
 } from '../types/types.collections';
-import { canProxy } from '../canProxy';
 
 function keysOf(
   subject?: Map<unknown, unknown> | Record<string, unknown>
@@ -32,12 +30,12 @@ function keysOf(
     return [];
   }
 }
-export class Collection<ValueType, SelfClass = CollectionIF<ValueType>>
+export class Collection<ValueType>
 implements CollectionIF<ValueType>
 {
   constructor(
     public name: string,
-    private params?: CollectionParams<ValueType, SelfClass>,
+    private params?: CollectionParams<ValueType>,
     forest?: ForestIF
   ) {
     this.forest = forest ?? new Forest();
@@ -63,76 +61,6 @@ implements CollectionIF<ValueType>
         this.forest.addTree(name);
       }
     }
-  }
-
-  _doProxy(): DoRecord {
-    const out: unknown = new Proxy(this, {
-      get(target: Collection<ValueType, SelfClass>, key: string) {
-        if (
-          target.actionNames().includes(key) &&
-          target.revisionNames().includes(key)
-        ) {
-          console.warn(
-            'warning: action and revisions both have method ',
-            key,
-            'results may be ambiguous; calling the action'
-          );
-        }
-        if (target.actionNames().includes(key)) {
-          return (seed?: unknown) => target.act(key, seed);
-        }
-
-        if (target.revisionNames().includes(key)) {
-          return (seed?: unknown) => {
-            target.revise(key, seed);
-          };
-        }
-
-        throw new Error('cannot find action or revision named ' + key);
-      },
-    });
-
-    return out as DoRecord;
-  }
-
-  _doObject() {
-    const out: DoRecord = {};
-
-    for (const key of this.revisionNames()) {
-      out[key] = (seed?: unknown) => {
-        return this.revise(key, seed);
-      };
-    }
-
-    for (const key of this.actionNames()) {
-      const warn = this.revisionNames().includes(key)
-        ? () => {
-          console.warn(
-            'warning: action and revisions both have method ',
-            key,
-            'results may be ambiguous; calling the action'
-          );
-        }
-        : undefined;
-      out[key] = (seed?: unknown) => {
-        warn?.();
-        return this.act(key, seed);
-      };
-    }
-
-    return out;
-  }
-
-  private _do: DoRecord;
-  get do(): DoRecord {
-    if (!this._do) {
-      if (canProxy) {
-        this._do = this._doProxy();
-      } else {
-        this._do = this._doObject();
-      }
-    }
-    return this._do as DoRecord;
   }
 
   get value(): ValueType {

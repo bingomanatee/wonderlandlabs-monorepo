@@ -28,24 +28,17 @@ export interface CollectionIF<ValueType> {
 
 export type CollectionActFn<
   ValueType,
-  CollectionType = CollectionIF<ValueType>,
   ParamType = any,
   ReturnType = any,
-> = (collection: CollectionType, seed?: ParamType) => ReturnType;
+> = (collection:  CollectionIF<ValueType>, seed?: ParamType) => ReturnType;
 
 export type CollectionParams<
   ValueType,
-  CollectionType = CollectionIF<ValueType>,
 > = TreeParams<ValueType> & {
-  actions?:
-    | Map<string, CollectionActFn<ValueType, CollectionType>>
-    | Record<string, CollectionActFn<ValueType, CollectionType>>;
+  initial: ValueType;
+  actions:
+     Record<string, CollectionActFn<ValueType>>;
   revisions?:
-    | Map<string, UpdaterValueProviderFN<ValueType>>
-    | Record<string, UpdaterValueProviderFN<ValueType>>;
-
+     Record<string, UpdaterValueProviderFN<ValueType>>;
   reuseTree?: boolean;
 };
-
-type DoFn<Seed = unknown, Response = unknown> = (Seed?: Seed) => Response;
-export type DoRecord = Record<string, DoFn>;

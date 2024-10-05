@@ -16,16 +16,17 @@ export class MapCollection<
 > extends Collection<Map<KeyType, ValueType>> {
   constructor(
     name: string,
-    params: CollectionParams<Map<KeyType, ValueType>>,
+    params: CollectionParams<Map<KeyType, ValueType>> | Omit<CollectionParams<Map<KeyType, ValueType>>, 'actions'>,
     forest?: ForestIF,
   ) {
+    const actions = 'actions' in params ? params.actions : {};
     function mapCloner(
       cloneParams: ValueProviderParams<Map<KeyType, ValueType>>,
     ): Map<KeyType, ValueType> {
       const { value } = cloneParams;
       if (!value[Symbol.iterator]) {
         console.log(
-          'attepmt to clone : params',
+          'attempt to clone : params',
           cloneParams,
           'not a map:',
           value,
@@ -42,12 +43,12 @@ export class MapCollection<
       {
         super(
           name,
-          { ...params, benchmarkInterval: 20, serializer: mapCloner },
+          { ...params, benchmarkInterval: 20, serializer: mapCloner, actions },
           forest,
         );
       }
     } else {
-      super(name, { ...params, serializer: mapCloner }, forest);
+      super(name, { ...params, serializer: mapCloner, actions }, forest);
     }
   }
 

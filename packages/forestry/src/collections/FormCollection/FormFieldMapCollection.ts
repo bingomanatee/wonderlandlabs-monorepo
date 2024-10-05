@@ -43,6 +43,7 @@ export class FormFieldMapCollection
     super(
       name,
       {
+        actions: {},
         initial: mappedFields,
       },
       formCollection.forest,

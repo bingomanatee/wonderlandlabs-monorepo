@@ -9,7 +9,9 @@ import { PartialObserver, Subscription, Unsubscribable } from 'rxjs';
 export interface CollectionIF<ValueType> {
   // abstract
   value: ValueType;
+  params: CollectionParams<ValueType>;
   act<ParamType = unknown>(name: string, seed?: ParamType): any;
+  do: DoRecord<any>;
   next(value: ValueType, name?: string): void;
   mutate<ParamType = unknown>(
     mutatorFn: MutationValueProviderFN<ValueType, ParamType>,
@@ -33,19 +35,27 @@ export type CollectionActFn<
   ReturnType = any,
 > = (collection: CollectionType, seed?: ParamType) => ReturnType;
 
+
+
+export type RevisionsRecord<ValueType> = Record<string, UpdaterValueProviderFN<ValueType>>;
+export type ActionsRecord<ValueType, CollectionType> = Record<string, CollectionActFn<ValueType, CollectionType>>;
+
 export type CollectionParams<
   ValueType,
-  CollectionType = CollectionIF<ValueType>,
 > = TreeParams<ValueType> & {
-  actions?:
-    | Map<string, CollectionActFn<ValueType, CollectionType>>
-    | Record<string, CollectionActFn<ValueType, CollectionType>>;
+  actions: ActionsRecord<ValueType, CollectionIF<ValueType>>;
   revisions?:
-    | Map<string, UpdaterValueProviderFN<ValueType>>
-    | Record<string, UpdaterValueProviderFN<ValueType>>;
+    Record<string, UpdaterValueProviderFN<ValueType>>;
 
   reuseTree?: boolean;
 };
 
-type DoFn<Seed = unknown, Response = unknown> = (Seed?: Seed) => Response;
-export type DoRecord = Record<string, DoFn>;
+
+/**
+   TActions[K] extends CollectionActFn<ValueType, SelfType, infer ParamType>
+   ? (seed?: ParamType) => ReturnType<TActions[K]>
+   : never;
+   */
+export type DoRecord<Acts> = {
+    [K in keyof Acts]: OmitThisParameter<Acts[K]>;
+  };

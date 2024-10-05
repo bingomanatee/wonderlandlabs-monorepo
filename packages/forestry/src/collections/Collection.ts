@@ -8,12 +8,13 @@ import type { ForestIF } from '../types/types.forest';
 import type { TreeIF } from '../types/types.trees';
 import type { PartialObserver } from 'rxjs';
 import { upperFirst } from 'lodash-es';
-import type {
+import {
+  ActionsRecord, CollectionActFn,
   CollectionIF,
-  CollectionParams,
-  DoRecord,
+  CollectionParams, DoRecord,
 } from '../types/types.collections';
-import { canProxy } from '../canProxy';
+
+// import { canProxy } from '../canProxy';
 
 function keysOf(
   subject?: Map<unknown, unknown> | Record<string, unknown>
@@ -32,118 +33,65 @@ function keysOf(
     return [];
   }
 }
-export class Collection<ValueType, SelfClass = CollectionIF<ValueType>>
+
+type CollActsInput<SelfClass, Acts> = {
+  [K in keyof Acts]: (
+    this: SelfClass,
+    ...args: any[]
+  ) => any;
+};
+
+type ReturnTypeOf<F> = F extends (...args: any[]) => infer R ? R : never;
+type SecondParamOf<F> = F extends (arg1: any, arg2: infer ParamType) => any ? ParamType : never;
+
+function createContextDo<
+  ValueType
+>(self: CollectionIF<ValueType>): DoRecord<Acts> {
+  const doObj: ActionsRecord<ValueType, self> = {};
+
+  for (const key in actions) {
+    const action: CollectionActFn<ValueType, SelfType> = actions[key];
+    type  SecondParamType = SecondParamOf<typeof action>
+    type ReturnType = ReturnTypeOf<typeof action>
+    doObj[key] = (param: SecondParamType): ReturnType => forest.do(() => action(self, param));
+  }
+  return doObj;
+}
+
+export class Collection<ValueType>
 implements CollectionIF<ValueType>
 {
   constructor(
     public name: string,
-    private params?: CollectionParams<ValueType, SelfClass>,
+    private params: CollectionParams<ValueType>,
     forest?: ForestIF
   ) {
     this.forest = forest ?? new Forest();
 
     if (this.forest.hasTree(name)) {
       if (params?.reuseTree) {
-        if (params.validator || params.initial) {
-          throw new Error(
-            'reused tree cannot have validator/initial value - tree exists already and cannot be redefined'
-          );
-        }
-        // otherwise, allow Collection to exist
-        return;
-      } else {
         throw new Error('cannot create collection - tree ' + name + ' exi');
-      }
-    } else {
-      if (params) {
-        const { actions, ...rest } = params;
-
-        this.forest.addTree(name, rest);
       } else {
-        this.forest.addTree(name);
+        if (params) {
+          const { actions, ...rest } = params;
+
+          this.forest.addTree(name, rest);
+        } else {
+          this.forest.addTree(name);
+        }
       }
     }
+    this.do = createContextDo<ValueType>
+    (this);
   }
 
-  _doProxy(): DoRecord {
-    const out: unknown = new Proxy(this, {
-      get(target: Collection<ValueType, SelfClass>, key: string) {
-        if (
-          target.actionNames().includes(key) &&
-          target.revisionNames().includes(key)
-        ) {
-          console.warn(
-            'warning: action and revisions both have method ',
-            key,
-            'results may be ambiguous; calling the action'
-          );
-        }
-        if (target.actionNames().includes(key)) {
-          return (seed?: unknown) => target.act(key, seed);
-        }
-
-        if (target.revisionNames().includes(key)) {
-          return (seed?: unknown) => {
-            target.revise(key, seed);
-          };
-        }
-
-        throw new Error('cannot find action or revision named ' + key);
-      },
-    });
-
-    return out as DoRecord;
-  }
-
-  _doObject() {
-    const out: DoRecord = {};
-
-    for (const key of this.revisionNames()) {
-      out[key] = (seed?: unknown) => {
-        return this.revise(key, seed);
-      };
-    }
-
-    for (const key of this.actionNames()) {
-      const warn = this.revisionNames().includes(key)
-        ? () => {
-          console.warn(
-            'warning: action and revisions both have method ',
-            key,
-            'results may be ambiguous; calling the action'
-          );
-        }
-        : undefined;
-      out[key] = (seed?: unknown) => {
-        warn?.();
-        return this.act(key, seed);
-      };
-    }
-
-    return out;
-  }
-
-  private _do: DoRecord;
-  get do(): DoRecord {
-    if (!this._do) {
-      if (canProxy) {
-        this._do = this._doProxy();
-      } else {
-        this._do = this._doObject();
-      }
-    }
-    return this._do as DoRecord;
-  }
-
+  do;
   get value(): ValueType {
     return this.tree.value;
   }
 
   act(name: string, seed?: unknown) {
-    const fn =
-      this.params?.actions instanceof Map
-        ? this.params?.actions?.get(name)
-        : this.params?.actions?.[name];
+    const fn = this.params.actions[name];
     if (!fn) {
       throw new Error('cannot perform action ' + name + ': not in collection');
     }

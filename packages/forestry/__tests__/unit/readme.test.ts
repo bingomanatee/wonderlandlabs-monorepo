@@ -1,7 +1,6 @@
 import { Forest, Collection } from '../../src/index';
 import { expect, it, describe } from 'vitest';
 import type { MutationValueProviderFN, ValueProviderParams } from '../../src/types/types.shared';
-import type { CollectionActFn } from '../../src/types/types.collections';
 
 function message(...items: any[]) {
   //  eslint-disable-next-line no-constant-condition
@@ -17,43 +16,31 @@ function makeCounter(initial = 0, name = 'counter') {
     name,
     {
       initial,
-      actions: new Map<string, CollectionActFn<number>>([
-        [
-          'increment',
-          (collection) => {
-            collection.mutate(({ value }) => {
-              return value === undefined ? 1 : value + 1;
-            }, 'increment');
-          },
-        ],
-        [
-          'decrement',
-          (collection) => {
-            collection.mutate(({ value }) => {
-              return value === undefined ? -1 : value - 1;
-            }, 'increment');
-          },
-        ],
-        [
-          'add',
-          (collection, n: number) => {
-            collection.mutate<number>(
-              (params) => {
-                const { value, seed } = params;
-                return value === undefined ? seed : value + seed;
-              },
-              n,
-              'add'
-            );
-          },
-        ],
-        [
-          'zeroOut',
-          (collection) => {
-            collection.next(0, 'zeroOut');
-          },
-        ],
-      ]),
+      actions: {
+        increment(collection) {
+          collection.mutate(({ value }) => {
+            return value === undefined ? 1 : value + 1;
+          }, 'increment');
+        },
+        decrement(collection) {
+          collection.mutate(({ value }) => {
+            return value === undefined ? -1 : value - 1;
+          }, 'increment');
+        },
+        add(collection, n: number) {
+          collection.mutate<number>(
+            (params) => {
+              const { value, seed } = params;
+              return value === undefined ? seed : value + seed;
+            },
+            n,
+            'add'
+          );
+        },
+        zeroOut(collection) {
+          collection.next(0, 'zeroOut');
+        }
+      },
       benchmarkInterval: 6,
       serializer(params: ValueProviderParams<number>) {
         const { value } = params;

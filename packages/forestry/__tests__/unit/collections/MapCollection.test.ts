@@ -12,6 +12,7 @@ describe('MapCollection', () => {
     const mc = new MapCollection<string, number>(
       'foo',
       {
+        actions: {},
         initial: new Map<string, number>(MAP_SEED),
       },
       f
@@ -29,6 +30,7 @@ describe('MapCollection', () => {
     const mc = new MapCollection<string, number>(
       'foo',
       {
+        actions: {},
         initial: new Map<string, number>([
           [ 'a', 1 ],
           [ 'b', 2 ],
@@ -51,6 +53,7 @@ describe('MapCollection', () => {
     const mc = new MapCollection<string, number>(
       'foo',
       {
+        actions: {},
         initial: new Map<string, number>(MAP_SEED),
       },
       f
@@ -71,6 +74,7 @@ describe('MapCollection', () => {
     const mc = new MapCollection<string, number>(
       'foo',
       {
+        actions: {},
         initial: new Map<string, number>([
           [ 'a', 1 ],
           [ 'b', 2 ],
@@ -97,6 +101,7 @@ describe('MapCollection', () => {
       const mc = new MapCollection<string, number>(
         'foo',
         {
+          actions: {},
           initial: new Map<string, number>([
             [ 'a', 1 ],
             [ 'b', 2 ],
@@ -118,6 +123,7 @@ describe('MapCollection', () => {
       const mc = new MapCollection<string, number>(
         'foo',
         {
+          actions: {},
           initial: new Map<string, number>([
             [ 'a', 1 ],
             [ 'b', 2 ],
@@ -150,6 +156,7 @@ describe('MapCollection', () => {
       const mc = new MapCollection<string, number>(
         'foo',
         {
+          actions: {},
           initial: new Map<string, number>([
             [ 'a', 1 ],
             [ 'b', 2 ],
@@ -184,6 +191,7 @@ describe('MapCollection', () => {
       const mc = new MapCollection<string, number>(
         'foo',
         {
+          actions: {},
           initial: new Map<string, number>([
             [ 'a', 1 ],
             [ 'b', 2 ],
@@ -205,6 +213,7 @@ describe('MapCollection', () => {
       const mc = new MapCollection<string, number>(
         'foo',
         {
+          actions: {},
           initial: new Map<string, number>([
             [ 'a', 1 ],
             [ 'b', 2 ],
@@ -237,6 +246,7 @@ describe('MapCollection', () => {
       const mc = new MapCollection<string, number>(
         'foo',
         {
+          actions: {},
           initial: new Map<string, number>([
             [ 'a', 1 ],
             [ 'b', 2 ],
@@ -271,6 +281,7 @@ describe('MapCollection', () => {
       const mc = new MapCollection<string, number>(
         'foo',
         {
+          actions: {},
           initial: new Map<string, number>(MAP_SEED),
         },
         f
@@ -288,6 +299,7 @@ describe('MapCollection', () => {
       const mc = new MapCollection<string, number>(
         'foo',
         {
+          actions: {},
           initial: new Map<string, number>(MAP_SEED),
         },
         f

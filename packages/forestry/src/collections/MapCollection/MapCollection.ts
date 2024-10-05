@@ -13,10 +13,10 @@ export function noSet() {
 export class MapCollection<
   KeyType = unknown,
   ValueType = unknown,
-> extends Collection<Map<KeyType, ValueType>> {
+> extends Collection<Map<KeyType, ValueType>, MapCollection<KeyType, ValueType>, Acts> {
   constructor(
     name: string,
-    params: CollectionParams<Map<KeyType, ValueType>>,
+    params: CollectionParams<ValueType, Map<KeyType, ValueType>>,
     forest?: ForestIF,
   ) {
     function mapCloner(

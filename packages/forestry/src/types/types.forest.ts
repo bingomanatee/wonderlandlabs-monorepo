@@ -2,7 +2,7 @@ import type { Notable } from './types.shared';
 import type { TreeName, TreeIF, TreeParams } from './types.trees';
 import type { Observable } from 'rxjs';
 
-export type TaskFn<ResultType> = (forest: ForestIF) => ResultType;
+export type TaskFn = (...args: any) => any;
 
 export interface ForestIF extends Notable {
   tree<ValueType>(
@@ -22,7 +22,9 @@ export interface ForestIF extends Notable {
 
   uniqueTreeName(basis: string): string;
 
-  do<ResultType>(change: TaskFn<ResultType>): ResultType;
-
+  do<F extends (...args: any[]) => any>(
+    fn: F,
+    ...args: Parameters<F>
+  ): ReturnType<F>;
   observe<ValueType>(name: TreeName): Observable<ValueType>;
 }

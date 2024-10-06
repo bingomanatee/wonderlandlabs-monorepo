@@ -81,11 +81,14 @@ export class Forest implements ForestIF {
     return Array.from(this.activeTaskSubject.value.values());
   }
 
-  do<ResultType>(change: TaskFn<ResultType>) {
+  do<F extends (...args: any[]) => any>(
+    change: F,
+    ...args: Parameters<F>
+  ): ReturnType<F> {
     const taskTime = this.nextTime;
     this.addActiveTask(taskTime);
     try {
-      const result = change(this);
+      const result: ReturnType<F> = change(...args);
       this.removeActiveTask(taskTime);
       return result;
     } catch (err) {

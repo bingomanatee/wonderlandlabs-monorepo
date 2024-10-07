@@ -1,6 +1,9 @@
 import { Forest, Collection } from '../../src/index';
 import { expect, it, describe } from 'vitest';
-import type { MutationValueProviderFN, ValueProviderParams } from '../../src/types/types.shared';
+import type {
+  MutationValueProviderFN,
+  ValueProviderParams,
+} from '../../src/types/types.shared';
 
 function message(...items: any[]) {
   //  eslint-disable-next-line no-constant-condition
@@ -12,32 +15,10 @@ function message(...items: any[]) {
 function makeCounter(initial = 0, name = 'counter') {
   const f = new Forest();
 
-  return new Collection(
+  return new Collection<number>(
     name,
     {
       initial,
-      actions: {
-        increment(collection) {
-          collection.mutate(({ value }) => {
-            return value === undefined ? 1 : value + 1;
-          }, 'increment');
-        },
-        decrement(collection) {
-          collection.mutate(({ value }) => {
-            return value === undefined ? -1 : value - 1;
-          }, 'increment');
-        },
-        add (collection, n: number) {
-          collection.mutate<number>(
-            (params) => {
-              const { value, seed } = params;
-              return value === undefined ? seed : value + seed;
-            }, n);
-        },
-        zeroOut (collection) {
-          collection.next(0, 'zeroOut');
-        }
-      },
       benchmarkInterval: 6,
       serializer(params: ValueProviderParams<number>) {
         const { value } = params;
@@ -50,6 +31,26 @@ function makeCounter(initial = 0, name = 'counter') {
         if (v !== Math.floor(v)) {
           throw new Error('must be integer');
         }
+      },
+    },
+    {
+      increment() {
+        this.update((value) => {
+          return value + 1;
+        }, 'increment');
+      },
+      decrement() {
+        this.update((value) => {
+          return value - 1;
+        }, 'increment');
+      },
+      add(n: number) {
+        this.update((value, seed) => {
+          return value === undefined ? seed : value + seed;
+        }, n);
+      },
+      zeroOut() {
+        this.next(0, 'zeroOut');
       },
     },
     f
@@ -65,13 +66,16 @@ describe('README.md', () => {
       message('$tree change', t.top?.cause, ':', value);
     });
 
-    const growBy: MutationValueProviderFN<number, number> = ({ value, seed }) => {
+    const growBy: MutationValueProviderFN<number, number> = ({
+      value,
+      seed,
+    }) => {
       return Number(seed ?? 0 + (value ?? 0));
     };
 
-    t.mutate<number>(growBy, 3, 'growBy 3');
+    t.mutate(growBy, 3, 'growBy 3');
 
-    t.mutate<number>(growBy, 4, 'growBy 4');
+    t.mutate(growBy, 4, 'growBy 4');
 
     t.next(100, 'set to 100');
     expect(t.value).toBe(100);
@@ -102,15 +106,15 @@ describe('README.md', () => {
       message('collection is ', n, 'because of', counter.tree.top?.cause)
     );
 
-    counter.act('increment');
-    counter.act('increment');
-    counter.act('increment');
-    counter.act('add', 100);
-    expect(() => counter.act('add', 1.5)).toThrow('must be integer');
-    counter.act('zeroOut');
-    counter.act('add', 300);
-    counter.act('increment');
-    counter.act('decrement');
+    counter.acts.increment();
+    counter.acts.increment();
+    counter.acts.increment();
+    counter.acts.add(100);
+    expect(() => counter.acts.add(1.5)).toThrow('must be integer');
+    counter.acts.zeroOut();
+    counter.acts.add(300);
+    counter.acts.increment();
+    counter.acts.decrement();
     /**
      *
       collection is  0 because of initial
@@ -128,18 +132,24 @@ describe('README.md', () => {
   it('occasionally caches', () => {
     const counter = makeCounter(0, 'counter:cached');
 
-    counter.act('increment');
-    counter.act('increment');
-    counter.act('increment');
-    counter.act('add', 100);
-    expect(() => counter.act('add', 1.5)).toThrow('must be integer');
-    counter.act('zeroOut');
-    counter.act('add', 300);
-    counter.act('increment');
-    counter.act('decrement');
+    counter.acts.increment();
+    counter.acts.increment();
+    counter.acts.increment();
+    counter.acts.add(100);
+    expect(() => counter.acts.add(1.5)).toThrow('must be integer');
+    counter.acts.zeroOut();
+    counter.acts.add(300);
+    counter.acts.increment();
+    counter.acts.decrement();
 
     counter.tree.forEachDown((branch) => {
-      message(branch.time, ':counter value: ', branch.value, 'cause:', branch.cause);
+      message(
+        branch.time,
+        ':counter value: ',
+        branch.value,
+        'cause:',
+        branch.cause
+      );
     });
 
     /**

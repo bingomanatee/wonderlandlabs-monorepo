@@ -2,11 +2,12 @@ import type { TreeIF, TreeParams } from '../types/types.trees';
 import type { ForestIF } from '../types/types.forest';
 import { Forest } from '../Forest';
 
-type ActsDo<Acts> = {
+export type ControllerActions<Acts extends Record<string, (...args: any[]) => any>> = {
   [K in keyof Acts]: OmitThisParameter<Acts[K]>;
 };
 
-function createController<Acts>(name: string,
+export function createController<Acts
+  extends Record<string, (...args: any[]) => any>>(name: string,
   params: TreeParams<any>,
   actions: Acts ,
   forest: ForestIF = new Forest()) {
@@ -20,32 +21,33 @@ function createController<Acts>(name: string,
 
   const input = actions as ActsInput;
 
-  const doObj = {} as ActsDo<Acts>;
+  const controller = {} as ActsDo<Acts>;
   for (const key in input) {
     const action = input[key];
-    (doObj as any)[key] = action.bind(tree);
+    if (typeof action === 'function') {
+      (controller as any)[key] = action.bind(tree); // Bind each action to the tree
+    }
   }
 
-  return { $tree: tree, ...doObj };
+  return { tree, controller };
 }
 
 
 
 // Example usage
-const f = createController('foo', { initial: 2 },
+const { tree, controller } = createController('foo', { initial: 2 },
   {
-    multiply( input: number) {
-      console.log('this is ', this);
+    multiply(this: TreeIF<number>, input: number) {
       this.update((value, input) => value * input, input);
     },
     bar() {
-      f.multiply(5);
+      controller.multiply(5);
       return this.value;
     },
   });
 
-const b = f.bar();      // b is inferred as number
-f.multiply(2);   // c is inferred as number
-f.multiply(3);
+const b = controller.bar();      // b is inferred as number
+controller.multiply(2);   // c is inferred as number
+controller.multiply(3);
 console.log(b); // Output: 33
-console.log(f.$tree.value); // Output: 4
+console.log('tree is now ', tree.value); // Output: 4

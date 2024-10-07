@@ -48,10 +48,10 @@ describe('Forest', () => {
       f.addTree('foo', { initial: 100 });
       f.addTree('bar', { initial: 300 });
 
-      const sum = f.do<number>((f) => {
+      const sum = f.do(() => {
         return (
-          (f.tree<number>('foo')?.value ?? 0) +
-          (f.tree<number>('bar')?.value ?? 0)
+          (f.tree<number>('foo')?.value) +
+          (f.tree<number>('bar')?.value)
         );
       });
 

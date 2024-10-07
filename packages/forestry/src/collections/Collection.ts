@@ -5,107 +5,33 @@ import type {
   ValueProviderFN,
 } from '../types/types.shared';
 import type { ForestIF } from '../types/types.forest';
-import type { TreeIF } from '../types/types.trees';
+import type { TreeIF, TreeParams } from '../types/types.trees';
 import type { PartialObserver } from 'rxjs';
-import { upperFirst } from 'lodash-es';
-import type {
-  CollectionIF,
-  CollectionParams,
-} from '../types/types.collections';
+import type { CollectionIF } from '../types/types.collections';
 
-function keysOf(
-  subject?: Map<unknown, unknown> | Record<string, unknown>
-): string[] {
-  if (subject) {
-    if (subject instanceof Map) {
-      return [ ...this.params.actions.keys() ].filter(
-        (a) => typeof a === 'string'
-      );
-    } else {
-      return [ ...Object.keys(this.params.actions) ].filter(
-        (a) => typeof a === 'string'
-      );
-    }
-  } else {
-    return [];
-  }
-}
-export class Collection<ValueType>
-implements CollectionIF<ValueType>
-{
+import { ControllerActions, collectionActions } from './collectionActions';
+
+export class Collection<ValueType> implements CollectionIF<ValueType> {
   constructor(
     public name: string,
-    public params: CollectionParams<ValueType>,
-    forest: ForestIF = new Forest()
+    public params: TreeParams<ValueType>,
+    public actions: ControllerActions<any>,
+    public forest: ForestIF = new Forest()
   ) {
-    this.forest = forest;
-
-    if (this.forest.hasTree(name)) {
-      if (params?.reuseTree) {
-        if (params.validator || params.initial) {
-          throw new Error(
-            'reused $tree cannot have validator/initial value - $tree exists already and cannot be redefined'
-          );
-        }
-        // otherwise, allow Collection to exist
-        return;
-      } else {
-        throw new Error('cannot create collection - $tree ' + name + ' exi');
-      }
-    } else {
-      if (params) {
-        const { actions, ...rest } = params;
-
-        this.forest.addTree(name, rest);
-      } else {
-        this.forest.addTree(name);
-      }
-    }
+    this.tree = this.forest.addTree(name, params);
+    this.acts = collectionActions(this, actions);
   }
 
   get value(): ValueType {
     return this.tree.value;
   }
 
-  act(name: string, seed?: unknown) {
-    const fn =
-      this.params?.actions instanceof Map
-        ? this.params?.actions?.get(name)
-        : this.params?.actions?.[name];
-    if (!fn) {
-      throw new Error('cannot perform action ' + name + ': not in collection');
-    }
-    // @ts-expect-error
-    const collection = this as SelfClass;
-    return this.forest.do(() => {
-      return fn(collection, seed);
-    });
-  }
-
   next(next: ValueType, name: string) {
     this.tree.next(next, name);
   }
 
-  revise<ParamType = unknown>(name: string, seed?: ParamType) {
-    const fn =
-      this.params?.revisions instanceof Map
-        ? this.params?.revisions?.get(name)
-        : this.params?.revisions?.[name];
-    if (!fn) {
-      throw new Error(
-        'cannot perform revision ' + name + '; not in connection'
-      );
-    }
-
-    this.forest.do(() => {
-      this.update<ParamType>(fn, seed);
-    });
-  }
-
-  revisionNames(): string[] {
-    return keysOf(this.params?.revisions);
-  }
-
+  readonly tree: TreeIF<(typeof this)['params']['initial']>;
+  readonly acts: Record<string, (...args: any[]) => any>;
   mutate<SeedType>(
     mutator: ValueProviderFN<ValueType, SeedType>,
     seed?: SeedType,
@@ -128,53 +54,4 @@ implements CollectionIF<ValueType>
   subscribe(observer: PartialObserver<ValueType> | SubscribeFn<ValueType>) {
     return this.forest.observe(this.tree.name).subscribe(observer);
   }
-
-  public forest: ForestIF;
-
-  public get tree(): TreeIF<ValueType> {
-    const tree = this.forest.tree<ValueType>(this.name);
-    if (!tree) {
-      throw new Error('cannot find $tree ' + this.name);
-    }
-    return tree;
-  }
-
-  private actionNames(): string[] {
-    return keysOf(this.params?.actions);
-  }
-  superClassMe(
-    superClassName: string,
-    typeName: string,
-    includeImports = true
-  ) {
-    return `
-   ${includeImports ? 'import {Collection, Forest } from "@wonderlandlabs/forestry";' : ''}
-    ${this.actionNames().map(actionTypeTemplate)}
-
-   export class ${superClassName} extends Collection<${typeName}> {
-
-        constructor(f?: Forest) {
-          super('${this.name}', {/** insert base collection params here */}, f);
-        }
-
-        ${this.actionNames().map(actionsTemplate)}
-
-          // insert custom selectors here
-
-    }`;
-  }
-}
-
-function actionTypeTemplate(name: string) {
-  return `
-    type ${upperFirst(name)}Param = {/**param def here; delete this line if no arguments */}
-  `;
-}
-
-function actionsTemplate(name: string) {
-  return `
-  ${name}(seed: ${upperFirst(name)}Param) {
-    return this.act('${name}', seed);
-  }
-`;
 }

@@ -1,12 +1,12 @@
 import { expect, it, describe } from 'vitest';
 import { Collection, Forest } from '../../../src';
-import fs from 'fs';
+import { CollectionIF } from '../../../src/types/types.collections';
 
 describe('Collection', () => {
   it('allows update', () => {
     const f = new Forest();
 
-    const c = new Collection('incdec', { initial: 1, actions: {} }, f);
+    const c = new Collection('incdec', { initial: 1 }, {}, f);
 
     expect(c.value).toBe(1);
 
@@ -17,33 +17,6 @@ describe('Collection', () => {
 
     expect(c.value).toBe(3);
   });
-  it('allows revision', () => {
-    const f = new Forest();
-
-    const c = new Collection<number>(
-      'incdec',
-      {
-        actions: {},
-        initial: 1,
-        revisions: {
-          inc: (value) => value + 1,
-          dec: (value) => value - 1,
-        },
-      },
-      f
-    );
-
-    expect(c.value).toBe(1);
-
-    c.revise('inc');
-    c.revise('inc');
-
-    expect(c.value).toBe(3);
-
-    c.revise('dec');
-
-    expect(c.value).toBe(2);
-  });
 
   it('allows SuperClass to be extended', () => {
     class SuperClass extends Collection<number> {
@@ -52,11 +25,10 @@ describe('Collection', () => {
           'superClass!',
           {
             initial: 1,
-
-            actions: {
-              increment(coll) {
-                coll.mutate(({ value }) => value + 1, 'increment');
-              },
+          },
+          {
+            increment(this: CollectionIF<number>) {
+              this.mutate(({ value }) => value + 1, 'increment');
             },
           },
           new Forest()
@@ -64,7 +36,7 @@ describe('Collection', () => {
       }
 
       increment() {
-        this.act('increment');
+        this.acts.increment();
       }
     }
 
@@ -74,48 +46,4 @@ describe('Collection', () => {
     sc.increment();
     expect(sc.value).toBe(2);
   });
-
-  it.skip('allows superClass file to be written', () => {
-    const coll = new Collection(
-      'superClass!',
-      // --- start copy here <<<
-      {
-        initial: 1,
-
-        actions: {
-          multValue(coll, mult: number){
-            return coll.value * mult;
-          },
-          increment(coll) {
-            coll.mutate(({ value }) => value + 1, 'increment');
-          },
-        },
-      }, // >>> end copy here
-      new Forest()
-    );
-
-    // @ts-ignore
-
-    if (fs.existsSync(TMP_DIR + FILE_NAME)) {
-      fs.unlinkSync(TMP_DIR + FILE_NAME);
-    }
-
-    if (!fs.existsSync(TMP_DIR)) {
-      fs.mkdirSync(TMP_DIR);
-    }
-
-    const def = coll.superClassMe('SuperClass', 'number');
-
-    const myCode = fs.readFileSync(__filename).toString();
-    const RE = new RegExp(`<<${''}<(.*)>>${''}>`);
-
-    const matches = myCode.replace(/\n/g, '').match(RE);
-    const params = matches[1].trim().replace(', //', '');
-    const augmentedDef = def.replace('{/** insert base collection params here */}', params);
-
-    fs.writeFileSync(TMP_DIR + FILE_NAME, augmentedDef);
-  });
 });
-
-const TMP_DIR = __dirname + '/tmp';
-const FILE_NAME = '/SuperClass.ts';

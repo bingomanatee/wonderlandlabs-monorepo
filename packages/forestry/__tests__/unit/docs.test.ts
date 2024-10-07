@@ -1,4 +1,4 @@
-import { expect, it, describe } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import { Forest } from '../../src/Forest';
 import { Collection } from '../../src';
 import { CollectionIF } from '../../src/types/types.collections';
@@ -46,40 +46,39 @@ describe('concepts', () => {
         {
           initial: INITIAL,
           validator: eggsValidator,
-          actions: {
-            removeADay(coll: CollectionIF<Egg[]>) {
-              for (const egg of coll.value) {
-                coll.act('removeEggDay', egg.id);
+        },
+        {
+          removeADay(this: CollectionIF<Egg[]>) {
+            for (const egg of this.value) {
+              this.acts.removeEggDay(egg.id);
+            }
+          },
+          removeEggDay(this: CollectionIF<Egg[]>, id: string) {
+            const eggs: Egg[] = this.value.map((egg) => {
+              if (egg.id === id) {
+                return { ...egg, daysLeft: egg.daysLeft - 1 };
               }
-            },
-            removeEggDay(coll: CollectionIF<Egg[]>, id: string) {
-              const eggs: Egg[] = coll.value.map((egg) => {
-                if (egg.id === id) {
-                  return { ...egg, daysLeft: egg.daysLeft - 1 };
-                }
-                return egg;
-              });
-              coll.next(eggs);
-            },
-            removeEgg(coll: CollectionIF<Egg[]>, id: string) {
-              coll.mutate(({ value }) => {
-                const out = value.filter((egg: Egg) => egg.id !== id);
-                return out;
-              }, 'removing egg ' + id);
-            },
-            removeADayWithCatch(coll: CollectionIF<Egg[]>) {
-              for (const egg of coll.value) {
-                try {
-                  coll.act('removeEggDay', egg.id);
-                } catch (error) {
-                  if (error instanceof Error && error.message === EXPIRED_MSG) {
-                    coll.act('removeEgg', egg.id);
-                  } else {
-                    throw error;
-                  }
+              return egg;
+            });
+            this.next(eggs);
+          },
+          removeEgg: function (this: CollectionIF<Egg[]>, id: string) {
+            this.mutate(({ value }) => {
+              return value.filter((egg: Egg) => egg.id !== id);
+            }, 'removing egg ' + id);
+          },
+          removeADayWithCatch(this: CollectionIF<Egg[]>) {
+            for (const egg of this.value) {
+              try {
+                this.acts.removeEggDay(egg.id);
+              } catch (error) {
+                if (error instanceof Error && error.message === EXPIRED_MSG) {
+                  this.acts.removeEgg(egg.id);
+                } else {
+                  throw error;
                 }
               }
-            },
+            }
           },
         },
         f
@@ -87,15 +86,15 @@ describe('concepts', () => {
 
       expect(eggs.value).toEqual(INITIAL);
 
-      eggs.act('removeADay');
+      eggs.acts.removeADay();
 
       expect(eggs.value).toEqual(LESS_ONE_DAY);
 
-      expect(() => eggs.act('removeADay')).toThrow();
+      expect(() => eggs.acts.removeADay()).toThrow();
 
       expect(eggs.value).toEqual(LESS_ONE_DAY);
 
-      eggs.act('removeADayWithCatch');
+      eggs.acts.removeADayWithCatch();
       expect(eggs.value).toEqual([
         { id: 'alpha', daysLeft: 2 },
         { id: 'beta', daysLeft: 1 },
@@ -128,40 +127,44 @@ describe('concepts', () => {
         {
           initial: INITIAL,
           validator: eggsValidator,
-          actions: {
-            removeADay(coll: CollectionIF<Egg[]>) {
-              for (const egg of coll.value) {
-                coll.act('removeEggDay', egg.id);
+        },
+
+        {
+          removeADay(this: CollectionIF<Egg[]>) {
+            for (const egg of this.value) {
+              this.acts.removeEggDay(egg.id);
+            }
+          },
+          removeEggDay(this: CollectionIF<Egg[]>, id: string) {
+            const eggs: Egg[] = this.value.map((egg) => {
+              if (egg.id === id) {
+                return { ...egg, daysLeft: egg.daysLeft - 1 };
               }
-            },
-            removeEggDay(coll: CollectionIF<Egg[]>, id: string) {
-              const eggs: Egg[] = coll.value.map((egg) => {
-                if (egg.id === id) {
-                  return { ...egg, daysLeft: egg.daysLeft - 1 };
-                }
-                return egg;
-              });
-              coll.next(eggs);
-            },
-            removeEgg(coll: CollectionIF<Egg[]>, id: string) {
-              coll.mutate(({ value }) => {
-                const out = value.filter((egg: Egg) => egg.id !== id);
-                return out;
-              },null, 'removing egg ' + id);
-            },
-            removeADayWithCatch(coll: CollectionIF<Egg[]>) {
-              for (const egg of coll.value) {
-                try {
-                  coll.act('removeEggDay', egg.id);
-                } catch (error) {
-                  if (error instanceof Error && error.message === EXPIRED_MSG) {
-                    coll.act('removeEgg', egg.id);
-                  } else {
-                    throw error;
-                  }
+              return egg;
+            });
+            this.next(eggs);
+          },
+          removeEgg(this: CollectionIF<Egg[]>, id: string) {
+            this.mutate(
+              ({ value }) => {
+                return value.filter((egg: Egg) => egg.id !== id);
+              },
+              null,
+              'removing egg ' + id
+            );
+          },
+          removeADayWithCatch(this: CollectionIF<Egg[]>) {
+            for (const egg of this.value) {
+              try {
+                this.acts.removeEggDay(egg.id);
+              } catch (error) {
+                if (error instanceof Error && error.message === EXPIRED_MSG) {
+                  this.acts.removeEgg(egg.id);
+                } else {
+                  throw error;
                 }
               }
-            },
+            }
           },
         },
         f
@@ -203,27 +206,46 @@ describe('concepts', () => {
         });
       });
 
-      eggsCollection.act('removeADay');
-      eggsCollection.act('removeADayWithCatch');
-
+      eggsCollection.acts.removeADay();
+      eggsCollection.acts.removeADayWithCatch();
 
       expect(log).toEqual([
-        { eggs: { alpha: 4, beta: 3, gamma: 2 }, time: 1, source: 'observe', act: 'INITIAL VALUE' },
+        {
+          eggs: { alpha: 4, beta: 3, gamma: 2 },
+          time: 1,
+          source: 'observe',
+          act: 'INITIAL VALUE',
+        },
         {
           eggs: { alpha: 4, beta: 3, gamma: 2 },
           time: 1,
           source: '$tree.subscribe',
           act: 'INITIAL VALUE',
         },
-        { eggs: { alpha: 3, beta: 3, gamma: 2 }, time: 5, source: '$tree.subscribe', act: '(next)' },
-        { eggs: { alpha: 3, beta: 2, gamma: 2 }, time: 8, source: '$tree.subscribe', act: '(next)' },
+        {
+          eggs: { alpha: 3, beta: 3, gamma: 2 },
+          time: 5,
+          source: '$tree.subscribe',
+          act: '(next)',
+        },
+        {
+          eggs: { alpha: 3, beta: 2, gamma: 2 },
+          time: 8,
+          source: '$tree.subscribe',
+          act: '(next)',
+        },
         {
           eggs: { alpha: 3, beta: 2, gamma: 1 },
           time: 11,
           source: '$tree.subscribe',
           act: '(next)',
         },
-        { eggs: { alpha: 3, beta: 2, gamma: 1 }, time: 11, source: 'observe', act: '(next)' },
+        {
+          eggs: { alpha: 3, beta: 2, gamma: 1 },
+          time: 11,
+          source: 'observe',
+          act: '(next)',
+        },
         {
           eggs: { alpha: 2, beta: 2, gamma: 1 },
           time: 15,
@@ -242,7 +264,12 @@ describe('concepts', () => {
           source: '$tree.subscribe',
           act: 'removing egg gamma',
         },
-        { eggs: { alpha: 2, beta: 1 }, time: 23, source: 'observe', act: 'removing egg gamma' },
+        {
+          eggs: { alpha: 2, beta: 1 },
+          time: 23,
+          source: 'observe',
+          act: 'removing egg gamma',
+        },
       ]);
     });
   });

@@ -1,6 +1,6 @@
 import { Tree } from './Tree';
 
-import type { ForestIF, TaskFn } from './types/types.forest';
+import type { ForestIF } from './types/types.forest';
 import type { TreeName, TreeIF, TreeParams } from './types/types.trees';
 import {
   BehaviorSubject,
@@ -45,7 +45,7 @@ export class Forest implements ForestIF {
     if (!this.hasTree(name)) {
       return undefined;
     }
-    return this.trees.get(name);
+    return this.trees.get(name) as TreeIF<ValueType>;
   }
 
   get treeNames() {

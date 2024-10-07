@@ -3,24 +3,23 @@ import type {
   SubscribeFn,
   UpdaterValueProviderFN,
 } from '../types';
-import type {ForestIF} from './types.forest';
-import type {TreeParams} from '../types/types.trees';
+import type { ForestIF } from './types.forest';
+import type { TreeParams } from './types.trees';
 
 import { PartialObserver, Subscription, Unsubscribable } from 'rxjs';
 
-export interface CollectionIF<ValueType> {
+export interface CollectionIF<ValueType > {
   // abstract
   value: ValueType;
-  params: CollectionParams<ValueType>;
-  forest: ForestIF,
-  act<ParamType = unknown>(name: string, seed?: ParamType): any;
+  params: TreeParams<ValueType>;
+  forest: ForestIF;
+   acts:   Record<string, (...args: any[]) => any>;
   next(value: ValueType, name?: string): void;
   mutate<ParamType = unknown>(
     mutatorFn: MutationValueProviderFN<ValueType, ParamType>,
     seed?: ParamType,
     name?: string,
   ): void;
-  revise<ParamType = unknown>(name: string, seed?: ParamType): void;
   update<ParamType = unknown>(
     updaterFn: UpdaterValueProviderFN<ValueType, ParamType>,
     seed?: ParamType,

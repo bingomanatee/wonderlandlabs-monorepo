@@ -5,6 +5,7 @@ import { Collection } from '../Collection';
 import { deleteProxyFor } from './deleteProxyFor';
 import { setProxyFor } from './setProxyFor';
 import type { CollectionParams } from '../../types/types.collections';
+import { TreeParams } from '../../types/types.trees';
 
 export function noSet() {
   throw new Error('forest maps are immutable');
@@ -16,12 +17,14 @@ export class MapCollection<
 > extends Collection<Map<KeyType, ValueType>> {
   constructor(
     name: string,
-    params: CollectionParams<Map<KeyType, ValueType>> | Omit<CollectionParams<Map<KeyType, ValueType>>, 'actions'>,
-    forest?: ForestIF,
+    params:
+      | TreeParams<Map<KeyType, ValueType>>
+      | Omit<CollectionParams<Map<KeyType, ValueType>>, 'actions'>,
+    actions,
+    forest?: ForestIF
   ) {
-    const actions = 'actions' in params ? params.actions : {};
     function mapCloner(
-      cloneParams: ValueProviderParams<Map<KeyType, ValueType>>,
+      cloneParams: ValueProviderParams<Map<KeyType, ValueType>>
     ): Map<KeyType, ValueType> {
       const { value } = cloneParams;
       if (!value[Symbol.iterator]) {
@@ -29,7 +32,7 @@ export class MapCollection<
           'attempt to clone : params',
           cloneParams,
           'not a map:',
-          value,
+          value
         );
         throw new Error('cannot clone map - not iterable');
       }
@@ -39,17 +42,16 @@ export class MapCollection<
       return out;
     }
 
-    if (!(params.serializer && params.benchmarkInterval)) {
+    super(
+      name,
       {
-        super(
-          name,
-          { ...params, benchmarkInterval: 20, serializer: mapCloner, actions },
-          forest,
-        );
-      }
-    } else {
-      super(name, { ...params, serializer: mapCloner, actions }, forest);
-    }
+        ...params,
+        benchmarkInterval: params.benchmarkInterval ?? 20,
+        serializer: params.serializer ?? mapCloner,
+      },
+      actions,
+      forest
+    );
   }
 
   has(key: KeyType) {

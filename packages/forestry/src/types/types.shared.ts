@@ -52,7 +52,8 @@ export type NotesMap = Map<number, Info[]>;
 
 export type VPRContextKeys = keyof typeof ValueProviderContext;
 
-export type ValueProviderContextType = (typeof ValueProviderContext)[VPRContextKeys];
+export type ValueProviderContextType =
+  (typeof ValueProviderContext)[VPRContextKeys];
 /**
  * export const TypeEnum : {
   string : 'string',
@@ -91,11 +92,14 @@ export type MutationValueProviderParams<
   seed?: ParamType;
 };
 
-export type LocalValueProviderParams<Value> = BaseValueProviderParams<Value> & {};
+export type LocalValueProviderParams<Value> =
+  BaseValueProviderParams<Value> & {};
 
-export type TruncationValueProviderParams<Value> = BaseValueProviderParams<Value> & {};
+export type TruncationValueProviderParams<Value> =
+  BaseValueProviderParams<Value> & {};
 
-export type IttermittentCacheProviderParams<Value> = BaseValueProviderParams<Value> & {};
+export type IttermittentCacheProviderParams<Value> =
+  BaseValueProviderParams<Value> & {};
 
 export type ValueProviderParams<Value = unknown, ParamType = unknown> =
   | MutationValueProviderParams<Value, ParamType>
@@ -133,5 +137,5 @@ export type MutationValueProviderFN<Value = unknown, ParamType = any> = (
 
 export type UpdaterValueProviderFN<Value = unknown, SeedType = any> = (
   value: Value,
-  seed?: SeedType
+  seed: SeedType
 ) => Value;

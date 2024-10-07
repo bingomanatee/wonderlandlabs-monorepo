@@ -11,11 +11,14 @@ to create custom accessors to your actions and define the interfaces to tree upd
 const f = new Forest();
 
 const INITIAL: DataType = {...};
-const t: treeIF<DataType> = f.addTree<DataType>('myTree', {initialValue: INITIAL});
+const t: treeIF<DataType> = f.addTree<DataType>(
+'myTree', {initial: INITIAL},
+ {},
+  f);
 
 // --- or ---
 
-const coll : CollectionIF<DataType> = new Collection<DataType>('myColl', {initialValue: INITIAL});
+const coll : CollectionIF<DataType> = new Collection<DataType>('myColl', {initial: INITIAL}, {}, f);
 
 const sub = f.observe<DataType>('myTree', (value: DataType) => {...});
 

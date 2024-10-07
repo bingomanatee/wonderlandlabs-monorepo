@@ -100,7 +100,7 @@ import {state, inputToUsername, type StateValue} from '/lib/state';
 // ---- mystate.ts
 
   // - this resource can be used for repeated instantiation of
-  // an app state for unit testing
+  // an app state for unit testing.
 
   export type StateValues = {
     username: '',
@@ -117,7 +117,16 @@ import {state, inputToUsername, type StateValue} from '/lib/state';
     return tree;
   }
 
-export const inputToUsername = (e) => state.next({...state.value, username: e.target.value}))
-export const inputToPassword = (e) => state.next({...state.value, password: e.target.value}))
+export const inputToUsername = (e) => state.update(
+    (value) => (
+        {...value, username: e.target.value})
+    )
+);
+export const inputToPassword = (e) => state.update(
+  (value) => (
+      {...value, password: e.target.value})
+  )
+);
+
 export const state = appState();
 ```

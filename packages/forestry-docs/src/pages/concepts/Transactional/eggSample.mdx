@@ -1,0 +1,75 @@
+
+```JavaScript
+
+import { Collection } from '@wonderlandlabs/forestry';
+import { CollectionIF } from '@wonderlandlabs/forestry/build/src/types';
+
+const f = new Forest();
+
+type Egg = {
+  id: string;
+  daysLeft: number;
+};
+
+const EXPIRED_MSG = 'Egg has expired';
+const eggValidator = (e: Egg) => {
+  if (e.daysLeft <= 0) {
+    throw new Error(EXPIRED_MSG);
+  }
+};
+const eggsValidator = (es: Egg[]) => {
+  for (const e of es) {
+    eggValidator(e);
+  }
+};
+
+const INITIAL = [
+  { id: 'alpha', daysLeft: 4 },
+  { id: 'beta', daysLeft: 3 },
+  { id: 'gamma', daysLeft: 2 },
+];
+
+const eggs = new Collection<Egg[]>(
+  'eggs',
+  {
+    initial: INITIAL,
+    validator: eggsValidator,
+  },
+  {
+    removeADay(this: CollectionIF<Egg[]>) {
+      for (const egg of this.value) {
+        this.acts.removeEggDay(egg.id);
+      }
+    },
+    removeEggDay(this: CollectionIF<Egg[]>, id: string) {
+      const eggs: Egg[] = this.value.map((egg) => {
+        if (egg.id === id) {
+          return { ...egg, daysLeft: egg.daysLeft - 1 };
+        }
+        return egg;
+      });
+      this.next(eggs);
+    },
+    removeEgg: function (this: CollectionIF<Egg[]>, id: string) {
+      this.mutate(({ value }) => {
+        return value.filter((egg: Egg) => egg.id !== id);
+      }, 'removing egg ' + id);
+    },
+    removeADayWithCatch(this: CollectionIF<Egg[]>) {
+      for (const egg of this.value) {
+        try {
+          this.acts.removeEggDay(egg.id);
+        } catch (error) {
+          if (error instanceof Error && error.message === EXPIRED_MSG) {
+            this.acts.removeEgg(egg.id);
+          } else {
+            throw error;
+          }
+        }
+      }
+    },
+  },
+  f
+);
+
+```

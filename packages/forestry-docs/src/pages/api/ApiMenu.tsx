@@ -16,25 +16,20 @@ function ApiMenuHead({ children }: PropsWithChildren) {
 export default function ApiMenu() {
   return (
     <>
-      <ApiMenuHead>External Resources</ApiMenuHead>
-
+      <ApiMenuHead>Core Classes</ApiMenuHead>
+      <HighlightContainer>
+        <MenuSection title="Tree">A single atomic value</MenuSection>
+        <MenuSection title="Forest">The core dataset for a series of relates states</MenuSection>
+      </HighlightContainer>
+      <ApiMenuHead>Extended Controllers</ApiMenuHead>
       <HighlightContainer>
         <MenuSection title="Collection">
-          the general purpose "state class" with named actions; manages data for a single Tree
-          instance
+          A decorator for a single tree; adds change actions to a single Tree
         </MenuSection>
-        <MenuSection title="FormCollection">
-          a multi-Tree collection for form management.
-        </MenuSection>
+        <MenuSection title="FormCollection">A utility class for managing a form.</MenuSection>
         <MenuSection title="MapCollection">
-          a Collection child specifically oriented towards Map content
-        </MenuSection>
-      </HighlightContainer>
-      <ApiMenuHead>Internal Resources</ApiMenuHead>
-      <HighlightContainer>
-        <MenuSection title="Tree">A single atomic store for all data</MenuSection>
-        <MenuSection title="Forest">
-          Synchronizes collection transactions and bridges connections between Trees
+          An optimized class for managing a Map based collection. Uses proxies for low-memory
+          journals
         </MenuSection>
       </HighlightContainer>
 

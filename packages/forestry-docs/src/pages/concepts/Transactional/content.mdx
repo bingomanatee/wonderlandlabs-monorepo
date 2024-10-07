@@ -1,3 +1,5 @@
+import EggSample from './eggSample.mdx';
+
 This means you don't end up with "half changed" state from nested actions,
 and you can trap errors at any stage to continue with the previous state.
 
@@ -8,75 +10,7 @@ This code sets up a system wherein the egg array requires each egg to be 1+ days
 
 The actions allow us to "take a day off each egg."
 
-```JavaScript
-
-const f = new Forest();
-
-type Egg = {
-  id: string;
-  daysLeft: number;
-};
-
-const EXPIRED_MSG = 'Egg has expired';
-const eggValidator = (e: Egg) => {
-  if (e.daysLeft <= 0) {
-    throw new Error(EXPIRED_MSG);
-  }
-};
-const eggsValidator = (es: Egg[]) => {
-  for (const e of es) {
-    eggValidator(e);
-  }
-};
-
-const INITIAL = [
-  { id: 'alpha', daysLeft: 4 },
-  { id: 'beta', daysLeft: 3 },
-  { id: 'gamma', daysLeft: 2 },
-];
-
-
-const eggs = new Collection<Egg[]>(
-  'eggs',
-  {
-    initial: INITIAL,
-    validator: eggsValidator,
-    actions: {
-      removeADay(coll: CollectionIF<Egg[]>) {
-        for (const egg of coll.value) {
-          coll.act('removeEggDay', egg.id);
-        }
-      },
-      removeEggDay(coll: CollectionIF<Egg[]>, id: string) {
-        coll.mutate(({value}) => (coll.value.map((egg) => {
-          if (egg.id === id) {
-            return { ...egg, daysLeft: egg.daysLeft - 1 };
-          }
-          return egg;
-        }));
-      },
-      removeEgg(coll: CollectionIF<Egg[]>, id: string) {
-        coll.mutate(({ value }) => (value.filter((egg: Egg) => egg.id !== id)));
-      },
-      removeADayWithCatch(coll: CollectionIF<Egg[]>) {
-        for (const egg of coll.value) {
-          try {
-            coll.act('removeEggDay', egg.id);
-          } catch (error) {
-            if (error instanceof Error
-             && error.message === EXPIRED_MSG) {
-              coll.act('removeEgg', egg.id);
-            } else {
-              throw error;
-            }
-          }
-        }
-      },
-    },
-  },
-  f
-);
-```
+<EggSample />
 
 The `removeADay` action lowers the day of each egg by one
 

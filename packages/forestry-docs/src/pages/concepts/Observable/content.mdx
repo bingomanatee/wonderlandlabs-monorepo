@@ -1,9 +1,13 @@
+import {SeeMore} from "../../../components/SeeMore";
+import EggSample from '../Transactional/eggSample.mdx';
+import Observation from './observation.mdx';
+
 Forestry conforms to the basic `Subscribable` model - trees can be
 subscribed to and provide a subject that can be `.pipe`d with any number
 of modifiers.
 
 Further the Forest exposes an observable for any named tree that only eimits when all
-nested transations have emptied; so, you can observe trees on a change by change basis,
+nested transactions have emptied; so, you can observe trees on a change by change basis,
 or you can observe only the validated complete actions after every topmost action has
 completed, reducing transitional noise of sub-actions.
 
@@ -14,164 +18,14 @@ This is a variation of the eggs example from [concepts: Transactional](/concepts
 The setup and actions is the same, except now we are subscribing to the activity at both
 the tree and Forest level and echoing the result at the end.
 
-```JavaScript
+<SeeMore title="The eggSample">
+<EggSample />
+</SeeMore>
 
-  const f = new Forest();
+This time, we are subscribing to a summary of our eggs, with two subscribers. (RxJS tech note - in production,
+save the subscribers so you can cancel them later)
 
-  const EXPIRED_MSG = 'Egg has expired';
-  const eggValidator = (e: Egg) => {
-    if (e.daysLeft <= 0) {
-      throw new Error(EXPIRED_MSG);
-    }
-  };
-  const eggsValidator = (es: Egg[]) => {
-    for (const e of es) {
-      eggValidator(e);
-    }
-  };
+<Observation />
 
-  const INITIAL = [
-    { id: 'alpha', daysLeft: 4 },
-    { id: 'beta', daysLeft: 3 },
-    { id: 'gamma', daysLeft: 2 },
-  ];
-
-  const eggsCollection = new Collection<Egg[]>(
-    'eggs',
-    {
-      initial: INITIAL,
-      validator: eggsValidator,
-      actions: {
-        removeADay(coll: CollectionIF<Egg[]>) {
-          for (const egg of coll.value) {
-            coll.act('removeEggDay', egg.id);
-          }
-        },
-        removeEggDay(coll: CollectionIF<Egg[]>, id: string) {
-          coll.mutate(({value}) => (coll.value.map((egg) => {
-            if (egg.id === id) {
-              return { ...egg, daysLeft: egg.daysLeft - 1 };
-            }
-            return egg;
-          }));
-        },
-        removeEgg(coll: CollectionIF<Egg[]>, id: string) {
-          coll.mutate(({ value }) => (value.filter((egg: Egg) => egg.id !== id)));
-        },
-        removeADayWithCatch(coll: CollectionIF<Egg[]>) {
-          for (const egg of coll.value) {
-            try {
-              coll.act('removeEggDay', egg.id);
-            } catch (error) {
-              if (error instanceof Error && error.message === EXPIRED_MSG) {
-                coll.act('removeEgg', egg.id);
-              } else {
-                throw error;
-              }
-            }
-          }
-        },
-      },
-    },
-    f
-  );
-```
-
-This time, we are subscxribing to a summary of our eggs, with two subscribers. (RxJS tech note - in production,
-save the subcribers so you can cancel them later)
-
-```
-  type EggSummary = Record<string, number>;
-
-  function summary(eggs: Egg[]): EggSummary {
-    const out: EggSummary = {};
-    for (const egg of eggs) {
-      out[egg.id] = egg.daysLeft;
-    }
-    return out;
-  }
-
-  type EggTimer = {
-    time: number;
-    eggs: EggSummary;
-    source: string;
-    act: string;
-  };
-  const log: EggTimer[] = [];
-
-  f.observe('eggs').subscribe((eggs: Egg[]) => {
-    log.push({
-      eggs: summary(eggs),
-      time: f.time,
-      source: 'observe',
-      act: eggsCollection.tree.top?.cause,
-    });
-  });
-
-  eggsCollection.tree.subscribe((eggs: Egg[]) => {
-    log.push({
-      eggs: summary(eggs),
-      time: f.time,
-      source: 'tree.subscribe',
-      act: eggsCollection.tree.top?.cause,
-    });
-  });
-
-  //
-  eggsCollection.act('removeADay');
-  try { eggsCollection.act('removeADay')} catch (err) {console.log(err.message)}
-  eggsCollection.act('removeADayWithCatch');
-```
-
-Note how much more verbose the Tree data is - good for diagnosis, not so much
-for application development.
-
-```
-  console.log('----- logs ----- ', JSON.stringify(log, true, 2));
- /**
-
-'Egg has expired'
-
-[
-  { eggs: { alpha: 4, beta: 3, gamma: 2 }, time: 1, source: 'observe', act: 'INITIAL VALUE' },
-  {
-    eggs: { alpha: 4, beta: 3, gamma: 2 },
-    time: 1,
-    source: 'tree.subscribe',
-    act: 'INITIAL VALUE',
-  },
-  { eggs: { alpha: 3, beta: 3, gamma: 2 }, time: 5, source: 'tree.subscribe', act: '(next)' },
-  { eggs: { alpha: 3, beta: 2, gamma: 2 }, time: 8, source: 'tree.subscribe', act: '(next)' },
-  {
-    eggs: { alpha: 3, beta: 2, gamma: 1 },
-    time: 11,
-    source: 'tree.subscribe',
-    act: '(next)',
-  },
-  { eggs: { alpha: 3, beta: 2, gamma: 1 }, time: 11, source: 'observe', act: '(next)' },
-  {
-    eggs: { alpha: 2, beta: 2, gamma: 1 },
-    time: 15,
-    source: 'tree.subscribe',
-    act: '(next)',
-  },
-  {
-    eggs: { alpha: 2, beta: 1, gamma: 1 },
-    time: 18,
-    source: 'tree.subscribe',
-    act: '(next)',
-  },
-  {
-    eggs: { alpha: 2, beta: 1 },
-    time: 23,
-    source: 'tree.subscribe',
-    act: 'removing egg gamma',
-  },
-  { eggs: { alpha: 2, beta: 1 }, time: 23, source: 'observe', act: 'removing egg gamma' },
-]
-  */
-
-```
-
-see [Transportable](/concepts/transportable) for an example of how observation plays
+see [React](/concepts/react) for an example of how observation plays
 out in React.

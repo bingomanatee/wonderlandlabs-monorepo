@@ -26,9 +26,13 @@ function Summary({ value }: { value: string | ReactNode }) {
 
 export function Concepts() {
   const state = useRef(
-    new Collection('concepts', {
-      initial: { current: '', summary: null },
-    })
+    new Collection(
+      'concepts',
+      {
+        initial: { current: '', summary: null },
+      },
+      {}
+    )
   );
 
   const [{ current, summary }, setValue] = useState(state.current.value);

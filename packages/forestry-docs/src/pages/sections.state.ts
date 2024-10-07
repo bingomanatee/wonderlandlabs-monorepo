@@ -1,4 +1,5 @@
 import { Collection } from '@wonderlandlabs/forestry';
+import { CollectionIF } from '@wonderlandlabs/forestry/build/src/types';
 
 export type PageDef = {
   name: string;
@@ -13,20 +14,25 @@ type Sections = {
   sections: PageDef[];
   current: string;
 };
-class SectionsCollection extends Collection<Sections, SectionsCollection> {
+class SectionsCollection extends Collection<Sections> {
   constructor() {
-    super('sections', {
-      initial: { sections: [], current: '' },
-      revisions: {
-        addSection(value: Sections, s: PageDef) {
-          const newValue: Sections = { ...value };
-          newValue.sections = [...value.sections, s];
-          return newValue;
-        },
+    super(
+      'sections',
+      {
+        initial: { sections: [], current: '' },
       },
-    });
+      {
+        addSection(this: CollectionIF<Sections>, s: PageDef) {
+          this.update((value, newSection) => {
+            const newValue: Sections = { ...value };
+            newValue.sections = [...value.sections, newSection];
+            return newValue;
+          }, s);
+        },
+      }
+    );
   }
-  currentPage() {
+  currentPage(this: CollectionIF<Sections>) {
     if (!this.value.current) return undefined;
     return this.value.sections.find((p) => {
       return p.name === this.value.current;
@@ -36,7 +42,7 @@ class SectionsCollection extends Collection<Sections, SectionsCollection> {
 
 export const sectionsState = new SectionsCollection();
 
-sectionsState.revise<PageDef>('addSection', {
+sectionsState.acts.addSection({
   art: '/pictures/api.png',
   icon: '/pictures/icons/api.png',
   url: '/api',
@@ -45,7 +51,7 @@ sectionsState.revise<PageDef>('addSection', {
   title: 'Forestry API',
 });
 
-sectionsState.revise<PageDef>('addSection', {
+sectionsState.acts.addSection({
   art: '/pictures/getting-started.png',
   url: '/getting-started',
   name: 'start',

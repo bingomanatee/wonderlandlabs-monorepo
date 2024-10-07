@@ -1,5 +1,6 @@
 import { Collection, Forest } from '@wonderlandlabs/forestry';
 import type { PageDef } from '../sections.state';
+import { CollectionIF } from '@wonderlandlabs/forestry/build/src/types';
 
 const SECONDS = 1000;
 const LONG_DELAY = 5 * SECONDS;
@@ -20,44 +21,39 @@ export class ConceptsState extends Collection<ConceptInfo> {
       'collections',
       {
         initial: { concepts: [], target: '', isLocked: false },
-        actions: {
-          setIsLocked(concepts, isLocked = true) {
-            concepts.update<boolean>((value) => ({ ...value, isLocked: !!isLocked }));
-          },
-          addConcept(concepts, concept: Concept) {
-            concepts.update<Concept>(
-              (value, concept) => ({
-                ...value,
-                concepts: [...value.concepts, concept!],
-              }),
-              concept
-            );
-          },
-          setTarget(concepts, target: string) {
-            concepts.mutate<string>(
-              ({ value, seed }) => ({
-                ...value,
-                target: seed ?? '',
-              }),
-              target,
-              'addTarget'
-            );
-          },
-          rotate(concepts) {
-            if (concepts.value.isLocked || !concepts.value.concepts.length) {
-              return;
-            }
+      },
+      {
+        setIsLocked(this: CollectionIF<ConceptInfo>, isLocked = true) {
+          this.update((value) => ({ ...value, isLocked: isLocked }));
+        },
+        addConcept(this: CollectionIF<ConceptInfo>, concept: Concept) {
+          this.update(
+            (value, concept) => ({
+              ...value,
+              concepts: [...value.concepts, concept!],
+            }),
+            concept
+          );
+        },
+        setTarget(this: ConceptsState, target: string) {
+          this.update(
+            (value, seed) => ({
+              ...value,
+              target: seed ?? '',
+            }),
+            target
+          );
+        },
+        rotate(this: ConceptsState) {
+          if (this.value.isLocked || !this.value.concepts.length) {
+            return;
+          }
 
-            const currentIndex = concepts.value.concepts.findIndex(
-              (c) => c.name === concepts.value.target
-            );
-            const next = concepts.value.concepts[currentIndex + 1] || concepts.value.concepts[0];
-            if (!next) return;
-            concepts.mutate(({ value }) => ({ ...value, target: next.name }));
-            const state = concepts as ConceptsState;
-
-            state.delay(() => state.rotate(), SHORT_DELAY);
-          },
+          const currentIndex = this.value.concepts.findIndex((c) => c.name === this.value.target);
+          const next = this.value.concepts[currentIndex + 1] || this.value.concepts[0];
+          if (!next) return;
+          this.update((value) => ({ ...value, target: next.name }));
+          this.delay(() => this.rotate(), SHORT_DELAY);
         },
       },
       f
@@ -65,12 +61,11 @@ export class ConceptsState extends Collection<ConceptInfo> {
   }
 
   getConcept(name: string) {
-    console.log('looking for ', name, 'in', this.value.concepts);
     return this.value.concepts.find((c) => c.name === name);
   }
 
   focus(target: string) {
-    this.act('setTarget', target);
+    this.acts.setTarget(target);
     this.setIsLocked(true);
   }
 
@@ -80,11 +75,11 @@ export class ConceptsState extends Collection<ConceptInfo> {
   }
 
   rotate() {
-    this.act('rotate');
+    this.acts.rotate();
   }
 
   setIsLocked(isLocked = true) {
-    this.act('setIsLocked', isLocked);
+    this.acts.setIsLocked(isLocked);
   }
 
   init() {
@@ -103,7 +98,7 @@ export class ConceptsState extends Collection<ConceptInfo> {
   }
 
   addConcept(concept: Concept) {
-    this.act('addConcept', { ...concept });
+    this.acts.addConcept({ ...concept });
   }
 
   goBack(current: string, navigate: (target: string) => void) {

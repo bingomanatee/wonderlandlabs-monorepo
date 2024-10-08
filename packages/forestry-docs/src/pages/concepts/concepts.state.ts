@@ -1,5 +1,5 @@
 import { Collection, Forest } from '@wonderlandlabs/forestry';
-import type { PageDef } from '../sections.state';
+import type { PageDef } from '../pageState.ts';
 import { CollectionIF } from '@wonderlandlabs/forestry/build/src/types';
 
 const SECONDS = 1000;
@@ -8,7 +8,7 @@ const SHORT_DELAY = 2 * SECONDS;
 
 const f = new Forest();
 
-export type Concept = PageDef;
+export type Concept = Omit<PageDef, 'url'>;
 export type ConceptInfo = {
   concepts: Concept[];
   target: string;
@@ -125,26 +125,22 @@ export const conceptsState = new ConceptsState(f);
 conceptsState.addConcept({
   name: 'transactional',
   title: 'Transactional',
-  blurb: `Actions are either fully executed, 
-  or revert to the previous state`,
+  blurb: `atomic changes to multiple states`,
   art: '/pictures/transactional.png',
 });
 
 conceptsState.addConcept({
   name: 'journaled',
   title: 'Journaled',
-  blurb: `Every change and action is logged and timestamped, 
-  even across multiple state collections,
-   for easy diagnosis.`,
+  blurb: `Inspect and diagnose changes across
+  multiple states.`,
   art: '/pictures/journaled.png',
 });
 
 conceptsState.addConcept({
   name: 'observable',
   title: 'Observable',
-  blurb: `Built on RxJS, Forestry allows for observation 
-  of changes system wide as well as piping to all
-      RxJS modifiers.`,
+  blurb: `Built on RxJS for proven subscription patterns and interoperability`,
   art: '/pictures/observable.png',
 });
 
@@ -158,22 +154,21 @@ conceptsState.addConcept({
 conceptsState.addConcept({
   name: 'transportable',
   title: 'Transportable',
-  blurb: ` State value and actions are contained 
+  blurb: `State value and actions are contained 
   within single instances, for ease of test and global access.`,
   art: '/pictures/transportable.png',
 });
 
 conceptsState.addConcept({
   name: 'typescript',
-  title: 'Typescript Friendly',
-  blurb: `Forestry classes and methods can be keyed to define 
-  the type of value managed by the state.`,
+  title: 'Typescripted',
+  blurb: `Type-sensitive generators allow methods to reflect state value`,
   art: '/pictures/typescript.png',
 });
 
 conceptsState.addConcept({
   name: 'react',
-  title: 'Enhances React Development',
+  title: 'Enhances React',
   blurb: `Designed for global or local state, 
   Forestry allows a single-system
   state tool for all scopes of a React application.`,

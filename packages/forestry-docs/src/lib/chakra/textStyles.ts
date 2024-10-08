@@ -55,4 +55,11 @@ export const textStyles = {
     color: 'pageTitle', // Reference color from theme
     textShadow: TITLE_TEXT_SHADOW,
   },
+
+  fn: {
+    whiteSpace: 'pre',
+    fontFamily: 'mono',
+    color: 'fn',
+    fontWeight: 400,
+  },
 };

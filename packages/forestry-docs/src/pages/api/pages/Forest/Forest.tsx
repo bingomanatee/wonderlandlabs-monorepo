@@ -1,13 +1,17 @@
-import { Fragment } from 'react';
+import { Box } from '@chakra-ui/react';
+import ApiHeader from '../ApiHeader.tsx';
+import type { PageDef } from '../../../pageState.ts';
+import Summary from './summary.mdx';
+import Content from './content.mdx';
 
-export default function ForestPage() {
+export default function ForestPage({ page }: { page: PageDef }) {
+  console.log('forest page:', page);
   return (
     <Box>
-      <ApiHeader title={'Forest'}>
-        Forest is a "tree management class." it coordinates transactions between a set of trees. For
-        the most part, its not a class you directly interact with other than as a getter for trees
-        or a parameter for Collections.
+      <ApiHeader page={page}>
+        <Summary />
       </ApiHeader>
+      <Content />
     </Box>
   );
 }

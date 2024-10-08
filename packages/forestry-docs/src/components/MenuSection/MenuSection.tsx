@@ -5,13 +5,13 @@ import { Box, Heading, Text } from '@chakra-ui/react';
 export function MenuSection({
   title,
   children,
-  link,
+  url,
   art,
-}: PropsWithChildren<Partial<{ title: string; art: string; link: string }>>) {
+}: PropsWithChildren<Partial<{ title: string; art: string; url: string }>>) {
   const navigate = useNavigate();
   const handleClick = useCallback(() => {
-    if (link) navigate(link);
-  }, [link, navigate]);
+    if (url) navigate(url);
+  }, [url, navigate]);
 
   return (
     <Box as="section" position="relative" onClick={handleClick} layerStyle="menuSection">

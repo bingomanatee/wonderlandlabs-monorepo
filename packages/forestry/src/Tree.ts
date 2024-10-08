@@ -6,12 +6,20 @@ import { BenchMarker } from './treeHelpers/BenchMarker';
 import { PreValidator } from './treeHelpers/PreValidator';
 
 import { NotableHelper } from './NotableHelper';
-import type { TreeIF, TreeName, TreeParams, TreeValuation } from './types/types.trees';
+import type {
+  TreeIF,
+  TreeName,
+  TreeParams,
+  TreeValuation,
+} from './types/types.trees';
 import type { ForestIF } from './types/types.forest';
 import type { BranchIF } from './types/types.branch';
 import type {
-  ChangeIF, Info, InfoParams,
-  MutationValueProviderFN, NotesMap,
+  ChangeIF,
+  Info,
+  InfoParams,
+  MutationValueProviderFN,
+  NotesMap,
   OffshootIF,
   SubscribeFn,
   UpdaterValueProviderFN,
@@ -26,7 +34,9 @@ export class Tree<ValueType> implements TreeIF<ValueType> {
   ) {
     this.initialize();
 
-    this.stream = new BehaviorSubject<BranchIF<ValueType> | undefined>(this.top);
+    this.stream = new BehaviorSubject<BranchIF<ValueType> | undefined>(
+      this.top
+    );
   }
 
   private initialize() {
@@ -81,7 +91,9 @@ export class Tree<ValueType> implements TreeIF<ValueType> {
 
     const last = firstObs.prev;
     this.top = last;
-
+    if (this.name === 'string-tree') {
+      console.log('rolled back tree to ', this.top.value, 'at', this.top.time);
+    }
     if (last) {
       last.next = undefined;
     } else {
@@ -112,8 +124,10 @@ export class Tree<ValueType> implements TreeIF<ValueType> {
     name = ''
   ) {
     const updaterFn = updater as UpdaterValueProviderFN<ValueType, typeof seed>;
-    const mutator: MutationValueProviderFN<ValueType, typeof seed> = ({ value, seed }) =>
-      updaterFn(value, seed);
+    const mutator: MutationValueProviderFN<ValueType, typeof seed> = ({
+      value,
+      seed,
+    }) => updaterFn(value, seed);
 
     let growName: string = name ?? '';
     if (!growName && updaterFn.name) {
@@ -137,7 +151,10 @@ export class Tree<ValueType> implements TreeIF<ValueType> {
         PreValidator.validate(change, this);
       }
 
-      if (this.params?.benchmarkInterval && BenchMarker.shouldBenchmark<ValueType>(this, change)) {
+      if (
+        this.params?.benchmarkInterval &&
+        BenchMarker.shouldBenchmark<ValueType>(this, change)
+      ) {
         new BenchMarker<ValueType>(this).benchmark(change);
         return this.top;
       }
@@ -243,7 +260,13 @@ export class Tree<ValueType> implements TreeIF<ValueType> {
     if (!this._notes) {
       this._notes = new Map();
     }
-    NotableHelper.addNote(this.forest.time, this._notes, message, params, this.name);
+    NotableHelper.addNote(
+      this.forest.time,
+      this._notes,
+      message,
+      params,
+      this.name
+    );
   }
 
   hasNoteAt(time: number) {

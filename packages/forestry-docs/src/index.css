@@ -25,9 +25,9 @@
   --nav-button-width: 30px;
   --nav-button-width-sm: 25px;
   --nav-button-color: rgb(59, 94, 91);
-  --home-header-bg1: hsla(200, 90%, 8%, 1);
-  --home-header-bg2: hsla(200, 90%, 8%, 0.5);
-  --home-header-bg3: hsla(200, 90%, 8%, 0.2);
+  --home-header-bg1: hsla(200, 75%, 40%, 1);
+  --home-header-bg2: hsla(200, 80%, 50%, 0.5);
+  --home-header-bg3: hsla(200, 90%, 60%, 0.33);
   --home-header-bg4: hsla(200, 90%, 8%, 0);
 }
 
@@ -102,4 +102,13 @@ p a {
 .sizeSVG svg {
     width: 100%;
     height: 100%
+}
+
+h1 > i, h2 > i, h3 > i {
+    font-family: var(--code-font);
+    color: var(--code-color);
+}
+
+h1 > span, h2 > span, h3 > span, h4 > span {
+    font-size: 1em !important;
 }

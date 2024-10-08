@@ -32,7 +32,8 @@ export const theme = extendBaseTheme({
   },
   fonts: {
     body: `Montserrat`, // Using CSS variables for fonts
-    heading: `Archivo`, // Main heading font
+    heading: `Archivo Black`, // Main heading font
+    headingSub: `Archivo`, // Main heading font
     logoHeading: 'Archivo Black', // For specific headings like logos
     mono: 'Source Code Pro',
   },

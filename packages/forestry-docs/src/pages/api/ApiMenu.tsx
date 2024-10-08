@@ -18,16 +18,22 @@ export default function ApiMenu() {
     <>
       <ApiMenuHead>Core Classes</ApiMenuHead>
       <HighlightContainer>
-        <MenuSection title="Tree">A single atomic value</MenuSection>
-        <MenuSection title="Forest">The core dataset for a series of relates states</MenuSection>
+        <MenuSection url="tree" title="Tree">
+          A single atomic value
+        </MenuSection>
+        <MenuSection url="forest" title="Forest">
+          The core dataset for a series of relates states
+        </MenuSection>
       </HighlightContainer>
       <ApiMenuHead>Extended Controllers</ApiMenuHead>
       <HighlightContainer>
-        <MenuSection title="Collection">
+        <MenuSection url="/api/collection" title="Collection">
           A decorator for a single tree; adds change actions to a single Tree
         </MenuSection>
-        <MenuSection title="FormCollection">A utility class for managing a form.</MenuSection>
-        <MenuSection title="MapCollection">
+        <MenuSection url="/api/formcollection" title="FormCollection">
+          A utility class for managing a form.
+        </MenuSection>
+        <MenuSection url="/api/mapcollection" title="MapCollection">
           An optimized class for managing a Map based collection. Uses proxies for low-memory
           journals
         </MenuSection>

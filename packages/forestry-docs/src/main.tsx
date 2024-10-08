@@ -1,4 +1,4 @@
-import { type FC, lazy, StrictMode, Suspense } from 'react';
+import { type FC, lazy, ReactNode, StrictMode, Suspense } from 'react';
 import { createRoot } from 'react-dom/client';
 import Home from './pages/home/Home.tsx';
 import './index.css';
@@ -13,6 +13,7 @@ import { upperFirst } from 'lodash-es';
 import ApiBase from './pages/api/ApiLayout.tsx';
 import ApiMenu from './pages/api/ApiMenu.tsx';
 import { Named } from './named.tsx';
+import { pageState } from './pages/pageState.ts';
 
 const conceptComponents = conceptsState.value.concepts.reduce(
   (acc, concept) => {
@@ -22,6 +23,34 @@ const conceptComponents = conceptsState.value.concepts.reduce(
     return acc;
   },
   {} as Record<string, FC>
+);
+
+type Route = { path: string; element: ReactNode };
+
+const apiPageDefs = pageState.pages().filter((p) => p.parent === 'api');
+// @ts-expect-error TS2740
+const apiPages: Route[] = apiPageDefs.reduce(
+  // @ts-expect-error TS2740
+  (out, page) => {
+    if (page.url === '') return out;
+    const path = pageState.fileFor(page);
+    const url = pageState.pageUrl(page);
+    console.log('making route for ', url, 'with file ', path);
+    console.log('-----importing', path, 'for page', page);
+    const Page = lazy(() => import(`${path}`));
+    return [
+      ...out,
+      {
+        path: url,
+        element: (
+          <Suspense fallback={<div>loading...</div>}>
+            <Page page={page} />
+          </Suspense>
+        ),
+      },
+    ];
+  },
+  [] as Route[]
 );
 
 const router = createBrowserRouter([
@@ -60,6 +89,7 @@ const router = createBrowserRouter([
             path: '',
             element: <ApiMenu />,
           },
+          ...apiPages,
         ],
       },
     ],

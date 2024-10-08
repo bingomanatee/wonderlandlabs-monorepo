@@ -49,10 +49,7 @@ describe('Forest', () => {
       f.addTree('bar', { initial: 300 });
 
       const sum = f.do(() => {
-        return (
-          (f.tree<number>('foo')?.value) +
-          (f.tree<number>('bar')?.value)
-        );
+        return f.tree<number>('foo')?.value + f.tree<number>('bar')?.value;
       });
 
       expect(sum).toEqual(400);
@@ -79,6 +76,42 @@ describe('Forest', () => {
       expect(foo.value).toBe(100);
       expect(bar.value).toBe(300);
     });
+
+    it('should accept arguments to do', () => {
+      const forest = new Forest();
+
+      const stringer = forest.addTree<string>('string-tree*', {
+        initial: '',
+        validator: (value) => {
+          if (typeof value !== 'string') {
+            throw new Error('value must be a string');
+          }
+        },
+      });
+
+      const number = forest.addTree<number>('number-tree*', {
+        initial: 0,
+      });
+
+      function setValues(num, string) {
+        number.next(num);
+        stringer.next(string);
+      }
+
+      setValues(100, 'a string');
+
+      expect(() => {
+        setValues(200, 200);
+      }).toThrow('value must be a string');
+
+      expect(number.value).toBe(200);
+
+      expect(() => {
+        forest.do(setValues, 300, 300);
+      }).toThrow('value must be a string');
+
+      expect(number.value).toBe(200);
+    });
   });
 
   describe('observe', () => {
@@ -103,12 +136,12 @@ describe('Forest', () => {
           values.push(v.num);
         }
       });
-      expect(values).toEqual([ ]);
+      expect(values).toEqual([]);
 
       t.grow(growBy(2));
 
       expect(t.value).toEqual({ num: 2 });
-      expect(values).toEqual([ 2 ]);
+      expect(values).toEqual([2]);
 
       f.do(() => {
         t.grow(growBy(2));
@@ -122,9 +155,9 @@ describe('Forest', () => {
         });
       }).toThrow();
 
-      expect(values).toEqual([  2, 11 ]);
+      expect(values).toEqual([2, 11]);
       t.grow(growBy(0));
-      expect(values).toEqual([ 2, 11 ]);
+      expect(values).toEqual([2, 11]);
     });
   });
 

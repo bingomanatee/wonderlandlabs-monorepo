@@ -41,6 +41,11 @@ export const layerStyles = {
     marginTop: 3,
     maxWidth: '600px',
   },
+  apiSummary: {
+    ...textStyles.conceptsSummary,
+    marginTop: 3,
+    maxWidth: '600px',
+  },
   content: {
     paddingX: { base: '10px', md: '1rem', lg: '1.5rem', xl: '2rem' },
     paddingY: '30px',
@@ -95,7 +100,7 @@ export const layerStyles = {
   },
   logo: {
     position: 'fixed',
-    right: `calc(10px - ${u(LOGO_MARGIN_SIZE)})`,
+    right: `calc(10px + ${u(LOGO_MARGIN_SIZE)})`,
     top: `calc(10px - ${u(LOGO_MARGIN_SIZE)})`,
     width: `calc(${u(LOGO_SIZE)} + (2 * ${u(LOGO_MARGIN_SIZE)}))`,
     minHeight: `calc(${u(LOGO_SIZE)} + (2 * ${u(LOGO_MARGIN_SIZE)}))`,
@@ -153,6 +158,7 @@ export const layerStyles = {
     flex: 1,
     flexBasis: 0,
     paddingX: { base: 0, md: '2rem', lg: '3rem', xl: '5rem' },
+    paddingTop: { base: '12px', md: '16px', lg: '20px' },
     display: 'flex',
     /* bgGradient: `linear(
     90deg,

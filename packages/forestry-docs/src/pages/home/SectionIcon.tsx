@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import type { PageDef } from '../sections.state.ts';
+import type { PageDef } from '../pageState.ts';
 import { useCallback } from 'react';
 import { Heading, Image, Box } from '@chakra-ui/react';
 

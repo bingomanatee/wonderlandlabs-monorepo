@@ -25,16 +25,21 @@ export const heading = defineStyleConfig({
       lineHeight: '100%',
       textTransform: 'uppercase',
     }),
+    mdH3: {
+      fontSize: scale(1.1, 'rem'),
+      fontWeight: 500,
+      fontFamily: 'headingSub',
+      color: 'blackAlpha.700',
+    },
     mdH2: { fontSize: scale(1.1, 'rem'), fontWeight: 500 },
     mdH1: { fontSize: scale(1.5, 'rem'), fontWeight: 500 },
 
     menuHead: {
-      textTransform: 'uppercase',
       fontFamily: 'heading',
       lineHeight: '90%',
-      fontWeight: 200,
+      fontWeight: 400,
       opacity: 0.5,
-      fontSize: scaleRem(1.5), // Responsive font size
+      fontSize: scaleRem(1.25), // Responsive font size
       color: 'menuTitle', // Reference color from theme
       textAlign: 'center',
       marginTop: '1.5rem',
@@ -78,6 +83,7 @@ export const heading = defineStyleConfig({
       fontFamily: 'logoHeading',
       fontSize: scale(2.5, 'rem'), // Responsive font size
       color: 'pageTitle', // Reference color from theme
+      textShadow: TITLE_TEXT_SHADOW,
     }),
   },
 });

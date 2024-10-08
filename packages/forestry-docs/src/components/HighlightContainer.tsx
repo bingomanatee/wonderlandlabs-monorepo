@@ -17,7 +17,7 @@ export function HighlightContainer({ children }: PropsWithChildren) {
     <Box layerStyle="highlightContainer" id="highlightContainer">
       {isWide ? (
         <SimpleGrid
-          minChildWidth={{ base: '150px', sm: '150px', md: '200px' }}
+          columns={3}
           spacing={{ base: '2px', sm: '5px', md: '8px', lg: '10px', xl: '12px' }}
         >
           {children}

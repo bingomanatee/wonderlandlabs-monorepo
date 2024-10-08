@@ -129,16 +129,14 @@ export class Forest implements ForestIF {
 
     const tree = this.tree(name);
     if (!tree) {
-      throw new Error(
-        'cannot observe ' + name + ': no $tree by that name exi'
-      );
+      throw new Error('cannot observe ' + name + ': no $tree by that name exi');
     } // for typescript
 
-    return combineLatest([ this.activeTaskSubject, tree.subject ]).pipe(
-      filter(([ depth ]: [Set<number>, undefined]) => {
+    return combineLatest([this.activeTaskSubject, tree.subject]).pipe(
+      filter(([depth]: [Set<number>, undefined]) => {
         return depth.size === 0;
       }),
-      map(([ , value ]: [Set<number>, undefined]) => value),
+      map(([, value]: [Set<number>, undefined]) => value),
       distinctUntilChanged(isEqual)
     ) as Observable<ValueType>;
   }

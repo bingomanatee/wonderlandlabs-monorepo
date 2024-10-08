@@ -1,28 +1,42 @@
 import { Box, Heading, Text } from '@chakra-ui/react';
-import { Outlet } from 'react-router-dom';
-import { sectionsState } from '../sections.state';
+import { Outlet, useLocation } from 'react-router-dom';
+import { PageDef, pageState } from '../pageState.ts';
 import { useEffect, useMemo, useState } from 'react';
 
 const TITLE = 'Forestry API';
 
 export default function ApiBase() {
-  const [, setSections] = useState(sectionsState.value);
+  const [, setPages] = useState(pageState.value);
+
+  const location = useLocation();
+
+  const pathname = useMemo(() => location.pathname, [location.pathname]);
+
+  const currentPage: PageDef | undefined = useMemo(() => {
+    return pageState.pageWithUrl(pathname);
+  }, [pathname]);
 
   useEffect(() => {
-    const sub = sectionsState.subscribe((value) => setSections(value));
-    return () => sub?.unsubscribe();
+    const sub = pageState.subscribe((value) => setPages(value));
+    return () => {
+      sub?.unsubscribe();
+    };
   }, []);
 
-  const currentPage = sectionsState.currentPage();
-
-  const atMenu = useMemo(() => !currentPage || currentPage?.name === 'api', [currentPage]);
+  const title = useMemo(() => {
+    if (pathname === '/api') return TITLE;
+    if (currentPage) {
+      return currentPage.title;
+    }
+    return '';
+  }, [pathname, currentPage]);
 
   return (
     <Box as="main" layerStyle="pageColumnContainer">
       <Box as="section" id="pageColumn" layerStyle="pageColumn">
         <Box as="header">
-          {!atMenu ? <Text textStyle="pageTitlePrefix">{TITLE}</Text> : null}
-          <Heading variant="titleLogo">{!atMenu ? currentPage!.title : TITLE}</Heading>
+          {pathname !== '/api' ? <Text textStyle="pageTitlePrefix">{TITLE}</Text> : null}
+          <Heading variant="titleLogo">{title}</Heading>
         </Box>
         <Outlet />
       </Box>

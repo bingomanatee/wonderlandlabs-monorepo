@@ -2,6 +2,7 @@ import { BG_HUE, BG_SAT, BG_LIGHT } from './themeConstants';
 
 export const colors = {
   code: 'hsl(200, 90%, 90%)',
+  fn: 'hsl(287,100%,25%)',
   content: `hsl(180, 40%, 90%)`,
   contentBackground: `hsla(180, 40%, 90%, 1)`,
   contentInset: `hsla(180, 40%, 95%, 0.8)`,

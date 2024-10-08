@@ -91,9 +91,6 @@ export class Tree<ValueType> implements TreeIF<ValueType> {
 
     const last = firstObs.prev;
     this.top = last;
-    if (this.name === 'string-tree') {
-      console.log('rolled back tree to ', this.top.value, 'at', this.top.time);
-    }
     if (last) {
       last.next = undefined;
     } else {

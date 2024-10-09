@@ -1,8 +1,7 @@
 import { Forest } from '../../Forest';
 import type { ForestIF } from '../../types/types.forest';
-import type { SubscribeFn } from '../../types/types.shared';
 import { BehaviorSubject, map } from 'rxjs';
-import type { PartialObserver, Unsubscribable } from 'rxjs';
+import type { Unsubscribable } from 'rxjs';
 import type {
   FieldList,
   FieldRecord,
@@ -19,11 +18,16 @@ import type {
 
 import { FormFieldMapCollection } from './FormFieldMapCollection';
 import { isFieldList, isFieldRecord, isFieldValue } from './types.guards';
+import { ObserverOrSubscribeFn } from '../../types/types.shared';
 
 type FieldDef = FieldList | FieldRecord;
 
 export class FormCollection implements FormCollectionIF {
-  constructor(public name: string, fields: FieldDef, params?: Params) {
+  constructor(
+    public name: string,
+    fields: FieldDef,
+    params?: Params
+  ) {
     this.forest = params?.forest ?? new Forest();
     this.initFields(fields);
     this.initForm(params?.form);
@@ -113,7 +117,7 @@ export class FormCollection implements FormCollectionIF {
     return this._stream!;
   }
   // @s-expect-error TS2416
-  subscribe(observer: PartialObserver<FormSetIF> | SubscribeFn<FormSetIF>) {
+  subscribe(observer: ObserverOrSubscribeFn<FormSetIF>) {
     if (typeof observer === 'function') {
       observer = { next: observer };
     }
@@ -148,7 +152,7 @@ export class FormCollection implements FormCollectionIF {
   }
 
   get isValid(): boolean {
-    return [ ...this.fieldMapCollection.value.values() ].every(
+    return [...this.fieldMapCollection.value.values()].every(
       (field) => !field.errors || !field.errors.length
     );
   }

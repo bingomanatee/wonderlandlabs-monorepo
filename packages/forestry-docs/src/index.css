@@ -109,6 +109,10 @@ h1 > i, h2 > i, h3 > i {
     color: var(--code-color);
 }
 
-h1 > span, h2 > span, h3 > span, h4 > span {
+h1 > .chakra-text,
+h2 > .chakra-text,
+h3 > .chakra-text,
+h4 > .chakra-text {
     font-size: 1em !important;
+    white-space: normal;
 }

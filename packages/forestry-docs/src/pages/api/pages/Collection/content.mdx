@@ -1,51 +1,35 @@
 import Observable from './../../../concepts/Observable/observation.mdx'
 import {SeeMore} from "../../../../components/SeeMore";
 
-## Collection
+## Tree
 
-A Collection is a class that decorates the Tree class and combines it with custom actions.
-Collections create a new tree upon instantiation and access it with decorating methods.
-However, there are a few extra nuances to be aware of:
+Trees are single value stores. What exactly that "single value" is is completely open -
+Trees can store anything that can be stored in a Javascript reference: Maps, arrays,
+strings, numbers, etc.
 
-1. All the actions it provides are wrapped in [`forest.do(...)`](/api/forest), providing automatic
-   transactional insulation.
-2. the Forest argument is optional in the Collection constructor, meaning you can automatically
-   create a Collection with its own dedicated Forest instance.
-3. Unlike Trees, creating a new collection with `myCollection = new Collection(...)`
-   _is the best (only) way_ to create a collection.
-4. Collections use the same namespace as trees in the forest; if the name of the collection
-   may conflict and is not important use `forest.uniqueNameLike('myName')` to create a safe
-   name for the collection.
+## Changing a Tree value
 
- Collections can be extended to allow custom methods referencing the collections' tree to create
- selectors and/or sub-collections.
-
-## Changing a Collection value
-
-As with [Trees](/api/tree), while changing a collection with `myCollection.next(value)`
-is easiest (and for scalar values, the best) way to change state for simple values,
-for complex values or dense objects, `myCollection.update(changeFn, seed?)`
-is generally a better way to change _part_ of the state;
-it takes less memory especially if you reuse the changeFn out of a library.
+While changing a tree with `myTree.next(value)` is easiest (and for scalar values, the best) way
+to change state for simple values, for complex values or dense objects, `myTree.update(changeFn, seed?)`
+is generally a better way to change _part_ of the state; it takes less memory especially if you reuse
+the changeFn out of a library.
 
 ## Constructor
 
-Constructor takes four arguments:
+Tree takes four arguments:
 
 * `name`: a string; can be anything of any length (it functions as a "Map" key)
 * `params`: defined by TreeParams; at minimum it is `{initial: [value]}`, the value of the state at start.
   See [TreeParams](/api/tree-params) for an exhaustive list of properties.
-* `actions`: an object containing functions, the "this" value for which is the collection.
-* `forest`: a [`Forest`](/api/forest) instance. optional
+* `forest`: a [`Forest`](/api/forest) instance.
+
+That being said - trees are instantiated via `myForest.addTree(name, params)`
+rather than `new Tree(name, params, forest)`.
 
 ```
 const f = new Forest();
 
-const counter: CollectionIF<number> = new Collection(
-  'counter',
-   {initial: 3},
-   {increment() {this.next(this.value + 1)},
-   forest);
+const counter: TreeIF<number> = f.addTree<number>('counter', {initial: 3});
 
 ```
 

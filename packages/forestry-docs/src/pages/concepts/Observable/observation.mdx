@@ -19,7 +19,7 @@ type EggTimer = {
 };
 const log: EggTimer[] = [];
 
-f.observe('eggs').subscribe((eggs: Egg[]) => {
+eggs.observe((eggs: Egg[]) => {
   log.push({
     eggs: summary(eggs),
     time: f.time,

@@ -1,0 +1,89 @@
+import {SeeMore} from "../../../../components/SeeMore";
+
+The configuration of a Tree has a host of options. At minimum `initial` must be set;
+all other arguments are optional. `validator` is recommended.
+
+Other than the validator and the initial value all these parameters optimize large-history
+storage; the details aren't necessarily important for transient stores or stores
+that are based on simple / static values like numbers or strings. Complex data should have
+a `maxBranches` and `trimTo` value if used in production.
+
+## Fields
+
+### initial: `<ValueType>`
+
+The starting value of the state. **REQUIRED**
+
+### validator: `(value) => Error | falsy`
+
+A function that either throws or returns an error if the property is invalid.
+Should return falsy for valid values.
+
+```
+const treeParams = {
+    initial: 0,
+    validator(value) {
+        if (typeof value !== number) throw new Error('Value must be a number');
+        if (value < 0) return new Error('value must be >= 0');
+        return false;
+      }
+}
+```
+
+### dontCache: `boolean`
+
+set to true to disable the storing of the output of `update()` methods in cache.
+Will re-compute the value every time it is accessed from `.myTree.value`.
+
+### maxBranches: `number`
+
+The maximum number of historical elements to save. it's recommended to be at least 80 items.
+Simple/static store values can have a value in the hundreds or thousands.
+
+### trimTo: `number`
+
+if maxBranches is set (and exceeded) the tree is trimmed to the `trimTo` size.
+This is a number that is less than maxBranches
+but large enough to maintain a reasonable history, at least 50 items.
+recommended 60-80% of `maxBranches`.
+
+Note - there are some circumstances, when open transactions are in play, that the actual number
+of branches retained will be longer than your desired maxBranches; however ultimately your tree
+will be kept at or near to trimTo past items stored (branches)
+-- or rather a number between maxBranches and TimTo.
+
+### serializer: `({ branch: BranchIF<ValueType>; tree: TreeIF<ValueType>; value: Value;  }) => value: ValueType`
+
+reduces the value (which in some cases may be a nested proxy) to a simple value, functionally identical
+to the proxy. This is necessary for MapCollection or any custom update function that produces a proxy.
+Otherwise, omit this property.
+
+### BenchmarkInterval: `number`
+
+how many changes a tree can undergo before its value is serialized. Important to prevent deep
+proxy nesting if proxies are used, or if dontCache is true, nested function calls to update deltas.
+
+## Example
+
+```
+const forest = new Forest();
+const tree = forest.addTree('generalObject', {
+    initial: {},
+    dontCache: true,
+    serializer: ({value) {
+        return {...value};
+    },
+    benchmarkInterval: 10});
+
+ const addProp = (value, [key, value]) => {
+    return {...value, [key]: value}
+    }
+
+tree.update(addProp, ['username', 'Bob Smith']);
+tree.update(addProp, ['password', '$abc123']);
+...
+```
+
+because dontCache is set, every time `tree.update(..)` is called, all the updates will be called
+in reverse order of assertion; however every ten changes, the nested call will be asserted as if
+`tree.next(tree.params.serializer({value: tree.value})` had been called.

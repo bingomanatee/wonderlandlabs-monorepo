@@ -1,6 +1,7 @@
 import type { BranchIF } from './types.branch';
 import type { TreeIF } from './types.trees';
 import type { ValueProviderContext } from './ValueProviderContext';
+import { PartialObserver } from 'rxjs';
 
 export interface OffshootIF<ValueType> {
   time: number;
@@ -31,7 +32,6 @@ export interface Mutator<ValueType> {
  * All changes must be named, to define clear journaling of acuase.
  */
 export type ChangeIF<ValueType> = Mutator<ValueType> | Assertion<ValueType>;
-export type SubscribeFn<ValueType> = (next: ValueType) => any;
 
 export type IterFn<KeyType, ValueType> = (v: ValueType, k: KeyType) => void;
 
@@ -139,3 +139,10 @@ export type UpdaterValueProviderFN<Value = unknown, SeedType = any> = (
   value: Value,
   seed: SeedType
 ) => Value;
+
+type SubscribeFn<ValueType> = (value: ValueType) => void;
+
+// Define the combined type that can be either a PartialObserver or a SubscribeFn
+export type ObserverOrSubscribeFn<ValueType> =
+  | PartialObserver<ValueType>
+  | SubscribeFn<ValueType>;

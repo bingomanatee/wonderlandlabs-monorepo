@@ -10,6 +10,7 @@ export type PageDef = {
   url: string;
   art?: string;
   parent?: string;
+  [key: string]: unknown;
 };
 
 const f = new Forest();
@@ -130,6 +131,15 @@ pageState.addPage({
   name: 'tree',
   parent: 'api',
   blurb: 'a single state',
+});
+
+pageState.addPage({
+  url: 'tree-params',
+  title: 'TreeParams',
+  name: 'tree-params',
+  parent: 'api',
+  showOnMenu: false,
+  blurb: 'Configuration arguments to Tree',
 });
 
 pageState.addPage({

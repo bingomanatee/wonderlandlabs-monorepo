@@ -1,5 +1,5 @@
 import { BehaviorSubject, filter, map } from 'rxjs';
-import type { Observer, PartialObserver } from 'rxjs';
+import type { Observer } from 'rxjs';
 import { Branch } from './Branch';
 import { Beaver } from './treeHelpers/Beaver';
 import { BenchMarker } from './treeHelpers/BenchMarker';
@@ -14,14 +14,14 @@ import type {
 } from './types/types.trees';
 import type { ForestIF } from './types/types.forest';
 import type { BranchIF } from './types/types.branch';
-import type {
+import {
   ChangeIF,
   Info,
   InfoParams,
   MutationValueProviderFN,
   NotesMap,
+  ObserverOrSubscribeFn,
   OffshootIF,
-  SubscribeFn,
   UpdaterValueProviderFN,
 } from './types/types.shared';
 
@@ -221,7 +221,7 @@ export class Tree<ValueType> implements TreeIF<ValueType> {
     );
   }
 
-  subscribe(observer: PartialObserver<ValueType> | SubscribeFn<ValueType>) {
+  subscribe(observer: ObserverOrSubscribeFn<ValueType>) {
     return this.subject.subscribe(observer);
   }
 

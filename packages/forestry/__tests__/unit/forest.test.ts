@@ -131,7 +131,7 @@ describe('Forest', () => {
       });
 
       const values: number[] = [];
-      f.observe<Numeric>(t.name!).subscribe((v: Numeric) => {
+      t.observe((v: Numeric) => {
         if (v) {
           values.push(v.num);
         }
@@ -141,7 +141,7 @@ describe('Forest', () => {
       t.grow(growBy(2));
 
       expect(t.value).toEqual({ num: 2 });
-      expect(values).toEqual([ 2 ]);
+      expect(values).toEqual([2]);
 
       f.do(() => {
         t.grow(growBy(2));
@@ -155,9 +155,9 @@ describe('Forest', () => {
         });
       }).toThrow();
 
-      expect(values).toEqual([ 2, 11 ]);
+      expect(values).toEqual([2, 11]);
       t.grow(growBy(0));
-      expect(values).toEqual([ 2, 11 ]);
+      expect(values).toEqual([2, 11]);
     });
   });
 

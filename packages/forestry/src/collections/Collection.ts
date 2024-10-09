@@ -1,12 +1,11 @@
 import { Forest } from '../Forest';
-import type {
-  SubscribeFn,
+import {
+  ObserverOrSubscribeFn,
   UpdaterValueProviderFN,
   ValueProviderFN,
 } from '../types/types.shared';
 import type { ForestIF } from '../types/types.forest';
 import type { TreeIF, TreeParams } from '../types/types.trees';
-import type { PartialObserver } from 'rxjs';
 import type { CollectionIF } from '../types/types.collections';
 
 import { ControllerActions, collectionActions } from './collectionActions';
@@ -51,7 +50,11 @@ export class Collection<ValueType> implements CollectionIF<ValueType> {
     return this.tree.subject;
   }
 
-  subscribe(observer: PartialObserver<ValueType> | SubscribeFn<ValueType>) {
-    return this.forest.observe(this.tree.name).subscribe(observer);
+  subscribe(observer: ObserverOrSubscribeFn<ValueType>) {
+    return this.tree.subscribe(observer);
+  }
+
+  observe(observer: ObserverOrSubscribeFn<ValueType>) {
+    return this.tree.observe(observer);
   }
 }

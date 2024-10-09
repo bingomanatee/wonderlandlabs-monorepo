@@ -1,15 +1,15 @@
 import type { BranchIF } from './types.branch';
 import type { ForestIF } from './types.forest';
-import type {
+import {
   ChangeIF,
   MutationValueProviderFN,
   Notable,
+  ObserverOrSubscribeFn,
   OffshootIF,
-  SubscribeFn,
   UpdaterValueProviderFN,
   ValueProviderFN,
 } from './types.shared';
-import { PartialObserver, Subscription, Observable } from 'rxjs';
+import { Subscription, Observable } from 'rxjs';
 
 export type TreeName = string;
 
@@ -50,12 +50,8 @@ export interface TreeIF<ValueType> extends Notable {
   ): TreeIF<ValueType>;
   value: ValueType;
   subject: Observable<ValueType>;
-  subscribe(
-    observer: PartialObserver<ValueType> | SubscribeFn<ValueType>
-  ): Subscription;
-  observe(
-    observer: PartialObserver<ValueType> | SubscribeFn<ValueType>
-  ): Subscription;
+  subscribe(observer: ObserverOrSubscribeFn<ValueType>): Subscription;
+  observe(observer: ObserverOrSubscribeFn<ValueType>): Subscription;
 
   valueAt(at: number): ValueType | undefined;
 

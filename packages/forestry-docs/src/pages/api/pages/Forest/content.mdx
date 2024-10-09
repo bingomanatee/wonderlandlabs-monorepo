@@ -96,9 +96,17 @@ const foo2 = makeState('foo', 400); // tree foo-2 has value 400;
 
 Test to see if the forest contains a Tree with a given name.console
 
-## `<ValueType>tree(name: string) : Tree | undefined`
+### `<ValueType>tree(name: string) : Tree | undefined`
 
 returns a previously created tree with the given name if it exists.
+
+### `observe(treeName: string) : Subscribable`
+
+returns a subscribable that updates every time all pending actions complete.
+
+```
+
+```
 
 ## Properties
 

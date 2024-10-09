@@ -1,0 +1,64 @@
+## Tree
+
+Trees are single value stores. What exactly that "single value" is is completely open -
+Trees can store anything that can be stored in a Javascript reference: Maps, arrays,
+strings, numbers, etc.
+
+## Changing a Tree value
+
+While changing a tree with `myTree.next(value)` is easiest (and for scalar values, the best) way
+to change state for simple values, for complex values or dense objects, `myTree.update(changeFn, seed?)`
+is generally a better way to change _part_ of the state; it takes less memory especially if you reuse
+the changeFn out of a library.
+
+## Constructor
+
+Tree takes four arguments:
+
+* `name`: a string; can be anything of any length (it functions as a "Map" key)
+* `params`: defined by TreeParams; at minimum it is `{initial: [value]}`, the value of the state at start.
+  See [/api/TreeParam] for an exhaustive list of properties.
+* `forest`: a [`Forest`](/api/forest) instance.
+
+That being said - trees are instantiated via `myForest.addTree(name, params)`
+rather than `new Tree(name, params, forest)`.
+
+```
+const f = new Forest();
+
+const counter: TreeIF<number> = f.addTree<number>('counter', {initial: 3});
+
+```
+
+Those familiar with RxJS will recognize much of the profile of BehaviorSubject. Trees don't share code
+with BehaviorSubjects but they do have most of the same interface.
+
+## Methods
+
+### `next(value: <ValueType>): void`
+
+Sets the current value of the Tree. If the validator fails, will throw.
+
+### `update((currentValue: <ValueType>, seed) => nextValue, seed?: any)`
+
+changes the value of the tree parametrically.
+
+```
+const forest = new Forest();
+const increment = (n) => n + 1;
+const add(n, seed) => n + seed;
+const counter = forest.addTree('counter', {initial: 0});
+const broadcast = tree.subscribe((value) => console.log('counter = ', value));
+// counter = 0
+counter.update(increment);
+// counter = 1;
+counter.update(increment);
+// counter = 2;
+counter.update(add, 5);
+// counter = 7;
+```
+
+## `subscribe(onChange):` [`subscription`](https://rxjs.dev/guide/subscription)
+
+adds a listener to the value of the tree. Will broadcast immedaitely when added with the
+current state value.

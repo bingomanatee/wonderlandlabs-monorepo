@@ -1,5 +1,5 @@
 import { BehaviorSubject, filter, map } from 'rxjs';
-import type { PartialObserver } from 'rxjs';
+import type { Observer, PartialObserver } from 'rxjs';
 import { Branch } from './Branch';
 import { Beaver } from './treeHelpers/Beaver';
 import { BenchMarker } from './treeHelpers/BenchMarker';
@@ -26,6 +26,7 @@ import type {
 } from './types/types.shared';
 
 export const INITIAL_VALUE = 'INITIAL VALUE';
+
 export class Tree<ValueType> implements TreeIF<ValueType> {
   constructor(
     public forest: ForestIF,
@@ -142,6 +143,7 @@ export class Tree<ValueType> implements TreeIF<ValueType> {
   offshoots?: OffshootIF<ValueType>[];
   root?: BranchIF<ValueType>;
   top?: BranchIF<ValueType>;
+
   grow(change: ChangeIF<ValueType>): BranchIF<ValueType> {
     return this.forest.do(() => {
       if (this.params?.validator) {
@@ -221,6 +223,12 @@ export class Tree<ValueType> implements TreeIF<ValueType> {
 
   subscribe(observer: PartialObserver<ValueType> | SubscribeFn<ValueType>) {
     return this.subject.subscribe(observer);
+  }
+
+  observe(
+    observer: Partial<Observer<ValueType>> | ((value: ValueType) => void)
+  ) {
+    return this.forest.observe<ValueType>(this.name).subscribe(observer);
   }
 
   valueAt(at: number): ValueType | undefined {

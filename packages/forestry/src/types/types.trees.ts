@@ -50,7 +50,12 @@ export interface TreeIF<ValueType> extends Notable {
   ): TreeIF<ValueType>;
   value: ValueType;
   subject: Observable<ValueType>;
-  subscribe(observer: PartialObserver<ValueType> | SubscribeFn<ValueType>): Subscription;
+  subscribe(
+    observer: PartialObserver<ValueType> | SubscribeFn<ValueType>
+  ): Subscription;
+  observe(
+    observer: PartialObserver<ValueType> | SubscribeFn<ValueType>
+  ): Subscription;
 
   valueAt(at: number): ValueType | undefined;
 
@@ -65,7 +70,9 @@ export type ValidatorFn<TreeValueType> = (
   tree: TreeIF<TreeValueType>
 ) => Error | void | undefined; // also throws
 
-export type TreeClonerFn<TreeValueType> = (branch?: BranchIF<TreeValueType>) => TreeValueType;
+export type TreeClonerFn<TreeValueType> = (
+  branch?: BranchIF<TreeValueType>
+) => TreeValueType;
 
 export type TreeParams<TreeValueType> = {
   initial: TreeValueType;

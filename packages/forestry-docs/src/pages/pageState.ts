@@ -144,6 +144,15 @@ pageState.addPage({
 
 pageState.addPage({
   art: '/pictures/getting-started.png',
+  url: 'collection',
+  name: 'collection',
+  blurb: 'The Collection class',
+  icon: '/pictures/icons/collection.png',
+  title: 'Collection',
+  parent: 'api',
+});
+pageState.addPage({
+  art: '/pictures/getting-started.png',
   url: 'getting-started',
   name: 'start',
   blurb: 'Up and running with Forestry',

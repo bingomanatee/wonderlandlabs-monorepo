@@ -162,30 +162,22 @@ describe('tree', () => {
   });
 
   describe('initial invalid', () => {
-    it('should have an undefined value for an initial if the initial is invalid', () => {
+    it('should throw with an invalid initial value', () => {
       const f = new Forest();
 
-      const t = f.addTree('whole numbers', {
-        initial: -1,
-        validator(v) {
-          if (typeof v !== 'number' || v < 0) {
-            throw new Error('not a whole number');
-          }
-          if (v % 0) {
-            throw new Error('not a whole number');
-          }
-        },
-      });
-
-      expect(t.value).toBeUndefined();
-
-      t.next(2);
-      t.next(3);
-
-      expect(t.value).toBe(3);
-
-      t.rollback(-1, 'clear out values');
-      expect(t.value).toBeUndefined();
+      expect(() => {
+        f.addTree('whole numbers', {
+          initial: -1,
+          validator(v) {
+            if (typeof v !== 'number' || v < 0) {
+              throw new Error('not a whole number');
+            }
+            if (v % 0) {
+              throw new Error('not a whole number');
+            }
+          },
+        });
+      }).toThrowError();
     });
   });
 });

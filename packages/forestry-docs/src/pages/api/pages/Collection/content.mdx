@@ -1,35 +1,51 @@
 import Observable from './../../../concepts/Observable/observation.mdx'
 import {SeeMore} from "../../../../components/SeeMore";
 
-## Tree
+## Collection
 
-Trees are single value stores. What exactly that "single value" is is completely open -
-Trees can store anything that can be stored in a Javascript reference: Maps, arrays,
-strings, numbers, etc.
+A Collection is a class that decorates the Tree class and combines it with custom actions.
+Collections create a new tree upon instantiation and access it with decorating methods.
+However, there are a few extra nuances to be aware of:
 
-## Changing a Tree value
+1. All the actions it provides are wrapped in [`forest.do(...)`](/api/forest), providing automatic
+   transactional insulation.
+2. the Forest argument is optional in the Collection constructor, meaning you can automatically
+   create a Collection with its own dedicated Forest instance.
+3. Unlike Trees, creating a new collection with `myCollection = new Collection(...)`
+   _is the best (only) way_ to create a collection.
+4. Collections use the same namespace as trees in the forest; if the name of the collection
+   may conflict and is not important use `forest.uniqueNameLike('myName')` to create a safe
+   name for the collection.
 
-While changing a tree with `myTree.next(value)` is easiest (and for scalar values, the best) way
-to change state for simple values, for complex values or dense objects, `myTree.update(changeFn, seed?)`
-is generally a better way to change _part_ of the state; it takes less memory especially if you reuse
-the changeFn out of a library.
+ Collections can be extended to allow custom methods referencing the collections' tree to create
+ selectors and/or sub-collections.
+
+## Changing a Collection value
+
+As with [Trees](/api/tree), while changing a collection with `myCollection.next(value)`
+is easiest (and for scalar values, the best) way to change state for simple values,
+for complex values or dense objects, `myCollection.update(changeFn, seed?)`
+is generally a better way to change _part_ of the state;
+it takes less memory especially if you reuse the changeFn out of a library.
 
 ## Constructor
 
-Tree takes four arguments:
+Constructor takes four arguments:
 
 * `name`: a string; can be anything of any length (it functions as a "Map" key)
 * `params`: defined by TreeParams; at minimum it is `{initial: [value]}`, the value of the state at start.
   See [TreeParams](/api/tree-params) for an exhaustive list of properties.
-* `forest`: a [`Forest`](/api/forest) instance.
-
-That being said - trees are instantiated via `myForest.addTree(name, params)`
-rather than `new Tree(name, params, forest)`.
+* `actions`: an object containing functions, the "this" value for which is the collection.
+* `forest`: a [`Forest`](/api/forest) instance. optional
 
 ```
 const f = new Forest();
 
-const counter: TreeIF<number> = f.addTree<number>('counter', {initial: 3});
+const counter: CollectionIF<number> = new Collection(
+  'counter',
+   {initial: 3},
+   {increment() {this.next(this.value + 1)},
+   forest);
 
 ```
 
@@ -42,7 +58,7 @@ with BehaviorSubjects but they do have most of the same interface.
 
 Sets the current value of the Tree. If the validator fails, will throw.
 
-### `update((currentValue: <ValueType>, seed) => nextValue, seed?: any)`
+### `update((currentValue: <ValueType>, seed?: any) => nextValue)`
 
 changes the value of the tree parametrically.
 
@@ -51,7 +67,7 @@ const forest = new Forest();
 const increment = (n) => n + 1;
 const add(n, seed) => n + seed;
 const counter = forest.addTree('counter', {initial: 0});
-const broadcast = tree.subscribe((value) => console.log('counter = ', value));
+const broadcast = counter.subscribe((value) => console.log('counter = ', value));
 // counter = 0
 counter.update(increment);
 // counter = 1;
@@ -84,3 +100,51 @@ returns information about the validity of a value. Does not throw, or change the
 
 The current value of the state.
 
+
+### `act: {[string]: actionFunction}`
+
+resolves the third parameter into a set of functions bound to the collection instance. this means that
+`this` in the function will refer to the collection itself allowing for `this.next(...)`,
+ `this.update(...)`, etc. Note: in typescript you can also provide the "this" as the first argument as in:
+
+```
+
+const forest = new Forest();
+
+const collection = new Collection<number>(
+  'counter',
+  { initial: 0},
+  {
+    increment(this: CollectionIF<number>) { this.next(this.value + 1)},
+    decrement() { this.next(this.value - 1)},
+    add(this: CollectionIF<number>, sum: number) { this.next(this.value + sum) }
+  }
+)
+
+const sub = collection.subscribe((value) => console.log('counter is now ', value);
+// counter is now 0
+
+collection.act.increment();
+// counter is now 1
+
+collection.act.add(10);
+// counter is now 11
+
+collection.act.decrement();
+// counter is now 10
+
+```
+
+For increment and add, the variable name `this` is significant; it would not work as expected with
+a variable name like `coll` etc.
+
+#### Transactional insulation
+
+All actions are bound in [`forest.do(...)`](/api/forest)
+and provide [transactional insurance](/concepts/transactional).
+
+#### Arguments
+
+Actions can take any number of arguments. That being said, `next` and `update` can take only up to one
+argument so you'll need to merge/condense all parameters into the built-in Collection methods before
+calling them.

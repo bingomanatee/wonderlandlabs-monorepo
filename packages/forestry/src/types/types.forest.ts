@@ -15,7 +15,7 @@ export interface ForestIF extends Notable {
   ): TreeIF<ValueType>;
   hasTree(name: TreeName): boolean;
   treeNames: string[];
-
+  trees: Map<string, TreeIF<any>>;
   nextTime: number;
   time: number;
   readonly activeTasks: number[];

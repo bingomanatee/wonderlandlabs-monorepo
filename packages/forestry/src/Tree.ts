@@ -29,28 +29,34 @@ export const INITIAL_VALUE = 'INITIAL VALUE';
 
 export class Tree<ValueType> implements TreeIF<ValueType> {
   constructor(
-    public forest: ForestIF,
     public readonly name: TreeName,
-    public readonly params?: TreeParams<ValueType>
+    public readonly params: TreeParams<ValueType>,
+    public forest: ForestIF
   ) {
+    if (forest.hasTree(name)) {
+      throw new Error('tree ' + name + ' exists');
+    }
     this.initialize();
 
     this.stream = new BehaviorSubject<BranchIF<ValueType> | undefined>(
       this.top
     );
+    this.forest.trees.set(name, this);
   }
 
-  private initialize() {
-    const initial = this.params?.initial ?? undefined;
-    if (this.validate(initial).isValid) {
+  private initialize(throwIfBad = true) {
+    if (this.validate(this.params.initial).isValid) {
       this.root = new Branch<ValueType>(this, {
-        assert: initial,
+        assert: this.params.initial,
         name: INITIAL_VALUE,
       });
       this.top = this.root;
     } else {
       this.root = undefined;
       this.top = undefined;
+      if (throwIfBad) {
+        throw new Error('intial value fails validator');
+      }
     }
   }
 
@@ -146,12 +152,12 @@ export class Tree<ValueType> implements TreeIF<ValueType> {
 
   grow(change: ChangeIF<ValueType>): BranchIF<ValueType> {
     return this.forest.do(() => {
-      if (this.params?.validator) {
+      if (this.params.validator) {
         PreValidator.validate(change, this);
       }
 
       if (
-        this.params?.benchmarkInterval &&
+        this.params.benchmarkInterval &&
         BenchMarker.shouldBenchmark<ValueType>(this, change)
       ) {
         new BenchMarker<ValueType>(this).benchmark(change);
@@ -174,7 +180,7 @@ export class Tree<ValueType> implements TreeIF<ValueType> {
   }
 
   validate(value: ValueType): TreeValuation<ValueType> {
-    if (!this.params?.validator) {
+    if (!this.params.validator) {
       return {
         isValid: true,
         value,
@@ -261,7 +267,7 @@ export class Tree<ValueType> implements TreeIF<ValueType> {
 
   private _notes?: NotesMap;
 
-  addNote(message: string, params?: InfoParams) {
+  addNote(message: string, params: InfoParams) {
     if (!this._notes) {
       this._notes = new Map();
     }

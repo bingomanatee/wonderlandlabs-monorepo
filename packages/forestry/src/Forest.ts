@@ -35,7 +35,7 @@ export class Forest implements ForestIF {
 
     return `${basis}-${pad(number)}`;
   }
-  private trees: Map<TreeName, TreeIF<any>> = new Map();
+  public readonly trees: Map<TreeName, TreeIF<any>> = new Map();
 
   public hasTree(name: TreeName) {
     return this.trees.has(name);
@@ -57,8 +57,7 @@ export class Forest implements ForestIF {
       throw new Error('cannot redefine $tree ' + name);
     }
 
-    const tree: TreeIF<ValueType> = new Tree<ValueType>(this, name, params);
-    this.trees.set(name, tree);
+    const tree: TreeIF<ValueType> = new Tree<ValueType>(name, params, this);
     return tree;
   }
   private _time = 0;
@@ -132,11 +131,11 @@ export class Forest implements ForestIF {
       throw new Error('cannot observe ' + name + ': no $tree by that name exi');
     } // for typescript
 
-    return combineLatest([this.activeTaskSubject, tree.subject]).pipe(
-      filter(([depth]: [Set<number>, undefined]) => {
+    return combineLatest([ this.activeTaskSubject, tree.subject ]).pipe(
+      filter(([ depth ]: [Set<number>, undefined]) => {
         return depth.size === 0;
       }),
-      map(([, value]: [Set<number>, undefined]) => value),
+      map(([ , value ]: [Set<number>, undefined]) => value),
       distinctUntilChanged(isEqual)
     ) as Observable<ValueType>;
   }

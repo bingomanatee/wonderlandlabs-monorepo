@@ -152,7 +152,7 @@ export class FormCollection implements FormCollectionIF {
   }
 
   get isValid(): boolean {
-    return [...this.fieldMapCollection.value.values()].every(
+    return [ ...this.fieldMapCollection.value.values() ].every(
       (field) => !field.errors || !field.errors.length
     );
   }

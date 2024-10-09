@@ -119,7 +119,7 @@ describe('Forest', () => {
       const f = new Forest();
 
       const t = f.addTree<Numeric>('should-observe-values', {
-        initial: { num: 0 },
+        initial: { num: 1 },
         validator(value) {
           if (value === undefined) {
             return;
@@ -136,12 +136,12 @@ describe('Forest', () => {
           values.push(v.num);
         }
       });
-      expect(values).toEqual([]);
+      expect(values).toEqual([ 1 ]);
 
-      t.grow(growBy(2));
+      t.grow(growBy(1));
 
       expect(t.value).toEqual({ num: 2 });
-      expect(values).toEqual([2]);
+      expect(values).toEqual([ 1, 2 ]);
 
       f.do(() => {
         t.grow(growBy(2));
@@ -155,9 +155,9 @@ describe('Forest', () => {
         });
       }).toThrow();
 
-      expect(values).toEqual([2, 11]);
+      expect(values).toEqual([ 1, 2, 11 ]);
       t.grow(growBy(0));
-      expect(values).toEqual([2, 11]);
+      expect(values).toEqual([ 1, 2, 11 ]);
     });
   });
 

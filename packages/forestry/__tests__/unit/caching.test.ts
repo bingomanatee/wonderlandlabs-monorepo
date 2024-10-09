@@ -1,7 +1,10 @@
 import { Forest } from '../../src/Forest';
 import { BENCHMARK_CAUSE } from '../../src/treeHelpers/BenchMarker';
 import type { BranchIF } from '../../src/types/types.branch';
-import type { MutationValueProviderFN, Mutator } from '../../src/types/types.shared';
+import type {
+  MutationValueProviderFN,
+  Mutator,
+} from '../../src/types/types.shared';
 import { expect, it, describe } from 'vitest';
 
 describe('caching', () => {
@@ -18,8 +21,6 @@ describe('caching', () => {
           return value ?? 0;
         },
       });
-
-      f.addTree('sat');
 
       const branchCount: number[] = [];
       const branchValues = new Map<number, number>();
@@ -173,11 +174,16 @@ describe('caching', () => {
 
       history.forEach(({ cause }, i) => {
         if (cause === BENCHMARK_CAUSE) {
-          const preset = history.slice(Math.max(0, i - (t.params?.benchmarkInterval ?? 0) - 1), i);
+          const preset = history.slice(
+            Math.max(0, i - (t.params?.benchmarkInterval ?? 0) - 1),
+            i
+          );
           if (i > 4) {
             expect(preset[0].cause).toBe(BENCHMARK_CAUSE);
             // eslint-disable @typescript-eslint/no-unused-expressions
-            expect(preset.slice(1).every((bc) => bc.cause !== BENCHMARK_CAUSE)).toBeTruthy();
+            expect(
+              preset.slice(1).every((bc) => bc.cause !== BENCHMARK_CAUSE)
+            ).toBeTruthy();
             // eslint-enable @typescript-eslint/no-unused-expressions
           }
         }

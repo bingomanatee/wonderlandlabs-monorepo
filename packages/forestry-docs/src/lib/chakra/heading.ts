@@ -31,6 +31,13 @@ export const heading = defineStyleConfig({
       fontFamily: 'headingSub',
       color: 'blackAlpha.700',
     },
+    mdH4: {
+      fontSize: scale(1, 'rem'),
+      fontWeight: 500,
+      fontFamily: 'headingSub',
+      color: 'blackAlpha.700',
+      textDecoration: 'italic',
+    },
     mdH2: { fontSize: scale(1.1, 'rem'), fontWeight: 500 },
     mdH1: { fontSize: scale(1.5, 'rem'), fontWeight: 500 },
 

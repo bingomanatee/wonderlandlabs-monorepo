@@ -143,14 +143,28 @@ pageState.addPage({
 });
 
 pageState.addPage({
-  art: '/pictures/getting-started.png',
   url: 'collection',
   name: 'collection',
   blurb: 'The Collection class',
-  icon: '/pictures/icons/collection.png',
   title: 'Collection',
   parent: 'api',
 });
+
+pageState.addPage({
+  url: 'map-collection',
+  name: 'map-collection',
+  blurb: 'A specialized Map Collection class',
+  title: 'MapCollection',
+  parent: 'api',
+});
+pageState.addPage({
+  url: 'form-collection',
+  name: 'form-collection',
+  blurb: 'A specialized Form Manager class',
+  title: 'FormCollection ',
+  parent: 'api',
+});
+
 pageState.addPage({
   art: '/pictures/getting-started.png',
   url: 'getting-started',

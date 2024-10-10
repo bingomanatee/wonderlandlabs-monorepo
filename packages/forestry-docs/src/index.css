@@ -89,6 +89,9 @@ a {
   text-decoration: underline !important;
     font-weight: 500;
 }
+.no-underline a {
+    text-decoration: none !important;
+}
 
 p a {
     color: var(--link-color);

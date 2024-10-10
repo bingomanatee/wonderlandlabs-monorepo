@@ -10,6 +10,11 @@ export const MARKDOWN_COMPONENTS = {
   h4: (props: PropsWithChildren<AnyProps>) => <Heading my={2} variant="mdH4" as="h4" {...props} />,
   ol: (props: PropsWithChildren<AnyProps>) => <Box as="ol" layerStyle="list" {...props} />,
   ul: (props: PropsWithChildren<AnyProps>) => <Box as="ul" layerStyle="list" {...props} />,
+  li: (props: PropsWithChildren<AnyProps>) => (
+    <Box as="li" layerStyle="mdListItem">
+      <Text textStyle="mdListItem" {...props} />
+    </Box>
+  ),
   fn: (props: PropsWithChildren<AnyProps>) => <Text as="span" textStyle="fn" {...props} />,
   pre: (props: PropsWithChildren<AnyProps>) => (
     <Box

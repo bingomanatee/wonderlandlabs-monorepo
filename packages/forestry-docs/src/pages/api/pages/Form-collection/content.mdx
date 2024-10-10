@@ -1,0 +1,85 @@
+## FormCollection
+
+FormCollection is _not_ a collection child class - it is a custom multi-tree manager for
+controlling form fields and form metadata.
+
+## Constructor
+
+The arguments to FormCollection are:
+
+### name: string
+
+the identifier of the form
+
+### fields: `FieldDef[] | {[string]: FieldDef}`
+
+a list or dictionary of the forms' fields. (see below)
+
+### form: `{name: string, props: object}` (FormInfo)
+
+any information you want to store for the form; this is read-only memo that doesn't change.tree (optional)
+
+### forest: `ForestIF`
+
+optional
+
+### FieldDef
+
+FieldDef are:
+
+* name: `string` (unneeded for the object version)
+* value: `string | number` -- the initial value of the field (required)
+* edited: `boolean` -- set by use when the user interacts with the field - don't set in the constructor
+* errors?: `FieldError[]` -- set by use if the user enters an invalid value
+* inputType?: `string` -- for use in HTML -- has no effect on the FormCollection code
+* componentType?: `string` -- eg. 'input', 'select', etc.; for use in html
+* props?: `object` -- any custom data you want to associate with the form (select options, etc.)
+* isRequired?: `boolean` (default false) -- whether the user is required to add a non-empty value.tree
+* order?: `number` -- a sort key for rendering
+* label?: `string` -- for use in HTML
+* validators?: a FieldValidator function
+* baseParams?: `FieldDef` -- a set of defaults for this field.
+
+The FieldDef is not just the constructor argument - its also the field definition stored and returned by this collection.
+
+### FieldValidator function: `(field: FieldParam, previousErrors: FieldError[]) => FieldError | undefined | null | false`
+
+If the value is bad return `{message: string, severity?: number}`. (technically you can also return an Error instance, as
+it will have a message).
+
+If you pass an array of FieldValidators, any errors from previous calls will be passed to successive functions.
+so, for instance, if you have one failure its up to you whether to continue testing or just let that error stand.
+
+Field Validator functions do _not_ cause errors to throw or any sort of data failure; they just decorate the field definition.
+
+## Methods
+
+### `subscribe(listener): subscription`
+
+returns the current form info in the form `{fields: FieldDef[], form: FormInfo}` upon a change
+
+### `field(name: string) : FieldDef | undefined`
+
+The current value of a single field (if it exists).
+
+### `setFieldValue(name: string, value: string | number)`
+
+Update a field's value
+
+### `updateField(name: string, (FieldDef, FormCollection) => FieldDef)`
+
+revise a field; the function receives the current field value, and returns an updated field definition.
+
+### `updateFieldProperty(name: string, key: string, value: unknown)`
+
+revise a field - update a single property of the FieldDef.
+
+## Properties
+
+### `value: {fields: {name: FieldDef}, form: {formInfo}}`
+
+the current value of the form
+
+## `isValid: boolean`
+
+indicates the absence of any errors in the form fields.

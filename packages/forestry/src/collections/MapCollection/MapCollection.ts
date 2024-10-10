@@ -4,7 +4,6 @@ import { canProxy } from '../../canProxy';
 import { Collection } from '../Collection';
 import { deleteProxyFor } from './deleteProxyFor';
 import { setProxyFor } from './setProxyFor';
-import type { CollectionParams } from '../../types/types.collections';
 import { TreeParams } from '../../types/types.trees';
 
 export function noSet() {
@@ -17,9 +16,7 @@ export class MapCollection<
 > extends Collection<Map<KeyType, ValueType>> {
   constructor(
     name: string,
-    params:
-      | TreeParams<Map<KeyType, ValueType>>
-      | Omit<CollectionParams<Map<KeyType, ValueType>>, 'actions'>,
+    params: TreeParams<Map<KeyType, ValueType>>,
     actions,
     forest?: ForestIF
   ) {
@@ -111,12 +108,8 @@ export class MapCollection<
     return this.tree.top.value.get(key);
   }
 
-  replace(map: Map<KeyType, ValueType>) {
-    this.tree.next(map, 'replace');
-  }
-
   clear() {
-    this.replace(new Map());
+    this.next(new Map());
   }
 
   get size() {

@@ -30,10 +30,10 @@ export default function ApiMenu() {
         <MenuSection url="/api/collection" title="Collection">
           A decorator for a single tree; adds change actions to a single Tree
         </MenuSection>
-        <MenuSection url="/api/formcollection" title="FormCollection">
+        <MenuSection url="/api/form-collection" title="FormCollection">
           A utility class for managing a form.
         </MenuSection>
-        <MenuSection url="/api/mapcollection" title="MapCollection">
+        <MenuSection url="/api/map-collection" title="MapCollection">
           An optimized class for managing a Map based collection. Uses proxies for low-memory
           journals
         </MenuSection>

@@ -2,7 +2,7 @@ import { Box, Heading, Text } from '@chakra-ui/react';
 import { Outlet, useLocation } from 'react-router-dom';
 import { PageDef, pageState } from '../pageState.ts';
 import { useEffect, useMemo, useState } from 'react';
-
+import { Link } from 'react-router-dom';
 const TITLE = 'Forestry API';
 
 export default function ApiBase() {
@@ -35,10 +35,23 @@ export default function ApiBase() {
     <Box as="main" layerStyle="pageColumnContainer">
       <Box as="section" id="pageColumn" layerStyle="pageColumn">
         <Box as="header">
-          {pathname !== '/api' ? <Text textStyle="pageTitlePrefix">{TITLE}</Text> : null}
+          {pathname !== '/api' ? (
+            <span className="no-underline">
+              <Link to="/api">
+                <Text textStyle="pageTitlePrefix">{TITLE}</Text>
+              </Link>
+            </span>
+          ) : null}
           <Heading variant="titleLogo">{title}</Heading>
         </Box>
         <Outlet />
+        {pathname !== '/api' ? (
+          <Box marginY="2em">
+            <Link to="/api">
+              <a>Return to API Menu</a>
+            </Link>
+          </Box>
+        ) : null}
       </Box>
     </Box>
   );

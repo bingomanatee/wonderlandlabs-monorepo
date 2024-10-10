@@ -61,9 +61,7 @@ describe('FormCollection', () => {
   it('has all the initial values', () => {
     const f = new Forest();
 
-    const fm = new FormCollection('comment', COMMENT_FIELDS, {
-      forest: f,
-    });
+    const fm = new FormCollection('comment', COMMENT_FIELDS, {}, f);
 
     expect([ ...fm.value.fields.keys() ]).toEqual([
       'title',
@@ -101,9 +99,7 @@ describe('FormCollection', () => {
     it('can update with values', () => {
       const f = new Forest();
 
-      const fm = new FormCollection('comment', COMMENT_FIELDS, {
-        forest: f,
-      });
+      const fm = new FormCollection('comment', COMMENT_FIELDS, {}, f);
       fm.setFieldValue('title', 'Great Expectations');
       fm.setFieldValue('authorEmail', 'foo@bar.com');
 
@@ -137,9 +133,7 @@ describe('FormCollection', () => {
     it('should update a field property', () => {
       const f = new Forest();
 
-      const fm = new FormCollection('comment', COMMENT_FIELDS, {
-        forest: f,
-      });
+      const fm = new FormCollection('comment', COMMENT_FIELDS, {}, f);
 
       fm.updateFieldProperty('content', 'label', 'Content');
 
@@ -151,9 +145,7 @@ describe('FormCollection', () => {
     it('should commit a single named field', () => {
       const f = new Forest();
 
-      const fm = new FormCollection('comment', COMMENT_FIELDS, {
-        forest: f,
-      });
+      const fm = new FormCollection('comment', COMMENT_FIELDS, {}, f);
       fm.commit('title');
 
       expect([ ...fm.value.fields.keys() ]).toEqual([
@@ -171,9 +163,7 @@ describe('FormCollection', () => {
     it('should commit all fields without arguem', () => {
       const f = new Forest();
 
-      const fm = new FormCollection('comment', COMMENT_FIELDS, {
-        forest: f,
-      });
+      const fm = new FormCollection('comment', COMMENT_FIELDS, {}, f);
       fm.commit();
 
       expect([ ...fm.value.fields.values() ].map((f) => f.committed)).toEqual([

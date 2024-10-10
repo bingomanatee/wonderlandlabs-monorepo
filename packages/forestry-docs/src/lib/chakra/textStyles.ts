@@ -33,6 +33,10 @@ export const textStyles = {
     fontSize: scale(0.9, 'rem'),
     color: 'contentText',
   },
+  mdListItem: {
+    fontSize: scale(0.9, 'rem'),
+    color: 'contentText',
+  },
   mdPre: {
     color: 'code',
     whiteSpace: 'pre',
@@ -40,8 +44,8 @@ export const textStyles = {
     overflowY: 'auto',
   },
   mdVariable: {
-    color: 'variable',
-    fontSize: scale(0.7, 'rem'),
+    color: 'var(--variable-color)',
+    fontSize: '1em',
     whiteSpace: 'pre',
     fontFamily: 'mono',
     lineHeight: '110%',
@@ -54,6 +58,10 @@ export const textStyles = {
     fontSize: scaleRem(1), // Responsive font size
     color: 'pageTitle', // Reference color from theme
     textShadow: TITLE_TEXT_SHADOW,
+    _hover: {
+      textShadow: 'none',
+      textDecoration: 'underline',
+    },
   },
 
   fn: {

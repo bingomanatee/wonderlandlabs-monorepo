@@ -1,0 +1,54 @@
+
+## MapCollection
+
+While you don't _have_ to use this class to manage a Map in Forestry, this class
+stores changes as proxies instead of creating multiple copies of the entire map as it changes over time,
+reducing the memory footprint of large Map collections over time.
+
+MapCollection is a child class of [`Collection`](/api/collection); all custom functionality
+is in class methods, so you are free to implement any custom actions you wish through the third parameter.
+
+## Constructor
+
+you can define a type for the keys and values as generators:
+
+```
+const myMapCollection = new MapCollection<string, number>(
+  'population',
+  {initial: new Map(...)},
+  {...actions},
+  new Forest()
+);
+```
+
+You cannot create specific key / value typing pairs - the type constraints are homogenous for all keys and values.
+
+## Methods
+
+### `has(key): boolean`
+
+equivalent of `Map.has`: returns true if the value contains the given key
+
+###  `delete(key)`
+
+removes a single key from the value
+
+### `deleteMany(keys: any[])`
+
+removes multiple keys from the value
+
+### `get(key: any): value | undefined`
+
+returns the value for a key, if it exists; or undefined if it does not.
+
+### `clear()`
+
+empties the map - replaces it with an empty `Map()`.
+
+### `keys(): <KeyType[]>`
+
+returns an iterator over the keys of the map
+
+### `values(): <ValueType[]>`
+
+returns an iterator over the values of the map

@@ -120,6 +120,9 @@ export const layerStyles = {
     fontSize: scaleRem(0.7),
     lineHeight: '110%',
   },
+  mdListItem: {
+    marginBottom: scaleRem(0.25),
+  },
   menuSection: {
     paddingX: CALLOUT_PADDING_X,
     paddingY: CALLOUT_PADDING_Y,
@@ -157,7 +160,7 @@ export const layerStyles = {
     flexDirection: 'column',
     flex: 1,
     flexBasis: 0,
-    paddingX: { base: 0, md: '2rem', lg: '3rem', xl: '5rem' },
+    paddingX: { base: '10px', sm: '1rem', md: '2rem', lg: '3rem', xl: '5rem' },
     paddingTop: { base: '12px', md: '16px', lg: '20px' },
     display: 'flex',
     /* bgGradient: `linear(

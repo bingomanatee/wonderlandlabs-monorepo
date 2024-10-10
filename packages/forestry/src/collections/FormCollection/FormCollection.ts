@@ -6,7 +6,6 @@ import type {
   FieldList,
   FieldRecord,
   FormSetIF,
-  Params,
   FormIF,
   FieldIF,
   FieldBase,
@@ -26,11 +25,12 @@ export class FormCollection implements FormCollectionIF {
   constructor(
     public name: string,
     fields: FieldDef,
-    params?: Params
+    form?: FormIF,
+    forest?: ForestIF
   ) {
-    this.forest = params?.forest ?? new Forest();
+    this.forest = forest ?? new Forest();
     this.initFields(fields);
-    this.initForm(params?.form);
+    this.initForm(form);
   }
 
   public fieldBaseParams: BaseParamMap = new Map();

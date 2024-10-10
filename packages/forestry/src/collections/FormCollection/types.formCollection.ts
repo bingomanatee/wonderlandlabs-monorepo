@@ -46,14 +46,6 @@ export interface FormIF {
 export interface FormSetIF {
   fields: FieldMap;
   form: FormIF;
-  edited?: boolean;
-}
-
-export interface Params {
-  form?: FormIF;
-  errors?(input: FormSetIF): number[];
-  errorMessages?: string[];
-  forest?: ForestIF;
 }
 
 // #region field collections

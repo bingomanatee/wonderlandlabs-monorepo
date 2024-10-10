@@ -25,7 +25,7 @@ export class Collection<ValueType> implements CollectionIF<ValueType> {
     return this.tree.value;
   }
 
-  next(next: ValueType, name: string) {
+  next(next: ValueType, name?: string) {
     this.tree.next(next, name);
   }
 

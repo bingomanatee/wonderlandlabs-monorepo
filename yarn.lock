@@ -6579,7 +6579,18 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@wonderlandlabs/forestry@workspace:^, @wonderlandlabs/forestry@workspace:packages/forestry":
+"@wonderlandlabs/forestry@npm:latest":
+  version: 3.0.25
+  resolution: "@wonderlandlabs/forestry@npm:3.0.25"
+  dependencies:
+    lodash-es: "npm:^4.17.21"
+    rxjs: "npm:^7.8.1"
+    tslib: "npm:~2.7"
+  checksum: 10c0/2c0aa006a7615eb66e7e00d845c27c1a2eb8ca186807821a5c3e5fa6c8b37c4dd9fda48c3efcd776256489e1b017dc5c6e771b4e18206bc60885090a32565395
+  languageName: node
+  linkType: hard
+
+"@wonderlandlabs/forestry@workspace:packages/forestry":
   version: 0.0.0-use.local
   resolution: "@wonderlandlabs/forestry@workspace:packages/forestry"
   dependencies:
@@ -17234,7 +17245,7 @@ __metadata:
     "@types/react-helmet": "npm:^6"
     "@vitejs/plugin-react": "npm:^4.3.1"
     "@vitest/eslint-plugin": "npm:^1.1.4"
-    "@wonderlandlabs/forestry": "workspace:^"
+    "@wonderlandlabs/forestry": "npm:latest"
     dayjs: "npm:^1.11.13"
     eslint: "npm:^9.9.0"
     eslint-plugin-react-hooks: "npm:^5.1.0-rc.0"
@@ -17564,7 +17575,6 @@ __metadata:
     "@types/lodash.clonedeep": "npm:^4.5.0"
     "@typescript-eslint/eslint-plugin": "npm:^8.2.0"
     "@typescript-eslint/parser": "npm:^8.2.0"
-    "@wonderlandlabs/collect": "npm:^1.0.2"
     eslint: "npm:^8"
     eslint-config-prettier: "npm:^8"
     eslint-plugin-jest: "npm:^28.8.0"

@@ -9,8 +9,6 @@
     "packages/*"
   ],
   "private": true,
-  "dependencies": {
-  },
   "scripts": {
     "lint": "eslint .",
     "tsc": "tsc",

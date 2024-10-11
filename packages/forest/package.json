@@ -10,7 +10,7 @@
   "dependencies": {
     "@wonderlandlabs/collect": "^1.0.2",
     "@wonderlandlabs/styler": "0.0.8",
-    "@wonderlandlabs/walrus": "workspace:^",
+    "@wonderlandlabs/walrus": "latest",
     "lodash.isequal": "^4.5.0",
     "rxjs": "^7.8.1",
     "uuid": "^9.0.1"

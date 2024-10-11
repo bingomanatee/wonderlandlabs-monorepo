@@ -23,7 +23,7 @@ fs.writeFileSync(
   `
 import {SeeMore} from "../../../components/SeeMore";
 
-<SeeMore title="EggsAndHamWithForestry Source">
+<SeeMore title="EggsAndHamWithForestry Source" open>
 ${'```JavaScript'}
 
 ${buyEggsAndHamForestry}

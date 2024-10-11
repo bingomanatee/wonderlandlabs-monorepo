@@ -1,5 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import { Forest, Collection } from '@wonderlandlabs/forestry';
+import {
+  Forest,
+  Collection,
+} from '@wonderlandlabs/forestry';
 import type { CollectionIF } from '@wonderlandlabs/forestry/build/src/types';
 
 type Egg = {
@@ -52,26 +55,44 @@ describe('concepts', () => {
               this.acts.removeEggDay(egg.id);
             }
           },
-          removeEggDay(this: CollectionIF<Egg[]>, id: string) {
-            const eggs: Egg[] = this.value.map((egg) => {
-              if (egg.id === id) {
-                return { ...egg, daysLeft: egg.daysLeft - 1 };
-              }
-              return egg;
-            });
+          removeEggDay(
+            this: CollectionIF<Egg[]>,
+            id: string,
+          ) {
+            const eggs: Egg[] = this.value.map(
+              (egg) => {
+                if (egg.id === id) {
+                  return {
+                    ...egg,
+                    daysLeft: egg.daysLeft - 1,
+                  };
+                }
+                return egg;
+              },
+            );
             this.next(eggs);
           },
-          removeEgg: function (this: CollectionIF<Egg[]>, id: string) {
+          removeEgg: function (
+            this: CollectionIF<Egg[]>,
+            id: string,
+          ) {
             this.mutate(({ value }) => {
-              return value.filter((egg: Egg) => egg.id !== id);
+              return value.filter(
+                (egg: Egg) => egg.id !== id,
+              );
             }, 'removing egg ' + id);
           },
-          removeADayWithCatch(this: CollectionIF<Egg[]>) {
+          removeADayWithCatch(
+            this: CollectionIF<Egg[]>,
+          ) {
             for (const egg of this.value) {
               try {
                 this.acts.removeEggDay(egg.id);
               } catch (error) {
-                if (error instanceof Error && error.message === EXPIRED_MSG) {
+                if (
+                  error instanceof Error &&
+                  error.message === EXPIRED_MSG
+                ) {
                   this.acts.removeEgg(egg.id);
                 } else {
                   throw error;
@@ -80,7 +101,7 @@ describe('concepts', () => {
             }
           },
         },
-        f
+        f,
       );
 
       expect(eggs.value).toEqual(INITIAL);
@@ -89,7 +110,9 @@ describe('concepts', () => {
 
       expect(eggs.value).toEqual(LESS_ONE_DAY);
 
-      expect(() => eggs.acts.removeADay()).toThrow();
+      expect(() =>
+        eggs.acts.removeADay(),
+      ).toThrow();
 
       expect(eggs.value).toEqual(LESS_ONE_DAY);
 
@@ -121,7 +144,9 @@ describe('concepts', () => {
         { id: 'gamma', daysLeft: 2 },
       ];
 
-      const eggsCollection = new Collection<Egg[]>(
+      const eggsCollection = new Collection<
+        Egg[]
+      >(
         'eggs',
         {
           initial: INITIAL,
@@ -134,30 +159,48 @@ describe('concepts', () => {
               this.acts.removeEggDay(egg.id);
             }
           },
-          removeEggDay(this: CollectionIF<Egg[]>, id: string) {
-            const eggs: Egg[] = this.value.map((egg) => {
-              if (egg.id === id) {
-                return { ...egg, daysLeft: egg.daysLeft - 1 };
-              }
-              return egg;
-            });
+          removeEggDay(
+            this: CollectionIF<Egg[]>,
+            id: string,
+          ) {
+            const eggs: Egg[] = this.value.map(
+              (egg) => {
+                if (egg.id === id) {
+                  return {
+                    ...egg,
+                    daysLeft: egg.daysLeft - 1,
+                  };
+                }
+                return egg;
+              },
+            );
             this.next(eggs);
           },
-          removeEgg(this: CollectionIF<Egg[]>, id: string) {
+          removeEgg(
+            this: CollectionIF<Egg[]>,
+            id: string,
+          ) {
             this.mutate(
               ({ value }) => {
-                return value.filter((egg: Egg) => egg.id !== id);
+                return value.filter(
+                  (egg: Egg) => egg.id !== id,
+                );
               },
               null,
-              'removing egg ' + id
+              'removing egg ' + id,
             );
           },
-          removeADayWithCatch(this: CollectionIF<Egg[]>) {
+          removeADayWithCatch(
+            this: CollectionIF<Egg[]>,
+          ) {
             for (const egg of this.value) {
               try {
                 this.acts.removeEggDay(egg.id);
               } catch (error) {
-                if (error instanceof Error && error.message === EXPIRED_MSG) {
+                if (
+                  error instanceof Error &&
+                  error.message === EXPIRED_MSG
+                ) {
                   this.acts.removeEgg(egg.id);
                 } else {
                   throw error;
@@ -166,7 +209,7 @@ describe('concepts', () => {
             }
           },
         },
-        f
+        f,
       );
 
       type EggSummary = Record<string, number>;
@@ -187,23 +230,31 @@ describe('concepts', () => {
       };
       const log: EggTimer[] = [];
 
-      f.observe('eggs').subscribe((eggs: Egg[]) => {
-        log.push({
-          eggs: summary(eggs),
-          time: f.time,
-          source: 'observe',
-          act: eggsCollection.tree.top?.cause,
-        });
-      });
+      f.observe<Egg[]>('eggs').subscribe(
+        (eggs: Egg[]) => {
+          log.push({
+            eggs: summary(eggs),
+            time: f.time,
+            source: 'observe',
+            act:
+              eggsCollection.tree.top?.cause ??
+              '',
+          });
+        },
+      );
 
-      eggsCollection.tree.subscribe((eggs: Egg[]) => {
-        log.push({
-          eggs: summary(eggs),
-          time: f.time,
-          source: '$tree.subscribe',
-          act: eggsCollection.tree.top?.cause,
-        });
-      });
+      eggsCollection.tree.subscribe(
+        (eggs: Egg[]) => {
+          log.push({
+            eggs: summary(eggs),
+            time: f.time,
+            source: '$tree.subscribe',
+            act:
+              eggsCollection.tree.top?.cause ??
+              '',
+          });
+        },
+      );
 
       eggsCollection.acts.removeADay();
       eggsCollection.acts.removeADayWithCatch();

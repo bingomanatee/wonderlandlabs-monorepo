@@ -1,0 +1,63 @@
+import  EggSample   from './../concepts/Transactional/eggSample.mdx';
+import  BuyEggsAndHamWithForestry  from './../concepts/Synchronous/BuyEggsAndHamWithForestry.mdx';
+
+install Forestry from npm:
+
+```
+npm i @wonderlandlabs/forestry
+
+yarn add @wonderlandlabs/forestry
+```
+
+### Dependencies and Compatibility
+
+Forestry depends on:
+
+* [RxJS](https://rxjs.dev/guide/overview)
+* a few functions from lodash (isEqual, uniqWith)
+
+Forestry does not depend on browser APIs or any specific view library; it can work in Node or the Browser.
+It's compatible with React, Angular, Vue and vanilla javascript applications.
+
+### Developing a Store
+
+How you use Forestry depends on the style of use you want in managing your store.
+
+If you just want to have a value available and change it externally you can use a basic
+Tree instance as a store. If you want to bundle change methods with your store use a Collection.
+
+### A basic Tree Store
+
+```JavaScript
+const forest = new Forest();
+const counter = forest.addTree<number>(
+  'counter',
+  {
+    initial: 0,
+    validator({value}) {
+      if (typeof value !== 'number') throw new Error('counter must be a number');
+      if (Number.isNaN(value)) throw new Error('not a number');
+    }
+  }
+);
+
+const sub = counter.subscribe((n) => console.log('counter is now ',n ));
+// counter is now 0
+counter.next(100);
+// counter is now 100
+counter.update((n) => n + 10);
+// counter is now 110
+
+```
+
+i.e., tree will simply act as a validation enforced stream. Here's a more
+involved example with React integration:
+
+<BuyEggsAndHamWithForestry show />
+
+
+### Full Collection
+
+If you want to bundle your actions with your store, you can use a collection.
+
+<EggSample />

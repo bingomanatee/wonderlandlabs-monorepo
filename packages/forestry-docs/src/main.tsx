@@ -14,6 +14,7 @@ import ApiBase from './pages/api/ApiLayout.tsx';
 import ApiMenu from './pages/api/ApiMenu.tsx';
 import { Named } from './named.tsx';
 import { pageState } from './pages/pageState.ts';
+import Start from './pages/start/Start.tsx';
 
 const conceptComponents = conceptsState.value.concepts.reduce(
   (acc, concept) => {
@@ -92,6 +93,7 @@ const router = createBrowserRouter([
           ...apiPages,
         ],
       },
+      { path: 'start', element: <Start /> },
     ],
   },
 ]);

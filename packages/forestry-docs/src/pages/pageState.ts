@@ -109,7 +109,6 @@ class PageCollection extends MapCollection<string, PageDef> {
 export const pageState = new PageCollection();
 
 pageState.addPage({
-  art: '/pictures/api.png',
   icon: '/pictures/icons/api.png',
   url: '/api',
   name: 'api',
@@ -166,8 +165,7 @@ pageState.addPage({
 });
 
 pageState.addPage({
-  art: '/pictures/getting-started.png',
-  url: 'getting-started',
+  url: 'start',
   name: 'start',
   blurb: 'Up and running with Forestry',
   icon: '/pictures/icons/getting-started.png',

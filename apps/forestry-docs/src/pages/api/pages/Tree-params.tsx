@@ -4,7 +4,7 @@ import type { PageDef } from '../../pageState.ts';
 import Summary from './Tree-params/summary.mdx';
 import Content from './Tree-params/content.mdx';
 
-export default function ForestPage({
+export default function TreeParams({
   page,
 }: {
   page: PageDef;

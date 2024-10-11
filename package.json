@@ -10,7 +10,6 @@
   ],
   "private": true,
   "dependencies": {
-    "@wonderlandlabs/collect": "^1.0.2"
   },
   "scripts": {
     "lint": "eslint .",

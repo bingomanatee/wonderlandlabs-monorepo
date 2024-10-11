@@ -17,7 +17,7 @@
     "@mdx-js/rollup": "^3.0.1",
     "@pixi/react": "7",
     "@vitest/eslint-plugin": "^1.1.4",
-    "@wonderlandlabs/forestry": "workspace:^",
+    "@wonderlandlabs/forestry": "latest",
     "dayjs": "^1.11.13",
     "framer-motion": "^11.8.0",
     "lodash-es": "^4.17.21",

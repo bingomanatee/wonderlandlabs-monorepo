@@ -1,0 +1,23 @@
+{
+  "name": "forestry-docs",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/forestry-docs/src",
+  "projectType": "application",
+  "targets": {
+    "serve": {
+      "executor": "vite",
+      "options": {
+        "configFile": "vite.config.ts"
+      }
+    },
+    "build": {
+      "executor": "vite",
+      "outputs": [
+        "dist/apps/forestry-docs"
+      ],
+      "options": {
+        "configFile": "vite.config.ts"
+      }
+    }
+  }
+}

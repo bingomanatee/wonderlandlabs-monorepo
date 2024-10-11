@@ -1,11 +1,14 @@
-import { unit } from './Background';
-import type { CellFactory, CellIF } from '../types';
+import { unit } from './Background.ts.txt';
+import type {
+  CellFactory,
+  CellIF,
+} from '../types';
 
 export class Screen {
   constructor(
     public width: number,
     public height: number,
-    private cellFactory: CellFactory
+    private cellFactory: CellFactory,
   ) {
     this.initTiles();
   }
@@ -15,7 +18,11 @@ export class Screen {
     for (let t = 0; t < tiles; ++t) {
       const i = t % I;
       const j = Math.floor(t / I);
-      this.cells[t] = this.cellFactory(i, j, this);
+      this.cells[t] = this.cellFactory(
+        i,
+        j,
+        this,
+      );
     }
   }
   get iCount() {
@@ -28,7 +35,12 @@ export class Screen {
   cells: CellIF[] = [];
 
   cell(i: number, j: number) {
-    if (i < 0 || j < 0 || i >= this.iCount || j >= this.jCount) {
+    if (
+      i < 0 ||
+      j < 0 ||
+      i >= this.iCount ||
+      j >= this.jCount
+    ) {
       return null;
     }
     const index = j * this.iCount + i;

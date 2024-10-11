@@ -1,3 +1,4 @@
+// @ts-nocheck
 type EggSummary = Record<string, number>;
 
 function summary(eggs: Egg[]): EggSummary {

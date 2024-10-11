@@ -1,4 +1,7 @@
-import { Collection, Forest } from '@wonderlandlabs/forestry';
+import {
+  Collection,
+  Forest,
+} from '@wonderlandlabs/forestry';
 import type { PageDef } from '../pageState.ts';
 import { CollectionIF } from '@wonderlandlabs/forestry/build/src/types';
 
@@ -8,7 +11,7 @@ const SHORT_DELAY = 2 * SECONDS;
 
 const f = new Forest();
 
-export type Concept = Omit<PageDef, 'url'>;
+export type Concept = PageDef;
 export type ConceptInfo = {
   concepts: Concept[];
   target: string;
@@ -20,48 +23,84 @@ export class ConceptsState extends Collection<ConceptInfo> {
     super(
       'collections',
       {
-        initial: { concepts: [], target: '', isLocked: false },
+        initial: {
+          concepts: [],
+          target: '',
+          isLocked: false,
+        },
       },
       {
-        setIsLocked(this: CollectionIF<ConceptInfo>, isLocked = true) {
-          this.update((value) => ({ ...value, isLocked: isLocked }));
+        setIsLocked(
+          this: CollectionIF<ConceptInfo>,
+          isLocked = true,
+        ) {
+          this.update((value) => ({
+            ...value,
+            isLocked: isLocked,
+          }));
         },
-        addConcept(this: CollectionIF<ConceptInfo>, concept: Concept) {
+        addConcept(
+          this: CollectionIF<ConceptInfo>,
+          concept: Concept,
+        ) {
           this.update(
             (value, concept) => ({
               ...value,
-              concepts: [...value.concepts, concept!],
+              concepts: [
+                ...value.concepts,
+                concept!,
+              ],
             }),
-            concept
+            concept,
           );
         },
-        setTarget(this: ConceptsState, target: string) {
+        setTarget(
+          this: ConceptsState,
+          target: string,
+        ) {
           this.update(
             (value, seed) => ({
               ...value,
               target: seed ?? '',
             }),
-            target
+            target,
           );
         },
         rotate(this: ConceptsState) {
-          if (this.value.isLocked || !this.value.concepts.length) {
+          if (
+            this.value.isLocked ||
+            !this.value.concepts.length
+          ) {
             return;
           }
 
-          const currentIndex = this.value.concepts.findIndex((c) => c.name === this.value.target);
-          const next = this.value.concepts[currentIndex + 1] || this.value.concepts[0];
+          const currentIndex =
+            this.value.concepts.findIndex(
+              (c) => c.name === this.value.target,
+            );
+          const next =
+            this.value.concepts[
+              currentIndex + 1
+            ] || this.value.concepts[0];
           if (!next) return;
-          this.update((value) => ({ ...value, target: next.name }));
-          this.delay(() => this.rotate(), SHORT_DELAY);
+          this.update((value) => ({
+            ...value,
+            target: next.name,
+          }));
+          this.delay(
+            () => this.rotate(),
+            SHORT_DELAY,
+          );
         },
       },
-      f
+      f,
     );
   }
 
   getConcept(name: string) {
-    return this.value.concepts.find((c) => c.name === name);
+    return this.value.concepts.find(
+      (c) => c.name === name,
+    );
   }
 
   focus(target: string) {
@@ -88,7 +127,10 @@ export class ConceptsState extends Collection<ConceptInfo> {
 
   #interval?: NodeJS.Timeout;
 
-  delay(action: () => unknown, delay: number = 0) {
+  delay(
+    action: () => unknown,
+    delay: number = 0,
+  ) {
     clearInterval(this.#interval);
     this.#interval = setTimeout(action, delay);
   }
@@ -101,19 +143,34 @@ export class ConceptsState extends Collection<ConceptInfo> {
     this.acts.addConcept({ ...concept });
   }
 
-  goBack(current: string, navigate: (target: string) => void) {
-    const index = this.value.concepts.findIndex((c) => c.name === current);
+  goBack(
+    current: string,
+    navigate: (target: string) => void,
+  ) {
+    const index = this.value.concepts.findIndex(
+      (c) => c.name === current,
+    );
     const prev = this.value.concepts[index - 1];
     this.go(prev, navigate);
   }
-  goNext(current: string, navigate: (target: string) => void) {
-    const index = this.value.concepts.findIndex((c) => c.name === current);
+  goNext(
+    current: string,
+    navigate: (target: string) => void,
+  ) {
+    const index = this.value.concepts.findIndex(
+      (c) => c.name === current,
+    );
     const prev = this.value.concepts[index + 1];
     this.go(prev, navigate);
   }
-  private go(target: Concept | undefined, navigate: (target: string) => void) {
+  private go(
+    target: Concept | undefined,
+    navigate: (target: string) => void,
+  ) {
     if (target) {
-      navigate(ConceptsState.fullUrl(target.name));
+      navigate(
+        ConceptsState.fullUrl(target.name),
+      );
     } else {
       navigate('/');
     }
@@ -123,6 +180,7 @@ export class ConceptsState extends Collection<ConceptInfo> {
 export const conceptsState = new ConceptsState(f);
 
 conceptsState.addConcept({
+  url: '/concepts/transactional',
   name: 'transactional',
   title: 'Transactional',
   blurb: `atomic changes to multiple states`,
@@ -130,6 +188,7 @@ conceptsState.addConcept({
 });
 
 conceptsState.addConcept({
+  url: '/concepts/journaled',
   name: 'journaled',
   title: 'Journaled',
   blurb: `Inspect and diagnose changes across
@@ -138,6 +197,7 @@ conceptsState.addConcept({
 });
 
 conceptsState.addConcept({
+  url: '/concepts/observable',
   name: 'observable',
   title: 'Observable',
   blurb: `Built on RxJS for proven subscription patterns and interoperability`,
@@ -145,6 +205,7 @@ conceptsState.addConcept({
 });
 
 conceptsState.addConcept({
+  url: '/concepts/synchronous',
   name: 'synchronous',
   title: 'Synchronous',
   blurb: `Changes occur in real time.`,
@@ -152,6 +213,7 @@ conceptsState.addConcept({
 });
 
 conceptsState.addConcept({
+  url: '/concepts/transportable',
   name: 'transportable',
   title: 'Transportable',
   blurb: `State value and actions are contained 
@@ -160,6 +222,7 @@ conceptsState.addConcept({
 });
 
 conceptsState.addConcept({
+  url: '/concepts/typescript',
   name: 'typescript',
   title: 'Typescripted',
   blurb: `Type-sensitive generators allow methods to reflect state value`,
@@ -167,6 +230,7 @@ conceptsState.addConcept({
 });
 
 conceptsState.addConcept({
+  url: '/concepts/react',
   name: 'react',
   title: 'Enhances React',
   blurb: `Designed for global or local state, 

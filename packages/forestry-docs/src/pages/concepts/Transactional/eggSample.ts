@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Collection } from '@wonderlandlabs/forestry';
 import { CollectionIF } from '@wonderlandlabs/forestry/build/src/types';
 
@@ -38,26 +39,44 @@ const eggs = new Collection<Egg[]>(
         this.acts.removeEggDay(egg.id);
       }
     },
-    removeEggDay(this: CollectionIF<Egg[]>, id: string) {
-      const eggs: Egg[] = this.value.map((egg) => {
-        if (egg.id === id) {
-          return { ...egg, daysLeft: egg.daysLeft - 1 };
-        }
-        return egg;
-      });
+    removeEggDay(
+      this: CollectionIF<Egg[]>,
+      id: string,
+    ) {
+      const eggs: Egg[] = this.value.map(
+        (egg) => {
+          if (egg.id === id) {
+            return {
+              ...egg,
+              daysLeft: egg.daysLeft - 1,
+            };
+          }
+          return egg;
+        },
+      );
       this.next(eggs);
     },
-    removeEgg: function (this: CollectionIF<Egg[]>, id: string) {
+    removeEgg: function (
+      this: CollectionIF<Egg[]>,
+      id: string,
+    ) {
       this.mutate(({ value }) => {
-        return value.filter((egg: Egg) => egg.id !== id);
+        return value.filter(
+          (egg: Egg) => egg.id !== id,
+        );
       }, 'removing egg ' + id);
     },
-    removeADayWithCatch(this: CollectionIF<Egg[]>) {
+    removeADayWithCatch(
+      this: CollectionIF<Egg[]>,
+    ) {
       for (const egg of this.value) {
         try {
           this.acts.removeEggDay(egg.id);
         } catch (error) {
-          if (error instanceof Error && error.message === EXPIRED_MSG) {
+          if (
+            error instanceof Error &&
+            error.message === EXPIRED_MSG
+          ) {
             this.acts.removeEgg(egg.id);
           } else {
             throw error;
@@ -66,5 +85,5 @@ const eggs = new Collection<Egg[]>(
       }
     },
   },
-  f
+  f,
 );

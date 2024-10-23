@@ -1,10 +1,10 @@
-import type { ForestIF } from '../../types/types.forest';
-import type { IterFn, ValueProviderParams } from '../../types/types.shared';
-import { canProxy } from '../../canProxy';
-import { Collection } from '../Collection';
+import type { ForestIF } from './../../types/types.forest';
+import type { IterFn, ValueProviderParams } from './../../types/types.shared';
+import { canProxy } from './../../canProxy';
+import { Collection } from './../Collection';
 import { deleteProxyFor } from './deleteProxyFor';
 import { setProxyFor } from './setProxyFor';
-import { TreeParams } from '../../types/types.trees';
+import { TreeParams } from './../../types/types.trees';
 
 export function noSet() {
   throw new Error('forest maps are immutable');
@@ -18,10 +18,10 @@ export class MapCollection<
     name: string,
     params: TreeParams<Map<KeyType, ValueType>>,
     actions,
-    forest?: ForestIF
+    forest?: ForestIF,
   ) {
     function mapCloner(
-      cloneParams: ValueProviderParams<Map<KeyType, ValueType>>
+      cloneParams: ValueProviderParams<Map<KeyType, ValueType>>,
     ): Map<KeyType, ValueType> {
       const { value } = cloneParams;
       if (!value[Symbol.iterator]) {
@@ -29,7 +29,7 @@ export class MapCollection<
           'attempt to clone : params',
           cloneParams,
           'not a map:',
-          value
+          value,
         );
         throw new Error('cannot clone map - not iterable');
       }
@@ -47,7 +47,7 @@ export class MapCollection<
         serializer: params.serializer ?? mapCloner,
       },
       actions,
-      forest
+      forest,
     );
   }
 
@@ -73,12 +73,12 @@ export class MapCollection<
         this.tree.next(next, 'set');
       }
     } else {
-      this.tree.next(new Map([ [ key, value ] ]), 'set');
+      this.tree.next(new Map([[key, value]]), 'set');
     }
   }
 
   delete(key: KeyType) {
-    return this.deleteMany([ key ]);
+    return this.deleteMany([key]);
   }
 
   deleteMany(keys: KeyType[]) {

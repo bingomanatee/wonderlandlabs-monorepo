@@ -1,8 +1,8 @@
-import type { BranchIF } from '../types/types.branch';
-import { isAssert, isMutator } from '../types/types.guards';
-import type { ChangeIF } from '../types/types.shared';
-import { ValueProviderContext } from '../types/ValueProviderContext';
-import type { TreeIF } from '../types/types.trees';
+import type { BranchIF } from './../types/types.branch';
+import { isAssert, isMutator } from './../types/types.guards';
+import type { ChangeIF } from './../types/types.shared';
+import { ValueProviderContext } from './../types/ValueProviderContext';
+import type { TreeIF } from './../types/types.trees';
 
 export const BENCHMARK_CAUSE = '!BENCHMARK!';
 
@@ -10,7 +10,7 @@ export class BenchMarker<ValueType> {
   constructor(private tree: TreeIF<ValueType>) {}
   static shouldBenchmark<ValueType>(
     tree: TreeIF<ValueType>,
-    change: ChangeIF<ValueType>
+    change: ChangeIF<ValueType>,
   ) {
     if (change.name === BENCHMARK_CAUSE) {
       return false;

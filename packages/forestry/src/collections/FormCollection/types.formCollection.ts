@@ -1,4 +1,4 @@
-import type { ForestIF } from '../../types/types.forest';
+import type { ForestIF } from './../../types/types.forest';
 
 export type FieldProps = Record<string, any>;
 export type FieldValue = string | number;
@@ -7,7 +7,7 @@ export type FieldMap = Map<string, FieldIF>;
 export type ErrorMessageMap = Map<number, string>;
 export type FieldValidator = (
   field: FieldIF,
-  previousErrors: FieldError[]
+  previousErrors: FieldError[],
 ) => FieldError | undefined | null | false;
 export type FieldError = {
   message: string;
@@ -69,5 +69,5 @@ export interface FormCollectionIF {
 
 export type FieldMutatorFN = (
   field: FieldIF,
-  formCollection: FormCollectionIF
+  formCollection: FormCollectionIF,
 ) => FieldIF;

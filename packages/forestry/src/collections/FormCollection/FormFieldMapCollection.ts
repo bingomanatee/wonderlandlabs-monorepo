@@ -6,8 +6,8 @@ import type {
   FieldProps,
 } from './types.formCollection';
 import extendField from './extendField';
-import { MapCollection } from '../MapCollection/MapCollection';
-import type { CollectionIF } from '../../types/types.collections';
+import { MapCollection } from './../MapCollection/MapCollection';
+import type { CollectionIF } from './../../types/types.collections';
 
 /**
  * this is a "utility sub-class" of FormCollection designed exclusively
@@ -29,7 +29,7 @@ export class FormFieldMapCollection
   ) {
     const mappedFields = new Map();
 
-    for (const [ name, field ] of fields) {
+    for (const [name, field] of fields) {
       if (field.baseParams) {
         formCollection.fieldBaseParams.set(name, field.baseParams);
         delete field.baseParams;

@@ -1,12 +1,12 @@
-import { isAssert, isMutator } from '../types/types.guards';
-import type { ChangeIF } from '../types/types.shared';
-import { ValueProviderContext } from '../types/ValueProviderContext';
-import type { TreeIF } from '../types/types.trees';
+import { isAssert, isMutator } from './../types/types.guards';
+import type { ChangeIF } from './../types/types.shared';
+import { ValueProviderContext } from './../types/ValueProviderContext';
+import type { TreeIF } from './../types/types.trees';
 
 export class PreValidator {
   static validate<ValueType>(
     change: ChangeIF<ValueType>,
-    tree: TreeIF<ValueType>
+    tree: TreeIF<ValueType>,
   ) {
     if (isAssert(change)) {
       const nextValue = change.assert;

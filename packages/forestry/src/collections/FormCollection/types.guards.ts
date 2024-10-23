@@ -1,4 +1,4 @@
-import { isObj } from '../../types/types.guards';
+import { isObj } from './../../types/types.guards';
 import type { FieldIF } from './types.formCollection';
 import type {
   FieldValue,

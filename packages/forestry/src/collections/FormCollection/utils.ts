@@ -1,4 +1,4 @@
-import { Forest } from '../../Forest';
+import { Forest } from './../../Forest';
 import type {
   FieldIF,
   FieldError,
@@ -95,10 +95,10 @@ export const makeFields = (
   values: Record<string, string | number> = {
     username: 'John',
     password: 'foo bar',
-  }
+  },
 ) =>
   new Map<string, FieldIF>([
-    [ 'username', { name: 'username', value: values['username'] ?? '' } ],
+    ['username', { name: 'username', value: values['username'] ?? '' }],
     [
       'password',
       {
@@ -126,7 +126,7 @@ export const makeMockFormCollection = (): FormCollectionIF => ({
       {
         label: 'User Name',
         isRequired: true,
-        validators: [ isRequired, isString, isSingleWord, isCommonUserName ],
+        validators: [isRequired, isString, isSingleWord, isCommonUserName],
       },
     ],
     [

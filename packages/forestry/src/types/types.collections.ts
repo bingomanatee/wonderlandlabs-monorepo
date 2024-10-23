@@ -2,7 +2,7 @@ import {
   MutationValueProviderFN,
   ObserverOrSubscribeFn,
   UpdaterValueProviderFN,
-} from '../types';
+} from './../types';
 import type { ForestIF } from './types.forest';
 import type { TreeParams } from './types.trees';
 
@@ -16,7 +16,7 @@ export interface CollectionIF<ValueType> {
   mutate<ParamType = unknown>(
     mutatorFn: MutationValueProviderFN<ValueType, ParamType>,
     seed?: ParamType,
-    name?: string
+    name?: string,
   ): void;
 
   next(value: ValueType, name?: string): void;
@@ -24,12 +24,12 @@ export interface CollectionIF<ValueType> {
   params: TreeParams<ValueType>;
 
   subscribe(
-    observer: ObserverOrSubscribeFn<ValueType>
+    observer: ObserverOrSubscribeFn<ValueType>,
   ): Subscription | Unsubscribable;
 
   update<ParamType = unknown>(
     updaterFn: UpdaterValueProviderFN<ValueType, ParamType>,
-    seed?: ParamType
+    seed?: ParamType,
   ): void;
 
   value: ValueType;

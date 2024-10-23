@@ -1,12 +1,12 @@
-import { Forest } from '../Forest';
+import { Forest } from './../Forest';
 import {
   ObserverOrSubscribeFn,
   UpdaterValueProviderFN,
   ValueProviderFN,
-} from '../types/types.shared';
-import type { ForestIF } from '../types/types.forest';
-import type { TreeIF, TreeParams } from '../types/types.trees';
-import type { CollectionIF } from '../types/types.collections';
+} from './../types/types.shared';
+import type { ForestIF } from './../types/types.forest';
+import type { TreeIF, TreeParams } from './../types/types.trees';
+import type { CollectionIF } from './../types/types.collections';
 
 import { ControllerActions, collectionActions } from './collectionActions';
 
@@ -15,7 +15,7 @@ export class Collection<ValueType> implements CollectionIF<ValueType> {
     public name: string,
     public params: TreeParams<ValueType>,
     public actions: ControllerActions<any>,
-    public forest: ForestIF = new Forest()
+    public forest: ForestIF = new Forest(),
   ) {
     this.tree = this.forest.addTree(name, params);
     this.acts = collectionActions(this, actions);
@@ -34,14 +34,14 @@ export class Collection<ValueType> implements CollectionIF<ValueType> {
   mutate<SeedType>(
     mutator: ValueProviderFN<ValueType, SeedType>,
     seed?: SeedType,
-    name: string = '(mutate)'
+    name: string = '(mutate)',
   ) {
     this.tree.mutate<SeedType>(mutator, seed, name);
   }
 
   update<ParamType = unknown>(
     updaterFn: UpdaterValueProviderFN<ValueType, ParamType>,
-    seed?: ParamType
+    seed?: ParamType,
   ) {
     this.tree.mutate(({ value }) => updaterFn(value, seed));
   }

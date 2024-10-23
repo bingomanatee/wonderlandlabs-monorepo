@@ -1,6 +1,6 @@
-import { Branch } from '../Branch';
-import type { BranchIF } from '../types/types.branch';
-import type { TreeIF } from '../types/types.trees';
+import { Branch } from './../Branch';
+import type { BranchIF } from './../types/types.branch';
+import type { TreeIF } from './../types/types.trees';
 
 type ActiveTaskInfo = {
   hasActiveTasks: boolean;
@@ -82,7 +82,7 @@ export class Beaver<ValueType> {
    */
   private destoryOldData(
     fromBranch: BranchIF<ValueType> | undefined,
-    toBranch: BranchIF<ValueType> | undefined
+    toBranch: BranchIF<ValueType> | undefined,
   ) {
     let next: BranchIF<ValueType> | undefined;
     // because destruction removes prev/next link we

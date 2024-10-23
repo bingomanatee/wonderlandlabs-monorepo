@@ -1,4 +1,4 @@
-import { CollectionIF } from '../types/types.collections';
+import { CollectionIF } from './../types/types.collections';
 
 export type ControllerActions<
   Acts extends Record<string, (...args: any[]) => any>,
@@ -8,7 +8,7 @@ export type ControllerActions<
 
 export function collectionActions<ValueType, Acts>(
   collection: CollectionIF<ValueType>,
-  actions: Acts
+  actions: Acts,
 ) {
   const acts = {} as ActsDo<Acts>;
   for (const key in actions) {

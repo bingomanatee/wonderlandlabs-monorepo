@@ -2,12 +2,156 @@ import { describe, expect, it } from 'vitest';
 import { Forest } from '../../src/Forest';
 import { Collection } from '../../src';
 import { CollectionIF } from '../../src/types/types.collections';
+import { sortBy } from 'lodash-es';
 
 type Egg = {
   id: string;
   daysLeft: number;
 };
-describe('concepts', () => {
+
+describe('docs', () => {
+  describe('cart', () => {
+    interface Product {
+      name: string;
+      id: string;
+      cost: number;
+    }
+
+    function isProduct(product: unknown): product is Product {
+      return (
+        typeof product === 'object' &&
+        product !== null &&
+        'name' in product &&
+        'id' in product &&
+        'cost' in product &&
+        typeof (product as { name: unknown }).name === 'string' &&
+        typeof (product as { id: unknown }).id === 'string' &&
+        typeof (product as { cost: unknown }).cost === 'number' &&
+        (product as { cost: number }).cost >= 0
+      );
+    }
+
+    function validProduct(product: unknown): asserts product is Product {
+      if (!isProduct(product)) {
+        throw new Error('Invalid product');
+      }
+    }
+
+    function validCart(items) {
+      if (!Array.isArray(items)) {
+        throw new Error('must be an array');
+      }
+      items.forEach(validProduct);
+    }
+
+    const api = {
+      async getCart(): Promise<Product[]> {
+        return [
+          { id: 'tshirt', name: 'T Shirt', cost: 20 },
+          { id: 'ybox', name: 'Y-box', cost: 200 },
+          { id: 'pencil', name: 'Pencil', cost: 5 },
+          { id: 'mtruck', name: 'Monster-Truck', cost: 50000 },
+        ];
+      },
+    };
+    it('should load and respect constraints', async () => {
+      const cart = new Collection<Product[]>(
+        'cart',
+        {
+          initial: [],
+          validator: validCart,
+        },
+
+        {
+          applyDiscount({ id, amount }) {
+            const newProducts = this.value.map((product) => {
+              if (product.id === id) {
+                return { ...product, cost: product.cost - amount };
+              } else {
+                return product;
+              }
+            });
+            this.next(newProducts);
+          },
+          mostExpensiveProducts() {
+            return sortBy(this.value, 'cost').reverse();
+          },
+          discountedProduct({ id, amount }: { id: string; amount: number }) {
+            // doesn't change state - just returns a candidate
+
+            const product = this.acts
+              .mostExpensiveProducts()
+              .find((p) => p.id === id);
+            return { ...product, cost: product.cost - amount };
+          },
+          percentDiscount({
+            percent,
+            maxSaving,
+          }: {
+            percent: number; // amount off 0..1
+            maxSaving: number;
+          }) {
+            // should validate rational values of percent/maxDate
+            let saved = 0;
+            for (const p of this.acts.mostExpensiveProducts()) {
+              let discount = p.cost * percent;
+              if (saved + discount > maxSaving) {
+                discount = maxSaving - saved;
+              }
+              saved += discount;
+              const discountedProduct = this.acts.discountedProduct({
+                id: p.id,
+                amount: discount,
+              });
+              this.acts.updateProduct(discountedProduct);
+              if (saved >= maxSaving) {
+                break;
+              }
+            }
+            return saved;
+          },
+          updateProduct(product: Product) {
+            // should validate existence in list
+            this.next(
+              this.value.map((p) => (p.id === product.id ? product : p)),
+            );
+          },
+        },
+      );
+
+      async function loadCart() {
+        const products = await api.getCart();
+        try {
+          cart.next(products);
+        } catch (err) {
+          window.alert('your products are not valid');
+        }
+      }
+
+      loadCart().then(() => {
+        try {
+          console.log('products loaded:', cart.value);
+          const saved = cart.acts.applyDiscount({ id: 'tshirt', amount: 5000 });
+          console.log('discount applied, saved', saved);
+        } catch (err) {
+          console.log('you cannot discount t-shirt by $5,000');
+        }
+        const discount = { percent: 0.2, maxSaving: 10020 };
+        const saving = cart.acts.percentDiscount(discount);
+        console.log(
+          '--- after ',
+          100 * discount.percent,
+          '% savings up to ',
+          discount.maxSaving,
+          'saved',
+          saving,
+          cart.value,
+        );
+        expect(saving).toBeLessThanOrEqual(discount.maxSaving);
+        expect(cart.value.find((p) => p.id === 'pencil').cost).toBe(5);
+      });
+    });
+  });
   describe('transactional', () => {
     it('should rollback collections', () => {
       const f = new Forest();
@@ -81,7 +225,7 @@ describe('concepts', () => {
             }
           },
         },
-        f
+        f,
       );
 
       expect(eggs.value).toEqual(INITIAL);
@@ -150,7 +294,7 @@ describe('concepts', () => {
                 return value.filter((egg: Egg) => egg.id !== id);
               },
               null,
-              'removing egg ' + id
+              'removing egg ' + id,
             );
           },
           removeADayWithCatch(this: CollectionIF<Egg[]>) {
@@ -167,7 +311,7 @@ describe('concepts', () => {
             }
           },
         },
-        f
+        f,
       );
 
       type EggSummary = Record<string, number>;

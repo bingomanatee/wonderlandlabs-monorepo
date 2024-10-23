@@ -1,20 +1,28 @@
-import type { TreeIF, TreeParams } from '../types/types.trees';
-import type { ForestIF } from '../types/types.forest';
-import { Forest } from '../Forest';
+import type { TreeIF, TreeParams } from './../types/types.trees';
+import type { ForestIF } from './../types/types.forest';
+import { Forest } from './../Forest';
 
-export type ControllerActions<Acts extends Record<string, (...args: any[]) => any>> = {
+export type ControllerActions<
+  Acts extends Record<string, (...args: any[]) => any>,
+> = {
   [K in keyof Acts]: OmitThisParameter<Acts[K]>;
 };
 
-export function createController<Acts
-  extends Record<string, (...args: any[]) => any>>(name: string,
+export function createController<
+  Acts extends Record<string, (...args: any[]) => any>,
+>(
+  name: string,
   params: TreeParams<any>,
-  actions: Acts ,
-  forest: ForestIF = new Forest()) {
+  actions: Acts,
+  forest: ForestIF = new Forest(),
+) {
   type ValueType = typeof params.initial;
 
   type ActsInput = {
-    [K in keyof typeof actions]: (this: TreeIF<ValueType>, ...args: any[]) => any;
+    [K in keyof typeof actions]: (
+      this: TreeIF<ValueType>,
+      ...args: any[]
+    ) => any;
   };
 
   const tree = forest.addTree<ValueType>(name, params as TreeParams<ValueType>);
@@ -32,10 +40,10 @@ export function createController<Acts
   return { tree, controller };
 }
 
-
-
 // Example usage
-const { tree, controller } = createController('foo', { initial: 2 },
+const { tree, controller } = createController(
+  'foo',
+  { initial: 2 },
   {
     multiply(this: TreeIF<number>, input: number) {
       this.update((value, input) => value * input, input);
@@ -44,10 +52,11 @@ const { tree, controller } = createController('foo', { initial: 2 },
       controller.multiply(5);
       return this.value;
     },
-  });
+  },
+);
 
-const b = controller.bar();      // b is inferred as number
-controller.multiply(2);   // c is inferred as number
+const b = controller.bar(); // b is inferred as number
+controller.multiply(2); // c is inferred as number
 controller.multiply(3);
 console.log(b); // Output: 33
 console.log('tree is now ', tree.value); // Output: 4

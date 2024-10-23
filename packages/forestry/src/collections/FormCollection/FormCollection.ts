@@ -1,5 +1,5 @@
-import { Forest } from '../../Forest';
-import type { ForestIF } from '../../types/types.forest';
+import { Forest } from './../../Forest';
+import type { ForestIF } from './../../types/types.forest';
 import { BehaviorSubject, map } from 'rxjs';
 import type { Unsubscribable } from 'rxjs';
 import type {
@@ -17,7 +17,7 @@ import type {
 
 import { FormFieldMapCollection } from './FormFieldMapCollection';
 import { isFieldList, isFieldRecord, isFieldValue } from './types.guards';
-import { ObserverOrSubscribeFn } from '../../types/types.shared';
+import { ObserverOrSubscribeFn } from './../../types/types.shared';
 
 type FieldDef = FieldList | FieldRecord;
 
@@ -26,7 +26,7 @@ export class FormCollection implements FormCollectionIF {
     public name: string,
     fields: FieldDef,
     form?: FormIF,
-    forest?: ForestIF
+    forest?: ForestIF,
   ) {
     this.forest = forest ?? new Forest();
     this.initFields(fields);
@@ -47,7 +47,7 @@ export class FormCollection implements FormCollectionIF {
       name: string,
       value: string | number,
       baseParams: FieldBase | undefined,
-      rest: Partial<FieldIF>
+      rest: Partial<FieldIF>,
     ) => {
       const field: FieldIF = { name, value, ...rest };
       if (baseParams) {
@@ -78,7 +78,7 @@ export class FormCollection implements FormCollectionIF {
     this.fieldMapCollection = new FormFieldMapCollection(
       fcName,
       fieldMap,
-      this
+      this,
     );
   }
 
@@ -152,8 +152,8 @@ export class FormCollection implements FormCollectionIF {
   }
 
   get isValid(): boolean {
-    return [ ...this.fieldMapCollection.value.values() ].every(
-      (field) => !field.errors || !field.errors.length
+    return [...this.fieldMapCollection.value.values()].every(
+      (field) => !field.errors || !field.errors.length,
     );
   }
 }

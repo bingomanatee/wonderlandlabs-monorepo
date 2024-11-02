@@ -13,7 +13,7 @@ export interface CollectionIF<ValueType> {
   acts: Record<string, (...args: any[]) => any>;
   forest: ForestIF;
 
-  mutate<ParamType = unknown>(
+  mutate<ParamType>(
     mutatorFn: MutationValueProviderFN<ValueType, ParamType>,
     seed?: ParamType,
     name?: string,
@@ -27,7 +27,7 @@ export interface CollectionIF<ValueType> {
     observer: ObserverOrSubscribeFn<ValueType>,
   ): Subscription | Unsubscribable;
 
-  update<ParamType = unknown>(
+  update<ParamType>(
     updaterFn: UpdaterValueProviderFN<ValueType, ParamType>,
     seed?: ParamType,
   ): void;

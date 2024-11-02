@@ -1,9 +1,9 @@
-import { Forest, Collection } from '../../src/index';
+import { Forest, Collection } from '../../build/src/index';
 import { expect, it, describe } from 'vitest';
 import type {
   MutationValueProviderFN,
   ValueProviderParams,
-} from '../../src/types/types.shared';
+} from '../../build/src/types/types.shared';
 
 function message(...items: any[]) {
   //  eslint-disable-next-line no-constant-condition
@@ -53,7 +53,7 @@ function makeCounter(initial = 0, name = 'counter') {
         this.next(0, 'zeroOut');
       },
     },
-    f
+    f,
   );
 }
 
@@ -88,7 +88,7 @@ describe('README.md', () => {
         'cause:',
         branch.cause,
         'value:',
-        branch.value
+        branch.value,
       );
     });
     /**
@@ -103,7 +103,7 @@ describe('README.md', () => {
     const counter = makeCounter(0);
 
     counter.subscribe((n: number) =>
-      message('collection is ', n, 'because of', counter.tree.top?.cause)
+      message('collection is ', n, 'because of', counter.tree.top?.cause),
     );
 
     counter.acts.increment();
@@ -148,7 +148,7 @@ describe('README.md', () => {
         ':counter value: ',
         branch.value,
         'cause:',
-        branch.cause
+        branch.cause,
       );
     });
 

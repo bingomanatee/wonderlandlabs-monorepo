@@ -1,8 +1,8 @@
 import { Forest } from './../Forest';
 import {
+  MutationValueProviderFN,
   ObserverOrSubscribeFn,
   UpdaterValueProviderFN,
-  ValueProviderFN,
 } from './../types/types.shared';
 import type { ForestIF } from './../types/types.forest';
 import type { TreeIF, TreeParams } from './../types/types.trees';
@@ -32,7 +32,7 @@ export class Collection<ValueType> implements CollectionIF<ValueType> {
   readonly tree: TreeIF<(typeof this)['params']['initial']>;
   readonly acts: Record<string, (...args: any[]) => any>;
   mutate<SeedType>(
-    mutator: ValueProviderFN<ValueType, SeedType>,
+    mutator: MutationValueProviderFN<ValueType, SeedType>,
     seed?: SeedType,
     name: string = '(mutate)',
   ) {

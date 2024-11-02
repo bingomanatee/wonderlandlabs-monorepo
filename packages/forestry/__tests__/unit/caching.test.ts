@@ -1,10 +1,10 @@
-import { Forest } from '../../src/Forest';
-import { BENCHMARK_CAUSE } from '../../src/treeHelpers/BenchMarker';
-import type { BranchIF } from '../../src/types/types.branch';
+import { Forest } from '../../build/src/Forest';
+import { BENCHMARK_CAUSE } from '../../build/src/treeHelpers/BenchMarker';
+import type { BranchIF } from '../../build/src/types/types.branch';
 import type {
   MutationValueProviderFN,
   Mutator,
-} from '../../src/types/types.shared';
+} from '../../build/src/types/types.shared';
 import { expect, it, describe } from 'vitest';
 
 describe('caching', () => {
@@ -176,13 +176,13 @@ describe('caching', () => {
         if (cause === BENCHMARK_CAUSE) {
           const preset = history.slice(
             Math.max(0, i - (t.params?.benchmarkInterval ?? 0) - 1),
-            i
+            i,
           );
           if (i > 4) {
             expect(preset[0].cause).toBe(BENCHMARK_CAUSE);
             // eslint-disable @typescript-eslint/no-unused-expressions
             expect(
-              preset.slice(1).every((bc) => bc.cause !== BENCHMARK_CAUSE)
+              preset.slice(1).every((bc) => bc.cause !== BENCHMARK_CAUSE),
             ).toBeTruthy();
             // eslint-enable @typescript-eslint/no-unused-expressions
           }

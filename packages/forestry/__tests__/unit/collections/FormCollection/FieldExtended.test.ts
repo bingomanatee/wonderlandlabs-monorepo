@@ -1,5 +1,5 @@
 import { expect, it, describe } from 'vitest';
-import { FieldExtended } from '../../../../src/collections/FormCollection/FieldExtended.js';
+import { FieldExtended } from '../../../../build/src/collections/FormCollection/FieldExtended.js';
 
 describe('FieldExtended', () => {
   it('should reflect simple qualities of the field', () => {
@@ -28,7 +28,7 @@ describe('FieldExtended', () => {
       className: 'override-me',
     };
     const ex = new FieldExtended(testField, testField.name, {
-      fieldBaseParams: new Map([ [ 'comme', baseParams ] ]),
+      fieldBaseParams: new Map([['comme', baseParams]]),
     });
 
     expect(ex.name).toBe(testField.name);

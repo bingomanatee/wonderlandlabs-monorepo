@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import { Forest } from '../../src/Forest';
+import { Forest } from '../../build/src/Forest';
 import { Collection } from '../../src';
-import { CollectionIF } from '../../src/types/types.collections';
+import { CollectionIF } from '../../build/src/types/types.collections';
 import { sortBy } from 'lodash-es';
 
 type Egg = {

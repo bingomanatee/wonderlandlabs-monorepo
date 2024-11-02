@@ -1,6 +1,6 @@
 import { expect, it, describe } from 'vitest';
-import { FormFieldMapCollection } from '../../../../src/collections/FormCollection/FormFieldMapCollection';
-import type { FieldMap } from '../../../../src/collections/FormCollection/types.formCollection';
+import { FormFieldMapCollection } from '../../../../build/src/collections/FormCollection/FormFieldMapCollection';
+import type { FieldMap } from '../../../../build/src/collections/FormCollection/types.formCollection';
 import {
   makeFields,
   makeMockFormCollection,
@@ -8,20 +8,20 @@ import {
   NO_EMPTY_CHARS,
   IS_REQUIRED,
   TOO_SHORT,
-} from '../../../../src/collections/FormCollection/utils';
+} from '../../../../build/src/collections/FormCollection/utils';
 
 describe('FormFieldMapCollection', () => {
   it('should reflect the input', () => {
     const formFieldMapCollection = new FormFieldMapCollection(
       'user-login-form',
       makeFields(),
-      makeMockFormCollection()
+      makeMockFormCollection(),
     );
     expect(
-      (formFieldMapCollection.value as FieldMap).get('username')?.value
+      (formFieldMapCollection.value as FieldMap).get('username')?.value,
     ).toBe('John');
     expect(
-      (formFieldMapCollection.value as FieldMap).get('password')?.value
+      (formFieldMapCollection.value as FieldMap).get('password')?.value,
     ).toBe('foo bar');
   });
 
@@ -29,10 +29,10 @@ describe('FormFieldMapCollection', () => {
     const formFieldMapCollection = new FormFieldMapCollection(
       'user-login-form',
       makeFields(),
-      makeMockFormCollection()
+      makeMockFormCollection(),
     );
     expect(
-      (formFieldMapCollection.value as FieldMap).get('username')?.errors
+      (formFieldMapCollection.value as FieldMap).get('username')?.errors,
     ).toEqual([
       {
         message: IS_TOO_COMMON,
@@ -40,7 +40,7 @@ describe('FormFieldMapCollection', () => {
       },
     ]);
     expect(
-      (formFieldMapCollection.value as FieldMap).get('password')?.errors
+      (formFieldMapCollection.value as FieldMap).get('password')?.errors,
     ).toEqual([
       {
         message: NO_EMPTY_CHARS,
@@ -52,10 +52,10 @@ describe('FormFieldMapCollection', () => {
     const formFieldMapCollection = new FormFieldMapCollection(
       'user-login-form',
       makeFields({ username: '', password: 'bum' }),
-      makeMockFormCollection()
+      makeMockFormCollection(),
     );
     expect(
-      (formFieldMapCollection.value as FieldMap).get('username')?.errors
+      (formFieldMapCollection.value as FieldMap).get('username')?.errors,
     ).toEqual([
       {
         message: IS_REQUIRED,
@@ -63,7 +63,7 @@ describe('FormFieldMapCollection', () => {
       },
     ]);
     expect(
-      (formFieldMapCollection.value as FieldMap).get('password')?.errors
+      (formFieldMapCollection.value as FieldMap).get('password')?.errors,
     ).toEqual([
       {
         message: TOO_SHORT,

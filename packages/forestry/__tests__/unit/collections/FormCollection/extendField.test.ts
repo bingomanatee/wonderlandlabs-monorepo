@@ -1,10 +1,10 @@
-import extendField from '../../../../src/collections/FormCollection/extendField';
+import extendField from '../../../../build/src/collections/FormCollection/extendField';
 import {
   isLongEnough,
   isNotCommonPassword,
   isString,
   TOO_SHORT,
-} from '../../../../src/collections/FormCollection/utils';
+} from '../../../../build/src/collections/FormCollection/utils';
 import { expect, it, describe } from 'vitest';
 
 describe('extendField', () => {
@@ -51,7 +51,7 @@ describe('extendField', () => {
       baseParams: {
         label: 'Comme',
         className: 'override-me',
-        validators: [ isString, isLongEnough, isNotCommonPassword ],
+        validators: [isString, isLongEnough, isNotCommonPassword],
       },
     };
 
@@ -59,7 +59,7 @@ describe('extendField', () => {
 
     expect(ex.name).toBe(testField.name);
     expect(ex.value).toBe(testField.value);
-    expect(ex.errors).toEqual([ { message: TOO_SHORT, severity: 5 } ]);
+    expect(ex.errors).toEqual([{ message: TOO_SHORT, severity: 5 }]);
     expect(ex.isRequired).toBeFalsy();
     expect(ex.order).toBeUndefined();
     expect(ex.props?.className).toBe(testField.props.className);

@@ -1,6 +1,6 @@
 import { expect, it, describe } from 'vitest';
 import { Collection, Forest } from '../../../src';
-import { CollectionIF } from '../../../src/types/types.collections';
+import { CollectionIF } from '../../../build/src/types/types.collections';
 
 describe('Collection', () => {
   it('allows update', () => {
@@ -31,7 +31,7 @@ describe('Collection', () => {
               this.mutate(({ value }) => value + 1, 'increment');
             },
           },
-          new Forest()
+          new Forest(),
         );
       }
 

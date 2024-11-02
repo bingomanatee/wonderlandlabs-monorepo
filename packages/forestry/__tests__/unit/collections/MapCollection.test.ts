@@ -1,9 +1,9 @@
-import { Forest, MapCollection } from '../../../src/index';
+import { Forest, MapCollection } from '../../../build/src/index';
 import { expect, it, describe } from 'vitest';
 
 const MAP_SEED: [string, number][] = [
-  [ 'a', 1 ],
-  [ 'b', 2 ],
+  ['a', 1],
+  ['b', 2],
 ];
 
 describe('MapCollection', () => {
@@ -14,7 +14,7 @@ describe('MapCollection', () => {
       {
         initial: new Map<string, number>(MAP_SEED),
       },
-      f
+      f,
     );
 
     expect(mc.get('a')).toBe(1);
@@ -30,11 +30,11 @@ describe('MapCollection', () => {
       'foo',
       {
         initial: new Map<string, number>([
-          [ 'a', 1 ],
-          [ 'b', 2 ],
+          ['a', 1],
+          ['b', 2],
         ]),
       },
-      f
+      f,
     );
 
     mc.set('c', 30);
@@ -53,7 +53,7 @@ describe('MapCollection', () => {
       {
         initial: new Map<string, number>(MAP_SEED),
       },
-      f
+      f,
     );
 
     mc.set('c', 30);
@@ -72,11 +72,11 @@ describe('MapCollection', () => {
       'foo',
       {
         initial: new Map<string, number>([
-          [ 'a', 1 ],
-          [ 'b', 2 ],
+          ['a', 1],
+          ['b', 2],
         ]),
       },
-      f
+      f,
     );
 
     mc.set('a', 30);
@@ -98,11 +98,11 @@ describe('MapCollection', () => {
         'foo',
         {
           initial: new Map<string, number>([
-            [ 'a', 1 ],
-            [ 'b', 2 ],
+            ['a', 1],
+            ['b', 2],
           ]),
         },
-        f
+        f,
       );
 
       const keys: string[] = [];
@@ -110,7 +110,7 @@ describe('MapCollection', () => {
       for (const k of mc.keys()) {
         keys.push(k);
       }
-      expect(keys).toEqual([ 'a', 'b' ]);
+      expect(keys).toEqual(['a', 'b']);
     });
 
     it('should get keys from a map with set', () => {
@@ -119,11 +119,11 @@ describe('MapCollection', () => {
         'foo',
         {
           initial: new Map<string, number>([
-            [ 'a', 1 ],
-            [ 'b', 2 ],
+            ['a', 1],
+            ['b', 2],
           ]),
         },
-        f
+        f,
       );
 
       mc.set('c', 30);
@@ -133,7 +133,7 @@ describe('MapCollection', () => {
         keys.push(k);
       }
 
-      expect(keys).toEqual([ 'a', 'b', 'c' ]);
+      expect(keys).toEqual(['a', 'b', 'c']);
 
       mc.set('d', 500);
 
@@ -142,7 +142,7 @@ describe('MapCollection', () => {
         keys2.push(k);
       }
 
-      expect(keys2).toEqual([ 'a', 'b', 'c', 'd' ]);
+      expect(keys2).toEqual(['a', 'b', 'c', 'd']);
     });
 
     it('should respect overrides', () => {
@@ -151,11 +151,11 @@ describe('MapCollection', () => {
         'foo',
         {
           initial: new Map<string, number>([
-            [ 'a', 1 ],
-            [ 'b', 2 ],
+            ['a', 1],
+            ['b', 2],
           ]),
         },
-        f
+        f,
       );
 
       mc.set('a', 100);
@@ -165,7 +165,7 @@ describe('MapCollection', () => {
         keys.push(k);
       }
 
-      expect(keys).toEqual([ 'b', 'a' ]);
+      expect(keys).toEqual(['b', 'a']);
 
       mc.set('c', 500);
 
@@ -174,7 +174,7 @@ describe('MapCollection', () => {
         keys2.push(k);
       }
 
-      expect(keys2).toEqual([ 'b', 'a', 'c' ]);
+      expect(keys2).toEqual(['b', 'a', 'c']);
     });
   });
 
@@ -185,11 +185,11 @@ describe('MapCollection', () => {
         'foo',
         {
           initial: new Map<string, number>([
-            [ 'a', 1 ],
-            [ 'b', 2 ],
+            ['a', 1],
+            ['b', 2],
           ]),
         },
-        f
+        f,
       );
 
       const values: number[] = [];
@@ -197,7 +197,7 @@ describe('MapCollection', () => {
       for (const k of mc.values()) {
         values.push(k);
       }
-      expect(values).toEqual([ 1, 2 ]);
+      expect(values).toEqual([1, 2]);
     });
 
     it('should get values from a map with set', () => {
@@ -206,11 +206,11 @@ describe('MapCollection', () => {
         'foo',
         {
           initial: new Map<string, number>([
-            [ 'a', 1 ],
-            [ 'b', 2 ],
+            ['a', 1],
+            ['b', 2],
           ]),
         },
-        f
+        f,
       );
 
       mc.set('c', 30);
@@ -220,7 +220,7 @@ describe('MapCollection', () => {
         values.push(k);
       }
 
-      expect(values).toEqual([ 1, 2, 30 ]);
+      expect(values).toEqual([1, 2, 30]);
 
       mc.set('d', 100);
 
@@ -229,7 +229,7 @@ describe('MapCollection', () => {
         values2.push(k);
       }
 
-      expect(values2).toEqual([ 1, 2, 30, 100 ]);
+      expect(values2).toEqual([1, 2, 30, 100]);
     });
 
     it('should get respect overrides', () => {
@@ -238,11 +238,11 @@ describe('MapCollection', () => {
         'foo',
         {
           initial: new Map<string, number>([
-            [ 'a', 1 ],
-            [ 'b', 2 ],
+            ['a', 1],
+            ['b', 2],
           ]),
         },
-        f
+        f,
       );
 
       mc.set('a', 30);
@@ -252,7 +252,7 @@ describe('MapCollection', () => {
         values.push(k);
       }
 
-      expect(values).toEqual([ 2, 30 ]);
+      expect(values).toEqual([2, 30]);
 
       mc.set('d', 100);
 
@@ -261,7 +261,7 @@ describe('MapCollection', () => {
         values2.push(k);
       }
 
-      expect(values2).toEqual([ 2, 30, 100 ]);
+      expect(values2).toEqual([2, 30, 100]);
     });
   });
 
@@ -273,14 +273,14 @@ describe('MapCollection', () => {
         {
           initial: new Map<string, number>(MAP_SEED),
         },
-        f
+        f,
       );
 
       mc.set('c', 3); // force a proxy;
 
       const clone = new Map(mc.value);
 
-      const extendedSeed: [string, number][] = [ ...MAP_SEED, [ 'c', 3 ] ];
+      const extendedSeed: [string, number][] = [...MAP_SEED, ['c', 3]];
       expect(clone).toEqual(new Map<string, number>(extendedSeed));
     });
     it('iterates after set and delete', () => {
@@ -290,7 +290,7 @@ describe('MapCollection', () => {
         {
           initial: new Map<string, number>(MAP_SEED),
         },
-        f
+        f,
       );
 
       mc.set('c', 30); // force a proxy;
@@ -299,8 +299,8 @@ describe('MapCollection', () => {
       const clone = new Map(mc.value);
 
       const extendedSeed: [string, number][] = [
-        [ 'b', 2 ],
-        [ 'c', 30 ],
+        ['b', 2],
+        ['c', 30],
       ];
       expect(clone).toEqual(new Map<string, number>(extendedSeed));
     });

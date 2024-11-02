@@ -1,4 +1,4 @@
-import { Forest } from '../../src/Forest';
+import { Forest } from '../../build/src/Forest';
 import { expect, it, describe } from 'vitest';
 
 describe('tree', () => {
@@ -65,10 +65,10 @@ describe('tree', () => {
 
       t.subscribe((v: number) => out.push(v));
 
-      expect(out).toEqual([ 100 ]);
+      expect(out).toEqual([100]);
 
       t.next(300);
-      expect(out).toEqual([ 100, 300 ]);
+      expect(out).toEqual([100, 300]);
     });
   });
 
@@ -95,8 +95,8 @@ describe('tree', () => {
       for (let time = f.time; time >= 0; time -= 1) {
         backwards.push(
           `${time} alpha=${alpha.valueAt(time)}, beta=${beta.valueAt(
-            time
-          )}, gamma=${gamma.valueAt(time)}`
+            time,
+          )}, gamma=${gamma.valueAt(time)}`,
         );
       }
 

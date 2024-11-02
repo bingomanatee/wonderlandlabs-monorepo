@@ -1,8 +1,8 @@
-import { Forest } from './../../src/Forest';
+import { Forest } from './../../build/src/Forest';
 import type {
   ChangeIF,
   MutationValueProviderParams,
-} from '../../src/types/types.shared';
+} from '../../build/src/types/types.shared';
 import { expect, it, describe } from 'vitest';
 
 type Numeric = { num: number };
@@ -136,12 +136,12 @@ describe('Forest', () => {
           values.push(v.num);
         }
       });
-      expect(values).toEqual([ 1 ]);
+      expect(values).toEqual([1]);
 
       t.grow(growBy(1));
 
       expect(t.value).toEqual({ num: 2 });
-      expect(values).toEqual([ 1, 2 ]);
+      expect(values).toEqual([1, 2]);
 
       f.do(() => {
         t.grow(growBy(2));
@@ -155,9 +155,9 @@ describe('Forest', () => {
         });
       }).toThrow();
 
-      expect(values).toEqual([ 1, 2, 11 ]);
+      expect(values).toEqual([1, 2, 11]);
       t.grow(growBy(0));
-      expect(values).toEqual([ 1, 2, 11 ]);
+      expect(values).toEqual([1, 2, 11]);
     });
   });
 

@@ -54,6 +54,9 @@ export class Forest implements ForestIF {
 
   public addTree<ValueType>(name: TreeName, params?: TreeParams<ValueType>) {
     if (this.hasTree(name)) {
+      if (params.allowReload) {
+        return this.tree<ValueType>(name);
+      }
       throw new Error('cannot redefine $tree ' + name);
     }
 
@@ -95,7 +98,7 @@ export class Forest implements ForestIF {
       this.trees.forEach((tree) => {
         tree.rollback(
           taskTime,
-          err instanceof Error ? err.message : 'unknown error'
+          err instanceof Error ? err.message : 'unknown error',
         );
       });
       throw err;
@@ -131,12 +134,12 @@ export class Forest implements ForestIF {
       throw new Error('cannot observe ' + name + ': no $tree by that name exi');
     } // for typescript
 
-    return combineLatest([ this.activeTaskSubject, tree.subject ]).pipe(
-      filter(([ depth ]: [Set<number>, undefined]) => {
+    return combineLatest([this.activeTaskSubject, tree.subject]).pipe(
+      filter(([depth]: [Set<number>, undefined]) => {
         return depth.size === 0;
       }),
-      map(([ , value ]: [Set<number>, undefined]) => value),
-      distinctUntilChanged(isEqual)
+      map(([, value]: [Set<number>, undefined]) => value),
+      distinctUntilChanged(isEqual),
     ) as Observable<ValueType>;
   }
   // #region notable

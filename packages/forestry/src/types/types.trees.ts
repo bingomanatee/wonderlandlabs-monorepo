@@ -22,7 +22,7 @@ export type TreeValuation<ValueType> = {
 
 export type BranchIterFn<ValueType> = (
   b: BranchIF<ValueType>,
-  count?: number | null
+  count?: number | null,
 ) => true | void;
 
 export interface TreeIF<ValueType> extends Notable {
@@ -42,11 +42,11 @@ export interface TreeIF<ValueType> extends Notable {
   mutate<ParamType = unknown>(
     mutator: MutationValueProviderFN<ValueType, ParamType>,
     seed?: any,
-    name?: string
+    name?: string,
   ): TreeIF<ValueType>;
   update<ParamType = unknown>(
     updaterFn: UpdaterValueProviderFN<ValueType, ParamType>,
-    seed?: ParamType
+    seed?: ParamType,
   ): TreeIF<ValueType>;
   value: ValueType;
   subject: Observable<ValueType>;
@@ -63,11 +63,11 @@ export interface TreeIF<ValueType> extends Notable {
 
 export type ValidatorFn<TreeValueType> = (
   value: TreeValueType,
-  tree: TreeIF<TreeValueType>
+  tree: TreeIF<TreeValueType>,
 ) => Error | void | undefined; // also throws
 
 export type TreeClonerFn<TreeValueType> = (
-  branch?: BranchIF<TreeValueType>
+  branch?: BranchIF<TreeValueType>,
 ) => TreeValueType;
 
 export type TreeParams<TreeValueType> = {
@@ -78,4 +78,5 @@ export type TreeParams<TreeValueType> = {
   validator?: ValidatorFn<TreeValueType>;
   serializer?: ValueProviderFN<TreeValueType>;
   benchmarkInterval?: number;
+  allowReload?: boolean; // allow addTree to retrieve stored tree
 };

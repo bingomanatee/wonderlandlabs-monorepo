@@ -43,7 +43,11 @@ export class Collection<ValueType> implements CollectionIF<ValueType> {
     updaterFn: UpdaterValueProviderFN<ValueType, ParamType>,
     seed?: ParamType,
   ) {
-    this.tree.mutate(({ value }) => updaterFn(value, seed));
+    const mutator: MutationValueProviderFN<ValueType, ParamType> = ({
+      value,
+      seed,
+    }) => updaterFn(value, seed);
+    this.tree.mutate(mutator, seed);
   }
 
   protected get subject() {

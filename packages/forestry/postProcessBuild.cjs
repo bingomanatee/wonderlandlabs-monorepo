@@ -16,29 +16,22 @@ function processFiles(directory) {
       let content = fs.readFileSync(filePath, 'utf8');
 
       // Log the file being processed
-      console.log(`Processing file: ${filePath}`);
 
       // Update the content by adding `.js` only when no valid extension exists
       content = content.replace(
         /((?:import|export).*?['"])(\.{1,2}\/.*?)(['"])/g,
         (match, prefix, importPath, suffix) => {
-          console.log(`Original statement: ${match}`);
-          console.log(`Found path: ${importPath}`);
-
           // Only add .js if the path has no extension
           if (!extRegex.test(importPath)) {
             const newPath = `${importPath}.js`;
-            console.log(`Transforming to: ${newPath}`);
             return `${prefix}${newPath}${suffix}`;
           } else {
-            console.log(`No transformation needed for: ${importPath}`);
             return match;
           }
         },
       );
 
       fs.writeFileSync(filePath, content);
-      console.log(`Finished processing file: ${filePath}\n`);
     }
   }
 }

@@ -9,6 +9,8 @@ type Egg = {
   daysLeft: number;
 };
 
+function console_log() {}
+
 describe('docs', () => {
   describe('cart', () => {
     interface Product {
@@ -130,15 +132,15 @@ describe('docs', () => {
 
       loadCart().then(() => {
         try {
-          console.log('products loaded:', cart.value);
+          console_log('products loaded:', cart.value);
           const saved = cart.acts.applyDiscount({ id: 'tshirt', amount: 5000 });
-          console.log('discount applied, saved', saved);
+          console_log('discount applied, saved', saved);
         } catch (err) {
-          console.log('you cannot discount t-shirt by $5,000');
+          console_log('you cannot discount t-shirt by $5,000');
         }
         const discount = { percent: 0.2, maxSaving: 10020 };
         const saving = cart.acts.percentDiscount(discount);
-        console.log(
+        console_log(
           '--- after ',
           100 * discount.percent,
           '% savings up to ',

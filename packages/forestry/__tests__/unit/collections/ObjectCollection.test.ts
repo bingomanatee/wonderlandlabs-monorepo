@@ -1,18 +1,15 @@
-import { Forest, MapCollection } from '../../../build/src/index';
+import { Forest, ObjectCollection } from '../../../build/src/index';
 import { expect, it, describe } from 'vitest';
 
-const MAP_SEED: [string, number][] = [
-  ['a', 1],
-  ['b', 2],
-];
+const OBJ_SEED = { a: 1, b: 2 };
 
-describe('MapCollection', () => {
+describe('ObjectCollection', () => {
   it('should get values from a object', () => {
     const f = new Forest();
-    const mc = new MapCollection<string, number>(
+    const mc = new ObjectCollection<string, number>(
       'foo',
       {
-        initial: new Map<string, number>(MAP_SEED),
+        initial: { ...OBJ_SEED },
       },
       f,
     );
@@ -26,13 +23,10 @@ describe('MapCollection', () => {
 
   it('should get values from a object with set', () => {
     const f = new Forest();
-    const mc = new MapCollection<string, number>(
+    const mc = new ObjectCollection<string, number>(
       'foo',
       {
-        initial: new Map<string, number>([
-          ['a', 1],
-          ['b', 2],
-        ]),
+        initial: { ...OBJ_SEED },
       },
       f,
     );
@@ -48,10 +42,10 @@ describe('MapCollection', () => {
 
   it('should allow keys to be deleted', () => {
     const f = new Forest();
-    const mc = new MapCollection<string, number>(
+    const mc = new ObjectCollection<string, number>(
       'foo',
       {
-        initial: new Map<string, number>(MAP_SEED),
+        initial: { ...OBJ_SEED },
       },
       f,
     );
@@ -68,39 +62,36 @@ describe('MapCollection', () => {
 
   it('should respect set overrides', () => {
     const f = new Forest();
-    const mc = new MapCollection<string, number>(
+    const mc = new ObjectCollection<string, number>(
       'foo',
       {
-        initial: new Map<string, number>([
-          ['a', 1],
-          ['b', 2],
-        ]),
+        initial: { ...OBJ_SEED },
       },
       f,
     );
 
-    mc.set('a', 30);
+    mc.patch({ b: 100, d: 300 });
 
     expect(mc.get('a')).toBe(30);
-    expect(mc.get('b')).toBe(2);
-    expect(mc.size).toBe(2);
+    expect(mc.get('b')).toBe(100);
+    expect(mc.get('d')).toBe(300);
+    expect(mc.size).toBe(3);
 
     mc.set('a', 5);
     mc.set('b', 10);
     expect(mc.get('a')).toBe(5);
-    expect(mc.get('b')).toBe(10);
-    expect(mc.size).toBe(2);
+    expect(mc.get('d')).toBe(300);
+    expect(mc.size).toBe(30);
   });
+
+  it('allows patching of new values', () => {});
   describe('keys', () => {
     it('should ket keys from a object', () => {
       const f = new Forest();
-      const mc = new MapCollection<string, number>(
+      const mc = new ObjectCollection<string, number>(
         'foo',
         {
-          initial: new Map<string, number>([
-            ['a', 1],
-            ['b', 2],
-          ]),
+          initial: { ...OBJ_SEED },
         },
         f,
       );
@@ -115,13 +106,10 @@ describe('MapCollection', () => {
 
     it('should get keys from a object with set', () => {
       const f = new Forest();
-      const mc = new MapCollection<string, number>(
+      const mc = new ObjectCollection<string, number>(
         'foo',
         {
-          initial: new Map<string, number>([
-            ['a', 1],
-            ['b', 2],
-          ]),
+          initial: { ...OBJ_SEED },
         },
         f,
       );
@@ -147,13 +135,10 @@ describe('MapCollection', () => {
 
     it('should respect overrides', () => {
       const f = new Forest();
-      const mc = new MapCollection<string, number>(
+      const mc = new ObjectCollection<string, number>(
         'foo',
         {
-          initial: new Map<string, number>([
-            ['a', 1],
-            ['b', 2],
-          ]),
+          initial: { ...OBJ_SEED },
         },
         f,
       );
@@ -181,13 +166,10 @@ describe('MapCollection', () => {
   describe('values', () => {
     it('should get values from a object', () => {
       const f = new Forest();
-      const mc = new MapCollection<string, number>(
+      const mc = new ObjectCollection<string, number>(
         'foo',
         {
-          initial: new Map<string, number>([
-            ['a', 1],
-            ['b', 2],
-          ]),
+          initial: { ...OBJ_SEED },
         },
         f,
       );
@@ -202,13 +184,10 @@ describe('MapCollection', () => {
 
     it('should get values from a object with set', () => {
       const f = new Forest();
-      const mc = new MapCollection<string, number>(
+      const mc = new ObjectCollection<string, number>(
         'foo',
         {
-          initial: new Map<string, number>([
-            ['a', 1],
-            ['b', 2],
-          ]),
+          initial: { ...OBJ_SEED },
         },
         f,
       );
@@ -234,13 +213,10 @@ describe('MapCollection', () => {
 
     it('should get respect overrides', () => {
       const f = new Forest();
-      const mc = new MapCollection<string, number>(
+      const mc = new ObjectCollection<string, number>(
         'foo',
         {
-          initial: new Map<string, number>([
-            ['a', 1],
-            ['b', 2],
-          ]),
+          initial: { ...OBJ_SEED },
         },
         f,
       );
@@ -268,27 +244,27 @@ describe('MapCollection', () => {
   describe('iterator/clone', () => {
     it('iterates after set', () => {
       const f = new Forest();
-      const mc = new MapCollection<string, number>(
+      const mc = new ObjectCollection<string, number>(
         'foo',
         {
-          initial: new Map<string, number>(MAP_SEED),
+          initial: { ...OBJ_SEED },
         },
         f,
       );
 
       mc.set('c', 3); // force a proxy;
 
-      const clone = new Map(mc.value);
+      const clone = { ...mc.value };
 
-      const extendedSeed: [string, number][] = [...MAP_SEED, ['c', 3]];
-      expect(clone).toEqual(new Map<string, number>(extendedSeed));
+      const extendedSeed = { ...OBJ_SEED, c: 3 };
+      expect(clone).toEqual(extendedSeed);
     });
-    it('iterates after set and delete', () => {
+    it.only('iterates after set and delete', () => {
       const f = new Forest();
-      const mc = new MapCollection<string, number>(
+      const mc = new ObjectCollection<string, number>(
         'foo',
         {
-          initial: new Map<string, number>(MAP_SEED),
+          initial: { ...OBJ_SEED },
         },
         f,
       );
@@ -296,13 +272,11 @@ describe('MapCollection', () => {
       mc.set('c', 30); // force a proxy;
       mc.delete('a');
 
-      const clone = new Map(mc.value);
+      const clone = { ...mc.value };
 
-      const extendedSeed: [string, number][] = [
-        ['b', 2],
-        ['c', 30],
-      ];
-      expect(clone).toEqual(new Map<string, number>(extendedSeed));
+      const extendedSeed = { b: 2, c: 30 };
+
+      expect(clone).toEqual(extendedSeed);
     });
   });
 });

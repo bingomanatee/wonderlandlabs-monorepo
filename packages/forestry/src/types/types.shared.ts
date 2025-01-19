@@ -61,7 +61,7 @@ export type ValueProviderContextType =
   boolean : 'boolean',
   symbol : 'symbol',
   array : 'array',
-  map : 'map',
+  object : 'object',
   object : 'object',
   set : 'set',
   null : 'null',
@@ -118,7 +118,7 @@ export type ValueProviderParams<Value = unknown, ParamType = unknown> =
  *  They will often produce a dynamic (proxy) of the previous value, to limit memory bloat.
  *
  * Truncation and Ittermittent caching should be a "hard serialization" - if the original value was a proxy, for instance, you want to produce
- * a less dynamic object, map or whatever. Especially with Truncation, as you want to limit the reference to the previous
+ * a less dynamic object, object or whatever. Especially with Truncation, as you want to limit the reference to the previous
  * branch which is destroyed in the process.
  *
  * Local caching will be done on nearly every branch, so you in general will just want to produce the value that comes
@@ -128,16 +128,16 @@ export type ValueProviderParams<Value = unknown, ParamType = unknown> =
  *
  */
 export type ValueProviderFN<Value = unknown, ParamType = any> = (
-  params: ValueProviderParams<Value, ParamType>
+  params: ValueProviderParams<Value, ParamType>,
 ) => Value;
 
 export type MutationValueProviderFN<Value = unknown, ParamType = any> = (
-  params: MutationValueProviderParams<Value, ParamType>
+  params: MutationValueProviderParams<Value, ParamType>,
 ) => Value;
 
 export type UpdaterValueProviderFN<Value = unknown, SeedType = any> = (
   value: Value,
-  seed: SeedType
+  seed: SeedType,
 ) => Value;
 
 type SubscribeFn<ValueType> = (value: ValueType) => void;

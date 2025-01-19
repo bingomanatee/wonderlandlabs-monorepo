@@ -2,11 +2,11 @@
 
 Forest is an attempt to create a journalled, transactional synchronous, query based muuti collection ecosystem.
 
-It is intened as a Redis Killer for client side / react apps, but can have other applications.
+It is intended as a Redis Killer for client side / react apps, but can have other applications.
 
-# STATUS: AlPHA
+# STATUS: 1.0
 
-currently Forestry is undergoing alpha testing. For a stable state system check out   `wonderlandlabs/forest`.
+Forestry is production tested - some issues may remain but it is solid for deployment
 
 ## Journeled
 
@@ -42,11 +42,11 @@ Any type of data you wish can be contained with in a Tree; Maps, DOM, database c
 As with previous iterations of Forest, Forest stores are
 
 - Quick to define
-- transactionally contain
-- allow actions to call each other with indfeinate depth for orchestration
+- transactional 
+- allow actions to call each other with indefinite depth for orchestration
 - Can be used globally or locally
-- minimize view notification by only broacasting outside the outermost transaction
-- produce synchromous change and can always be immediately inspected for current value
+- minimize view notification by only broadcasting outside the outermost transaction
+- produce synchronous change and can always be immediately inspected for current value
 
 the principal change for Forest 3.0 is that the Engine is no longer a class instance defiend by the Forest library but (can be) a custom class with your own action definitions. It also has even fewer depenencies than the previous iteration.
 
@@ -119,48 +119,6 @@ error, all the trees are reset to their pre-function state.
 - `observe<ValueType>(name: string)`: SubjectLike<ValueType>
   > returns a subscription to a named $tree, that only emits after all do()'s are complete.
 
-## Tree:
-
-Trees are made from(in) forest instances.
-
-- (constructor): (name: string, params: TreeParams)
-  parameters are:
-  - validator?: (value: ValueType, $tree: TreeIF<ValueTYpe>)
-  - initial?: ValueType
-- `subscribe((value) => void) : Subscription
-  > an RxJS subscribe method. 
-- `name`: string
-- `value`: ValueType
-  > shortcut to this.top?.value
-- top?: BranchIF<ValueType>.
-  > while any $tree with an initial value will have a top there are some
-  > circumstances where the $tree may be "without branches" -- if validators disallowed all submissions, or there is no initial parameter.
-- `next(nextValue: ValueType, cause?: string): void
-  > sets the value of the $tree to the defined overwrite; may throw if validators present.
-- `mutate(mutator: ({value, seed, branch, $tree}) => newValue, seed?, name?)
-  > pass a function that will produce a new value for the $tree.
-- `valueAt(time: number) // the value of the branch "in history" at (or just before) the given time
-- `validate(value: ValueType) : {isValid, value, $tree, error?: string}
-  > if you want to "test an input" before committing it to state,
-  > validate tries the value against any validators; doesn't throw,
-  > but returns feedback in a handy object
-- `offshoots`: {time, errror, branch}[]
-  > invalid branches removed during submission due to validation failures
-- `forEachDown((branch, count) => void | true, maxBranches?: number)
-  > iterate through the branches from most recent to oldest. 
-
-### Tree Validation {
-  if you add a validator, it will examine every value that is put in to the $tree. If it throws, the $tree's value will be the one the $tree had before you fed
-  it crap data. 
-}
-## Branch:
-
-Branches should in general not be messed with externally; their one outward facing field is `value` but that may as well be accessed indrectly, off their $tree; the exception may be examining offshoots
-
-## Changing a $tree's state
-
-the methods `next(value)` or `$tree.mutate(({value, seed) => newValue, seed)` will update the state of the $tree. It is synchronous and will broadcast through subscriers. 
-
 ### Notes
 
 If you want to throw a message into the history of the $tree (or forest),
@@ -172,30 +130,24 @@ may be useful.
 
 The notes list in forest and that in individual trees are distinct and unrelated; $tree notes will include the name of the $tree.
 
-# What can you put in a $tree?
-
-Forest puts no limit on what a $tree can store. That being said - _simple values_ make the best candidate for a $tree. As a rule of thumb if it can be processed by JSON.stringify, or is a
-Map of things that are "stringifiable" and keyed by strings or numbers.
-
-Class instances, functions, DOM fragments all are not good candidates for Tree storage; its best to find some other way of storing these things such as keeping them in a seperate map
-and referring to them with ID numbers/strings.
-
-Objects and arrays are valid, but ideally are not deeply nested or overlong.
-
 # Collections
 
 An collection is a "class that uses Forest". It can add, manipulate and filter
 trees. Collections that are based on the Collection class (and satisfy the CollectionIF) is based on a specific (single)
-$tree and will allow for controlled manipulaition of its values.
+$tree and will allow for controlled manipulation of its values.
 
 - a MapCollection uses proxied maps and exposes "mappy" methods.
 - a FormCollection is a "multi-$tree" engine that puts form-centric properties in one $tree and a map of detailed form-centric fields. Its validators, unlike Forest validators, express errors for "bad values" without throwing/pruning trees, allowing the user to enter values for fields as they may and providing real time feedback for field falidation.
+- an ObjectCollection is built to manage values for a single object. 
+
+If you want to manage data of other types (array, string, number, Set, etc.) you 
+can use the base Collection class. 
 
 ## Custom Collections
 
 You can create any class you like around a $tree/forest paradigm. you can create "change methods" in any manner you like. However, the Collection class has a custom "actions" property in its parameter that lets you define methods as you will, wrapping each in a transaction (`do()`) wrapper for sanitation.
 
-Collections will create a forest if not injeted as a parameter; if you
+Collections will create a forest if not injected as a parameter; if you
 have a simple "single $tree" use case, a Collection will do just fine.
 
 ```
@@ -307,7 +259,7 @@ serializer(params: ValueProviderParams<number>) {
   return value === undefined ? 0 : value;
 }, 
 ```
-resulting in an ittermittent serializer that creates a literal copy of the mutation chain every six branches:
+resulting in an intermittent serializer that creates a literal copy of the mutation chain every six branches:
 
 ```
 

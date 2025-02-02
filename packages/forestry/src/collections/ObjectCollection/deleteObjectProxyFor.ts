@@ -140,7 +140,6 @@ export function deleteObjectProxyFor<KeyType extends keyof any, ValueType>(
       if (descriptor) {
         descriptor.configurable = true; // Required for the spread operator
       }
-      console.log('descriptor is ', descriptor);
       return descriptor;
     },
     get(

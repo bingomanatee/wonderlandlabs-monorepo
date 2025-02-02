@@ -4,104 +4,6 @@ export type ObjectSetInfo<KeyType extends keyof any, ValueType> = {
   value: ValueType;
 };
 
-/*
-
-import type { IterFn } from './../../types/types.shared';
-import { noSet } from './ObjectCollection';
-
-function makeIterator<KeyType extends keyof any, ValueType>(
-  target: ObjectSetInfo<KeyType, ValueType>,
-) {
-  const { object, key, value } = target;
-  return function* () {
-    for (const list of map) {
-      yield list;
-    }
-    yield [key, value];
-  };
-}
-
-function makeValueIterator<KeyType, ValueType>(
-  target: ObjectSetInfo<KeyType, ValueType>,
-) {
-  const { object, key, value } = target;
-  return () => ({
-    // because one of the key may be redundant
-    // we have to iterate over keys to find and skip it
-    [Symbol.iterator]: function* () {
-      for (const k of map.keys()) {
-        if (k !== key) {
-          yield map.get(k);
-        }
-      }
-      yield value;
-    },
-  });
-}
-function makeEntriesIterator<KeyType, ValueType>(
-  target: ObjectSetInfo<KeyType, ValueType>,
-) {
-  const { object, key, value } = target;
-  return () => ({
-    // because one of the key may be redundant
-    // we have to iterate over keys to find and skip it
-    [Symbol.iterator]: function* () {
-      for (const k of map.keys()) {
-        if (k !== key) {
-          yield [k, map.get(k)];
-        }
-      }
-      yield [key, value];
-    },
-  });
-}
-
-function makeKeyIterator<KeyType, ValueType>(
-  target: ObjectSetInfo<KeyType, ValueType>,
-) {
-  const { object, key } = target;
-  return () => ({
-    [Symbol.iterator]: function* () {
-      for (const k of map.keys()) {
-        if (k !== key) {
-          yield k;
-        }
-      }
-      yield key;
-    },
-  });
-}
-
-function getter<KeyType, ValueType>(
-  target: ObjectSetInfo<KeyType, ValueType>,
-  key: KeyType,
-) {
-  return key === target.key ? target.value : target.object.get(key);
-}
-
-function haser<KeyType, ValueType>(
-  target: ObjectSetInfo<KeyType, ValueType>,
-  key: KeyType,
-) {
-  return key === target.key ? true : target.object.has(key);
-}
-function makeEach<KeyType, ValueType>(target: ObjectSetInfo<KeyType, ValueType>) {
-  const { object, key, value } = target;
-  return (eachFN: IterFn<KeyType, ValueType>) => {
-    map.forEach((v, k) => {
-      if (k !== key) {
-        eachFN(v, k);
-      }
-    });
-    eachFN(value, key);
-  };
-}
-
-function size<KeyType, ValueType>(target: ObjectSetInfo<KeyType, ValueType>) {
-  const { object, key } = target;
-  return map.has(key) ? map.size : map.size + 1;
-}*/
-
 export function setObjectProxyFor<
   KeyType extends keyof any,
   ValueType = unknown,
@@ -113,7 +15,6 @@ export function setObjectProxyFor<
       );
     },
     get(target: ObjectSetInfo<KeyType, ValueType>, method: KeyType) {
-      console.log('getting', method, 'from', target.object, 'osi', target);
       if (method === target.key) {
         return target.value;
       }
@@ -144,10 +45,13 @@ export function setObjectProxyFor<
       return descriptor;
     },
     ownKeys(target: ObjectSetInfo<KeyType, ValueType>) {
-      if (target.key in target.object) {
-        return Reflect.ownKeys(target.object);
+      console.log('owpKeys: -- set');
+      const baseKeys = [...Reflect.ownKeys(target.object)];
+      console.log('--- base are ', ...baseKeys);
+      if (baseKeys.includes(target.key as string | symbol)) {
+        return baseKeys;
       }
-      return new Set([...Reflect.ownKeys(target.object), target.key]).values();
+      return [...baseKeys, target.key];
     },
     deleteProperty(): boolean {
       throw new Error('forest objects are immutable - cannot delete keys');

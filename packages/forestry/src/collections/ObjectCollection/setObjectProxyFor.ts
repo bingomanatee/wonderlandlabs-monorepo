@@ -144,8 +144,10 @@ export function setObjectProxyFor<
       return descriptor;
     },
     ownKeys(target: ObjectSetInfo<KeyType, ValueType>) {
-      if (target.key in target.object) return Reflect.ownKeys(target.object);
-      return [...Reflect.ownKeys(target.object), target.key];
+      if (target.key in target.object) {
+        return Reflect.ownKeys(target.object);
+      }
+      return new Set([...Reflect.ownKeys(target.object), target.key]).values();
     },
     deleteProperty(): boolean {
       throw new Error('forest objects are immutable - cannot delete keys');

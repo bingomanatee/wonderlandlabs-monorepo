@@ -45,9 +45,7 @@ export function setObjectProxyFor<
       return descriptor;
     },
     ownKeys(target: ObjectSetInfo<KeyType, ValueType>) {
-      console.log('owpKeys: -- set');
       const baseKeys = [...Reflect.ownKeys(target.object)];
-      console.log('--- base are ', ...baseKeys);
       if (baseKeys.includes(target.key as string | symbol)) {
         return baseKeys;
       }

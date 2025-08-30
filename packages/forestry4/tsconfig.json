@@ -1,0 +1,26 @@
+{
+  "compilerOptions": {
+    "target": "es2022",
+    "module": "ES2015",
+    "lib": ["ES2022", "DOM"],
+    "moduleResolution": "Bundler",
+    "declaration": true,
+    "rootDir": ".",
+    "outDir": "build",
+    "typeRoots": ["src/types.d.ts"],
+    "allowSyntheticDefaultImports": true,
+    "importHelpers": true,
+    "alwaysStrict": true,
+    "sourceMap": true,
+    "forceConsistentCasingInFileNames": true,
+    "noFallthroughCasesInSwitch": true,
+    "noImplicitReturns": true,
+    "allowImportingTsExtensions": false,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noImplicitAny": false,
+    "noImplicitThis": false,
+    "strictNullChecks": false,
+  },
+  "include": ["src"]
+}

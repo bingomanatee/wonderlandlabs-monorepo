@@ -41,7 +41,7 @@ export default [
       'no-unused-vars': 'off', // Avoid setting both rules for the same lint issue
       semi: ['error', 'always'],
       'object-curly-spacing': ['warn', 'always'],
-      'array-bracket-spacing': ['warn', 'always'],
+      'array-bracket-spacing': ['off'],
       quotes: [
         'error',
         'single',

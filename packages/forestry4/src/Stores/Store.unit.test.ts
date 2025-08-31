@@ -2,6 +2,7 @@ import { describe, it, expect, vi } from 'vitest';
 import { z } from 'zod';
 import { Store } from './Store';
 import type { ActionMethodRecord, ActionRecord, StoreIF } from '../types';
+import { isStore, isObj } from '../typeguards';
 
 describe('Store', () => {
   describe('constructor', () => {
@@ -264,6 +265,31 @@ describe('Store', () => {
       expect(store.value.age).toBe(30);
       expect(typeof store.acts.setName).toBe('function');
       expect(typeof store.acts.incrementAge).toBe('function');
+    });
+  });
+
+  describe('typeguards', () => {
+    it('should identify objects with isObj', () => {
+      expect(isObj({})).toBe(true);
+      expect(isObj({ a: 1 })).toBe(true);
+      expect(isObj([])).toBe(true);
+      
+      expect(isObj(null)).toBe(false);
+      expect(isObj(undefined)).toBe(false);
+      expect(isObj('string')).toBe(false);
+      expect(isObj(42)).toBe(false);
+      expect(isObj(true)).toBe(false);
+    });
+
+    it('should identify Store instances with isStore', () => {
+      const store = new Store({ value: 42, acts: {} });
+      expect(isStore(store)).toBe(true);
+      
+      expect(isStore(null)).toBe(false);
+      expect(isStore(undefined)).toBe(false);
+      expect(isStore({})).toBe(false);
+      expect(isStore({ value: 42 })).toBe(false); // missing required methods
+      expect(isStore({ next: () => {} })).toBe(false); // missing required props
     });
   });
 });

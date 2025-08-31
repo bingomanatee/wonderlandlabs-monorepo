@@ -4,10 +4,13 @@ import {
   StoreIF,
   StoreParams,
   ValueTestFn,
+  Listener,
 } from '../types';
-import { BehaviorSubject, Subscription } from 'rxjs';
+import { BehaviorSubject, Subject, Subscription } from 'rxjs';
 import asError from '../lib/asError';
 import { isZodParser, ZodParser } from '../typeguards';
+import * as console from 'node:console';
+import { result } from 'lodash-es';
 
 function methodize<DataType, Actions extends ActionRecord = ActionRecord>(
   actsMethods: ActionMethodRecord,
@@ -27,45 +30,58 @@ function testize<DataType>(
   self: Store<DataType>,
 ): ValueTestFn<DataType> | ValueTestFn<DataType>[] {
   if (Array.isArray(testFunctions)) {
-    return testFunctions.map(fn => function(value: unknown) {
-      return fn.call(self, value, self);
-    });
+    return testFunctions.map(
+      (fn) =>
+        function (value: unknown) {
+          return fn.call(self, value, self);
+        },
+    );
   } else {
-    return function(value: unknown) {
+    return function (value: unknown) {
       return testFunctions.call(self, value, self);
     };
   }
 }
 
 export class Store<DataType, Actions extends ActionRecord = ActionRecord>
-implements StoreIF<DataType, Actions>
+  implements StoreIF<DataType, Actions>
 {
+  /**
+   * note - for consistency with the types subject is a generic subject;
+   * however internally it is a BehaviorSubject.
+   * @private
+   */
+  #subject?: Subject<DataType>;
+  get subject(): Subject<DataType> {
+    return this.#subject;
+  }
+
+  set subject(value: Subject<DataType>) {
+    this.#subject = value;
+  }
   $: Actions;
 
   get acts(): Actions {
     return this.$;
   }
 
-  #subject: BehaviorSubject<DataType>;
-
-  constructor(p: StoreParams<DataType>) {
-    this.#subject = new BehaviorSubject(p.value);
+  constructor(p: StoreParams<DataType>, noSubject = false) {
+    if (!noSubject) {
+      this.#subject = new BehaviorSubject(p.value);
+    }
     if ('schema' in p && p.schema) {
       this.schema = p.schema;
     }
 
-    this.next = this.next.bind(this);
-    this.validate = this.validate.bind(this);
-    this.isValid = this.isValid.bind(this);
     this.debug = !!p.debug;
 
     const self = this;
     this.$ = methodize<DataType, Actions>(p.acts ?? {}, self);
-    
+
     if (p.tests) {
       this.tests = testize<DataType>(p.tests, self);
     }
-    
+
     if (p.name && typeof p.name === 'string') {
       this.#name = p.name;
     }
@@ -89,8 +105,11 @@ implements StoreIF<DataType, Actions>
 
   next(value: DataType): boolean {
     const { isValid, error } = this.validate(value);
+    if (!this.subject) {
+      throw new Error('Store requires subject -- or override of next()');
+    }
     if (isValid) {
-      this.#subject.next(value);
+      this.subject!.next(value);
       return true;
     }
     if (this.debug) {
@@ -157,10 +176,13 @@ implements StoreIF<DataType, Actions>
     if (this.#pending) {
       return this.#pending;
     }
-    return this.#subject.value as DataType;
+    if (!this.subject) {
+      throw new Error('Store requires subject or overload of value');
+    }
+    return (this.subject! as BehaviorSubject<DataType>).value as DataType;
   }
 
-  subscribe(listener: (value: DataType) => void): Subscription {
-    return this.#subject.subscribe(listener);
+  subscribe(listener: Listener<DataType>): Subscription {
+    return this.subject!.subscribe(listener);
   }
 }

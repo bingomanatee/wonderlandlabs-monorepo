@@ -344,19 +344,13 @@ note - if the path is dynamic (has a glob or regex) the first matching candidate
 ## Factories
 
 Factory functions contain sub-stores for managing part of the root stores' values.
-Changes,
-
-* in the absence of an actions parameter, predefined actions from the branchTemplate may be
-  applied.
-* Schema, if pre-defined for a specific / dynamic path, are embedded in a tree at the relevant sub-path.
-* tests, if predefined for a specific / dynamic path, are embedded in a tree at the relevant sub-path.
 
 ### `makeTree<DataType, ActionMethodRecord>(path: Path, actions: ActionRecord?): Tree<DataType>`
 
 Makes a store out of a shard of the current Store; when the value of the store changes, it updates
 the parent store's value -- and vice versa. In this way the main Forest can act as a "database" and
 you can have ORM style trees for tables and records (or even more granular fields etc.) to
-focus on a specific subsection of the
+focus on a specific subsection of the store and apply methods with a more focused "this" and value. 
 
 ### `transaction<SubDataType>((Store<subDataType>) => void, path: Path?: acts?: ActionMethodRecordIF>`
 

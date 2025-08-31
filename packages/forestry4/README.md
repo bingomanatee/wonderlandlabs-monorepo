@@ -252,17 +252,51 @@ All validation is optional but useful for maintaining quality data.
 ### schema: Map<Path, Zod> | Zod
 
 you can define schema for a path or class of paths or just simply for the entire
-store value.
+store value. you can use Zod to validate basic types (`z.string()` or `z.array()`).
 
-### `tests: Map<Path, ValidatorFn> | ValidatorFn
+note - the actual interface of a schema is that which has a parse(value) method that throws when the argument 
+fails to meet expectations; Zod or ZodMini is recommended but any object with that signature can be used
+to define your schema if you have another pre-existing schema system in your code base (eg Yup), just 
+create a scaffold around it via an object with a parse method. 
+
+### `tests: ValueTestFn[] | ValueTestFn 
 
 you can define tests(validators) for a path or class of paths or just simply for the entire
-store value.
+store value. Validator Function takes a value and the store (this) as arguments, so you can 
+compare current value with the candidate if it matters. 
 
 ValidatorFn's are functions that return a falsy value / void if the value is correct,
 and an error string / thrown error if the value fails to pass muster.
 
-You can test the vailidity of an element or a shard with the `isValid(value, path?)`
+You can test the validity of an element or a shard with the `mystore.isValid(value)`
+
+tests can be a single function or an array of functions; in the latter case they are run in order; 
+any failed test will short circuit the series so you can trust the prior test succeeded; eg, 
+in the below example, you can trust the input to the second function is a string due to the first test.
+
+```javascript
+{
+  tests: [(a: unknown) => typeof a === 'string', (v: string) => /^[\d]{3}-[/d]{4}-[\d]{4}/.test(v)]
+}
+
+```
+#### Usage Note 
+Tests are not for type validation - that should be covered using Zod as `schema`.
+it is for things like validating strings against regex, or that each item in an array param is unique,
+or other "business criteria" that type/schema checks cannot facilitate. Also you can define custom error 
+messages for multiple checks in tests, so you can get more specific information as to why a value failed validation. 
+
+the schema test executes before the tests, so you can trust any input to a test has passed the schema
+parse test (if it exists); conversely you _cannot_ trust that the tests have passed before the schema.parse() 
+method is called. 
+
+###
+
+### `validate(value) : {isValid: boolean, error?: Error}`, `isValid(value) : boolean`
+if you want to check a value for validity without throwing both these methods  check the tests and schema
+against a candidate and return feedback without throwing. isValid returns a simple boolean; validate 
+returns a structure containing the failure if you want to know why the value is not valid.
+(and yes, isValid is just a wrapper for validate)
 
 ## Mutation Helpers
 
@@ -281,8 +315,8 @@ The one exception is the '+' subpath - you can push() an value to an array or se
 
 ### `get<Type>( path: path, count?: number | true = 1): Type | Type[] | undefined`
 
-**Gets a value from the store. returns undefined if the path has no solution.
-note - if the path is dynami**c (has a glob or regex) the first matching candidate is found;
+Gets a value from the store. returns undefined if the path has no solution.
+note - if the path is dynamic (has a glob or regex) the first matching candidate is found;
 
 * if a number is passed as the second argument, _that many_ results will be returned.
 * if `true` is passed as a second argument, _all_ results will be returned
@@ -306,8 +340,8 @@ focus on a specific subsection of the
 
 ### `transaction<SubDataType>((Store<subDataType>) => void, path: Path?: acts?: ActionMethodRecordIF>`
 
-Transactions copy the store value into a detached tree/store, passes it to a mutator, and
-barring thrown errors, copies its value to the parent store upon completion.
+Transactions copy the store value into a detached tree/store, passes it to a mutator, 
+and barring thrown errors, copies its value to the parent store upon completion.
 
 During execution of the store all validation in the parent context is suspended.
 This is useful for conducting operations in which invalid states may be temporarily

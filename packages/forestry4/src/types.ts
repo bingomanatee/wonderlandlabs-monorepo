@@ -48,4 +48,5 @@ export type StoreParams<DataType, Actions = ActionMethodRecord> = {
   schema?: z.ZodSchema<DataType>;
   tests?: ValueTestFn<DataType> | ValueTestFn<DataType>[];
   name?: string;
+  debug?: boolean;
 };

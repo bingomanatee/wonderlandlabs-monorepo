@@ -262,8 +262,8 @@ create a scaffold around it via an object with a parse method.
 ### `tests: ValueTestFn[] | ValueTestFn 
 
 you can define tests(validators) for a path or class of paths or just simply for the entire
-store value. Validator Function takes a value and the store (this) as arguments, so you can 
-compare current value with the candidate if it matters. 
+store value. Validator Functions take a value as their first parameter and have access to the 
+store instance via `this`, allowing you to compare the candidate value with the current store state.
 
 ValidatorFn's are functions that return a falsy value / void if the value is correct,
 and an error string / thrown error if the value fails to pass muster.
@@ -276,9 +276,29 @@ in the below example, you can trust the input to the second function is a string
 
 ```javascript
 {
-  tests: [(a: unknown) => typeof a === 'string', (v: string) => /^[\d]{3}-[/d]{4}-[\d]{4}/.test(v)]
+  tests: [
+    function(value: unknown) { 
+      return typeof value === 'string' ? null : 'must be string'; 
+    },
+    function(value: unknown) { 
+      const str = value as string;
+      return /^[\d]{3}-[\d]{4}-[\d]{4}$/.test(str) ? null : 'invalid phone format';
+    }
+  ]
 }
+```
 
+Test functions can also access the store via `this` to compare with current state:
+
+```javascript
+{
+  tests: function(value: unknown) {
+    if (typeof value !== 'number') return 'must be number';
+    if (value < 0) return 'must be positive';
+    if (value > this.value * 2) return 'cannot more than double current value';
+    return null;
+  }
+}
 ```
 #### Usage Note 
 Tests are not for type validation - that should be covered using Zod as `schema`.

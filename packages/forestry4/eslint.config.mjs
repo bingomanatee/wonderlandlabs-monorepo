@@ -77,4 +77,23 @@ export default [
       },
     },
   },
+  {
+    files: ['**/*.test.ts', '**/*.spec.ts'],
+    languageOptions: {
+      globals: {
+        ...vitest.environments.env.globals,
+      },
+      parserOptions: {
+        project: null, // Disable project-based linting for test files
+      },
+    },
+    plugins: {
+      vitest,
+    },
+    rules: {
+      ...vitest.configs.recommended.rules,
+      'no-sparse-arrays': 'off',
+      '@typescript-eslint/no-unused-expressions': 'off',
+    },
+  },
 ];

@@ -36,7 +36,7 @@ describe('Store', () => {
       const testFn = vi.fn();
       const store = new Store({ value: 42, acts: {}, tests: testFn });
 
-      expect(store.tests).toBe(testFn);
+      expect(typeof store.tests).toBe('function');
     });
   });
 
@@ -119,7 +119,7 @@ describe('Store', () => {
 
     it('should pass additional arguments to actions', () => {
       const mockAction = vi.fn(function (
-        this: Store<string>,
+        this: StoreIF<string>,
         value: string,
         suffix: string,
       ) {
@@ -147,7 +147,7 @@ describe('Store', () => {
       const schema = z.number().min(0);
       const store = new Store({ value: 5, acts: {}, schema });
 
-      expect(() => store.next(-1)).toThrow();
+      expect(() => store.next(-1)).toThrowError();
       expect(store.value).toBe(5); // value should remain unchanged
     });
 
@@ -159,7 +159,7 @@ describe('Store', () => {
       store.subscribe(listener);
       listener.mockClear(); // Clear initial subscription call
 
-      expect(() => store.next('hi')).toThrow();
+      expect(() => store.next('hi')).toThrowError();
       expect(listener).not.toHaveBeenCalled();
       expect(store.value).toBe('hello');
     });
@@ -178,6 +178,55 @@ describe('Store', () => {
 
       expect(() => store.next({ name: 'Jane', age: 25 })).not.toThrow();
       expect(store.value).toEqual({ name: 'Jane', age: 25 });
+    });
+  });
+
+  describe('test function validation', () => {
+    it('should allow test functions to access store via this', () => {
+      const TOO_BIG = 'cannot more than double current value';
+      const POS = 'must be positive';
+      const testFn = function (this: Store<number>, value: unknown) {
+        if (typeof value !== 'number') {
+          return 'must be number';
+        }
+        if (value < 0) {
+          return POS;
+        }
+        if (value > this.value * 2) {
+          return TOO_BIG;
+        }
+        return null;
+      };
+
+      const store = new Store({ value: 10, acts: {}, tests: testFn });
+
+      expect(() => store.next(15)).not.toThrowError(); // valid: 15 < 20
+      expect(() => store.next(35)).toThrowError(TOO_BIG); // invalid: 35 > 30 (15 * 2)
+      expect(() => store.next(-5)).toThrowError(POS); // invalid: negative
+    });
+
+    it('should work with array of test functions', () => {
+      const tests = [
+        function (this: Store<string>, value: unknown) {
+          if (typeof value !== 'string') {
+            return 'must be string';
+          }
+          return null;
+        },
+        function (this: Store<string>, value: unknown) {
+          if ((value as string).length < this.value.length) {
+            return 'cannot shrink';
+          }
+          return null;
+        },
+      ];
+
+      const store = new Store({ value: 'hello', acts: {}, tests });
+
+      expect(() => store.next('hello world')).not.toThrowError(); // valid: longer
+      expect(() => store.next('hi')).toThrowError(); // invalid: shorter
+      // @ts-expect-error TS2345
+      expect(() => store.next(123)).toThrowError(); // invalid: not string
     });
   });
 

@@ -6,11 +6,8 @@ import {
   ValueTestFn,
 } from '../types';
 import { BehaviorSubject, Subscription } from 'rxjs';
-import { TestFunction } from 'vitest';
 import asError from '../lib/asError';
 import { isZodParser, ZodParser } from '../typeguards';
-
-const itsAllGood = () => {};
 
 function methodize<DataType, Actions extends ActionRecord = ActionRecord>(
   actsMethods: ActionMethodRecord,
@@ -18,18 +15,30 @@ function methodize<DataType, Actions extends ActionRecord = ActionRecord>(
 ): Actions {
   return Array.from(Object.keys(actsMethods)).reduce((memo, key) => {
     const fn = actsMethods[key];
-
-    function f(...args: any[]) {
-      return fn(self.value, ...args);
-    }
-
-    memo[key] = f.bind(self);
+    memo[key] = function (...args: any[]) {
+      return fn.call(self, self.value, ...args);
+    };
     return memo as Partial<Actions>;
   }, {}) as Actions;
 }
 
+function testize<DataType>(
+  testFunctions: ValueTestFn<DataType> | ValueTestFn<DataType>[],
+  self: Store<DataType>,
+): ValueTestFn<DataType> | ValueTestFn<DataType>[] {
+  if (Array.isArray(testFunctions)) {
+    return testFunctions.map(fn => function(value: unknown) {
+      return fn.call(self, value, self);
+    });
+  } else {
+    return function(value: unknown) {
+      return testFunctions.call(self, value, self);
+    };
+  }
+}
+
 export class Store<DataType, Actions extends ActionRecord = ActionRecord>
-  implements StoreIF<DataType, Actions>
+implements StoreIF<DataType, Actions>
 {
   $: Actions;
 
@@ -41,18 +50,28 @@ export class Store<DataType, Actions extends ActionRecord = ActionRecord>
 
   constructor(p: StoreParams<DataType>) {
     this.#subject = new BehaviorSubject(p.value);
-    this.tests = p.tests ?? itsAllGood;
     if ('schema' in p && p.schema) {
       this.schema = p.schema;
     }
 
+    this.next = this.next.bind(this);
+    this.validate = this.validate.bind(this);
+    this.isValid = this.isValid.bind(this);
+    this.debug = !!p.debug;
+
     const self = this;
     this.$ = methodize<DataType, Actions>(p.acts ?? {}, self);
+    
+    if (p.tests) {
+      this.tests = testize<DataType>(p.tests, self);
+    }
+    
     if (p.name && typeof p.name === 'string') {
       this.#name = p.name;
     }
   }
 
+  public debug: boolean; // more alerts on validation failures;
   #name?: string;
   get name(): string {
     if (!this.#name) {
@@ -69,14 +88,12 @@ export class Store<DataType, Actions extends ActionRecord = ActionRecord>
   #pending: DataType | undefined;
 
   next(value: DataType): boolean {
-    try {
-      const { isValid, error } = this.validate(value);
-      if (isValid) {
-        this.#subject.next(value);
-        return true;
-      }
-      throw error;
-    } catch (e) {
+    const { isValid, error } = this.validate(value);
+    if (isValid) {
+      this.#subject.next(value);
+      return true;
+    }
+    if (this.debug) {
       console.error(
         'cannot update ',
         this.name,
@@ -85,10 +102,10 @@ export class Store<DataType, Actions extends ActionRecord = ActionRecord>
         '(current: ',
         this.value,
         ')',
-        e,
+        error,
       );
-      throw asError(e);
     }
+    throw asError(error);
   }
 
   #test(fn: ValueTestFn<DataType>, value: unknown) {
@@ -134,7 +151,7 @@ export class Store<DataType, Actions extends ActionRecord = ActionRecord>
 
   schema?: ZodParser;
 
-  tests?: TestFunction;
+  tests?: ValueTestFn<DataType> | ValueTestFn<DataType>[];
 
   get value() {
     if (this.#pending) {

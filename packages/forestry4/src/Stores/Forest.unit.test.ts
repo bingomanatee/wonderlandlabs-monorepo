@@ -1,7 +1,9 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { Forest } from './Forest';
-import { ForestTree } from './ForestTree';
-import type { ActionMethodRecord, ActionRecord } from '../types';
+import { ForestBranch } from './ForestBranch';
+import { Store } from './Store';
+import type { ActionParamsRecord, ActionExposedRecord } from '../types';
+import { previewActionSignatures } from './helpers';
 
 // Test data types
 interface User {
@@ -34,7 +36,7 @@ interface StoreData {
 }
 
 // Define the cart action types
-interface CartActions extends ActionRecord {
+interface CartActions extends ActionExposedRecord {
   addItem: (productId: string, quantity?: number) => ShoppingCart;
   removeItem: (productId: string) => ShoppingCart;
   updateQuantity: (productId: string, quantity: number) => ShoppingCart;
@@ -42,17 +44,17 @@ interface CartActions extends ActionRecord {
   totalCartCost: () => number;
 }
 
-interface UserActions extends ActionRecord {
+interface UserActions extends ActionExposedRecord {
   addUser: (user: User) => Record<string, User>;
 }
 
-interface ProductActions extends ActionRecord {
+interface ProductActions extends ActionExposedRecord {
   updatePrice: (productId: string, newPrice: number) => Record<string, Product>;
 }
 
-describe('Forest and ForestTree Integration', () => {
+describe('Forest and ForestBranch Integration', () => {
   let forest: Forest<StoreData>;
-  let cartTree: ForestTree<ShoppingCart, CartActions>;
+  let cartTree: ForestBranch<ShoppingCart, CartActions>;
 
   const sampleUsers: Record<string, User> = {
     user1: { id: 'user1', name: 'Alice', email: 'alice@example.com' },
@@ -60,8 +62,18 @@ describe('Forest and ForestTree Integration', () => {
   };
 
   const sampleProducts: Record<string, Product> = {
-    prod1: { id: 'prod1', name: 'Laptop', price: 999.99, category: 'Electronics' },
-    prod2: { id: 'prod2', name: 'Mouse', price: 29.99, category: 'Electronics' },
+    prod1: {
+      id: 'prod1',
+      name: 'Laptop',
+      price: 999.99,
+      category: 'Electronics',
+    },
+    prod2: {
+      id: 'prod2',
+      name: 'Mouse',
+      price: 29.99,
+      category: 'Electronics',
+    },
     prod3: { id: 'prod3', name: 'Book', price: 19.99, category: 'Books' },
   };
 
@@ -88,14 +100,22 @@ describe('Forest and ForestTree Integration', () => {
     });
 
     // Create cart actions with totalCartCost computation
-    const cartActions: ActionMethodRecord = {
-      addItem: (cart: ShoppingCart, productId: string, quantity: number = 1) => {
-        const existingIndex = cart.purchases.findIndex((p) => p.productId === productId);
+    const cartActions: ActionParamsRecord = {
+      addItem: (
+        cart: ShoppingCart,
+        productId: string,
+        quantity: number = 1,
+      ) => {
+        const existingIndex = cart.purchases.findIndex(
+          (p) => p.productId === productId,
+        );
         if (existingIndex >= 0) {
           return {
             ...cart,
             purchases: cart.purchases.map((p, i) =>
-              i === existingIndex ? { ...p, quantity: p.quantity + quantity } : p
+              i === existingIndex
+                ? { ...p, quantity: p.quantity + quantity }
+                : p,
             ),
           };
         } else {
@@ -113,7 +133,11 @@ describe('Forest and ForestTree Integration', () => {
         };
       },
 
-      updateQuantity: (cart: ShoppingCart, productId: string, quantity: number) => {
+      updateQuantity: (
+        cart: ShoppingCart,
+        productId: string,
+        quantity: number,
+      ) => {
         if (quantity <= 0) {
           return {
             ...cart,
@@ -123,7 +147,7 @@ describe('Forest and ForestTree Integration', () => {
         return {
           ...cart,
           purchases: cart.purchases.map((p) =>
-            p.productId === productId ? { ...p, quantity } : p
+            p.productId === productId ? { ...p, quantity } : p,
           ),
         };
       },
@@ -136,7 +160,10 @@ describe('Forest and ForestTree Integration', () => {
       },
 
       // Computed action: totalCartCost
-      totalCartCost: function (this: ForestTree<ShoppingCart>, cart: ShoppingCart) {
+      totalCartCost: function (
+        this: ForestBranch<ShoppingCart>,
+        cart: ShoppingCart,
+      ) {
         const products = (this.root.value as StoreData).products;
         return cart.purchases.reduce((total, purchase) => {
           const product = products[purchase.productId];
@@ -148,8 +175,10 @@ describe('Forest and ForestTree Integration', () => {
       },
     };
 
-    // Create a ForestTree branch for the shopping cart with proper type hints
-    cartTree = forest.branch<ShoppingCart, CartActions>(['shoppingCart'], cartActions);
+    // Create a ForestBranch for the shopping cart with proper type hints
+    cartTree = forest.branch<ShoppingCart, CartActions>(['shoppingCart'], {
+      actions: cartActions,
+    });
   });
 
   describe('Forest Store', () => {
@@ -166,7 +195,11 @@ describe('Forest and ForestTree Integration', () => {
     });
 
     it('should allow setting nested values', () => {
-      const newUser: User = { id: 'user3', name: 'Charlie', email: 'charlie@example.com' };
+      const newUser: User = {
+        id: 'user3',
+        name: 'Charlie',
+        email: 'charlie@example.com',
+      };
 
       forest.set(newUser, ['users', 'user3']);
 
@@ -174,16 +207,18 @@ describe('Forest and ForestTree Integration', () => {
     });
 
     it('should create branches for nested data', () => {
-      const usersTree = forest.branch<Record<string, User>>(['users'], {});
+      const usersTree = forest.branch<Record<string, User>>(['users'], {
+        actions: {},
+      });
 
-      expect(usersTree).toBeInstanceOf(ForestTree);
+      expect(usersTree).toBeInstanceOf(ForestBranch);
       expect(usersTree.path).toEqual(['users']);
       expect(usersTree.parent).toBe(forest);
       expect(usersTree.value).toEqual(sampleUsers);
     });
   });
 
-  describe('ForestTree (Shopping Cart)', () => {
+  describe('ForestBranch (Shopping Cart)', () => {
     it('should be properly connected to parent forest', () => {
       expect(cartTree.parent).toBe(forest);
       expect(cartTree.path).toEqual(['shoppingCart']);
@@ -336,22 +371,40 @@ describe('Forest and ForestTree Integration', () => {
 
   describe('Complex Integration Scenarios', () => {
     it('should handle multiple ForestTree branches', () => {
-      const usersTree = forest.branch<Record<string, User>, UserActions>(['users'], {
-        addUser: (users: Record<string, User>, user: User) => ({
-          ...users,
-          [user.id]: user,
-        }),
-      });
+      const usersTree = forest.branch<Record<string, User>, UserActions>(
+        ['users'],
+        {
+          actions: {
+            addUser: (users: Record<string, User>, user: User) => ({
+              ...users,
+              [user.id]: user,
+            }),
+          },
+        },
+      );
 
-      const productsTree = forest.branch<Record<string, Product>, ProductActions>(['products'], {
-        updatePrice: (products: Record<string, Product>, productId: string, newPrice: number) => ({
-          ...products,
-          [productId]: { ...products[productId], price: newPrice },
-        }),
+      const productsTree = forest.branch<
+        Record<string, Product>,
+        ProductActions
+      >(['products'], {
+        actions: {
+          updatePrice: (
+            products: Record<string, Product>,
+            productId: string,
+            newPrice: number,
+          ) => ({
+            ...products,
+            [productId]: { ...products[productId], price: newPrice },
+          }),
+        },
       });
 
       // Test that changes in one branch affect calculations in another
-      const newUser: User = { id: 'user3', name: 'Charlie', email: 'charlie@example.com' };
+      const newUser: User = {
+        id: 'user3',
+        name: 'Charlie',
+        email: 'charlie@example.com',
+      };
       const updatedUsers = usersTree.$.addUser(newUser);
       usersTree.next(updatedUsers);
 
@@ -476,6 +529,176 @@ describe('Forest and ForestTree Integration', () => {
       // Should complete quickly (less than 100ms for 100 operations)
       expect(endTime - startTime).toBeLessThan(100);
       expect(cart.purchases[0].quantity).toBe(101); // 1 initial + 100 added
+    });
+  });
+
+  describe('Action Signature Transformation', () => {
+    it('should demonstrate how ActionParamsRecord transforms to ActionExposedRecord', () => {
+      // Define actions with value as first parameter (ActionParamsRecord)
+      const inputActions: ActionParamsRecord = {
+        addItem: (cart: ShoppingCart, productId: string, quantity: number) => {
+          return {
+            ...cart,
+            purchases: [...cart.purchases, { productId, quantity }],
+          };
+        },
+        removeItem: (cart: ShoppingCart, productId: string) => {
+          return {
+            ...cart,
+            purchases: cart.purchases.filter((p) => p.productId !== productId),
+          };
+        },
+        clearCart: (cart: ShoppingCart) => {
+          return { ...cart, purchases: [] };
+        },
+        totalCost: (cart: ShoppingCart) => {
+          return cart.purchases.reduce(
+            (total, p) => total + p.quantity * 10,
+            0,
+          );
+        },
+      };
+
+      // Preview what the exposed signatures will look like
+      const exposedActions = previewActionSignatures(inputActions);
+
+      // The exposed actions should have the value parameter removed
+      expect(exposedActions.addItem.length).toBe(2); // productId, quantity (cart removed)
+      expect(exposedActions.removeItem.length).toBe(1); // productId (cart removed)
+      expect(exposedActions.clearCart.length).toBe(0); // no params (cart removed)
+      expect(exposedActions.totalCost.length).toBe(0); // no params (cart removed)
+
+      // Verify the functions exist but throw when called (they're for type inspection only)
+      expect(() => exposedActions.addItem('prod1', 2)).toThrow(
+        'previewActionSignatures is for type inspection only',
+      );
+      expect(() => exposedActions.removeItem('prod1')).toThrow(
+        'previewActionSignatures is for type inspection only',
+      );
+      expect(() => exposedActions.clearCart()).toThrow(
+        'previewActionSignatures is for type inspection only',
+      );
+      expect(() => exposedActions.totalCost()).toThrow(
+        'previewActionSignatures is for type inspection only',
+      );
+    });
+
+    it('should show the actual working transformation in a real store', () => {
+      // Create a simple store to demonstrate the transformation
+      const inputActions: ActionParamsRecord = {
+        addItem: (
+          cart: ShoppingCart,
+          productId: string,
+          quantity: number = 1,
+        ) => {
+          const existingIndex = cart.purchases.findIndex(
+            (p) => p.productId === productId,
+          );
+          if (existingIndex >= 0) {
+            return {
+              ...cart,
+              purchases: cart.purchases.map((p, i) =>
+                i === existingIndex
+                  ? { ...p, quantity: p.quantity + quantity }
+                  : p,
+              ),
+            };
+          } else {
+            return {
+              ...cart,
+              purchases: [...cart.purchases, { productId, quantity }],
+            };
+          }
+        },
+      };
+
+      // Create a branch with these actions
+      const testBranch = forest.branch<ShoppingCart, CartActions>(
+        ['shoppingCart'],
+        {
+          actions: inputActions,
+        },
+      );
+
+      // The actual exposed action should work without passing the cart value
+      const result = testBranch.$.addItem('prod3', 3);
+
+      // Verify the transformation worked correctly
+      expect(result.purchases).toHaveLength(3);
+      expect(result.purchases[2]).toEqual({ productId: 'prod3', quantity: 3 });
+
+      // The original cart should have the value automatically injected
+      expect(result.userId).toBe('user1'); // Preserved from original cart
+    });
+  });
+
+  describe('Type System Verification', () => {
+    it('should demonstrate correct type flow: input actions -> exposed actions', () => {
+      // Define input actions (with value parameter) - this is what developers write
+      const inputActions = {
+        addItem: (cart: ShoppingCart, productId: string, quantity: number) => ({
+          ...cart,
+          purchases: [...cart.purchases, { productId, quantity }],
+        }),
+        removeItem: (cart: ShoppingCart, productId: string) => ({
+          ...cart,
+          purchases: cart.purchases.filter((p) => p.productId !== productId),
+        }),
+      };
+
+      // Create a branch - the Actions generic represents what will be exposed
+      interface ExposedCartActions extends ActionExposedRecord {
+        addItem: (productId: string, quantity: number) => ShoppingCart;
+        removeItem: (productId: string) => ShoppingCart;
+      }
+
+      const typedCartTree = forest.branch<ShoppingCart, ExposedCartActions>(
+        ['shoppingCart'],
+        {
+          actions: inputActions, // Input: actions with value parameter
+        },
+      );
+
+      // The exposed actions should NOT require the value parameter
+      const result = typedCartTree.$.addItem('prod4', 5); // ✅ No cart parameter needed!
+
+      expect(result.purchases).toHaveLength(3);
+      expect(result.purchases[2]).toEqual({ productId: 'prod4', quantity: 5 });
+
+      // Verify the transformation worked - the original cart value was automatically injected
+      expect(result.userId).toBe('user1'); // Preserved from original cart
+    });
+
+    it('should show that Actions generic represents the exposed interface', () => {
+      // The Store/Forest/ForestBranch classes use Actions to represent what users see
+      // StoreParams.actions uses RecordToParams<Actions> to represent what developers write
+
+      interface MyExposedActions extends ActionExposedRecord {
+        increment: () => number;
+        add: (amount: number) => number;
+      }
+
+      // Input actions (what developer writes - with value parameter)
+      const inputActions = {
+        increment: (value: number) => value + 1,
+        add: (value: number, amount: number) => value + amount,
+      };
+
+      // Create store with explicit typing
+      const numberStore = new Store<number, MyExposedActions>({
+        value: 10,
+        actions: inputActions, // TypeScript ensures this matches RecordToParams<MyExposedActions>
+      });
+
+      // Exposed actions don't need value parameter
+      const result1 = numberStore.$.increment();
+      expect(result1).toBe(11); // 10 + 1
+
+      const result2 = numberStore.$.add(5);
+      expect(result2).toBe(15); // 10 + 5 (original value, actions don't auto-update store)
+
+      // Actions return new values but don't automatically update the store
+      expect(numberStore.value).toBe(10); // Original value unchanged
     });
   });
 });

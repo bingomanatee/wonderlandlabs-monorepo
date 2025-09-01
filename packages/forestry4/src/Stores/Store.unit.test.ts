@@ -1,7 +1,11 @@
 import { describe, it, expect, vi } from 'vitest';
 import { z } from 'zod';
 import { Store } from './Store';
-import type { ActionMethodRecord, ActionRecord, StoreIF } from '../types';
+import type {
+  ActionParamsRecord,
+  ActionExposedRecord,
+  StoreIF,
+} from '../types';
 import { isStore, isObj } from '../typeguards';
 
 describe('Store', () => {
@@ -12,9 +16,11 @@ describe('Store', () => {
     });
 
     it('should create a store with actions', () => {
-      const acts: ActionMethodRecord = {
-        increment: (value: number, store: StoreIF<number>) => store.next(value + 1),
-        add: (value: number, store: StoreIF<number>, amount: number) => store.next(value + amount),
+      const acts: ActionParamsRecord = {
+        increment: (value: number, store: StoreIF<number>) =>
+          store.next(value + 1),
+        add: (value: number, store: StoreIF<number>, amount: number) =>
+          store.next(value + amount),
       };
       const store = new Store({ value: 0, actions: acts });
 
@@ -86,7 +92,7 @@ describe('Store', () => {
 
   describe('actions', () => {
     it('should execute actions and update store state', () => {
-      const acts: ActionMethodRecord = {
+      const acts: ActionParamsRecord = {
         increment: function (this: Store<number>, value: number) {
           this.next(value + 1);
         },
@@ -107,7 +113,7 @@ describe('Store', () => {
       const mockAction = vi.fn(function (this: Store<number>, value: number) {
         this.next(value + 1);
       });
-      const acts: ActionMethodRecord = { test: mockAction };
+      const acts: ActionParamsRecord = { test: mockAction };
       const store = new Store({ value: 10, actions: acts });
 
       store.acts.test();
@@ -117,10 +123,14 @@ describe('Store', () => {
     });
 
     it('should pass additional arguments to actions', () => {
-      const mockAction = vi.fn(function (this: StoreIF<string>, value: string, suffix: string) {
+      const mockAction = vi.fn(function (
+        this: StoreIF<string>,
+        value: string,
+        suffix: string,
+      ) {
         this.next(value + suffix);
       });
-      const acts: ActionMethodRecord = { append: mockAction };
+      const acts: ActionParamsRecord = { append: mockAction };
       const store = new Store({ value: 'hello', actions: acts });
 
       store.acts.append(' world');
@@ -232,13 +242,17 @@ describe('Store', () => {
         age: number;
       }
 
-      interface UserActions extends ActionRecord {
+      interface UserActions extends ActionExposedRecord {
         setName: (name: string) => void;
         incrementAge: () => void;
       }
 
-      const acts: ActionMethodRecord = {
-        setName: function (this: Store<UserData>, user: UserData, name: string) {
+      const acts: ActionParamsRecord = {
+        setName: function (
+          this: Store<UserData>,
+          user: UserData,
+          name: string,
+        ) {
           this.next({ ...user, name });
         },
         incrementAge: function (this: Store<UserData>, user: UserData) {

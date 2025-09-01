@@ -1,5 +1,5 @@
 import {
-  ActionRecord,
+  ActionExposedRecord,
   Listener,
   Path,
   StoreParams,
@@ -18,12 +18,15 @@ import { getPath, setPath } from '../lib/path';
  * ForestBranch is a shard store for a forest;
  * it cannot be the root and it always must have parent and path.
  */
-export class ForestBranch<DataType, Actions extends ActionRecord = ActionRecord>
+export class ForestBranch<
+    DataType,
+    Actions extends ActionExposedRecord = ActionExposedRecord,
+  >
   extends Store<DataType, Actions>
   implements StoreBranch<DataType, Actions>
 {
   constructor(
-    p: Omit<StoreParams<DataType>, 'value'>,
+    p: Omit<StoreParams<DataType, Actions>, 'value'>,
     public readonly path: Path,
     public readonly parent: StoreBranch<unknown>,
   ) {
@@ -97,11 +100,11 @@ export class ForestBranch<DataType, Actions extends ActionRecord = ActionRecord>
     }
   }
 
-  branch<DataType, Actions extends ActionRecord = ActionRecord>(
+  branch<Type, BranchActions extends ActionExposedRecord = ActionExposedRecord>(
     path: Path,
-    actions: Actions,
+    params: Omit<StoreParams<Type, BranchActions>, 'value'>,
   ) {
     const mergedPath = combinePaths(this.path, path);
-    return this.root.branch<DataType, Actions>(mergedPath, actions);
+    return this.root.branch<Type, BranchActions>(mergedPath, params);
   }
 }

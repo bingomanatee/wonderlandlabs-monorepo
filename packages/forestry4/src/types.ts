@@ -3,15 +3,39 @@ import { z } from 'zod';
 import { Subject, Subscription, Observer, Observable } from 'rxjs';
 import { ZodParser } from './typeguards';
 
-export type ActionMethodFn<DataType = unknown> = (
+export type ActionParamsIF<DataType = unknown> = (
   value: DataType,
   ...args: unknown[]
 ) => unknown;
 
-export type ActionFn = (...args: unknown[]) => unknown;
+export type ActionExposedFn = (...args: unknown[]) => unknown;
 
-export type ActionMethodRecord = Record<string, ActionMethodFn>;
-export type ActionRecord = Record<string, ActionFn>;
+export type ActionParamsRecord = Record<string, ActionParamsIF>;
+export type ActionExposedRecord = Record<string, ActionExposedFn>;
+
+// Utility type to transform ActionParamsIF to ActionExposedFn (removes first parameter)
+export type TransformActionMethod<T> = T extends (
+  value: any,
+  ...args: infer Args
+) => infer Return
+  ? (...args: Args) => Return
+  : T;
+
+// Utility type to transform an entire ActionParamsRecord to ActionExposedRecord
+export type TransformActionRecord<T extends ActionParamsRecord> = {
+  [K in keyof T]: TransformActionMethod<T[K]>;
+};
+
+// Utility type to infer the exposed Actions type from ActionParamsRecord
+export type InferExposedActions<T extends ActionParamsRecord> =
+  TransformActionRecord<T>;
+
+// Utility type to convert exposed ActionExposedRecord back to ActionParamsRecord (adds value parameter)
+export type RecordToParams<T extends ActionExposedRecord> = {
+  [K in keyof T]: T[K] extends (...args: infer Args) => infer Return
+    ? (value: any, ...args: Args) => Return
+    : never;
+};
 export type ValueTestFn<DataType> = (
   value: unknown,
   store: StoreIF<DataType>,
@@ -28,7 +52,7 @@ export type Validity = {
 
 export interface StoreIF<
   DataType,
-  Actions extends ActionRecord = ActionRecord,
+  Actions extends ActionExposedRecord = ActionExposedRecord,
 > {
   value: DataType;
   name: string;
@@ -53,7 +77,7 @@ export interface StoreIF<
 
 export interface StoreBranch<
   DataType,
-  Actions extends ActionRecord = ActionRecord,
+  Actions extends ActionExposedRecord = ActionExposedRecord,
 > extends StoreIF<DataType, Actions> {
   path: Path;
   isRoot: boolean;
@@ -62,15 +86,18 @@ export interface StoreBranch<
   receiver: Subject<unknown>;
   set(value, path): boolean;
   subject: Observable<DataType>;
-  branch<Type, BranchActions extends ActionRecord = ActionRecord>(
+  branch<Type, BranchActions extends ActionExposedRecord = ActionExposedRecord>(
     path: Path,
-    actions: BranchActions,
+    params: Omit<StoreParams<Type, BranchActions>, 'value'>,
   ): StoreBranch<Type, BranchActions>;
 }
 
-export type StoreParams<DataType, Actions = ActionMethodRecord> = {
+export type StoreParams<
+  DataType,
+  Actions extends ActionExposedRecord = ActionExposedRecord,
+> = {
   value: DataType;
-  actions: Actions;
+  actions: RecordToParams<Actions>; // Input actions always have value as first parameter
   schema?: z.ZodSchema<DataType>;
   tests?: ValueTestFn<DataType> | ValueTestFn<DataType>[];
   name?: string;

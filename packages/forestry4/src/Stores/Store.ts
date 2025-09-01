@@ -1,6 +1,5 @@
 import {
-  ActionMethodRecord,
-  ActionRecord,
+  ActionExposedRecord,
   StoreIF,
   StoreParams,
   ValueTestFn,
@@ -12,43 +11,15 @@ import { isEqual } from 'lodash-es';
 import asError from '../lib/asError';
 import { isZodParser, ZodParser } from '../typeguards';
 import { enableMapSet } from 'immer';
+import { methodize, testize } from './helpers';
 
 // Enable Immer support for Map and Set
 enableMapSet();
 
-function methodize<DataType, Actions extends ActionRecord = ActionRecord>(
-  actsMethods: ActionMethodRecord,
-  self: Store<DataType, Actions>,
-): Actions {
-  return Array.from(Object.keys(actsMethods)).reduce((memo, key) => {
-    const fn = actsMethods[key];
-    memo[key] = function (...args: any[]) {
-      return fn.call(self, self.value, ...args);
-    };
-    return memo as Partial<Actions>;
-  }, {}) as Actions;
-}
-
-function testize<DataType>(
-  testFunctions: ValueTestFn<DataType> | ValueTestFn<DataType>[],
-  self: Store<DataType>,
-): ValueTestFn<DataType> | ValueTestFn<DataType>[] {
-  if (Array.isArray(testFunctions)) {
-    return testFunctions.map(
-      (fn) =>
-        function (value: unknown) {
-          return fn.call(self, value, self);
-        },
-    );
-  } else {
-    return function (value: unknown) {
-      return testFunctions.call(self, value, self);
-    };
-  }
-}
-
-export class Store<DataType, Actions extends ActionRecord = ActionRecord>
-  implements StoreIF<DataType, Actions>
+export class Store<
+  DataType,
+  Actions extends ActionExposedRecord = ActionExposedRecord,
+> implements StoreIF<DataType, Actions>
 {
   /**
    * note - for consistency with the types subject is a generic subject;
@@ -66,7 +37,7 @@ export class Store<DataType, Actions extends ActionRecord = ActionRecord>
     return this.$;
   }
 
-  constructor(p: StoreParams<DataType>, noSubject = false) {
+  constructor(p: StoreParams<DataType, Actions>, noSubject = false) {
     if (!noSubject) {
       this.#subject = new BehaviorSubject(p.value);
     }

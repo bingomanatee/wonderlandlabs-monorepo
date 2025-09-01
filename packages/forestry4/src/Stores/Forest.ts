@@ -1,22 +1,19 @@
 import { Store } from './Store';
-import {
-  ActionMethodRecord,
-  ActionRecord,
-  Path,
-  StoreParams,
-  StoreBranch,
-} from '../types';
+import { ActionExposedRecord, Path, StoreParams, StoreBranch } from '../types';
 import { Subject } from 'rxjs';
 import { pathString } from '../lib/combinePaths';
 import { produce } from 'immer';
 import { ForestBranch } from './ForestBranch';
 import { setPath } from '../lib/path';
 
-export class Forest<DataType, Actions extends ActionRecord = ActionRecord>
+export class Forest<
+    DataType,
+    Actions extends ActionExposedRecord = ActionExposedRecord,
+  >
   extends Store<DataType, Actions>
   implements StoreBranch<DataType, Actions>
 {
-  constructor(p: StoreParams<DataType>) {
+  constructor(p: StoreParams<DataType, Actions>) {
     super(p);
     this.root = this;
   }
@@ -47,15 +44,15 @@ export class Forest<DataType, Actions extends ActionRecord = ActionRecord>
     return this.next(newValue);
   }
 
-  branch<DataType, Actions extends ActionRecord = ActionRecord>(
+  branch<Type, BranchActions extends ActionExposedRecord = ActionExposedRecord>(
     path: Path,
-    actions: ActionMethodRecord,
+    params: Omit<StoreParams<Type, BranchActions>, 'value'>,
   ) {
     const name = this.name + '.' + pathString(path);
-    return new ForestBranch<DataType, Actions>(
+    return new ForestBranch<Type, BranchActions>(
       {
         name,
-        actions,
+        ...params,
       },
       path,
       this,

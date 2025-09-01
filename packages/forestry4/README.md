@@ -11,8 +11,8 @@ rarely requires atomic transactions they will only be present on request.
 ## 2. Homogenized structure
 
 Instead of the Forest/Tree/Collection duality which was an unhelpful metaphor
-we will be essentially flattening everything in the system to stores; both Forests(the root)
-and Trees(sub-data) will expose the Store interface of a value, actions and subscriptions
+we will be essentially flattening everything in the system to stores; both Forests (the root)
+and ForestBranches (sub-data) will expose the Store interface of a value, actions and subscriptions
 and most of the interface of Subjects from RxJS
 
 ## 3. if it's good enough for Redux Toolkit: Immer
@@ -186,19 +186,53 @@ we don't have to pass in the current value - it is done behind the scenes for us
 Also, it's quite likely in a long action the value will get out of date; check `this.value` for 
 the most up to date version of the value. 
 
-### ActionMethodRecord / ActionMethodFn vs. ActionRecord /ActionFn
+### ActionParamsRecord / ActionParamsIF vs. ActionExposedRecord /ActionExposedFn
 
-In the type system there are two flavors of actions; `ActionFn` (which have 0..? args) and 
-`ActionMethodFn`s which DO have a first parameter DataType and optional arguments (eg 1..? args). 
+In the type system there are two flavors of actions; `ActionExposedFn` (which have 0..? args) and
+`ActionParamsIF`s which DO have a first parameter DataType and optional arguments (eg 1..? args).
 
-the ActionFn is what is _exposed_ on `store.$` and `store.actions` of each store. 
-the ActionMethodFn is what is passed ino params in an ActionMethodRecord object. 
+the ActionExposedFn is what is _exposed_ on `store.$` and `store.actions` of each store.
+the ActionParamsIF is what is passed into params in an ActionParamsRecord object.
 
-so the ActionRecord exposed on the generic type Store is the _user facing interface_ (action functions) 
-which delegates to the value-prefixed actions defined in the constructor. 
+so the ActionExposedRecord exposed on the generic type Store is the _user facing interface_ (action functions)
+which delegates to the value-prefixed actions defined in the constructor.
 
-that is the _creator_ writes action in long form with a value arg; the user _gets_ the short form 
-(without having to add value). 
+that is the _creator_ writes action in long form with a value arg; the user _gets_ the short form
+(without having to add value).
+
+### Previewing Action Signatures
+
+You can use the `previewActionSignatures` utility to see what your exposed action signatures will look like:
+
+```javascript
+import { previewActionSignatures } from '@wonderlandlabs/forestry4';
+
+// Define your actions with value as first parameter
+const inputActions = {
+  addItem: (cart, productId, quantity = 1) => ({
+    ...cart,
+    items: [...cart.items, { productId, quantity }]
+  }),
+  removeItem: (cart, productId) => ({
+    ...cart,
+    items: cart.items.filter(item => item.productId !== productId)
+  }),
+  clearCart: (cart) => ({ ...cart, items: [] })
+};
+
+// Preview what will be exposed on store.$ and store.acts
+const exposedActions = previewActionSignatures(inputActions);
+// exposedActions.addItem: (productId: string, quantity?: number) => Cart
+// exposedActions.removeItem: (productId: string) => Cart
+// exposedActions.clearCart: () => Cart
+
+// Use in your store
+const cartStore = forest.branch(['cart'], { actions: inputActions });
+cartStore.$.addItem('prod-123', 2); // No need to pass cart value!
+```
+
+This transformation happens automatically when you create stores - the `previewActionSignatures` function
+is just for development-time inspection of what your API will look like.
 
 ### Action Return Values
 
@@ -222,7 +256,7 @@ by calling `store.error('failed apis')`;
 this will suspend future changes and make the store _inactive_ (`store.isActive = false);
 next() calls will cause an error.
 
-Trees may be terminated without terminating the root store. you can for instance create two stores 
+ForestBranches may be terminated without terminating the root store. You can for instance create two branches
 from the same path and terminate one, but the other will still be active, as will the store that created them.
 
 ### Action resolution and subscriptions
@@ -236,7 +270,7 @@ because the ned value is the same and the original counter number.
 
 User defined methods for selecting values and/or updating state
 
-### `actions: Map<string, ActionFn> | Record<string, ActionFn> `
+### `actions: Map<string, ActionExposedFn> | Record<string, ActionExposedFn> `
 
 The input change functions that are the basis for actions/$
 
@@ -345,12 +379,42 @@ note - if the path is dynamic (has a glob or regex) the first matching candidate
 
 Factory functions contain sub-stores for managing part of the root stores' values.
 
-### `branch<DataType, ActionMethodRecord>(path: Path, actions: ActionRecord?): Tree<DataType>`
+### `branch<DataType, Actions>(path: Path, params: Omit<StoreParams<DataType, Actions>, 'value'>): ForestBranch<DataType, Actions>`
 
 Makes a store out of a shard of the current Store; when the value of the store changes, it updates
 the parent store's value -- and vice versa. In this way the main Forest can act as a "database" and
-you can have ORM style trees for tables and records (or even more granular fields etc.) to
-focus on a specific subsection of the store and apply methods with a more focused "this" and value. 
+you can have ORM style branches for tables and records (or even more granular fields etc.) to
+focus on a specific subsection of the store and apply methods with a more focused "this" and value.
+
+The `params` object can include:
+- `actions`: ActionParamsRecord - Custom actions for the branch
+- `schema`: ZodSchema - Validation schema for the branch data
+- `tests`: ValueTestFn or ValueTestFn[] - Custom validation functions
+- `name`: string - Optional name for the branch (auto-generated if not provided)
+
+Example:
+```javascript
+const cartBranch = forest.branch(['shoppingCart'], {
+  actions: {
+    addItem: (cart, productId, quantity = 1) => ({
+      ...cart,
+      items: [...cart.items, { productId, quantity }]
+    }),
+    clearCart: (cart) => ({ ...cart, items: [] })
+  },
+  schema: z.object({
+    userId: z.string(),
+    items: z.array(z.object({
+      productId: z.string(),
+      quantity: z.number().positive()
+    }))
+  }),
+  tests: (cart) => {
+    if (cart.items.length > 100) return 'Cart cannot exceed 100 items';
+    return null;
+  }
+});
+```
 
 ### `transaction<SubDataType>((Store<subDataType>) => void, path: Path?: actions?: ActionMethodRecordIF>`
 
@@ -371,21 +435,33 @@ likely to be a problem but any change queued during a transactions lifetime will
 if the transaction fails. Any async actions called inside a transaction mutator have un-predictable
 results but will most likely fail as the subject will be locked post-mutation.
 
-# Trees and Forests
+# Branches and Forests
 
 A forest is a "Root store" with no parent or rootPath but conforms in all other
 ways to the Store interface.
 
-A tree is a client of the Forest that represent a sub-part of the forest such as a sub-record or sub-field
+A ForestBranch is a client of the Forest that represents a sub-part of the forest such as a sub-record or sub-field.
+ForestBranches maintain reactive connections to their parent Forest, automatically updating when the parent changes
+and propagating their own changes back to the parent.
 
-## Transactions and Trees and Forests
+## Transactions and Branches and Forests
 
-Transactions defer ALL changes ACROSS THE BOARD to the forest even sibling Trees or sub-Trees.
+Transactions defer ALL changes ACROSS THE BOARD to the forest even sibling ForestBranches or sub-branches.
 They establish consistent changes at the potential loss of a bit of performance.
 
-## Trees / paths are _optional_
+## Branches / paths are _optional_
 
-putting all your data in the root and only having a single, shallow state is
-_perfectly fine_ - trees and pathing are advanced features that you don't need to
-use Forestry 4.0. thus schema and validators can be defined using a complex pathing
-scheme OR can be simple root value Zod items and ValidatorFn instances. 
+Putting all your data in the root and only having a single, shallow state is
+_perfectly fine_ - branches and pathing are advanced features that you don't need to
+use Forestry 4.0. Thus schema and validators can be defined using a complex pathing
+scheme OR can be simple root value Zod items and ValidatorFn instances.
+
+## ForestBranch Features
+
+ForestBranches provide several advantages over working directly with the root Forest:
+
+1. **Focused Interface**: Each branch exposes only the data and actions relevant to its specific domain
+2. **Type Safety**: Full TypeScript support with proper typing for both data and actions
+3. **Reactive Updates**: Automatic synchronization with parent Forest changes
+4. **Validation**: Branch-specific schema and test validation
+5. **Nested Branching**: Branches can create their own sub-branches for further organization

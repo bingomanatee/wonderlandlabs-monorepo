@@ -7,8 +7,14 @@ import {
   Listener,
 } from '../types';
 import { BehaviorSubject, Observable, Subscription } from 'rxjs';
+import { distinctUntilChanged } from 'rxjs/operators';
+import { isEqual } from 'lodash-es';
 import asError from '../lib/asError';
 import { isZodParser, ZodParser } from '../typeguards';
+import { enableMapSet } from 'immer';
+
+// Enable Immer support for Map and Set
+enableMapSet();
 
 function methodize<DataType, Actions extends ActionRecord = ActionRecord>(
   actsMethods: ActionMethodRecord,
@@ -71,7 +77,7 @@ export class Store<DataType, Actions extends ActionRecord = ActionRecord>
     this.debug = !!p.debug;
 
     const self = this;
-    this.$ = methodize<DataType, Actions>(p.acts ?? {}, self);
+    this.$ = methodize<DataType, Actions>(p.actions ?? {}, self);
 
     if (p.tests) {
       this.tests = testize<DataType>(p.tests, self);
@@ -178,6 +184,8 @@ export class Store<DataType, Actions extends ActionRecord = ActionRecord>
   }
 
   subscribe(listener: Listener<DataType>): Subscription {
-    return this.subject!.subscribe(listener);
+    return this.subject!.pipe(distinctUntilChanged(isEqual)).subscribe(
+      listener,
+    );
   }
 }

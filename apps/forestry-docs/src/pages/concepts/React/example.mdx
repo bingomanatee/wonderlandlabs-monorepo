@@ -78,7 +78,7 @@ export class ConceptsState extends Collection<ConceptInfo> {
   }
 
   focus(target: string) {
-    this.acts.setTarget(target);
+    this.actions.setTarget(target);
     this.setIsLocked(true);
   }
 
@@ -88,11 +88,11 @@ export class ConceptsState extends Collection<ConceptInfo> {
   }
 
   rotate() {
-    this.acts.rotate();
+    this.actions.rotate();
   }
 
   setIsLocked(isLocked = true) {
-    this.acts.setIsLocked(isLocked);
+    this.actions.setIsLocked(isLocked);
   }
 
   init() {
@@ -111,7 +111,7 @@ export class ConceptsState extends Collection<ConceptInfo> {
   }
 
   addConcept(concept: Concept) {
-    this.acts.addConcept({ ...concept });
+    this.actions.addConcept({ ...concept });
   }
 
   goBack(current: string, navigate: (target: string) => void) {

@@ -32,7 +32,7 @@ export default [
     },
     rules: {
       '@typescript-eslint/explicit-function-return-type': 'off',
-      indent: ['error', 2],
+      indent: ['off'],
       curly: 1,
       '@typescript-eslint/no-unused-vars': 'off',
       '@typescript-eslint/ban-ts-comment': 'off',

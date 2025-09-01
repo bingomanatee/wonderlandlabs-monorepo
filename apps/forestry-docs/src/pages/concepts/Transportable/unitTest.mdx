@@ -55,7 +55,7 @@ describe('concepts', () => {
         {
           removeADay(this: CollectionIF<Egg[]>) {
             for (const egg of this.value) {
-              this.acts.removeEggDay(egg.id);
+              this.actions.removeEggDay(egg.id);
             }
           },
           removeEggDay(this: CollectionIF<Egg[]>, id: string) {
@@ -75,10 +75,10 @@ describe('concepts', () => {
           removeADayWithCatch(this: CollectionIF<Egg[]>) {
             for (const egg of this.value) {
               try {
-                this.acts.removeEggDay(egg.id);
+                this.actions.removeEggDay(egg.id);
               } catch (error) {
                 if (error instanceof Error && error.message === EXPIRED_MSG) {
-                  this.acts.removeEgg(egg.id);
+                  this.actions.removeEgg(egg.id);
                 } else {
                   throw error;
                 }
@@ -91,15 +91,15 @@ describe('concepts', () => {
 
       expect(eggs.value).toEqual(INITIAL);
 
-      eggs.acts.removeADay();
+      eggs.actions.removeADay();
 
       expect(eggs.value).toEqual(LESS_ONE_DAY);
 
-      expect(() => eggs.acts.removeADay()).toThrow();
+      expect(() => eggs.actions.removeADay()).toThrow();
 
       expect(eggs.value).toEqual(LESS_ONE_DAY);
 
-      eggs.acts.removeADayWithCatch();
+      eggs.actions.removeADayWithCatch();
       expect(eggs.value).toEqual([
         { id: 'alpha', daysLeft: 2 },
         { id: 'beta', daysLeft: 1 },
@@ -137,7 +137,7 @@ describe('concepts', () => {
         {
           removeADay(this: CollectionIF<Egg[]>) {
             for (const egg of this.value) {
-              this.acts.removeEggDay(egg.id);
+              this.actions.removeEggDay(egg.id);
             }
           },
           removeEggDay(this: CollectionIF<Egg[]>, id: string) {
@@ -161,10 +161,10 @@ describe('concepts', () => {
           removeADayWithCatch(this: CollectionIF<Egg[]>) {
             for (const egg of this.value) {
               try {
-                this.acts.removeEggDay(egg.id);
+                this.actions.removeEggDay(egg.id);
               } catch (error) {
                 if (error instanceof Error && error.message === EXPIRED_MSG) {
-                  this.acts.removeEgg(egg.id);
+                  this.actions.removeEgg(egg.id);
                 } else {
                   throw error;
                 }
@@ -211,8 +211,8 @@ describe('concepts', () => {
         });
       });
 
-      eggsCollection.acts.removeADay();
-      eggsCollection.acts.removeADayWithCatch();
+      eggsCollection.actions.removeADay();
+      eggsCollection.actions.removeADayWithCatch();
 
       expect(log).toEqual([
         {

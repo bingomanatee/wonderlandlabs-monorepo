@@ -40,7 +40,7 @@ export type MutationValidatorFn = (
 
 export interface MutationValidatorIF {
   name: string;
-  onlyFor?: string | string[]; // if unset will be triggered before all acts;
+  onlyFor?: string | string[]; // if unset will be triggered before all actions;
   validator: MutationValidatorFn;
 }
 

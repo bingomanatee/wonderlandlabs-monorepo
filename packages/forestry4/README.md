@@ -191,7 +191,7 @@ the most up to date version of the value.
 In the type system there are two flavors of actions; `ActionFn` (which have 0..? args) and 
 `ActionMethodFn`s which DO have a first parameter DataType and optional arguments (eg 1..? args). 
 
-the ActionFn is what is _exposed_ on `store.$` and `store.acts` of each store. 
+the ActionFn is what is _exposed_ on `store.$` and `store.actions` of each store. 
 the ActionMethodFn is what is passed ino params in an ActionMethodRecord object. 
 
 so the ActionRecord exposed on the generic type Store is the _user facing interface_ (action functions) 
@@ -232,13 +232,13 @@ but the user only gets an update at the completion of the outermost action. This
 overload. Also, only unique values are emitted; so in the above code, `counter.$.loop()` doesn't broadcast
 because the ned value is the same and the original counter number.
 
-### `acts|$`
+### `actions|$`
 
 User defined methods for selecting values and/or updating state
 
 ### `actions: Map<string, ActionFn> | Record<string, ActionFn> `
 
-The input change functions that are the basis for acts/$
+The input change functions that are the basis for actions/$
 
 ## Validation and Schema
 
@@ -345,14 +345,14 @@ note - if the path is dynamic (has a glob or regex) the first matching candidate
 
 Factory functions contain sub-stores for managing part of the root stores' values.
 
-### `makeTree<DataType, ActionMethodRecord>(path: Path, actions: ActionRecord?): Tree<DataType>`
+### `branch<DataType, ActionMethodRecord>(path: Path, actions: ActionRecord?): Tree<DataType>`
 
 Makes a store out of a shard of the current Store; when the value of the store changes, it updates
 the parent store's value -- and vice versa. In this way the main Forest can act as a "database" and
 you can have ORM style trees for tables and records (or even more granular fields etc.) to
 focus on a specific subsection of the store and apply methods with a more focused "this" and value. 
 
-### `transaction<SubDataType>((Store<subDataType>) => void, path: Path?: acts?: ActionMethodRecordIF>`
+### `transaction<SubDataType>((Store<subDataType>) => void, path: Path?: actions?: ActionMethodRecordIF>`
 
 Transactions copy the store value into a detached tree/store, passes it to a mutator, 
 and barring thrown errors, copies its value to the parent store upon completion.

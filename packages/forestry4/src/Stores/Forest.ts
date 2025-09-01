@@ -1,12 +1,20 @@
 import { Store } from './Store';
-import { ActionRecord, Path, StoreParams, StoreTree } from '../types';
+import {
+  ActionMethodRecord,
+  ActionRecord,
+  Path,
+  StoreParams,
+  StoreBranch,
+} from '../types';
 import { Subject } from 'rxjs';
-import { cloneDeep, set } from 'lodash-es';
 import { pathString } from '../lib/combinePaths';
+import { produce } from 'immer';
+import { ForestBranch } from './ForestBranch';
+import { setPath } from '../lib/path';
 
 export class Forest<DataType, Actions extends ActionRecord = ActionRecord>
   extends Store<DataType, Actions>
-  implements StoreTree<DataType, Actions>
+  implements StoreBranch<DataType, Actions>
 {
   constructor(p: StoreParams<DataType>) {
     super(p);
@@ -15,9 +23,9 @@ export class Forest<DataType, Actions extends ActionRecord = ActionRecord>
 
   path: Path = [];
 
-  root: StoreTree<unknown>;
+  root: StoreBranch<unknown>;
   isRoot = true;
-  parent?: StoreTree<unknown> = null;
+  parent?: StoreBranch<unknown> = null;
 
   public broadcast(message: unknown, fromRoot?: boolean) {
     if (fromRoot || this.isRoot) {
@@ -30,10 +38,27 @@ export class Forest<DataType, Actions extends ActionRecord = ActionRecord>
 
   public receiver = new Subject();
 
-  set(value, path: Path) {
-    // @TODO: handle "exotic type sets" for Map and Array
-    const target = cloneDeep(this.value);
-    const updated = set(target as object, pathString(path), value) as DataType;
-    return this.next(updated);
+  set(value: unknown, path: Path): boolean {
+    const pathArray = Array.isArray(path) ? path : pathString(path).split('.');
+    const newValue = produce(this.value, (draft) => {
+      // Use Immer to safely set nested values
+      setPath(draft, pathArray, value);
+    });
+    return this.next(newValue);
+  }
+
+  branch<DataType, Actions extends ActionRecord = ActionRecord>(
+    path: Path,
+    actions: ActionMethodRecord,
+  ) {
+    const name = this.name + '.' + pathString(path);
+    return new ForestBranch<DataType, Actions>(
+      {
+        name,
+        actions,
+      },
+      path,
+      this,
+    );
   }
 }

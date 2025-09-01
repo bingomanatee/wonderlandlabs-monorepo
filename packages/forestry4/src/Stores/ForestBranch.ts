@@ -1,24 +1,33 @@
-import { ActionRecord, Listener, Path, StoreParams, StoreTree } from '../types';
+import {
+  ActionRecord,
+  Listener,
+  Path,
+  StoreParams,
+  StoreBranch,
+} from '../types';
 import { Store } from './Store';
 import { isStore } from '../typeguards';
-import { cloneDeep, get, set } from 'lodash-es';
+import { get, isEqual } from 'lodash-es';
 import combinePaths, { pathString } from '../lib/combinePaths';
 import { map, Subject } from 'rxjs';
+import { distinctUntilChanged } from 'rxjs/operators';
+import { produce } from 'immer';
+import { getPath, setPath } from '../lib/path';
 
 /**
- * ForestTree is a shard store for a forest;
+ * ForestBranch is a shard store for a forest;
  * it cannot be the root and it always must have parent and path.
  */
-export class ForestTree<DataType, Actions extends ActionRecord = ActionRecord>
+export class ForestBranch<DataType, Actions extends ActionRecord = ActionRecord>
   extends Store<DataType, Actions>
-  implements StoreTree<DataType, Actions>
+  implements StoreBranch<DataType, Actions>
 {
   constructor(
-    p: StoreParams<DataType>,
+    p: Omit<StoreParams<DataType>, 'value'>,
     public readonly path: Path,
-    public readonly parent: StoreTree<unknown>,
+    public readonly parent: StoreBranch<unknown>,
   ) {
-    super(p, true);
+    super({ ...p, value: getPath(parent.value, path) as DataType }, true);
     if (!isStore(parent)) {
       throw new Error('ForestTrees must have parents');
     }
@@ -47,28 +56,30 @@ export class ForestTree<DataType, Actions extends ActionRecord = ActionRecord>
 
   get subject() {
     const path = pathString(this.path);
-    return this.parent.subject.pipe(map((value) => get(value, path)));
+    return this.parent.subject.pipe(
+      map((value) => get(value, path)),
+      distinctUntilChanged(isEqual),
+    );
   }
 
   subscribe(listener: Listener<DataType>) {
     return this.subject.subscribe(listener);
   }
 
-  set(value: unknown, path: Path) {
-    // @TODO check path integrity
+  set(value: unknown, path: Path): boolean {
     if (this.parent) {
-      const deepPath = combinePaths(this.parent.path, path);
-      this.parent.set(value, deepPath);
-      return true;
+      const deepPath = combinePaths(this.path, path);
+      return this.parent.set(value, deepPath);
     } else {
       // should be in Forest class instance but just in case:
-      const target = cloneDeep(this.value);
-      const updated = set(
-        target as object,
-        pathString(path),
-        value,
-      ) as DataType;
-      return this.next(updated);
+      // Use Immer to create immutable update
+      const pathArray = Array.isArray(path)
+        ? path
+        : pathString(path).split('.');
+      const newValue = produce(this.value, (draft) => {
+        setPath(draft, pathArray, value);
+      });
+      return this.next(newValue);
     }
   }
 
@@ -84,5 +95,13 @@ export class ForestTree<DataType, Actions extends ActionRecord = ActionRecord>
         'strange broadcast pattern; node that is not root has no parent',
       );
     }
+  }
+
+  branch<DataType, Actions extends ActionRecord = ActionRecord>(
+    path: Path,
+    actions: Actions,
+  ) {
+    const mergedPath = combinePaths(this.path, path);
+    return this.root.branch<DataType, Actions>(mergedPath, actions);
   }
 }

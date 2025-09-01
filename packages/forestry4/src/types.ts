@@ -51,22 +51,26 @@ export interface StoreIF<
   isValid(value: unknown): boolean;
 }
 
-export interface StoreTree<
+export interface StoreBranch<
   DataType,
   Actions extends ActionRecord = ActionRecord,
 > extends StoreIF<DataType, Actions> {
   path: Path;
   isRoot: boolean;
-  parent?: StoreTree<unknown>;
+  parent?: StoreBranch<unknown>;
   broadcast: (message: unknown, fromRoot?: boolean) => void;
   receiver: Subject<unknown>;
   set(value, path): boolean;
   subject: Observable<DataType>;
+  branch<Type, BranchActions extends ActionRecord = ActionRecord>(
+    path: Path,
+    actions: BranchActions,
+  ): StoreBranch<Type, BranchActions>;
 }
 
 export type StoreParams<DataType, Actions = ActionMethodRecord> = {
   value: DataType;
-  acts: Actions;
+  actions: Actions;
   schema?: z.ZodSchema<DataType>;
   tests?: ValueTestFn<DataType> | ValueTestFn<DataType>[];
   name?: string;

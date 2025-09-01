@@ -13,12 +13,10 @@ describe('Store', () => {
 
     it('should create a store with actions', () => {
       const acts: ActionMethodRecord = {
-        increment: (value: number, store: StoreIF<number>) =>
-          store.next(value + 1),
-        add: (value: number, store: StoreIF<number>, amount: number) =>
-          store.next(value + amount),
+        increment: (value: number, store: StoreIF<number>) => store.next(value + 1),
+        add: (value: number, store: StoreIF<number>, amount: number) => store.next(value + amount),
       };
-      const store = new Store({ value: 0, acts });
+      const store = new Store({ value: 0, actions: acts });
 
       expect(typeof store.acts.increment).toBe('function');
       expect(typeof store.acts.add).toBe('function');
@@ -96,7 +94,7 @@ describe('Store', () => {
           this.next(value + amount);
         },
       };
-      const store = new Store({ value: 5, acts });
+      const store = new Store({ value: 5, actions: acts });
 
       store.acts.increment();
       expect(store.value).toBe(6);
@@ -110,7 +108,7 @@ describe('Store', () => {
         this.next(value + 1);
       });
       const acts: ActionMethodRecord = { test: mockAction };
-      const store = new Store({ value: 10, acts });
+      const store = new Store({ value: 10, actions: acts });
 
       store.acts.test();
 
@@ -119,15 +117,11 @@ describe('Store', () => {
     });
 
     it('should pass additional arguments to actions', () => {
-      const mockAction = vi.fn(function (
-        this: StoreIF<string>,
-        value: string,
-        suffix: string,
-      ) {
+      const mockAction = vi.fn(function (this: StoreIF<string>, value: string, suffix: string) {
         this.next(value + suffix);
       });
       const acts: ActionMethodRecord = { append: mockAction };
-      const store = new Store({ value: 'hello', acts });
+      const store = new Store({ value: 'hello', actions: acts });
 
       store.acts.append(' world');
 
@@ -244,11 +238,7 @@ describe('Store', () => {
       }
 
       const acts: ActionMethodRecord = {
-        setName: function (
-          this: Store<UserData>,
-          user: UserData,
-          name: string,
-        ) {
+        setName: function (this: Store<UserData>, user: UserData, name: string) {
           this.next({ ...user, name });
         },
         incrementAge: function (this: Store<UserData>, user: UserData) {
@@ -258,7 +248,7 @@ describe('Store', () => {
 
       const store = new Store<UserData, UserActions>({
         value: { name: 'John', age: 30 },
-        acts,
+        actions: acts,
       });
 
       expect(store.value.name).toBe('John');
@@ -273,7 +263,7 @@ describe('Store', () => {
       expect(isObj({})).toBe(true);
       expect(isObj({ a: 1 })).toBe(true);
       expect(isObj([])).toBe(true);
-      
+
       expect(isObj(null)).toBe(false);
       expect(isObj(undefined)).toBe(false);
       expect(isObj('string')).toBe(false);
@@ -284,7 +274,7 @@ describe('Store', () => {
     it('should identify Store instances with isStore', () => {
       const store = new Store({ value: 42, acts: {} });
       expect(isStore(store)).toBe(true);
-      
+
       expect(isStore(null)).toBe(false);
       expect(isStore(undefined)).toBe(false);
       expect(isStore({})).toBe(false);

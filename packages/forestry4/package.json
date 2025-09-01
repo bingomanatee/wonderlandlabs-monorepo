@@ -10,6 +10,7 @@
   },
   "license": "MIT",
   "dependencies": {
+    "@wonderlandlabs/walrus": "0.1.2",
     "immer": "^10.1.1",
     "lodash-es": "^4.17.21",
     "rxjs": "^7.8.1"

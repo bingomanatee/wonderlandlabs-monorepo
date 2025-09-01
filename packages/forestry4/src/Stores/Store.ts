@@ -6,11 +6,9 @@ import {
   ValueTestFn,
   Listener,
 } from '../types';
-import { BehaviorSubject, Subject, Subscription } from 'rxjs';
+import { BehaviorSubject, Observable, Subscription } from 'rxjs';
 import asError from '../lib/asError';
 import { isZodParser, ZodParser } from '../typeguards';
-import * as console from 'node:console';
-import { result } from 'lodash-es';
 
 function methodize<DataType, Actions extends ActionRecord = ActionRecord>(
   actsMethods: ActionMethodRecord,
@@ -51,14 +49,11 @@ export class Store<DataType, Actions extends ActionRecord = ActionRecord>
    * however internally it is a BehaviorSubject.
    * @private
    */
-  #subject?: Subject<DataType>;
-  get subject(): Subject<DataType> {
+  #subject?: BehaviorSubject<DataType>;
+  get subject(): Observable<DataType> {
     return this.#subject;
   }
 
-  set subject(value: Subject<DataType>) {
-    this.#subject = value;
-  }
   $: Actions;
 
   get acts(): Actions {
@@ -109,7 +104,7 @@ export class Store<DataType, Actions extends ActionRecord = ActionRecord>
       throw new Error('Store requires subject -- or override of next()');
     }
     if (isValid) {
-      this.subject!.next(value);
+      this.#subject!.next(value);
       return true;
     }
     if (this.debug) {
@@ -176,10 +171,10 @@ export class Store<DataType, Actions extends ActionRecord = ActionRecord>
     if (this.#pending) {
       return this.#pending;
     }
-    if (!this.subject) {
+    if (!this.#subject) {
       throw new Error('Store requires subject or overload of value');
     }
-    return (this.subject! as BehaviorSubject<DataType>).value as DataType;
+    return this.#subject.value as DataType;
   }
 
   subscribe(listener: Listener<DataType>): Subscription {

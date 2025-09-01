@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-import { Subject, Subscription, Observer } from 'rxjs';
+import { Subject, Subscription, Observer, Observable } from 'rxjs';
 import { ZodParser } from './typeguards';
 
 export type ActionMethodFn<DataType = unknown> = (
@@ -17,7 +17,9 @@ export type ValueTestFn<DataType> = (
   store: StoreIF<DataType>,
 ) => null | void | string;
 
-export type Listener<DataType> = Partial<Observer<DataType>> | ((value: DataType) => void);
+export type Listener<DataType> =
+  | Partial<Observer<DataType>>
+  | ((value: DataType) => void);
 
 export type Validity = {
   isValid: boolean;
@@ -59,7 +61,7 @@ export interface StoreTree<
   broadcast: (message: unknown, fromRoot?: boolean) => void;
   receiver: Subject<unknown>;
   set(value, path): boolean;
-  subject: Subject<DataType>;
+  subject: Observable<DataType>;
 }
 
 export type StoreParams<DataType, Actions = ActionMethodRecord> = {

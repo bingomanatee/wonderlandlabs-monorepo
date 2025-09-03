@@ -34,11 +34,11 @@ export default [
       '@typescript-eslint/explicit-function-return-type': 'off',
       indent: ['off'],
       curly: 1,
-      '@typescript-eslint/no-unused-vars': 'off',
+      '@typescript-eslint/no-unused-vars': 'warn',
       '@typescript-eslint/ban-ts-comment': 'off',
       '@typescript-eslint/no-non-null-assertion': 'off',
       '@typescript-eslint/no-this-alias': 'off',
-      'no-unused-vars': 'off', // Avoid setting both rules for the same lint issue
+      'no-unused-vars': 'warn', // Avoid setting both rules for the same lint issue
       semi: ['error', 'always'],
       'object-curly-spacing': ['warn', 'always'],
       'array-bracket-spacing': ['off'],
@@ -93,7 +93,7 @@ export default [
     rules: {
       ...vitest.configs.recommended.rules,
       'no-sparse-arrays': 'off',
-      '@typescript-eslint/no-unused-expressions': 'off',
+      '@typescript-eslint/no-unused-expressions': 'warn',
     },
   },
 ];

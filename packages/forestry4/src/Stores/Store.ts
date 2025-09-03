@@ -1,9 +1,9 @@
 import {
   ActionExposedRecord,
+  Listener,
   StoreIF,
   StoreParams,
   ValueTestFn,
-  Listener,
 } from '../types';
 import { BehaviorSubject, Observable, Subscription } from 'rxjs';
 import { distinctUntilChanged } from 'rxjs/operators';
@@ -38,8 +38,14 @@ export class Store<
   }
 
   constructor(p: StoreParams<DataType, Actions>, noSubject = false) {
+    // Store initial value
+    this.initialValue = p.value;
+
+    // Apply prep function to initial value if it exists
+    const processedValue = p.prep ? p.prep({}, p.value, p.value) : p.value;
+
     if (!noSubject) {
-      this.#subject = new BehaviorSubject(p.value);
+      this.#subject = new BehaviorSubject(processedValue);
     }
     if ('schema' in p && p.schema) {
       this.schema = p.schema;
@@ -54,12 +60,31 @@ export class Store<
       this.tests = testize<DataType>(p.tests, self);
     }
 
+    if (p.prep) {
+      this.prep = p.prep;
+    }
+
     if (p.name && typeof p.name === 'string') {
       this.#name = p.name;
+    }
+    if (p.res && p.res instanceof Map) {
+      p.res.forEach((value, key) => this.res.set(key, value));
+
+      console.log('---- set res', p.res, '... to state', this.name, this.res);
+    } else {
+      console.log('--- no res in ', this.name);
     }
   }
 
   public debug: boolean; // more alerts on validation failures;
+  public prep?: (
+    input: Partial<DataType>,
+    current: DataType,
+    initial: DataType,
+  ) => DataType;
+  protected initialValue: DataType;
+  public res: Map<string, any> = new Map();
+
   #name?: string;
   get name(): string {
     if (!this.#name) {
@@ -69,19 +94,44 @@ export class Store<
   }
 
   complete(): DataType {
-    return undefined;
+    if (!this.isActive) {
+      return this.value;
+    }
+
+    const finalValue = this.value;
+    this.isActive = false;
+
+    // Complete the RxJS subject
+    if (this.#subject) {
+      this.#subject.complete();
+    }
+
+    // Clear pending state
+    this.clearPending();
+
+    return finalValue;
   }
 
   isActive: boolean = true;
-  #pending: DataType | undefined;
+  protected pending: DataType | undefined;
+  private _hasPending: boolean = false;
 
-  next(value: DataType): boolean {
-    const { isValid, error } = this.validate(value);
+  next(value: Partial<DataType>): boolean {
+    if (!this.isActive) {
+      throw new Error('Cannot update completed store');
+    }
+
+    // Apply prep function if it exists to transform partial input to complete data
+    const preparedValue = this.prep
+      ? this.prep(value, this.value, this.initialValue)
+      : (value as DataType);
+
+    const { isValid, error } = this.validate(preparedValue);
     if (!this.subject) {
       throw new Error('Store requires subject -- or override of next()');
     }
     if (isValid) {
-      this.#subject!.next(value);
+      this.#subject!.next(preparedValue);
       return true;
     }
     if (this.debug) {
@@ -144,9 +194,27 @@ export class Store<
 
   tests?: ValueTestFn<DataType> | ValueTestFn<DataType>[];
 
+  // Pending value management
+  setPending(value: DataType): void {
+    if (this._hasPending) {
+      throw new Error('cannot overwrite a pending value');
+    }
+    this.pending = value;
+    this._hasPending = true;
+  }
+
+  hasPending(): boolean {
+    return this._hasPending;
+  }
+
+  clearPending(): void {
+    this.pending = undefined;
+    this._hasPending = false;
+  }
+
   get value() {
-    if (this.#pending) {
-      return this.#pending;
+    if (this._hasPending) {
+      return this.pending;
     }
     if (!this.#subject) {
       throw new Error('Store requires subject or overload of value');

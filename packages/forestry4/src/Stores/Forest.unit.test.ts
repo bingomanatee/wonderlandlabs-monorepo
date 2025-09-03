@@ -2,7 +2,13 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { Forest } from './Forest';
 import { ForestBranch } from './ForestBranch';
 import { Store } from './Store';
-import type { ActionParamsRecord, ActionExposedRecord } from '../types';
+import type {
+  ActionParamsRecord,
+  ActionExposedRecord,
+  StoreBranch,
+  RecordToParams,
+  StoreParams,
+} from '../types';
 import { previewActionSignatures } from './helpers';
 
 // Test data types
@@ -100,22 +106,14 @@ describe('Forest and ForestBranch Integration', () => {
     });
 
     // Create cart actions with totalCartCost computation
-    const cartActions: ActionParamsRecord = {
-      addItem: (
-        cart: ShoppingCart,
-        productId: string,
-        quantity: number = 1,
-      ) => {
-        const existingIndex = cart.purchases.findIndex(
-          (p) => p.productId === productId,
-        );
+    const cartActions: RecordToParams<CartActions> = {
+      addItem: (cart: ShoppingCart, productId: string, quantity: number = 1) => {
+        const existingIndex = cart.purchases.findIndex((p) => p.productId === productId);
         if (existingIndex >= 0) {
           return {
             ...cart,
             purchases: cart.purchases.map((p, i) =>
-              i === existingIndex
-                ? { ...p, quantity: p.quantity + quantity }
-                : p,
+              i === existingIndex ? { ...p, quantity: p.quantity + quantity } : p
             ),
           };
         } else {
@@ -133,11 +131,7 @@ describe('Forest and ForestBranch Integration', () => {
         };
       },
 
-      updateQuantity: (
-        cart: ShoppingCart,
-        productId: string,
-        quantity: number,
-      ) => {
+      updateQuantity: (cart: ShoppingCart, productId: string, quantity: number) => {
         if (quantity <= 0) {
           return {
             ...cart,
@@ -147,7 +141,7 @@ describe('Forest and ForestBranch Integration', () => {
         return {
           ...cart,
           purchases: cart.purchases.map((p) =>
-            p.productId === productId ? { ...p, quantity } : p,
+            p.productId === productId ? { ...p, quantity } : p
           ),
         };
       },
@@ -160,10 +154,7 @@ describe('Forest and ForestBranch Integration', () => {
       },
 
       // Computed action: totalCartCost
-      totalCartCost: function (
-        this: ForestBranch<ShoppingCart>,
-        cart: ShoppingCart,
-      ) {
+      totalCartCost: function (this: ForestBranch<ShoppingCart>, cart: ShoppingCart) {
         const products = (this.root.value as StoreData).products;
         return cart.purchases.reduce((total, purchase) => {
           const product = products[purchase.productId];
@@ -371,27 +362,21 @@ describe('Forest and ForestBranch Integration', () => {
 
   describe('Complex Integration Scenarios', () => {
     it('should handle multiple ForestTree branches', () => {
-      const usersTree = forest.branch<Record<string, User>, UserActions>(
-        ['users'],
-        {
-          actions: {
-            addUser: (users: Record<string, User>, user: User) => ({
-              ...users,
-              [user.id]: user,
-            }),
-          },
+      const usersTree = forest.branch<Record<string, User>, UserActions>(['users'], {
+        actions: {
+          addUser: (users: Record<string, User>, user: User) => ({
+            ...users,
+            [user.id]: user,
+          }),
         },
-      );
+      });
 
-      const productsTree = forest.branch<
-        Record<string, Product>,
-        ProductActions
-      >(['products'], {
+      const productsTree = forest.branch<Record<string, Product>, ProductActions>(['products'], {
         actions: {
           updatePrice: (
             products: Record<string, Product>,
             productId: string,
-            newPrice: number,
+            newPrice: number
           ) => ({
             ...products,
             [productId]: { ...products[productId], price: newPrice },
@@ -552,10 +537,7 @@ describe('Forest and ForestBranch Integration', () => {
           return { ...cart, purchases: [] };
         },
         totalCost: (cart: ShoppingCart) => {
-          return cart.purchases.reduce(
-            (total, p) => total + p.quantity * 10,
-            0,
-          );
+          return cart.purchases.reduce((total, p) => total + p.quantity * 10, 0);
         },
       };
 
@@ -570,37 +552,29 @@ describe('Forest and ForestBranch Integration', () => {
 
       // Verify the functions exist but throw when called (they're for type inspection only)
       expect(() => exposedActions.addItem('prod1', 2)).toThrow(
-        'previewActionSignatures is for type inspection only',
+        'previewActionSignatures is for type inspection only'
       );
       expect(() => exposedActions.removeItem('prod1')).toThrow(
-        'previewActionSignatures is for type inspection only',
+        'previewActionSignatures is for type inspection only'
       );
       expect(() => exposedActions.clearCart()).toThrow(
-        'previewActionSignatures is for type inspection only',
+        'previewActionSignatures is for type inspection only'
       );
       expect(() => exposedActions.totalCost()).toThrow(
-        'previewActionSignatures is for type inspection only',
+        'previewActionSignatures is for type inspection only'
       );
     });
 
     it('should show the actual working transformation in a real store', () => {
       // Create a simple store to demonstrate the transformation
       const inputActions: ActionParamsRecord = {
-        addItem: (
-          cart: ShoppingCart,
-          productId: string,
-          quantity: number = 1,
-        ) => {
-          const existingIndex = cart.purchases.findIndex(
-            (p) => p.productId === productId,
-          );
+        addItem: (cart: ShoppingCart, productId: string, quantity: number = 1) => {
+          const existingIndex = cart.purchases.findIndex((p) => p.productId === productId);
           if (existingIndex >= 0) {
             return {
               ...cart,
               purchases: cart.purchases.map((p, i) =>
-                i === existingIndex
-                  ? { ...p, quantity: p.quantity + quantity }
-                  : p,
+                i === existingIndex ? { ...p, quantity: p.quantity + quantity } : p
               ),
             };
           } else {
@@ -613,12 +587,9 @@ describe('Forest and ForestBranch Integration', () => {
       };
 
       // Create a branch with these actions
-      const testBranch = forest.branch<ShoppingCart, CartActions>(
-        ['shoppingCart'],
-        {
-          actions: inputActions,
-        },
-      );
+      const testBranch = forest.branch<ShoppingCart, CartActions>(['shoppingCart'], {
+        actions: inputActions,
+      });
 
       // The actual exposed action should work without passing the cart value
       const result = testBranch.$.addItem('prod3', 3);
@@ -652,12 +623,9 @@ describe('Forest and ForestBranch Integration', () => {
         removeItem: (productId: string) => ShoppingCart;
       }
 
-      const typedCartTree = forest.branch<ShoppingCart, ExposedCartActions>(
-        ['shoppingCart'],
-        {
-          actions: inputActions, // Input: actions with value parameter
-        },
-      );
+      const typedCartTree = forest.branch<ShoppingCart, ExposedCartActions>(['shoppingCart'], {
+        actions: inputActions, // Input: actions with value parameter
+      });
 
       // The exposed actions should NOT require the value parameter
       const result = typedCartTree.$.addItem('prod4', 5); // ✅ No cart parameter needed!
@@ -699,6 +667,579 @@ describe('Forest and ForestBranch Integration', () => {
 
       // Actions return new values but don't automatically update the store
       expect(numberStore.value).toBe(10); // Original value unchanged
+    });
+  });
+
+  describe('Pending Change Validation System', () => {
+    it('should demonstrate basic validation system', () => {
+      // Start with a simple test to verify the validation system works
+      const testForest = new Forest({
+        value: { count: 5 },
+        actions: {},
+      });
+
+      // Create a branch with validation
+      const countBranch = testForest.branch(['count'], {
+        actions: {},
+        tests: (count: number) => {
+          if (count < 0) {
+            return 'Count cannot be negative';
+          }
+          return null;
+        },
+      });
+
+      // Valid update should work
+      expect(() => testForest.next({ count: 10 })).not.toThrow();
+      expect(testForest.value.count).toBe(10);
+
+      // Invalid update should be rejected
+      expect(() => testForest.next({ count: -5 })).toThrow('Count cannot be negative');
+      expect(testForest.value.count).toBe(10); // Should remain unchanged
+    });
+
+    it('should handle store completion properly', () => {
+      const testForest = new Forest({
+        value: { count: 5, name: 'test' },
+        actions: {},
+      });
+
+      const countBranch = testForest.branch(['count'], {
+        actions: {},
+      });
+
+      // Track receiver completion
+      let forestReceiverCompleted = false;
+      let branchReceiverCompleted = false;
+
+      testForest.receiver.subscribe({
+        complete: () => {
+          forestReceiverCompleted = true;
+        },
+      });
+
+      countBranch.receiver.subscribe({
+        complete: () => {
+          branchReceiverCompleted = true;
+        },
+      });
+
+      // Initially active
+      expect(testForest.isActive).toBe(true);
+      expect(countBranch.isActive).toBe(true);
+
+      // Complete the forest
+      const finalValue = testForest.complete();
+      expect(finalValue).toEqual({ count: 5, name: 'test' });
+
+      // Should be inactive after completion
+      expect(testForest.isActive).toBe(false);
+      expect(countBranch.isActive).toBe(false);
+
+      // Receiver subjects should be completed
+      expect(forestReceiverCompleted).toBe(true);
+      expect(branchReceiverCompleted).toBe(true);
+
+      // Should not allow updates after completion
+      expect(() => testForest.next({ count: 10, name: 'updated' })).toThrow(
+        'Cannot update completed store'
+      );
+      expect(() => countBranch.next(10)).toThrow('Cannot update completed store');
+
+      // Value should remain the same
+      expect(testForest.value).toEqual({ count: 5, name: 'test' });
+
+      // Multiple completes should have no effect
+      expect(testForest.complete()).toEqual({ count: 5, name: 'test' });
+      expect(countBranch.complete()).toBe(5);
+    });
+
+    it('should handle hierarchical completion (branch completion does not affect parent)', () => {
+      const testForest = new Forest({
+        value: { user: { name: 'John', cart: { items: [] } } },
+        actions: {},
+      });
+
+      const userBranch = testForest.branch(['user'], {
+        actions: {},
+      });
+
+      const cartBranch = userBranch.branch(['cart'], {
+        actions: {},
+      });
+
+      // Initially all active
+      expect(testForest.isActive).toBe(true);
+      expect(userBranch.isActive).toBe(true);
+      expect(cartBranch.isActive).toBe(true);
+
+      // Complete the user branch (middle level)
+      userBranch.complete();
+
+      // User branch and its sub-branches should be completed
+      expect(userBranch.isActive).toBe(false);
+      expect(cartBranch.isActive).toBe(false);
+
+      // But the root forest should still be active
+      expect(testForest.isActive).toBe(true);
+
+      // Forest should still allow updates
+      expect(() => testForest.next({ user: { name: 'Jane', cart: { items: [] } } })).not.toThrow();
+
+      // But completed branches should not
+      expect(() => userBranch.next({ name: 'Jane', cart: { items: [] } })).toThrow(
+        'Cannot update completed store'
+      );
+      expect(() => cartBranch.next({ items: [] })).toThrow('Cannot update completed store');
+    });
+
+    it('should handle prep function for partial data transformation', () => {
+      interface GameState {
+        player: { x: number; y: number; health: number };
+        level: number;
+        score: number;
+        nextLevelScore: number;
+      }
+
+      const gameForest = new Forest<GameState>({
+        value: {
+          player: { x: 0, y: 0, health: 100 },
+          level: 1,
+          score: 0,
+          nextLevelScore: 1000, // First level up at 1000 points
+        },
+        prep: (input: Partial<GameState>, current: GameState, initial: GameState) => {
+          // State machine logic: auto-increment level when score reaches threshold
+          const newState = {
+            ...current,
+            ...input,
+            // Properly merge player object if it exists in input
+            player: input.player ? { ...current.player, ...input.player } : { ...current.player },
+          };
+
+          // Level up logic: check if score crossed the threshold
+          if (
+            'score' in input &&
+            newState.score >= newState.nextLevelScore &&
+            current.score < current.nextLevelScore
+          ) {
+            newState.level = current.level + 1;
+            newState.player.health = 100; // Restore health on level up
+            // Increase next level threshold (exponential progression)
+            newState.nextLevelScore = Math.floor(newState.nextLevelScore * 1.5);
+          }
+
+          return newState;
+        },
+      });
+
+      const playerBranch = gameForest.branch(['player'], {
+        prep: (input: Partial<{ x: number; y: number; health: number }>, current, initial) => {
+          // Clamp player position to bounds
+          const newPlayer = { ...current, ...input };
+          newPlayer.x = Math.max(0, Math.min(100, newPlayer.x));
+          newPlayer.y = Math.max(0, Math.min(100, newPlayer.y));
+          return newPlayer;
+        },
+      });
+
+      // Test partial updates with prep
+      gameForest.next({ score: 500 });
+      expect(gameForest.value.score).toBe(500);
+      expect(gameForest.value.level).toBe(1); // No level up yet
+      expect(gameForest.value.nextLevelScore).toBe(1000); // Threshold unchanged
+
+      // Test player movement with clamping
+      playerBranch.next({ x: 150 }); // Should be clamped to 100
+      expect(gameForest.value.player.x).toBe(100);
+      expect(gameForest.value.player.y).toBe(0); // Unchanged
+
+      // Test state machine: score threshold triggers level up
+      gameForest.next({ score: 1000 });
+      expect(gameForest.value.score).toBe(1000);
+      expect(gameForest.value.level).toBe(2); // Auto-incremented by prep
+      expect(gameForest.value.player.health).toBe(100); // Restored by prep
+      expect(gameForest.value.nextLevelScore).toBe(1500); // Threshold increased (1000 * 1.5)
+
+      // Test that reaching the same score again doesn't level up
+      gameForest.next({ score: 1000 });
+      expect(gameForest.value.level).toBe(2); // Still level 2
+      expect(gameForest.value.nextLevelScore).toBe(1500); // Threshold unchanged
+
+      // Test next level up
+      gameForest.next({ score: 1500 });
+      expect(gameForest.value.level).toBe(3); // Level 3
+      expect(gameForest.value.nextLevelScore).toBe(2250); // 1500 * 1.5
+
+      // Test that prep works with validation
+      expect(() => playerBranch.next({ x: -50 })).not.toThrow(); // Should be clamped to 0
+      expect(gameForest.value.player.x).toBe(0);
+    });
+
+    it('should handle field data scenario with isDirty, isValid, error tracking', () => {
+      interface FieldData {
+        value: string;
+        title: string;
+        isDirty: boolean;
+        isValid: boolean;
+        error: string | null;
+      }
+
+      interface FormState {
+        email: FieldData;
+        password: FieldData;
+        confirmPassword: FieldData;
+      }
+
+      const initialFormState: FormState = {
+        email: {
+          value: '',
+          title: 'Email Address',
+          isDirty: false,
+          isValid: true,
+          error: null,
+        },
+        password: {
+          value: '',
+          title: 'Password',
+          isDirty: false,
+          isValid: true,
+          error: null,
+        },
+        confirmPassword: {
+          value: '',
+          title: 'Confirm Password',
+          isDirty: false,
+          isValid: true,
+          error: null,
+        },
+      };
+
+      const formForest = new Forest<FormState>({
+        value: initialFormState,
+        prep: (input: Partial<FormState>, current: FormState, initial: FormState) => {
+          const newState = { ...current };
+
+          // Apply input changes
+          Object.keys(input).forEach((key) => {
+            if (input[key as keyof FormState]) {
+              newState[key as keyof FormState] = {
+                ...current[key as keyof FormState],
+                ...input[key as keyof FormState],
+              };
+            }
+          });
+
+          // Cross-field validation: password confirmation
+          if (
+            newState.password.value !== newState.confirmPassword.value &&
+            (newState.confirmPassword.isDirty || newState.password.isDirty)
+          ) {
+            newState.confirmPassword.isValid = false;
+            newState.confirmPassword.error = 'Passwords do not match';
+          } else if (newState.password.value === newState.confirmPassword.value) {
+            newState.confirmPassword.isValid = true;
+            newState.confirmPassword.error = null;
+          }
+
+          return newState;
+        },
+      });
+
+      const emailField = formForest.branch(['email'], {
+        prep: (input: Partial<FieldData>, current: FieldData, initial: FieldData) => {
+          const newField = { ...current, ...input };
+
+          // Mark as dirty if value changed from initial
+          if ('value' in input) {
+            newField.isDirty = newField.value !== initial.value;
+
+            // Email validation
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            newField.isValid = emailRegex.test(newField.value) || newField.value === '';
+            newField.error = newField.isValid ? null : 'Please enter a valid email address';
+          }
+
+          return newField;
+        },
+      });
+
+      const passwordField = formForest.branch(['password'], {
+        prep: (input: Partial<FieldData>, current: FieldData, initial: FieldData) => {
+          const newField = { ...current, ...input };
+
+          // Mark as dirty if value changed from initial
+          if ('value' in input) {
+            newField.isDirty = newField.value !== initial.value;
+
+            // Password validation
+            newField.isValid = newField.value.length >= 8 || newField.value === '';
+            newField.error = newField.isValid ? null : 'Password must be at least 8 characters';
+          }
+
+          return newField;
+        },
+      });
+
+      // Test initial state
+      expect(formForest.value.email.isDirty).toBe(false);
+      expect(formForest.value.email.isValid).toBe(true);
+      expect(formForest.value.email.error).toBe(null);
+
+      // Test email field updates
+      emailField.next({ value: 'invalid-email' });
+      expect(formForest.value.email.value).toBe('invalid-email');
+      expect(formForest.value.email.isDirty).toBe(true);
+      expect(formForest.value.email.isValid).toBe(false);
+      expect(formForest.value.email.error).toBe('Please enter a valid email address');
+
+      // Test valid email
+      emailField.next({ value: 'user@example.com' });
+      expect(formForest.value.email.isValid).toBe(true);
+      expect(formForest.value.email.error).toBe(null);
+      expect(formForest.value.email.isDirty).toBe(true); // Still dirty
+
+      // Test password validation
+      passwordField.next({ value: 'short' });
+      expect(formForest.value.password.isDirty).toBe(true);
+      expect(formForest.value.password.isValid).toBe(false);
+      expect(formForest.value.password.error).toBe('Password must be at least 8 characters');
+
+      // Test valid password
+      passwordField.next({ value: 'validpassword123' });
+      expect(formForest.value.password.isValid).toBe(true);
+      expect(formForest.value.password.error).toBe(null);
+
+      // Test cross-field validation (password confirmation)
+      formForest.next({
+        confirmPassword: {
+          ...formForest.value.confirmPassword,
+          value: 'differentpassword',
+          isDirty: true,
+        },
+      });
+      expect(formForest.value.confirmPassword.isValid).toBe(false);
+      expect(formForest.value.confirmPassword.error).toBe('Passwords do not match');
+
+      // Test matching passwords
+      formForest.next({
+        confirmPassword: {
+          ...formForest.value.confirmPassword,
+          value: 'validpassword123',
+        },
+      });
+      expect(formForest.value.confirmPassword.isValid).toBe(true);
+      expect(formForest.value.confirmPassword.error).toBe(null);
+    });
+
+    it('should validate changes across all branches before committing', () => {
+      // Start with a fresh forest for this test
+      const testForest = new Forest({
+        value: {
+          user: { id: 'user1', name: 'John' },
+          shoppingCart: { userId: 'user1', purchases: [] },
+        },
+        actions: {},
+      });
+
+      // Create a branch with specific validation rules
+      const userBranch = testForest.branch(['user'], {
+        actions: {},
+        tests: (user: User) => {
+          if (!user.id || user.id.length < 3) {
+            return 'User ID must be at least 3 characters';
+          }
+          return null;
+        },
+      });
+
+      const cartBranch = testForest.branch(['shoppingCart'], {
+        actions: {},
+        tests: (cart: ShoppingCart) => {
+          if (cart.purchases.length > 10) {
+            return 'Cart cannot have more than 10 items';
+          }
+          return null;
+        },
+      });
+
+      // Valid update should work
+      const validUpdate = {
+        user: { id: 'user123', name: 'Valid User' },
+        shoppingCart: {
+          userId: 'user123',
+          purchases: [{ productId: 'prod1', quantity: 1 }],
+        },
+      };
+
+      expect(() => testForest.next(validUpdate)).not.toThrow();
+
+      // Invalid user update should be rejected
+      const invalidUserUpdate = {
+        user: { id: 'ab', name: 'Invalid User' }, // ID too short
+        shoppingCart: { userId: 'user123', purchases: [] },
+      };
+
+      expect(() => testForest.next(invalidUserUpdate)).toThrow(
+        'User ID must be at least 3 characters'
+      );
+
+      // Invalid cart update should be rejected
+      const invalidCartUpdate = {
+        user: { id: 'user123', name: 'Valid User' },
+        shoppingCart: {
+          userId: 'user123',
+          purchases: Array.from({ length: 11 }, (_, i) => ({
+            productId: `prod${i}`,
+            quantity: 1,
+          })),
+        },
+      };
+
+      expect(() => testForest.next(invalidCartUpdate)).toThrow(
+        'Cart cannot have more than 10 items'
+      );
+    });
+
+    it('should validate branch-specific updates', () => {
+      // Start with a fresh forest for this test
+      const testForest = new Forest({
+        value: {
+          user: { id: 'user1', name: 'John' },
+          shoppingCart: { userId: 'user1', purchases: [] },
+        },
+        actions: {},
+      });
+
+      // Create branches with validation
+      const userBranch = testForest.branch(['user'], {
+        actions: {},
+        tests: (user: User) => {
+          if (!user.name || user.name.length < 2) {
+            return 'Name must be at least 2 characters';
+          }
+          return null;
+        },
+      });
+
+      // Valid branch update should work
+      expect(() => userBranch.next({ id: 'user1', name: 'John' })).not.toThrow();
+
+      // Invalid branch update should be rejected
+      expect(() => userBranch.next({ id: 'user1', name: 'J' })).toThrow(
+        'Name must be at least 2 characters'
+      );
+    });
+
+    it('should validate cross-branch dependencies', () => {
+      // Start with a fresh forest for this test
+      const testForest = new Forest({
+        value: {
+          user: { id: 'user1', name: 'John' },
+          shoppingCart: { userId: 'user1', purchases: [] },
+        },
+        actions: {},
+      });
+
+      // Create branches that depend on each other
+      const userBranch = testForest.branch(['user'], {
+        actions: {},
+      });
+
+      const cartBranch = testForest.branch(['shoppingCart'], {
+        actions: {},
+        tests: (cart: ShoppingCart, store) => {
+          const rootValue = (store as StoreBranch<ShoppingCart>).root.value as {
+            user: User;
+            shoppingCart: ShoppingCart;
+          };
+          if (cart.userId !== rootValue.user.id) {
+            return 'Cart userId must match user.id';
+          }
+          return null;
+        },
+      });
+
+      // Valid cross-branch state should work
+      const validState = {
+        user: { id: 'user123', name: 'John' },
+        shoppingCart: { userId: 'user123', purchases: [] },
+      };
+
+      expect(() => testForest.next(validState)).not.toThrow();
+
+      // Invalid cross-branch state should be rejected
+      const invalidState = {
+        user: { id: 'user123', name: 'John' },
+        shoppingCart: { userId: 'different-user', purchases: [] }, // Mismatched userId
+      };
+
+      expect(() => testForest.next(invalidState)).toThrow('Cart userId must match user.id');
+    });
+
+    it('should handle validation failures safely without breaking RxJS subscriptions', () => {
+      // Create a forest with subscription
+      const testForest = new Forest({
+        value: { count: 5 },
+        actions: {},
+      });
+
+      const values: number[] = [];
+      const subscription = testForest.subscribe((value) => {
+        values.push(value.count);
+      });
+
+      // Create a branch with validation that will fail
+      const countBranch = testForest.branch(['count'], {
+        actions: {},
+        tests: (count: number) => {
+          if (count < 0) {
+            return 'Count cannot be negative';
+          }
+          return null;
+        },
+      });
+
+      // Valid update should work and be received by subscription
+      testForest.next({ count: 10 });
+      expect(values).toEqual([5, 10]); // Initial value + new value
+
+      // Invalid update should fail but not break the subscription
+      expect(() => testForest.next({ count: -5 })).toThrow('Count cannot be negative');
+
+      // Subscription should still be working
+      testForest.next({ count: 15 });
+      expect(values).toEqual([5, 10, 15]); // Should receive the new valid value
+
+      subscription.unsubscribe();
+    });
+
+    it('should ensure synchronous operation and proper pending state management', () => {
+      // Create a forest with validation
+      const testForest = new Forest({
+        value: { count: 5 },
+        actions: {},
+      });
+
+      let validationCallCount = 0;
+      const countBranch = testForest.branch(['count'], {
+        actions: {},
+        tests: (count: number) => {
+          validationCallCount++;
+          return null; // Always valid
+        },
+      });
+
+      // Multiple sequential calls should work fine
+      expect(() => testForest.next({ count: 10 })).not.toThrow();
+      expect(() => testForest.next({ count: 20 })).not.toThrow();
+      expect(() => testForest.next({ count: 30 })).not.toThrow();
+
+      // Each call should have triggered validation
+      expect(validationCallCount).toBe(3);
+
+      // Final value should be the last one set
+      expect(testForest.value.count).toBe(30);
     });
   });
 });

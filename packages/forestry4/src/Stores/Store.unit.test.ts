@@ -1,11 +1,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import { z } from 'zod';
 import { Store } from './Store';
-import type {
-  ActionParamsRecord,
-  ActionExposedRecord,
-  StoreIF,
-} from '../types';
+import type { ActionParamsRecord, ActionExposedRecord, StoreIF } from '../types';
 import { isStore, isObj } from '../typeguards';
 
 describe('Store', () => {
@@ -17,10 +13,8 @@ describe('Store', () => {
 
     it('should create a store with actions', () => {
       const acts: ActionParamsRecord = {
-        increment: (value: number, store: StoreIF<number>) =>
-          store.next(value + 1),
-        add: (value: number, store: StoreIF<number>, amount: number) =>
-          store.next(value + amount),
+        increment: (value: number, store: StoreIF<number>) => store.next(value + 1),
+        add: (value: number, store: StoreIF<number>, amount: number) => store.next(value + amount),
       };
       const store = new Store({ value: 0, actions: acts });
 
@@ -123,11 +117,7 @@ describe('Store', () => {
     });
 
     it('should pass additional arguments to actions', () => {
-      const mockAction = vi.fn(function (
-        this: StoreIF<string>,
-        value: string,
-        suffix: string,
-      ) {
+      const mockAction = vi.fn(function (this: StoreIF<string>, value: string, suffix: string) {
         this.next(value + suffix);
       });
       const acts: ActionParamsRecord = { append: mockAction };
@@ -141,9 +131,24 @@ describe('Store', () => {
   });
 
   describe('complete', () => {
-    it('should return undefined when complete is called', () => {
-      const store = new Store({ value: 'test', acts: {} });
-      expect(store.complete()).toBeUndefined();
+    it('should return final value and mark store as inactive', () => {
+      const store = new Store({ value: 'test', actions: {} });
+
+      // Initially active
+      expect(store.isActive).toBe(true);
+
+      // Complete should return final value
+      const finalValue = store.complete();
+      expect(finalValue).toBe('test');
+
+      // Should be inactive after completion
+      expect(store.isActive).toBe(false);
+
+      // Should not allow updates after completion
+      expect(() => store.next('updated')).toThrow('Cannot update completed store');
+
+      // Calling complete again should return the same value
+      expect(store.complete()).toBe('test');
     });
   });
 
@@ -248,11 +253,7 @@ describe('Store', () => {
       }
 
       const acts: ActionParamsRecord = {
-        setName: function (
-          this: Store<UserData>,
-          user: UserData,
-          name: string,
-        ) {
+        setName: function (this: Store<UserData>, user: UserData, name: string) {
           this.next({ ...user, name });
         },
         incrementAge: function (this: Store<UserData>, user: UserData) {

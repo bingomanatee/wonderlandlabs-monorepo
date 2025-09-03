@@ -148,10 +148,10 @@ export class ForestBranch<DataType, Actions extends ActionExposedRecord = Action
     return this.subject.subscribe(listener);
   }
 
-  set(value: unknown, path: Path): boolean {
+  set(path: Path, value: unknown): boolean {
     if (this.parent) {
       const deepPath = combinePaths(this.path, path);
-      return this.parent.set(value, deepPath);
+      return this.parent.set(deepPath, value);
     } else {
       // should be in Forest class instance but just in case:
       // Use Immer to create immutable update

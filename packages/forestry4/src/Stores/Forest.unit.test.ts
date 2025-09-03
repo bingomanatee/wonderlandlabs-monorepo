@@ -192,7 +192,7 @@ describe('Forest and ForestBranch Integration', () => {
         email: 'charlie@example.com',
       };
 
-      forest.set(newUser, ['users', 'user3']);
+      forest.set(['users', 'user3'], newUser);
 
       expect(forest.value.users.user3).toEqual(newUser);
     });
@@ -244,7 +244,7 @@ describe('Forest and ForestBranch Integration', () => {
 
       // Update cart through forest
       const updatedCart = { ...initialCart, userId: 'user2' };
-      forest.set(updatedCart, ['shoppingCart']);
+      forest.set(['shoppingCart'], updatedCart);
 
       expect(listener).toHaveBeenCalledWith(updatedCart);
     });
@@ -349,7 +349,7 @@ describe('Forest and ForestBranch Integration', () => {
         prod1: { ...forest.value.products.prod1, price: 1200.0 },
       };
 
-      forest.set(updatedProducts, ['products']);
+      forest.set(['products'], updatedProducts);
 
       const total = cartTree.$.totalCartCost();
 
@@ -407,7 +407,7 @@ describe('Forest and ForestBranch Integration', () => {
 
     it('should handle nested path updates through ForestTree', () => {
       // Update a specific purchase quantity through nested path
-      cartTree.set(5, ['purchases', '0', 'quantity']);
+      cartTree.set(['purchases', '0', 'quantity'], 5);
 
       expect(forest.value.shoppingCart.purchases[0].quantity).toBe(5);
 

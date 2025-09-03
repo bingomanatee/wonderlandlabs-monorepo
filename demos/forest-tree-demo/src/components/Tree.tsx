@@ -13,18 +13,6 @@ export const Tree: React.FC = () => {
 
   const { windForce } = treeState;
 
-  // Initialize Pixi.js
-  useEffect(() => {
-    if (!containerRef.current) return;
-
-    // Initialize Pixi with container through state action
-    treeForest.acts.initializePixi(containerRef.current);
-
-    return () => {
-      treeForest.acts.cleanup();
-    };
-  }, [treeForest]);
-
   // Animation loop for wind and time
   useEffect(() => {
     const interval = setInterval(() => {
@@ -61,7 +49,6 @@ export const Tree: React.FC = () => {
         style={{
           flexShrink: 0,
           padding: '1rem',
-          background: '#f5f5f5',
           borderBottom: '1px solid #ddd',
         }}
       >
@@ -90,6 +77,7 @@ export const Tree: React.FC = () => {
       >
         <div
           ref={containerRef}
+          id="tree-container"
           style={{
             width: '100%',
             height: '100%',

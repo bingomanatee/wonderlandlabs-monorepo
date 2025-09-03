@@ -43,6 +43,10 @@ export interface TreeState {
   growth: number;
   season: 'spring' | 'summer' | 'autumn' | 'winter';
   time: number;
+  width: number;
+  height: number;
+  initialized: boolean;
+  terminated: boolean;
 }
 
 export interface TreeConfig {

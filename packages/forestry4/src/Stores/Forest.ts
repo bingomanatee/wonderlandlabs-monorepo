@@ -136,7 +136,7 @@ export class Forest<DataType, Actions extends ActionExposedRecord = ActionExpose
     }
   }
 
-  set(value: unknown, path: Path): boolean {
+  set(path: Path, value: unknown): boolean {
     const pathArray = Array.isArray(path) ? path : pathString(path).split('.');
     const newValue = produce(this.value, (draft) => {
       // Use Immer to safely set nested values

@@ -716,8 +716,8 @@ export function createTreeState(): Forest<TreeState, TreeStateActions> {
 
         graphics.clear();
 
-        // Render coordinate validation in separate container
-        state.acts.renderCoordinateValidation();
+        // Render coordinate validation in separate container (hidden)
+        // state.acts.renderCoordinateValidation();
 
         // Draw entire tree using drawBranch (including trunk)
         state.acts.drawBranch(value.trunk);

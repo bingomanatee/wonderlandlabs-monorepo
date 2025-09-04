@@ -186,13 +186,13 @@ we don't have to pass in the current value - it is done behind the scenes for us
 Also, it's quite likely in a long action the value will get out of date; check `this.value` for 
 the most up to date version of the value. 
 
-### ActionParamsRecord / ActionParamsIF vs. ActionExposedRecord /ActionExposedFn
+### ActionParamsRecord / ActionParamsFn vs. ActionExposedRecord /ActionExposedFn
 
 In the type system there are two flavors of actions; `ActionExposedFn` (which have 0..? args) and
-`ActionParamsIF`s which DO have a first parameter DataType and optional arguments (eg 1..? args).
+`ActionParamsFn`s which DO have a first parameter DataType and optional arguments (eg 1..? args).
 
 the ActionExposedFn is what is _exposed_ on `store.$` and `store.actions` of each store.
-the ActionParamsIF is what is passed into params in an ActionParamsRecord object.
+the ActionParamsFn is what is passed into params in an ActionParamsRecord object.
 
 so the ActionExposedRecord exposed on the generic type Store is the _user facing interface_ (action functions)
 which delegates to the value-prefixed actions defined in the constructor.

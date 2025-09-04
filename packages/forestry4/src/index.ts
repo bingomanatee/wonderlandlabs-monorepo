@@ -4,7 +4,7 @@ export { ForestBranch } from './Stores/ForestBranch';
 
 // Export types for better TypeScript support
 export type {
-  ActionParamsIF,
+  ActionParamsFn,
   ActionExposedFn,
   ActionParamsRecord,
   ActionExposedRecord,

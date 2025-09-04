@@ -2,6 +2,8 @@ import React, { useEffect, useRef } from 'react';
 import type { TreeState } from '../types';
 import useForestryLocal from '../hooks/useForestryLocal';
 import { createTreeState } from '../state/createTreeState';
+import { ForceControls } from './ForceControls';
+import Controls from './Controls.tsx';
 
 // Tree state factory is now in separate file
 
@@ -9,7 +11,7 @@ export const Tree: React.FC = () => {
   const containerRef = useRef<HTMLDivElement>(null);
 
   // Use hook to create and observe tree forest (Pixi created internally)
-  const [treeState, treeForest] = useForestryLocal<TreeState>(createTreeState);
+  const [treeState, treeStore] = useForestryLocal<TreeState>(createTreeState);
 
   const { windForce } = treeState;
 
@@ -17,56 +19,22 @@ export const Tree: React.FC = () => {
   useEffect(() => {
     const interval = setInterval(() => {
       // Update time using action
-      treeForest.acts.tick();
+      treeStore.acts.tick();
 
       // Update wind toward current mouse position using action
-      treeForest.acts.updateWindToward();
+      treeStore.acts.updateWindToward();
 
       // Render tree using state action
-      treeForest.acts.renderTree();
+      treeStore.acts.renderTree();
     }, 50); // 20 FPS
 
     return () => clearInterval(interval);
-  }, [treeForest]);
+  }, [treeStore]);
 
   // All resize handling, mouse events, and rendering now managed by state
 
-  const handleSeasonChange = (season: TreeState['season']) => {
-    treeForest.acts.setSeason(season);
-  };
-
   return (
-    <div
-      className="tree-container"
-      style={{
-        height: '100vh',
-        display: 'flex',
-        flexDirection: 'column',
-      }}
-    >
-      <div
-        className="controls"
-        style={{
-          flexShrink: 0,
-          padding: '1rem',
-          borderBottom: '1px solid #ddd',
-        }}
-      >
-        <h3>Forest Tree Demo - Move mouse over tree for wind effects!</h3>
-        <div className="season-controls">
-          <label>Season: </label>
-          {(['spring', 'summer', 'autumn', 'winter'] as const).map((season) => (
-            <button
-              key={season}
-              onClick={() => handleSeasonChange(season)}
-              className={treeState.season === season ? 'active' : ''}
-            >
-              {season}
-            </button>
-          ))}
-        </div>
-      </div>
-
+    <div className="tree-container">
       <div
         className="tree-area"
         style={{
@@ -105,6 +73,7 @@ export const Tree: React.FC = () => {
           {Math.floor(treeState.time / 20)}s
         </div>
       </div>
+      <Controls state={treeStore} />
     </div>
   );
 };

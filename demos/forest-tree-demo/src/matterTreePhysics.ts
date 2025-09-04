@@ -40,15 +40,20 @@ export class MatterTreePhysics {
   }
 
   private createBranchBodies(branch: Branch): void {
-    // Create Matter.js body for branch
-    const branchLength = Vector.magnitude(Vector.sub(branch.endPoint, branch.startPoint));
-    const branchAngle = Math.atan2(
-      branch.endPoint.y - branch.startPoint.y,
-      branch.endPoint.x - branch.startPoint.x
-    );
+    // Create Matter.js body for branch using absolute position
+    const endPoint = branch.absolutePosition;
 
-    const centerX = (branch.startPoint.x + branch.endPoint.x) / 2;
-    const centerY = (branch.startPoint.y + branch.endPoint.y) / 2;
+    // Calculate start point from parent's absolute position or default for trunk
+    const startPoint =
+      branch.generation === 0
+        ? { x: endPoint.x, y: endPoint.y + branch.length } // Trunk base
+        : { x: endPoint.x - branch.relativePosition.x, y: endPoint.y - branch.relativePosition.y }; // Parent position
+
+    const branchLength = Vector.magnitude(Vector.sub(endPoint, startPoint));
+    const branchAngle = Math.atan2(endPoint.y - startPoint.y, endPoint.x - startPoint.x);
+
+    const centerX = (startPoint.x + endPoint.x) / 2;
+    const centerY = (startPoint.y + endPoint.y) / 2;
 
     const body = Bodies.rectangle(centerX, centerY, branchLength, branch.thickness, {
       angle: branchAngle,
@@ -78,16 +83,43 @@ export class MatterTreePhysics {
       const childBody = this.branchBodies.get(child.id);
       if (!childBody) return;
 
+      // Distance constraint with ±10% tolerance
+      const originalLength = child.length;
       const constraint = Constraint.create({
         bodyA: branchBody,
         bodyB: childBody,
-        stiffness: 0.6, // Slightly more flexible connection
-        damping: 0.05,
-        length: 0, // Connected directly
+        stiffness: 0.8,
+        damping: 0.1,
+        length: originalLength,
       });
 
       this.constraints.push(constraint);
       World.add(this.world, constraint);
+
+      // Angular constraint relative to parent's angle
+      const parentAngle = branch.generation === 0 ? -Math.PI / 2 : branch.angle; // Trunk points up, others use their angle
+
+      const childAngle = child.angle;
+      const childDx = child.relativePosition.x;
+      const childDy = child.relativePosition.y;
+
+      const relativeAngle = childAngle - parentAngle;
+
+      const angleConstraint = Constraint.create({
+        bodyA: branchBody,
+        bodyB: childBody,
+        pointA: { x: 0, y: 0 },
+        pointB: {
+          x: (-originalLength / 2) * Math.cos(relativeAngle),
+          y: (-originalLength / 2) * Math.sin(relativeAngle),
+        },
+        stiffness: 0.6,
+        damping: 0.2,
+        length: originalLength * 0.9,
+      });
+
+      this.constraints.push(angleConstraint);
+      World.add(this.world, angleConstraint);
 
       // Recursively create constraints for child branches
       this.createConstraints(child);
@@ -124,15 +156,17 @@ export class MatterTreePhysics {
     // Sync branch body position back to tree structure
     const branchBody = this.branchBodies.get(branch.id);
     if (branchBody) {
-      // Update branch endpoints based on body position and angle
+      // Update branch position based on body position and angle
       const halfLength = branch.length / 2;
       const cos = Math.cos(branchBody.angle);
       const sin = Math.sin(branchBody.angle);
 
-      branch.startPoint.x = branchBody.position.x - halfLength * cos;
-      branch.startPoint.y = branchBody.position.y - halfLength * sin;
-      branch.endPoint.x = branchBody.position.x + halfLength * cos;
-      branch.endPoint.y = branchBody.position.y + halfLength * sin;
+      // Update the branch absolute position (end point)
+      branch.absolutePosition.x = branchBody.position.x + halfLength * cos;
+      branch.absolutePosition.y = branchBody.position.y + halfLength * sin;
+
+      // Note: relativePosition stays the same as it's relative to parent
+      // The physics system moves the absolute positions, not the relative structure
     }
 
     // Leaves are just visual - no syncing needed

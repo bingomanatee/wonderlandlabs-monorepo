@@ -1,12 +1,17 @@
 import { Vector } from 'matter-js';
 import * as PIXI from 'pixi.js';
 import { produce } from 'immer';
+import chroma from 'chroma-js';
 import React from 'react';
-import type { ActionExposedFn, ActionExposedRecord } from '@wonderlandlabs/forestry4';
+import type { ActionExposedRecord } from '@wonderlandlabs/forestry4';
+// import type { ActionExposedFn, ActionExposedRecord } from '@wonderlandlabs/forestry4';
 import { Forest } from '@wonderlandlabs/forestry4';
-import type { Branch, Point, TreeState } from '../types';
+import type { Branch, Point, TreeConfig, TreeState } from '../types';
 import { defaultTreeConfig, generateTree, getSeasonalParams } from './treeGenerator.ts';
 import { MatterTreePhysics } from '../matterTreePhysics';
+import { createForestBranch } from './createForestBranch';
+import * as Graphics from '../utils/graphics';
+import { createContainers, makePixi, renderBackground, renderTree } from '../utils/graphics';
 
 // Type interface for all tree state actions
 export interface TreeStateActions extends ActionExposedRecord {
@@ -26,21 +31,7 @@ export interface TreeStateActions extends ActionExposedRecord {
 
   getSeasonalBackground(): string;
 
-  renderCoordinateValidation(): void;
-
-  renderBackground(): void;
-
-  renderMountains(graphics: PIXI.Graphics, width: number, height: number, season: string): void;
-
-  renderGround(graphics: PIXI.Graphics, width: number, height: number, season: string): void;
-
-  drawBranch(branch: Branch, parentWindEndPoint?: Point): void;
-
-  calculateWindOffset(branch: Branch): Point;
-
   findClosestLeaf(branch: Branch): Branch | null;
-
-  renderTree(): void;
 
   updateForceParams(params: Partial<TreeState['forceParams']>): void;
 
@@ -53,6 +44,35 @@ export interface TreeStateActions extends ActionExposedRecord {
   changeSeason(season: 'spring' | 'summer' | 'autumn' | 'fall' | 'winter'): void;
 
   updateLeafColorsImmutable(branch: Branch, season: string): Branch;
+
+  generateTreeInStore(config: TreeConfig): void;
+
+  generateBranchesRecursively(parent: Branch, config: TreeConfig, generation: number): void;
+
+  scaleTree(
+    branch: Branch,
+    scaleX: number,
+    scaleY: number,
+    centerX: number,
+    centerY: number
+  ): Branch;
+
+  // Graphics and rendering actions
+  calculateWindOffset(branch: Branch): Point;
+
+  createBranchContainers(branch: Branch, parentContainer: PIXI.Container): void;
+
+  updateWindPositions(): void;
+
+  updateBranchWindPosition(branch: Branch): void;
+
+  renderMountains(graphics: PIXI.Graphics, width: number, height: number, season: string): void;
+
+  renderGround(graphics: PIXI.Graphics, width: number, height: number, season: string): void;
+
+  generateBranchColor(parentColor: number): number;
+
+  handleResize(event: ResizeObserverEntry[]): void;
 }
 
 // Vector lerp utility using Matter.js operations
@@ -89,7 +109,7 @@ export function createTreeState(): Forest<TreeState, TreeStateActions> {
 
   const physics = new MatterTreePhysics();
 
-  const forest = new Forest<TreeState>({
+  const forest = new Forest<TreeState, TreeStateActions>({
     value: {
       trunk: initialTree,
       windForce: { x: 0, y: 0 },
@@ -136,72 +156,7 @@ export function createTreeState(): Forest<TreeState, TreeStateActions> {
         state.set('terminated', true);
       },
 
-      drawBranch(value, branch: Branch, parentWindEndPoint?: Point) {
-        const state = this as unknown as Forest<TreeState, TreeStateActions>;
-        const graphics = state.res.get('treeGraphics') as PIXI.Graphics | null;
-        if (!graphics) {
-          return;
-        }
-
-        if (!branch || !branch.absolutePosition) {
-          return;
-        }
-
-        // Get wind-affected positions
-        const windOffset = state.acts.calculateWindOffset(branch);
-
-        // Calculate start point - use parent's wind-affected end point if provided
-        const startPoint =
-          parentWindEndPoint ||
-          (branch.generation === 0
-            ? { x: branch.absolutePosition.x, y: branch.absolutePosition.y + branch.length } // Trunk base
-            : {
-                x: branch.absolutePosition.x - branch.relativePosition.x,
-                y: branch.absolutePosition.y - branch.relativePosition.y,
-              }); // Parent position
-
-        const endPoint = {
-          x: branch.absolutePosition.x + windOffset.x,
-          y: branch.absolutePosition.y + windOffset.y,
-        };
-
-        graphics.setStrokeStyle({ width: Math.max(1, branch.thickness), color: branch.color });
-        graphics.moveTo(startPoint.x, startPoint.y);
-        graphics.lineTo(endPoint.x, endPoint.y);
-        graphics.stroke();
-
-        if (!branch.children || branch.children.length === 0) {
-          // Draw leaf indicator for terminal branches
-          graphics.setFillStyle({ color: 0x228b22 });
-          graphics.circle(endPoint.x, endPoint.y, 2);
-          graphics.fill();
-        }
-
-        // Draw leaves attached to this branch
-        if (branch.leaves && branch.leaves.length > 0) {
-          branch.leaves.forEach((leaf) => {
-            // Apply wind effect to leaf position
-            const leafWindOffset = state.acts.calculateWindOffset(branch);
-            const leafPosition = {
-              x: leaf.position.x + leafWindOffset.x * 0.8, // Leaves move more with wind
-              y: leaf.position.y + leafWindOffset.y * 0.8,
-            };
-
-            graphics.setFillStyle({ color: leaf.color });
-            graphics.circle(leafPosition.x, leafPosition.y, leaf.size);
-            graphics.fill();
-          });
-        }
-
-        // Recursively draw children, passing this branch's wind-affected end point
-        branch.children?.forEach((child: Branch) => {
-          if (child) {
-            state.acts.drawBranch(child, endPoint);
-          }
-        });
-      },
-
-      calculateWindOffset(value, branch: Branch): Point {
+      calculateWindOffset(value: TreeState, branch: Branch): Point {
         const state = this as unknown as Forest<TreeState, TreeStateActions>;
 
         if (!branch.children || branch.children.length === 0) {
@@ -216,7 +171,9 @@ export function createTreeState(): Forest<TreeState, TreeStateActions> {
         } else {
           // Non-leaf branch - find closest leaf and scale by distance
           const closestLeaf = state.acts.findClosestLeaf(branch);
-          if (!closestLeaf) return { x: 0, y: 0 };
+          if (!closestLeaf) {
+            return { x: 0, y: 0 };
+          }
 
           // Calculate distance to closest leaf
           const dx = closestLeaf.absolutePosition.x - branch.absolutePosition.x;
@@ -244,7 +201,6 @@ export function createTreeState(): Forest<TreeState, TreeStateActions> {
       },
 
       findClosestLeaf(value, branch: Branch): Branch | null {
-        const state = this as unknown as Forest<TreeState, TreeStateActions>;
         let closestLeaf: Branch | null = null;
         let closestDistance = Infinity;
 
@@ -262,14 +218,18 @@ export function createTreeState(): Forest<TreeState, TreeStateActions> {
           } else {
             // Search children
             searchBranch.children?.forEach((child) => {
-              if (child) searchLeaves(child);
+              if (child) {
+                searchLeaves(child);
+              }
             });
           }
         };
 
         // Search from this branch's children
         branch.children?.forEach((child) => {
-          if (child) searchLeaves(child);
+          if (child) {
+            searchLeaves(child);
+          }
         });
 
         return closestLeaf;
@@ -335,11 +295,15 @@ export function createTreeState(): Forest<TreeState, TreeStateActions> {
       updateBranchWindPosition(value, branch: Branch) {
         const state = this as unknown as Forest<TreeState, TreeStateActions>;
         const treeGraphics = state.res.get('treeGraphics') as PIXI.Container;
-        if (!treeGraphics) return;
+        if (!treeGraphics) {
+          return;
+        }
 
         // Find container by branch ID
         const container = treeGraphics.getChildByName(branch.id) as PIXI.Container;
-        if (!container) return;
+        if (!container) {
+          return;
+        }
 
         // Calculate wind offset for this branch
         const windOffset = state.acts.calculateWindOffset(branch);
@@ -409,25 +373,40 @@ export function createTreeState(): Forest<TreeState, TreeStateActions> {
         const newWidth = contentRect.width;
         const newHeight = contentRect.height;
 
+        // Calculate scale factors based on container size change
+        const oldWidth = value.width;
+        const oldHeight = value.height;
+        const scaleX = newWidth / oldWidth;
+        const scaleY = newHeight / oldHeight;
+
+        // Calculate new center position
+        const newCenterX = newWidth / 2;
+        const newCenterY = newHeight * 0.97; // Root at 97% down from top (3% up from bottom)
+
+        // Scale existing tree instead of regenerating
+        const scaledTrunk = state.acts.scaleTree(
+          value.trunk,
+          scaleX,
+          scaleY,
+          newCenterX,
+          newCenterY
+        );
+
+        // Update state
         state.set('width', newWidth);
         state.set('height', newHeight);
+        state.set('trunk', scaledTrunk);
 
-        // Regenerate tree with new container dimensions
-        const newTreeConfig = {
-          ...defaultTreeConfig,
-          centerX: newWidth / 2,
-          centerY: newHeight - 50,
-        };
-        const newTree = generateTree(newTreeConfig);
-        state.acts.renderCoordinateValidation();
-
-        // Update tree state and physics
-        state.set('trunk', newTree);
+        // Update physics with scaled tree
         const physics = state.res.get('physics') as MatterTreePhysics;
-        physics.initializeTree(newTree);
+        physics.initializeTree(scaledTrunk);
 
         // Re-render tree
-        state.acts.renderTree();
+        const treeGraphics = state.res.get('treeGraphics') as PIXI.Graphics;
+        const coordGraphics = state.res.get('coordGraphics') as PIXI.Graphics;
+        if (treeGraphics && coordGraphics) {
+          Graphics.renderTree(treeGraphics, coordGraphics, scaledTrunk);
+        }
       },
 
       // Render coordinate validation target in centered square
@@ -440,21 +419,10 @@ export function createTreeState(): Forest<TreeState, TreeStateActions> {
         state.res.set('container', container);
 
         // Get container dimensions for proper tree sizing
+        const pixiApp = await makePixi(container);
         const containerRect = container.getBoundingClientRect();
         const containerWidth = containerRect.width;
         const containerHeight = containerRect.height;
-
-        // Create Pixi app with container dimensions (v8 API)
-        const pixiApp = new PIXI.Application();
-        await pixiApp.init({
-          width: containerWidth,
-          height: containerHeight,
-          backgroundColor: 0x87ceeb,
-          antialias: true,
-          autoDensity: true,
-          resizeTo: container, // Auto-resize to container
-          resolution: window.devicePixelRatio || 1, // Handle high DPI displays
-        });
 
         // Let Pixi append its canvas to the container
         container.appendChild(pixiApp.canvas);
@@ -464,39 +432,30 @@ export function createTreeState(): Forest<TreeState, TreeStateActions> {
         const treeConfig = {
           ...defaultTreeConfig,
           centerX: containerWidth / 2, // Center horizontally in container
-          centerY: containerHeight - 50, // Base near bottom with margin
+          centerY: containerHeight * 0.97, // Root at 97% down from top (3% up from bottom)
         };
-        const containerTree = generateTree(treeConfig);
 
-        // Update tree state with container-sized tree
-        state.set('trunk', containerTree);
+        // Option to use store-based tree generation (ForestBranch approach)
+        const useStoreBasedGeneration = false; // Use traditional generation for now
+
+        if (useStoreBasedGeneration) {
+          // Use store-based tree generation with ForestBranch for reactive updates
+          state.acts.generateTreeInStore(treeConfig);
+        } else {
+          // Use traditional tree generation
+          const containerTree = generateTree(treeConfig);
+          state.set('trunk', containerTree);
+        }
 
         // Create graphics containers in proper z-order (back to front)
+        const { backgroundGraphics, treeGraphics, coordGraphics } = createContainers(
+          state,
+          pixiApp
+        );
 
-        // 1. Background graphics (mountains and ground) - back layer
-        const backgroundGraphics = new PIXI.Graphics();
-        backgroundGraphics.position.set(0, 0);
-        pixiApp.stage.addChild(backgroundGraphics);
-        state.res.set('backgroundGraphics', backgroundGraphics);
-
-        // 2. Tree graphics - front layer
-        const treeGraphics = new PIXI.Graphics();
-        treeGraphics.position.set(0, 0);
-        pixiApp.stage.addChild(treeGraphics);
-        state.res.set('treeGraphics', treeGraphics);
-
-        // 3. Coordinate validation graphics (debug layer) - top layer
-        const coordGraphics = new PIXI.Graphics();
-        coordGraphics.position.set(0, 0);
-        pixiApp.stage.addChild(coordGraphics);
-        state.res.set('coordGraphics', coordGraphics);
-        console.log('--- graphics containers created in z-order');
-
-        // Skip container creation - use simple graphics drawing
-
-        // Initialize physics with container-sized tree
+        // Initialize physics with the tree
         const physics = state.res.get('physics') as MatterTreePhysics;
-        physics.initializeTree(containerTree);
+        physics.initializeTree(value.trunk);
 
         // Force-directed layout removed
 
@@ -522,10 +481,10 @@ export function createTreeState(): Forest<TreeState, TreeStateActions> {
         state.res.set('resizeObserver', resizeObserver);
 
         // Draw background once during initialization
-        state.acts.renderBackground();
+        renderBackground(backgroundGraphics, pixiApp, value.season);
 
         // Initial render with background
-        state.acts.renderTree();
+        renderTree(treeGraphics, coordGraphics, value.trunk);
       },
 
       // Draw a single branch with wind effects
@@ -680,7 +639,7 @@ export function createTreeState(): Forest<TreeState, TreeStateActions> {
             break;
         }
 
-        graphics.setFillStyle({ color: groundColor, alpha: 0.8 });
+        graphics.setFillStyle({ color: groundColor });
 
         // Ground takes up bottom 15% of screen
         const groundHeight = height * 0.15;
@@ -719,8 +678,8 @@ export function createTreeState(): Forest<TreeState, TreeStateActions> {
         // Render coordinate validation in separate container (hidden)
         // state.acts.renderCoordinateValidation();
 
-        // Draw entire tree using drawBranch (including trunk)
-        state.acts.drawBranch(value.trunk);
+        // Draw entire tree using drawBranch utility function (including trunk)
+        Graphics.drawBranch(graphics, value.trunk);
       },
 
       // Get seasonal wind strength
@@ -806,7 +765,11 @@ export function createTreeState(): Forest<TreeState, TreeStateActions> {
             forceLayout.applyToTree(draft);
           });
           state.set('trunk', updatedTrunk);
-          state.acts.renderTree();
+          const treeGraphics = state.res.get('treeGraphics') as PIXI.Graphics;
+          const coordGraphics = state.res.get('coordGraphics') as PIXI.Graphics;
+          if (treeGraphics && coordGraphics) {
+            Graphics.renderTree(treeGraphics, coordGraphics, updatedTrunk);
+          }
 
           // Dump partial tree JSON
           state.acts.dumpTreeJSON();
@@ -832,10 +795,60 @@ export function createTreeState(): Forest<TreeState, TreeStateActions> {
         }
 
         // Redraw background with new seasonal colors
-        state.acts.renderBackground();
+        const backgroundGraphics = state.res.get('backgroundGraphics') as PIXI.Graphics;
+        if (backgroundGraphics && pixiApp) {
+          Graphics.renderBackground(backgroundGraphics, pixiApp, season);
+        }
 
-        state.acts.renderTree();
+        const treeGraphics = state.res.get('treeGraphics') as PIXI.Graphics;
+        const coordGraphics = state.res.get('coordGraphics') as PIXI.Graphics;
+        if (treeGraphics && coordGraphics) {
+          Graphics.renderTree(treeGraphics, coordGraphics, updatedTrunk);
+        }
         console.log(`Season changed to: ${season}`);
+      },
+
+      // Scale tree to fit new container dimensions
+      scaleTree(
+        value,
+        branch: Branch,
+        scaleX: number,
+        scaleY: number,
+        centerX: number,
+        centerY: number
+      ): Branch {
+        return produce(branch, (draft) => {
+          // Scale positions relative to center
+          const scaledAbsoluteX = (branch.absolutePosition.x - centerX) * scaleX + centerX;
+          const scaledAbsoluteY = (branch.absolutePosition.y - centerY) * scaleY + centerY;
+
+          draft.absolutePosition.x = scaledAbsoluteX;
+          draft.absolutePosition.y = scaledAbsoluteY;
+
+          // Scale relative positions
+          draft.relativePosition.x *= scaleX;
+          draft.relativePosition.y *= scaleY;
+
+          // Scale length and thickness
+          draft.length *= Math.max(scaleX, scaleY); // Use larger scale for length
+          draft.thickness *= Math.max(scaleX, scaleY); // Scale thickness proportionally
+
+          // Scale leaf positions
+          draft.leaves.forEach((leaf) => {
+            const scaledLeafX = (leaf.position.x - centerX) * scaleX + centerX;
+            const scaledLeafY = (leaf.position.y - centerY) * scaleY + centerY;
+            leaf.position.x = scaledLeafX;
+            leaf.position.y = scaledLeafY;
+
+            // Scale leaf size
+            leaf.size *= Math.max(scaleX, scaleY);
+          });
+
+          // Recursively scale children
+          draft.children = draft.children.map((child) =>
+            this.acts.scaleTree(child, scaleX, scaleY, centerX, centerY)
+          );
+        });
       },
 
       updateLeafColorsImmutable(value, branch: Branch, season: string): Branch {
@@ -862,6 +875,225 @@ export function createTreeState(): Forest<TreeState, TreeStateActions> {
           }
         });
       },
+
+      // Generate tree using store-based approach with ForestBranch for each node
+      generateTreeInStore(value, config: TreeConfig) {
+        const state = this as unknown as Forest<TreeState, TreeStateActions>;
+
+        // Create trunk as root of tree
+        const centerX = config.centerX ?? 400;
+        const centerY = config.centerY ?? 600;
+        const trunkLength = 133; // Scaled up 11% from 120
+
+        const trunk: Branch = {
+          id: 'trunk',
+          relativePosition: { x: 0, y: 0 }, // Trunk is at origin
+          absolutePosition: { x: centerX, y: centerY },
+          angle: -Math.PI / 2, // Pointing up
+          thickness: 18, // Made trunk thicker
+          length: trunkLength,
+          children: [],
+          leaves: [],
+          generation: 0,
+          level: 0,
+          color: 0x8b4513, // Brown
+          branchCountOffset: 0,
+          ancestralOffsetSum: 0,
+          levelChangeOffset: 0,
+          ancestralLevelSum: 0,
+          velocity: { x: 0, y: 0 },
+          force: { x: 0, y: 0 },
+          springConstant: 0.02,
+          mass: 100,
+        };
+
+        // Generate branches recursively and build complete tree
+        state.acts.generateBranchesRecursively(trunk, config, 0);
+
+        // Set complete tree in store
+        state.set('trunk', trunk);
+      },
+
+      // Generate branches recursively using transient ForestBranch instances
+      generateBranchesRecursively(value, parent: Branch, config: TreeConfig, generation: number) {
+        const state = this as unknown as Forest<TreeState, TreeStateActions>;
+
+        if (generation >= config.maxGenerations) {
+          return; // Terminal branch
+        }
+
+        // Generate branch properties
+        const numBranches = 2 + Math.floor(Math.random() * 2); // Simple branch count
+
+        for (let i = 0; i < numBranches; i++) {
+          // Create transient ForestBranch for this branch during creation
+          const branchPath = `${parent.id}-child-${i}`;
+          const branchForest = createForestBranch(state, branchPath);
+
+          // Use the transient ForestBranch to create and manage this branch
+          const newBranch = branchForest.acts.initializeBranch(
+            parent,
+            i,
+            numBranches,
+            config,
+            generation
+          );
+
+          // Verify the branch was created properly
+          if (!newBranch || !newBranch.absolutePosition) {
+            console.error('Failed to create valid branch:', newBranch);
+            continue;
+          }
+
+          // Add the new branch to the parent's children using Forest's mutate method
+          state.mutate((draft) => {
+            // Find the parent in the draft tree and add the new branch
+            const findAndUpdateParent = (branch: Branch): boolean => {
+              if (branch.id === parent.id) {
+                branch.children.push(newBranch);
+                return true;
+              }
+              return branch.children.some((child) => findAndUpdateParent(child));
+            };
+
+            if (draft.trunk) {
+              findAndUpdateParent(draft.trunk);
+            }
+          });
+
+          // Generate children for the new branch - pass the newBranch directly
+          if (generation + 1 < config.maxGenerations) {
+            state.acts.generateBranchesRecursively(newBranch, config, generation + 1);
+          }
+
+          // ForestBranch is now transient - it will be garbage collected
+          // The branch data is now part of the main tree structure
+        }
+      },
+
+      // Helper method to calculate branch count
+      calculateBranchCount(value, parent: Branch, config: TreeConfig, generation: number): number {
+        // Use the tree generation algorithm from treeGenerator
+        const baseBranches = generation === 0 ? 2 : 3;
+        const variation = Math.floor(Math.random() * 3) - 1; // -1, 0, or 1
+        return Math.max(1, baseBranches + variation);
+      },
+
+      // Helper method to create branch data
+      createBranchData(
+        value,
+        parent: Branch,
+        index: number,
+        numBranches: number,
+        config: TreeConfig,
+        generation: number
+      ): Branch {
+        const state = this as unknown as Forest<TreeState, TreeStateActions>;
+
+        // Calculate angle using the same logic as treeGenerator
+        let finalAngle;
+        if (generation === 0) {
+          const maxSpread = Math.PI / 3; // 60 degrees
+          const angleOffset =
+            (index - (numBranches - 1) / 2) * (maxSpread / Math.max(1, numBranches - 1));
+          finalAngle = -Math.PI / 2 + angleOffset + (Math.random() - 0.5) * 0.2;
+        } else {
+          const maxSpread = Math.PI / 3;
+          const angleOffset =
+            (index - (numBranches - 1) / 2) * (maxSpread / Math.max(1, numBranches - 1));
+          finalAngle = parent.angle + angleOffset + (Math.random() - 0.5) * 0.3 - 0.1; // Upward bias
+        }
+
+        const branchLength =
+          parent.length * config.lengthDecay * (0.75 + Math.random() * 0.3) * 1.11;
+        const branchThickness = Math.max(2, parent.thickness * 0.7);
+
+        const relativeX = Math.cos(finalAngle) * branchLength;
+        const relativeY = Math.sin(finalAngle) * branchLength;
+
+        return {
+          id: `${parent.id}-${index}`,
+          relativePosition: { x: relativeX, y: relativeY },
+          absolutePosition: {
+            x: parent.absolutePosition.x + relativeX,
+            y: parent.absolutePosition.y + relativeY,
+          },
+          angle: finalAngle,
+          thickness: branchThickness,
+          length: branchLength,
+          children: [],
+          leaves: [],
+          generation: generation + 1,
+          level: parent.level,
+          color: state.acts.generateBranchColor(parent.color),
+          branchCountOffset: 0,
+          ancestralOffsetSum: parent.ancestralOffsetSum,
+          levelChangeOffset: 0,
+          ancestralLevelSum: parent.ancestralLevelSum,
+          velocity: { x: 0, y: 0 },
+          force: { x: 0, y: 0 },
+          springConstant: 0.02,
+          mass: parent.mass / 2,
+        };
+      },
+
+      // Helper method to generate branch color variation using chroma-js
+      generateBranchColor(value, parentColor: number): number {
+        // Convert hex number to chroma color
+        const baseColor = chroma(parentColor);
+
+        // Add subtle random variations to hue, saturation, and lightness
+        const hueVariation = (Math.random() - 0.5) * 10; // ±5 degrees
+        const satVariation = (Math.random() - 0.5) * 0.1; // ±0.05 saturation
+        const lightVariation = (Math.random() - 0.5) * 0.1; // ±0.05 lightness
+
+        // Apply variations and ensure values stay in valid ranges
+        const newColor = baseColor
+          .set('hsl.h', `+${hueVariation}`)
+          .set('hsl.s', Math.max(0, Math.min(1, baseColor.get('hsl.s') + satVariation)))
+          .set('hsl.l', Math.max(0.1, Math.min(0.9, baseColor.get('hsl.l') + lightVariation)));
+
+        // Convert back to hex number for PIXI
+        return parseInt(newColor.hex().replace('#', ''), 16);
+      },
+
+      // Utility method to create seasonal color palettes
+      createSeasonalPalette(value, season: string): number[] {
+        const baseBrown = 0x8b4513; // Saddle brown
+
+        switch (season) {
+          case 'spring':
+            return [
+              baseBrown,
+              parseInt(chroma(baseBrown).brighten(0.5).hex().replace('#', ''), 16),
+              parseInt(chroma(baseBrown).set('hsl.h', 30).hex().replace('#', ''), 16), // More orange
+            ];
+          case 'summer':
+            return [
+              baseBrown,
+              parseInt(chroma(baseBrown).darken(0.3).hex().replace('#', ''), 16),
+              parseInt(chroma(baseBrown).set('hsl.h', 25).hex().replace('#', ''), 16), // Warmer brown
+            ];
+          case 'autumn':
+          case 'fall':
+            return [
+              baseBrown,
+              parseInt(chroma(baseBrown).set('hsl.h', 15).saturate(0.5).hex().replace('#', ''), 16), // Reddish brown
+              parseInt(chroma(baseBrown).set('hsl.h', 35).brighten(0.2).hex().replace('#', ''), 16), // Golden brown
+            ];
+          case 'winter':
+            return [
+              baseBrown,
+              parseInt(chroma(baseBrown).desaturate(0.3).darken(0.2).hex().replace('#', ''), 16), // Greyish brown
+              parseInt(
+                chroma(baseBrown).set('hsl.h', 220).desaturate(0.5).hex().replace('#', ''),
+                16
+              ), // Cool brown
+            ];
+          default:
+            return [baseBrown];
+        }
+      },
     },
     prep: (input, current, _initial) => {
       return { ...current, ...input };
@@ -869,7 +1101,9 @@ export function createTreeState(): Forest<TreeState, TreeStateActions> {
   });
 
   const tryInit = () => {
-    if (!window || forest.value.terminated) return;
+    if (!window || forest.value.terminated) {
+      return;
+    }
 
     const container = window.document.getElementById('tree-container');
     if (!container) {

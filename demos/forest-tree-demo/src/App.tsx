@@ -1,10 +1,12 @@
 import React from 'react';
 import { Tree } from './components/Tree';
-import './Tree.css';
+import  style from './App.module.css';
+console.log('app style:', style);
 
 function App() {
   return (
-    <div className="App">
+    <div className={style.App}>
+      <h1 className={style['floating-title']}>Forest Tree Demo - Move mouse over tree for wind effects!</h1>
       <Tree />
       <a
         href="https://github.com/bingomanatee/wonderlandlabs-monorepo/tree/main/packages/forestry4"

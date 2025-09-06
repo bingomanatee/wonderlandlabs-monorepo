@@ -2,8 +2,8 @@ import React, { useEffect, useRef } from 'react';
 import type { TreeState } from '../types';
 import useForestryLocal from '../hooks/useForestryLocal';
 import { createTreeState } from '../state/createTreeState';
-import { ForceControls } from './ForceControls';
 import Controls from './Controls.tsx';
+import style from './Tree.module.css';
 
 // Tree state factory is now in separate file
 
@@ -34,26 +34,16 @@ export const Tree: React.FC = () => {
   // All resize handling, mouse events, and rendering now managed by state
 
   return (
-    <div className="tree-container">
+    <div className={style['tree-container']}>
       <div
-        className="tree-area"
+        className={style['tree-area']}
         style={{
           flex: 1,
           position: 'relative',
           overflow: 'hidden',
         }}
       >
-        <div
-          ref={containerRef}
-          id="tree-container"
-          style={{
-            width: '100%',
-            height: '100%',
-            border: '2px solid #8B4513',
-            borderRadius: '8px',
-            display: 'block',
-          }}
-        />
+        <div ref={containerRef} id="tree-container" className={style['tree-container-inner']} />
 
         {/* Bottom overlay for debug info */}
         <div

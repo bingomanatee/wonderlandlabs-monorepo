@@ -26,7 +26,7 @@ export function generateTree(config: TreeConfig): Branch {
   const trunk: Branch = {
     id: 'trunk',
     relativePosition: { x: 0, y: 0 }, // Trunk is at origin
-    absolutePosition: { x: centerX, y: centerY - trunkLength },
+    absolutePosition: { x: centerX, y: centerY },
     thickness: 18, // Made trunk thicker
     length: trunkLength,
     angle: -Math.PI / 2, // Pointing up
@@ -131,17 +131,22 @@ function addLeaves(branch: Branch, config: TreeConfig) {
         const leafAngle = branch.angle + (Math.random() - 0.5) * Math.PI * 0.8; // ±72 degrees from branch
         const leafDistance = 5 + Math.random() * 8; // 5-13 pixels from branch
 
-        const branchPointX = branch.relativePosition.x * positionAlongBranch;
-        const branchPointY = branch.relativePosition.y * positionAlongBranch;
+        // Calculate branch start point (where it begins)
+        const branchStartX = branch.absolutePosition.x - Math.cos(branch.angle) * branch.length;
+        const branchStartY = branch.absolutePosition.y - Math.sin(branch.angle) * branch.length;
+
+        // Calculate point along branch
+        const branchPointX = branchStartX + (branch.absolutePosition.x - branchStartX) * positionAlongBranch;
+        const branchPointY = branchStartY + (branch.absolutePosition.y - branchStartY) * positionAlongBranch;
 
         const leafX = branchPointX + Math.cos(leafAngle) * leafDistance;
         const leafY = branchPointY + Math.sin(leafAngle) * leafDistance;
 
         const leaf: Leaf = {
-          id: `${branch.id}-leaf-${i}`,
+          id: `${branch.id}-addLeaves-${i}`, // Mark as addLeaves system
           position: {
-            x: branch.absolutePosition.x - branch.relativePosition.x + leafX,
-            y: branch.absolutePosition.y - branch.relativePosition.y + leafY,
+            x: leafX,
+            y: leafY,
           },
           size: (2 + Math.random() * 3) * seasonalParams.leafSize, // Seasonal size variation
           color:
@@ -368,33 +373,54 @@ function generateBranches(parent: Branch, config: TreeConfig, generation: number
 function generateLeaves(branch: Branch, config: TreeConfig) {
   const numLeaves = Math.floor(config.leafDensity * (2 + Math.random() * 3));
 
+
   for (let i = 0; i < numLeaves; i++) {
-    const t = Math.random(); // Position along branch
-    const position: Point = {
-      x: branch.startPoint.x + (branch.endPoint.x - branch.startPoint.x) * t,
-      y: branch.startPoint.y + (branch.endPoint.y - branch.startPoint.y) * t,
+    const t = Math.random(); // Position along parent branch (0-1 lerp)
+
+    // Calculate parent's start point
+    const parentEndPoint = branch.absolutePosition;
+    const parentStartPoint = {
+      x: parentEndPoint.x - Math.cos(branch.angle) * branch.length,
+      y: parentEndPoint.y - Math.sin(branch.angle) * branch.length,
     };
 
-    // Add some random offset
-    position.x += (Math.random() - 0.5) * 20;
-    position.y += (Math.random() - 0.5) * 20;
+    // Lerp position along parent branch
+    const leafBasePosition: Point = {
+      x: parentStartPoint.x + (parentEndPoint.x - parentStartPoint.x) * t,
+      y: parentStartPoint.y + (parentEndPoint.y - parentStartPoint.y) * t,
+    };
 
-    const leafSize = 8 + Math.random() * 6;
-    const leaf: Leaf = {
+    // Create leaf as a special branch
+    const leafAngle = branch.angle + (Math.random() - 0.5) * Math.PI * 0.8; // ±72 degrees from parent
+    const leafSize = 2 + Math.random() * 3; // Smaller leaves: 2-5 pixels
+
+    // Convert hex color string to number
+    const leafColorHex = getLeafColor();
+    const leafColor = parseInt(leafColorHex.replace('#', ''), 16);
+
+    const leafBranch: Branch = {
       id: `${branch.id}-leaf-${i}`,
-      position,
-      restPosition: { ...position },
-      size: leafSize,
-      color: getLeafColor(),
-      opacity: 0.8 + Math.random() * 0.2,
-      rotation: Math.random() * 360,
-      // Physics properties
+      relativePosition: { x: 0, y: 0 }, // Not used for leaves
+      absolutePosition: leafBasePosition, // Start position of leaf
+      angle: leafAngle,
+      thickness: 0, // No visible branch line for leaves
+      length: leafSize,
+      children: [],
+      leaves: [], // Leaves don't have sub-leaves
+      generation: branch.generation + 1,
+      level: branch.level,
+      color: leafColor, // Varied seasonal colors
+      branchCountOffset: 0,
+      ancestralOffsetSum: branch.ancestralOffsetSum,
+      levelChangeOffset: 0,
+      ancestralLevelSum: branch.ancestralLevelSum,
       velocity: { x: 0, y: 0 },
       force: { x: 0, y: 0 },
-      area: leafSize * leafSize * Math.PI, // Circular area for wind resistance
+      springConstant: 0.001,
+      mass: 0.1, // Very light leaves
     };
 
-    branch.leaves.push(leaf);
+    branch.children.push(leafBranch);
   }
 }
 
@@ -414,7 +440,7 @@ export const defaultTreeConfig: TreeConfig = {
   branchingFactor: 2,
   lengthDecay: 0.75,
   angleVariation: 0.6,
-  leafDensity: 0, // No leaves for now
+  leafDensity: 0.8, // Enable leaves
   windStrength: 0.1,
   season: 'spring', // Default to spring to match initial state
 };

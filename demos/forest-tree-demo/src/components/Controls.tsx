@@ -2,13 +2,13 @@ import type { TreeState } from '../types.ts';
 import React from 'react';
 import useObserveForest from '../hooks/useObserveForest.ts';
 import type { StoreIF } from '@wonderlandlabs/forestry4';
+import style from './Controls.module.css';
 
 export default function Controls({ state }: { state: StoreIF<TreeState> }) {
   const treeState = useObserveForest<TreeState>(state);
   return (
-    <div className="controls">
-      <h3>Forest Tree Demo - Move mouse over tree for wind effects!</h3>
-      <div className="season-controls">
+    <div className={style.controls}>
+      <div className={style['season-controls']}>
         <label>Season: </label>
         {(['spring', 'summer', 'autumn', 'winter'] as const).map((season) => (
           <button

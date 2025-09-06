@@ -1,5 +1,4 @@
-import { NumberEnumType } from "./enums";
-import type { TypeEnumType, FormEnumType } from "./enums";
+import { NumberEnumType, TypeEnumType, FormEnumType } from './enums';
 type testFn = (value: any) => boolean;
 export declare class TypeDef {
     readonly type: TypeEnumType;
@@ -18,3 +17,4 @@ export declare function typeToForm(type: TypeEnumType): FormEnumType;
 export declare const describe: (value: any, reflect?: string | boolean) => TypeDef | TypeEnumType | FormEnumType;
 export declare const describeNumber: (value: any) => NumberEnumType;
 export {};
+//# sourceMappingURL=type.d.ts.map

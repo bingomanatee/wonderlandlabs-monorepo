@@ -7,3 +7,4 @@ export declare const addAfter: (phrase: string, suffix: string, loose?: boolean)
 export declare const humanize: (phrase: string) => string;
 export declare const capFirst: (phrase: string) => string;
 export declare const entitle: (phrase: string) => string;
+//# sourceMappingURL=text.d.ts.map

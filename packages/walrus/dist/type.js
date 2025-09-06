@@ -1,1 +1,118 @@
-Object.defineProperty(exports,"__esModule",{value:!0}),exports.describeNumber=exports.describe=exports.types=exports.TypeDef=void 0,exports.typeToForm=typeToForm;let enums_1=require("./enums");class TypeDef{type;form;typeOf;test;constructor(e,n,m,u){this.type=e,this.form=n,this.typeOf=m,this.test=u}get family(){return[enums_1.FormEnum.scalar,enums_1.FormEnum.void,enums_1.FormEnum.function].includes(this.form)?this.form:enums_1.FormEnum.container}includes(e,n){return n?n===this.typeOf&&!(this.test&&!this.test(e)):this.includes(e,typeof e)}}function typeToForm(n){return exports.types.find(e=>e.type===n)?.form||enums_1.FormEnum.void}exports.TypeDef=TypeDef,exports.types=[new TypeDef(enums_1.TypeEnum.undefined,enums_1.FormEnum.void,enums_1.TypeofEnum.undefined),new TypeDef(enums_1.TypeEnum.null,enums_1.FormEnum.void,enums_1.TypeofEnum.object,e=>null===e),new TypeDef(enums_1.TypeEnum.boolean,enums_1.FormEnum.scalar,enums_1.TypeofEnum.boolean),new TypeDef(enums_1.TypeEnum.string,enums_1.FormEnum.scalar,enums_1.TypeofEnum.string),new TypeDef(enums_1.TypeEnum.number,enums_1.FormEnum.scalar,enums_1.TypeofEnum.number),new TypeDef(enums_1.TypeEnum.number,enums_1.FormEnum.scalar,enums_1.TypeofEnum.bigint),new TypeDef(enums_1.TypeEnum.symbol,enums_1.FormEnum.scalar,enums_1.TypeofEnum.symbol),new TypeDef(enums_1.TypeEnum.function,enums_1.FormEnum.function,enums_1.TypeofEnum.function),new TypeDef(enums_1.TypeEnum.array,enums_1.FormEnum.array,enums_1.TypeofEnum.object,e=>Array.isArray(e)),new TypeDef(enums_1.TypeEnum.map,enums_1.FormEnum.map,enums_1.TypeofEnum.object,e=>e instanceof Map),new TypeDef(enums_1.TypeEnum.set,enums_1.FormEnum.set,enums_1.TypeofEnum.object,e=>e instanceof Set),new TypeDef(enums_1.TypeEnum.object,enums_1.FormEnum.object,enums_1.TypeofEnum.object,e=>e&&"object"==typeof e)];let describe=(n,e=!1)=>{if(e){var m=(0,exports.describe)(n);if("object"==typeof m){if(!0===e)return m.type;if("type"===e||"form"===e||"typeOf"===e||"family"===e)return m[e]}return m}var u=typeof n;for(let e=0;e<exports.types.length;++e){var s=exports.types[e];if(s.includes(n,u))return s}throw console.error("describe failure to analyze",n),new Error("cannot analyze value")},describeNumber=(exports.describe=describe,e=>["number","bigint"].includes(typeof e)?Number.isFinite(e)?Number.isInteger(e)?enums_1.NumberEnum.integer:enums_1.NumberEnum.decimal:enums_1.NumberEnum.infinite:enums_1.NumberEnum.nan);exports.describeNumber=describeNumber;
+import { FormEnum, TypeEnum, TypeofEnum, NumberEnum } from "./enums.js";
+class TypeDef {
+  constructor(type, form, typeOf, test) {
+    this.type = type;
+    this.form = form;
+    this.typeOf = typeOf;
+    this.test = test;
+  }
+  /**
+   * A very flat subspecies of FormEnum -- includes either 'void', 'scalar', 'function', or 'container'
+   */
+  get family() {
+    if ([FormEnum.scalar, FormEnum.void, FormEnum.function].includes(this.form)) {
+      return this.form;
+    }
+    return FormEnum.container;
+  }
+  includes(value, typeOf) {
+    if (!typeOf) {
+      return this.includes(value, typeof value);
+    }
+    if (typeOf !== this.typeOf) {
+      return false;
+    }
+    if (this.test && !this.test(value)) {
+      return false;
+    }
+    return true;
+  }
+}
+const types = [
+  new TypeDef(TypeEnum.undefined, FormEnum.void, TypeofEnum.undefined),
+  new TypeDef(
+    TypeEnum.null,
+    FormEnum.void,
+    TypeofEnum.object,
+    (s) => s === null
+  ),
+  new TypeDef(TypeEnum.boolean, FormEnum.scalar, TypeofEnum.boolean),
+  new TypeDef(TypeEnum.string, FormEnum.scalar, TypeofEnum.string),
+  new TypeDef(TypeEnum.number, FormEnum.scalar, TypeofEnum.number),
+  new TypeDef(TypeEnum.number, FormEnum.scalar, TypeofEnum.bigint),
+  new TypeDef(TypeEnum.symbol, FormEnum.scalar, TypeofEnum.symbol),
+  new TypeDef(TypeEnum.function, FormEnum.function, TypeofEnum.function),
+  new TypeDef(
+    TypeEnum.array,
+    FormEnum.array,
+    TypeofEnum.object,
+    (v) => Array.isArray(v)
+  ),
+  new TypeDef(
+    TypeEnum.map,
+    FormEnum.map,
+    TypeofEnum.object,
+    (m) => m instanceof Map
+  ),
+  new TypeDef(
+    TypeEnum.set,
+    FormEnum.set,
+    TypeofEnum.object,
+    (s) => s instanceof Set
+  ),
+  new TypeDef(
+    TypeEnum.object,
+    FormEnum.object,
+    TypeofEnum.object,
+    (o) => o && typeof o === "object"
+  )
+];
+function typeToForm(type) {
+  const d = types.find((d2) => d2.type === type);
+  return d?.form || FormEnum.void;
+}
+const describe = (value, reflect = false) => {
+  if (reflect) {
+    const t = describe(value);
+    if (typeof t === "object") {
+      if (reflect === true) {
+        return t.type;
+      }
+      if (reflect === "type" || reflect === "form" || reflect === "typeOf" || reflect === "family") {
+        return t[reflect];
+      }
+    }
+    return t;
+  }
+  const type = typeof value;
+  for (let i = 0; i < types.length; ++i) {
+    const def = types[i];
+    if (def.includes(value, type)) {
+      return def;
+    }
+  }
+  console.error("describe failure to analyze", value);
+  throw new Error("cannot analyze value");
+};
+const describeNumber = (value) => {
+  if (["number", "bigint"].includes(typeof value)) {
+    if (Number.isFinite(value)) {
+      if (Number.isInteger(value)) {
+        return NumberEnum.integer;
+      } else {
+        return NumberEnum.decimal;
+      }
+    } else {
+      return NumberEnum.infinite;
+    }
+  }
+  return NumberEnum.nan;
+};
+export {
+  TypeDef,
+  describe,
+  describeNumber,
+  typeToForm,
+  types
+};
+//# sourceMappingURL=type.js.map

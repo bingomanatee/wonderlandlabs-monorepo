@@ -11,7 +11,7 @@ import { Subject } from 'rxjs';
 import { pathString } from '../lib/combinePaths';
 import { produce } from 'immer';
 import { ForestBranch } from './ForestBranch';
-import { setPath } from '../lib/path';
+import { setPath, getPath } from '../lib/path';
 
 export class Forest<DataType, Actions extends ActionExposedRecord = ActionExposedRecord>
   extends Store<DataType, Actions>

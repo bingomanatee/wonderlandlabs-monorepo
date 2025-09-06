@@ -1,25 +1,19 @@
-import {
-  ActionExposedRecord,
-  Listener,
-  StoreIF,
-  StoreParams,
-  ValueTestFn,
-} from '../types';
+import { ActionExposedRecord, Listener, StoreIF, StoreParams, ValueTestFn, Path } from '../types';
 import { BehaviorSubject, Observable, Subscription } from 'rxjs';
 import { distinctUntilChanged } from 'rxjs/operators';
 import { isEqual } from 'lodash-es';
 import asError from '../lib/asError';
 import { isZodParser, ZodParser } from '../typeguards';
-import { enableMapSet } from 'immer';
+import { enableMapSet, produce } from 'immer';
 import { methodize, testize } from './helpers';
+import { getPath } from '../lib/path';
+import { pathString } from '../lib/combinePaths';
 
 // Enable Immer support for Map and Set
 enableMapSet();
 
-export class Store<
-  DataType,
-  Actions extends ActionExposedRecord = ActionExposedRecord,
-> implements StoreIF<DataType, Actions>
+export class Store<DataType, Actions extends ActionExposedRecord = ActionExposedRecord>
+  implements StoreIF<DataType, Actions>
 {
   /**
    * note - for consistency with the types subject is a generic subject;
@@ -77,11 +71,7 @@ export class Store<
   }
 
   public debug: boolean; // more alerts on validation failures;
-  public prep?: (
-    input: Partial<DataType>,
-    current: DataType,
-    initial: DataType,
-  ) => DataType;
+  public prep?: (input: Partial<DataType>, current: DataType, initial: DataType) => DataType;
   protected initialValue: DataType;
   public res: Map<string, any> = new Map();
 
@@ -143,7 +133,7 @@ export class Store<
         '(current: ',
         this.value,
         ')',
-        error,
+        error
       );
     }
     throw asError(error);
@@ -170,9 +160,7 @@ export class Store<
         } else if (typeof this.tests === 'function') {
           this.#test(this.tests, value);
         } else {
-          throw new Error(
-            'bad value for tests - must be function or array of functions',
-          );
+          throw new Error('bad value for tests - must be function or array of functions');
         }
       }
       return {
@@ -223,8 +211,36 @@ export class Store<
   }
 
   subscribe(listener: Listener<DataType>): Subscription {
-    return this.subject!.pipe(distinctUntilChanged(isEqual)).subscribe(
-      listener,
-    );
+    return this.subject!.pipe(distinctUntilChanged(isEqual)).subscribe(listener);
+  }
+
+  get(path?: Path): any {
+    if (!path || (Array.isArray(path) && path.length === 0)) {
+      return this.value;
+    }
+    const pathArray = Array.isArray(path) ? path : pathString(path).split('.');
+    return getPath(this.value, pathArray);
+  }
+
+  mutate(producerFn: (draft: any) => void, path?: Path): any {
+    if (!path || (Array.isArray(path) && path.length === 0)) {
+      // Mutate the entire state
+      const newValue = produce(this.value, producerFn);
+      this.next(newValue);
+      return this.value;
+    } else {
+      // Mutate a specific path within the state
+      const pathArray = Array.isArray(path) ? path : pathString(path).split('.');
+      const newValue = produce(this.value, (draft) => {
+        // Get the target object at the specified path
+        const target = getPath(draft, pathArray);
+        if (target !== undefined) {
+          // Apply the producer function to the target
+          producerFn(target);
+        }
+      });
+      this.next(newValue);
+      return this.value;
+    }
   }
 }

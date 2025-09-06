@@ -44,3 +44,4 @@ export declare const TypeEnum: {
 type TypeEnumKeys = keyof typeof TypeEnum;
 export type TypeEnumType = (typeof TypeEnum)[TypeEnumKeys];
 export {};
+//# sourceMappingURL=enums.d.ts.map

@@ -1,1 +1,0 @@
-Object.defineProperty(exports,"__esModule",{value:!0}),exports.hello=void 0;let hello=e=>`Hello there, ${e}!`;exports.hello=hello;

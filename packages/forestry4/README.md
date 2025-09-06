@@ -35,6 +35,12 @@ The Store interface is a decorated observable;
 absolutely ZERO control is made over the structure or form of the stores' values
 (until you create your own assumptions with schema and validation tests).
 
+**IMPORTANT: Store values are immutable.** You cannot directly modify the `value` property.
+To change the store's state, you must use:
+- `mutate()` method to transform the entire value or a specific path within it using Immer
+- `set()` method (Forest only) to update a specific path with a new value
+- `next()` method to replace the entire value
+
 values can be scalars, arrays, objects, Set's or Map's . Symbols even. The only
 requirement is that they be _immerable_. This means most JavaScript structures and even
 some instances of classes are valid; however immer _aggressively_ changes references so
@@ -42,7 +48,7 @@ you cannot depend on properties' reference targets being preserved during mutati
 (one of the many reasons that you cannot for instance use Dom nodes as state values)
 
 However if you apply a path to a target, it must be a complex type (Object, Map, Array) for which
-sub-items are relevant. 
+sub-items are relevant.
 
 ### paths 
 
@@ -110,6 +116,10 @@ the value that a path "points to" is called a "shard" for short - it is a subval
 Value is the latest broadcast state of the store; like BehaviorSubjects the value
 is always present and conforms to the schema and (hopefully) the generator type of the store.
 
+**IMPORTANT: The value property is read-only and immutable.** You cannot directly assign to it
+or modify it in place. To change the store's value, you must use `mutate()`, `set()` (Forest only),
+or `next()` methods.
+
 ### `subscribe(listener: Listener): Subscription`
 
 Subscribe provides obseverable functionality. Unlike "dumb Subjects" that
@@ -134,6 +144,84 @@ freeze the state and emit an error to all listeners.
 ### isActive: boolean
 
 Useful for finding out if a store has been completed/frozen
+
+### `get(path?: Path): any`
+
+Retrieves a value from the store. If no path is provided, returns the entire store value.
+If a path is provided, returns the value at that specific path within the store's data structure.
+
+```javascript
+const userStore = new Store({
+  value: {
+    name: 'John',
+    profile: {
+      age: 30,
+      settings: {
+        theme: 'dark'
+      }
+    },
+    tags: ['developer', 'typescript']
+  }
+});
+
+// Get entire value
+const fullData = userStore.get();
+// Returns: { name: 'John', profile: { age: 30, settings: { theme: 'dark' } }, tags: ['developer', 'typescript'] }
+
+// Get nested value using string path
+const theme = userStore.get('profile.settings.theme');
+// Returns: 'dark'
+
+// Get nested value using array path
+const age = userStore.get(['profile', 'age']);
+// Returns: 30
+
+// Get array element
+const firstTag = userStore.get(['tags', 0]);
+// Returns: 'developer'
+```
+
+### `mutate(producerFn: (draft: any) => void, path?: Path): any`
+
+Safely mutates the store's value using Immer. The producer function receives a draft that you can modify directly.
+If no path is provided, the producer function operates on the entire store value.
+If a path is provided, the producer function operates only on the value at that path.
+
+```javascript
+const userStore = new Store({
+  value: {
+    name: 'John',
+    profile: {
+      age: 30,
+      settings: {
+        theme: 'dark'
+      }
+    },
+    tags: ['developer']
+  }
+});
+
+// Mutate entire store
+userStore.mutate(draft => {
+  draft.name = 'Jane';
+  draft.profile.age = 25;
+  draft.tags.push('react');
+});
+// Store value is now: { name: 'Jane', profile: { age: 25, settings: { theme: 'dark' } }, tags: ['developer', 'react'] }
+
+// Mutate specific path - update profile only
+userStore.mutate(draft => {
+  draft.age = 26;
+  draft.settings.theme = 'light';
+}, 'profile');
+// Only the profile object is modified: { age: 26, settings: { theme: 'light' } }
+
+// Mutate array at specific path
+userStore.mutate(draft => {
+  draft.push('vue');
+}, 'tags');
+// Adds 'vue' to the tags array
+```
 
 ## Action methods/attributes
 
@@ -439,6 +527,49 @@ results but will most likely fail as the subject will be locked post-mutation.
 
 A forest is a "Root store" with no parent or rootPath but conforms in all other
 ways to the Store interface.
+
+## Forest-specific Methods
+
+In addition to all Store methods, Forest provides additional methods for managing nested data:
+
+### `set(path: Path, value: unknown): boolean`
+
+Sets a value at a specific path within the Forest's data structure. This is a convenience method
+that uses Immer internally to safely update nested values.
+
+```javascript
+const forest = new Forest({
+  value: {
+    user: {
+      name: 'John',
+      profile: {
+        age: 30,
+        settings: {
+          theme: 'dark'
+        }
+      }
+    },
+    config: {
+      debug: false
+    }
+  }
+});
+
+// Set a nested value using string path
+forest.set('user.profile.age', 31);
+// Updates only the age: { user: { name: 'John', profile: { age: 31, settings: { theme: 'dark' } } }, config: { debug: false } }
+
+// Set a nested value using array path
+forest.set(['user', 'profile', 'settings', 'theme'], 'light');
+// Updates only the theme: theme is now 'light'
+
+// Set a top-level value
+forest.set('config.debug', true);
+// Updates only the debug flag: debug is now true
+
+// Returns true if successful, throws error if validation fails
+const success = forest.set('user.name', 'Jane'); // returns true
+```
 
 A ForestBranch is a client of the Forest that represents a sub-part of the forest such as a sub-record or sub-field.
 ForestBranches maintain reactive connections to their parent Forest, automatically updating when the parent changes

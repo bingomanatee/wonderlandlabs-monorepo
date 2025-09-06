@@ -1,1 +1,46 @@
-Object.defineProperty(exports,"__esModule",{value:!0}),exports.entitle=exports.capFirst=exports.humanize=exports.addAfter=exports.addBefore=void 0;let addBefore=(e,t,r=!1)=>{if(e.startsWith(t))return e;if(r){r=new RegExp("^"+t,"i");if(r.test(e))return e.replace(r,t)}return""+t+e},addAfter=(exports.addBefore=addBefore,(e,t,r=!1)=>{if(e.endsWith(t))return e;if(r){r=new RegExp(t+"$","i");if(r.test(e))return e.replace(r,t)}return""+e+t}),humanize=(exports.addAfter=addAfter,e=>e.replace(/[ _-]+/g,"")),letter=(exports.humanize=humanize,/[a-z]/i),capFirst=e=>{var t;return letter.test(e)&&(t=letter.exec(e))?([t]=t,e.replace(t,t.toUpperCase())):e},entitle=(exports.capFirst=capFirst,e=>(0,exports.humanize)(e).split(" ").map(exports.capFirst).join(" "));exports.entitle=entitle;
+const addBefore = (phrase, prefix, loose = false) => {
+  if (phrase.startsWith(prefix)) {
+    return phrase;
+  }
+  if (loose) {
+    const r = new RegExp("^" + prefix, "i");
+    if (r.test(phrase)) {
+      return phrase.replace(r, prefix);
+    }
+  }
+  return `${prefix}${phrase}`;
+};
+const addAfter = (phrase, suffix, loose = false) => {
+  if (phrase.endsWith(suffix)) {
+    return phrase;
+  }
+  if (loose) {
+    const r = new RegExp(suffix + "$", "i");
+    if (r.test(phrase)) {
+      return phrase.replace(r, suffix);
+    }
+  }
+  return `${phrase}${suffix}`;
+};
+const humanize = (phrase) => {
+  return phrase.replace(/[ _-]+/g, "");
+};
+const letter = /[a-z]/i;
+const capFirst = (phrase) => {
+  if (!letter.test(phrase)) return phrase;
+  const m = letter.exec(phrase);
+  if (!m) return phrase;
+  const [firstLetter] = m;
+  return phrase.replace(firstLetter, firstLetter.toUpperCase());
+};
+const entitle = (phrase) => {
+  return humanize(phrase).split(" ").map(capFirst).join(" ");
+};
+export {
+  addAfter,
+  addBefore,
+  capFirst,
+  entitle,
+  humanize
+};
+//# sourceMappingURL=text.js.map

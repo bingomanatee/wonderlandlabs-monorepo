@@ -267,8 +267,8 @@ export class TreePhysics {
     render.bounds.max.x = newWidth;
     render.bounds.max.y = newHeight;
 
-    // Use TreeController to handle resize across all layers
-    treeController.scaleTree(
+    // Use ForestryTreeData to handle resize
+    forestryTreeData.acts.scaleTree(
       this.lastCanvasSize.width,
       this.lastCanvasSize.height,
       newWidth,

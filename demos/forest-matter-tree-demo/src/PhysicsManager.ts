@@ -10,9 +10,8 @@ import type {
 } from './types';
 
 // Manages non-serializable Matter.js physics objects
+// Now uses ForestryTreeData resources for storage
 export class PhysicsManager {
-  private bodies = new Map<string, MatterBody>();
-  private constraints = new Map<string, MatterConstraint>();
 
   // Body management
   createBody(
@@ -44,7 +43,9 @@ export class PhysicsManager {
   }
 
   removeBody(nodeId: string): boolean {
-    const body = this.bodies.get(nodeId);
+    // Get from ForestryTreeData instead of local Map
+    const bodies = forestryTreeData.res.get('matterBodies') as Map<string, any>;
+    const body = bodies?.get(nodeId);
     if (!body) return false;
 
     // Remove from physics world
@@ -53,8 +54,8 @@ export class PhysicsManager {
       World.remove(world, body);
     }
 
-    // Remove from our tracking
-    this.bodies.delete(nodeId);
+    // Remove from ForestryTreeData tracking
+    bodies.delete(nodeId);
     return true;
   }
 
@@ -86,12 +87,16 @@ export class PhysicsManager {
       },
     });
 
-    this.constraints.set(constraintData.id, constraint);
+    // Store in ForestryTreeData instead of local Map
+    const constraints = forestryTreeData.res.get('matterConstraints') as Map<string, any>;
+    constraints.set(constraintData.id, constraint);
     return constraint;
   }
 
   getConstraint(constraintId: string): MatterConstraint | undefined {
-    return this.constraints.get(constraintId);
+    // Get from ForestryTreeData instead of local Map
+    const constraints = forestryTreeData.res.get('matterConstraints') as Map<string, any>;
+    return constraints?.get(constraintId);
   }
 
   removeConstraint(constraintId: string): boolean {
@@ -110,7 +115,9 @@ export class PhysicsManager {
   }
 
   getAllConstraints(): MatterConstraint[] {
-    return Array.from(this.constraints.values());
+    // Get from ForestryTreeData instead of local Map
+    const constraints = forestryTreeData.res.get('matterConstraints') as Map<string, any>;
+    return constraints ? Array.from(constraints.values()) : [];
   }
 
   // Update constraint properties
@@ -291,21 +298,32 @@ export class PhysicsManager {
     const world = globalResources.get(RESOURCES.WORLD) as MatterWorld;
 
     if (world) {
-      // Remove all bodies and constraints from world
-      World.remove(world, [...this.bodies.values(), ...this.constraints.values()]);
+      // Get from ForestryTreeData and remove from world
+      const bodies = forestryTreeData.res.get('matterBodies') as Map<string, any>;
+      const constraints = forestryTreeData.res.get('matterConstraints') as Map<string, any>;
+      const allObjects = [
+        ...(bodies ? Array.from(bodies.values()) : []),
+        ...(constraints ? Array.from(constraints.values()) : [])
+      ];
+      World.remove(world, allObjects);
     }
 
-    this.bodies.clear();
-    this.constraints.clear();
+    // Clear ForestryTreeData resources
+    const bodies = forestryTreeData.res.get('matterBodies') as Map<string, any>;
+    const constraints = forestryTreeData.res.get('matterConstraints') as Map<string, any>;
+    bodies?.clear();
+    constraints?.clear();
   }
 
   // Get counts
   get bodyCount(): number {
-    return this.bodies.size;
+    const bodies = forestryTreeData.res.get('matterBodies') as Map<string, any>;
+    return bodies?.size || 0;
   }
 
   get constraintCount(): number {
-    return this.constraints.size;
+    const constraints = forestryTreeData.res.get('matterConstraints') as Map<string, any>;
+    return constraints?.size || 0;
   }
 }
 

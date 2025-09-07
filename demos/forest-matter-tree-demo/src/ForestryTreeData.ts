@@ -1,5 +1,5 @@
 import { Forest } from '@wonderlandlabs/forestry4';
-import { Bodies, World, Constraint } from 'matter-js';
+import { Bodies, World, Constraint, Body } from 'matter-js';
 
 // Define types inline to avoid import issues
 interface SerializableNodeData {
@@ -449,6 +449,95 @@ export function createForestryTreeData() {
         }
 
         return constraint;
+      },
+
+      // === TREE OPERATIONS (from TreeController) ===
+
+      scaleTree(value: SerializableTreeState, oldWidth: number, oldHeight: number, newWidth: number, newHeight: number): void {
+        console.log(`🔄 Scaling tree from ${oldWidth}x${oldHeight} to ${newWidth}x${newHeight}`);
+
+        const forest = this as unknown as Forest<SerializableTreeState, any>;
+        const scaleX = newWidth / oldWidth;
+        const scaleY = newHeight / oldHeight;
+        const oldCenterX = oldWidth * 0.5;
+        const oldCenterY = oldHeight * 0.5;
+        const newCenterX = newWidth * 0.5;
+        const newCenterY = newHeight * 0.5;
+
+        // Scale all bodies
+        const bodies = forest.res.get('matterBodies') as Map<string, any>;
+        if (bodies) {
+          bodies.forEach((body) => {
+            const relativeX = body.position.x - oldCenterX;
+            const relativeY = body.position.y - oldCenterY;
+
+            Body.setPosition(body, {
+              x: newCenterX + relativeX * scaleX,
+              y: newCenterY + relativeY * scaleY
+            });
+          });
+        }
+      },
+
+      // Generate complete tree (from TreeController.generateTree)
+      generateCompleteTree(value: SerializableTreeState, canvasWidth: number, canvasHeight: number): string {
+        console.log('🌳 Generating new tree with Forestry...');
+        const forest = this as unknown as Forest<SerializableTreeState, any>;
+
+        // 1. Generate tree structure (serializable)
+        const { adjacency, rootId } = forest.acts.generateRandomTree();
+
+        // 2. Build physics representation
+        forest.acts.buildPhysicsTree(adjacency, rootId, canvasWidth, canvasHeight);
+
+        console.log(`✅ Tree generated with ${forest.acts.getNodeCount()} nodes`);
+        return rootId;
+      },
+
+      // Build physics tree (from TreeController.buildPhysicsTree)
+      buildPhysicsTree(value: SerializableTreeState, adjacency: Map<string, string[]>, rootId: string, canvasWidth: number, canvasHeight: number): void {
+        const forest = this as unknown as Forest<SerializableTreeState, any>;
+
+        // Clear existing physics
+        // Note: Physics.clear() still needed for now
+        import('./PhysicsManager').then(({ Physics }) => {
+          Physics.clear();
+        });
+
+        // Create all nodes and bodies
+        const allNodeIds = new Set([rootId]);
+        adjacency.forEach((children, parent) => {
+          allNodeIds.add(parent);
+          children.forEach(child => allNodeIds.add(child));
+        });
+
+        // Create nodes and bodies for each
+        allNodeIds.forEach(nodeId => {
+          // Create serializable node data
+          const nodeData = {
+            id: nodeId,
+            nodeType: nodeId === rootId ? 'branch' as const : 'branch' as const,
+            constraintIds: [],
+          };
+          forest.acts.addNode(nodeData);
+
+          // Create physics body (simplified positioning for now)
+          const x = canvasWidth * 0.5 + (Math.random() - 0.5) * 200;
+          const y = canvasHeight - 100 - Math.random() * 300;
+
+          forest.acts.createBody(nodeData, x, y, 8, {
+            frictionAir: 0.01,
+            render: { fillStyle: '#228B22' }
+          });
+        });
+
+        // Create constraints between connected nodes
+        adjacency.forEach((children, parentId) => {
+          children.forEach(childId => {
+            const constraintId = forest.acts.connectNodes(parentId, childId, 50, 0.8, 0.1, false);
+            // Physics constraint creation handled by connectNodes
+          });
+        });
       },
     },
   });

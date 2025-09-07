@@ -12,7 +12,6 @@ import type {
 // Manages non-serializable Matter.js physics objects
 // Now uses ForestryTreeData resources for storage
 export class PhysicsManager {
-
   // Body management
   createBody(
     nodeData: SerializableNodeData,
@@ -40,6 +39,10 @@ export class PhysicsManager {
 
   addBody(nodeId: string, body: MatterBody): void {
     this.bodies.set(nodeId, body);
+  }
+
+  get bodies() {
+    return forestryTreeData.res.get('matterBodies') as Map<string, any>;
   }
 
   removeBody(nodeId: string): boolean {
@@ -99,8 +102,12 @@ export class PhysicsManager {
     return constraints?.get(constraintId);
   }
 
+  /**
+   * THIS METHOD IS out of date and not currently used
+   * @param constraintId
+   */
   removeConstraint(constraintId: string): boolean {
-    const constraint = this.constraints.get(constraintId);
+    const constraint = this.getConstraint(constraintId);
     if (!constraint) return false;
 
     // Remove from physics world
@@ -110,14 +117,8 @@ export class PhysicsManager {
     }
 
     // Remove from our tracking
-    this.constraints.delete(constraintId);
+    this.constraints.delete(constraintId); // this is out of date
     return true;
-  }
-
-  getAllConstraints(): MatterConstraint[] {
-    // Get from ForestryTreeData instead of local Map
-    const constraints = forestryTreeData.res.get('matterConstraints') as Map<string, any>;
-    return constraints ? Array.from(constraints.values()) : [];
   }
 
   // Update constraint properties
@@ -164,15 +165,6 @@ export class PhysicsManager {
     if (!body) return null;
 
     return { x: body.velocity.x, y: body.velocity.y };
-  }
-
-  // Apply force to body
-  applyForce(nodeId: string, force: { x: number; y: number }): boolean {
-    const body = this.getBody(nodeId);
-    if (!body) return false;
-
-    Body.applyForce(body, body.position, force);
-    return true;
   }
 
   // Batch operations
@@ -306,7 +298,7 @@ export class PhysicsManager {
       const constraints = forestryTreeData.res.get('matterConstraints') as Map<string, any>;
       const allObjects = [
         ...(bodies ? Array.from(bodies.values()) : []),
-        ...(constraints ? Array.from(constraints.values()) : [])
+        ...(constraints ? Array.from(constraints.values()) : []),
       ];
       World.remove(world, allObjects);
     }
@@ -327,6 +319,10 @@ export class PhysicsManager {
   get constraintCount(): number {
     const constraints = forestryTreeData.res.get('matterConstraints') as Map<string, any>;
     return constraints?.size || 0;
+  }
+
+  get constraints() {
+    return forestryTreeData.res.get('matterConstraints') as Map<string, any>;
   }
 }
 

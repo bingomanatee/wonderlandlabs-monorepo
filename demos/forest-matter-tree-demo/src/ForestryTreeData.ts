@@ -1,7 +1,7 @@
 import { Forest } from '@wonderlandlabs/forestry4';
-import { Bodies, World, Constraint, Body } from 'matter-js';
+import { Bodies, Constraint, Engine, World } from 'matter-js';
 import { Physics } from './PhysicsManager';
-import { CFG } from './constants';
+import { CFG, RESOURCES } from './constants';
 
 // Define types inline to avoid import issues
 interface SerializableNodeData {
@@ -44,14 +44,14 @@ interface TreeDataActions {
     length: number,
     stiffness: number,
     damping: number,
-    isLeaf?: boolean
+    isLeaf?: boolean,
   ) => string;
   generateRandomTree: () => { adjacency: Map<string, string[]>; rootId: string };
   createBranches: (
     adjacency: Map<string, string[]>,
     parentId: string,
     depth: number,
-    nodeCounter: { value: number }
+    nodeCounter: { value: number },
   ) => void;
   getChildren: (nodeId: string) => SerializableNodeData[];
   getParent: (nodeId: string) => SerializableNodeData | undefined;
@@ -64,25 +64,36 @@ interface TreeDataActions {
 
 // Helper functions and constants from TreeDataManager
 function shuffle<T>(array: T[]): T[] {
-  const result = [...array];
+  const result = [ ...array ];
   for (let i = result.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
-    [result[i], result[j]] = [result[j], result[i]];
+    [ result[i], result[j] ] = [ result[j], result[i] ];
   }
   return result;
 }
 
 const BRANCH_CHILD_COUNTS = [
-  [2, 3, 4], // Depth 0: Trunk top - 2-4 main branches
-  [2, 3], // Depth 1: Primary branches - 2-3 children
-  [2, 2, 3], // Depth 2: Secondary branches - mostly 2, some 3
-  [2, 2, 2, 3], // Depth 3: Tertiary branches - mostly 2, few 3
-  [1, 2], // Depth 4: Small branches - 1-2 children
-  [1, 2], // Depth 5: Twigs - 1-2 children
+  [ 2, 3, 4 ], // Depth 0: Trunk top - 2-4 main branches
+  [ 2, 3 ], // Depth 1: Primary branches - 2-3 children
+  [ 2, 2, 3 ], // Depth 2: Secondary branches - mostly 2, some 3
+  [ 2, 2, 2, 3 ], // Depth 3: Tertiary branches - mostly 2, few 3
+  [ 1, 2 ], // Depth 4: Small branches - 1-2 children
+  [ 1, 2 ], // Depth 5: Twigs - 1-2 children
 ];
+
+type ProcessChildParams = {
+  childId: string,
+  depth: Map<string, any>,
+  maxDepth: number,
+  constraintIds: string[]
+  canvasHeight: number,
+  parentDepth: number, parentId: string
+};
 
 // Forestry store that mirrors TreeDataManager's state structure
 export function createForestryTreeData() {
+  const engine = Engine.create();
+  const world = engine.world;
 
   const forest = new Forest<SerializableTreeState, TreeDataActions>({
     value: {
@@ -91,12 +102,14 @@ export function createForestryTreeData() {
       rootId: '',
     },
     res: new Map([
-      ['matterBodies', new Map()],
-      ['matterConstraints', new Map()],
-      ['matterEngine', null],
-      ['matterRender', null],
-      ['matterWorld', null],
-      ['matterRunner', null]
+      [ 'matterBodies', new Map() ],
+      [ 'matterConstraints', new Map() ],
+      [ 'matterEngine', null ],
+      [ 'matterRender', null ],
+      [ 'matterWorld', null ],
+      [ 'matterRunner', null ],
+      [ RESOURCES.ENGINE, engine ],
+      [ RESOURCES.WORLD, world ],
     ]),
     actions: {
       // Note: getState() and loadState() removed - use forest.value and forest.next() directly
@@ -114,9 +127,55 @@ export function createForestryTreeData() {
         });
       },
 
+      processChildren(value: SerializableTreeState, {
+        childId,
+        parentId,
+        depth,
+        parentDepth,
+        maxDepth,
+        canvasHeight,
+        constraintIds,
+      }: ProcessChildParams) {
+        const springs = this.acts.getSpringSettings(canvasHeight);
+
+        const childDepth = depth.get(childId) ?? 0;
+
+        // Calculate spring settings based on depth
+        const depthFactor = childDepth / maxDepth;
+        const springLength = springs.spring.length * (1 - depthFactor * 0.4);
+        const springStiffness = springs.spring.stiffness * (1 + depthFactor * 2);
+        const springDamping = springs.spring.damping * (1 + depthFactor * 0.5);
+
+        // Create constraint in data layer
+        const constraintId = this.acts.connectNodes(
+          parentId,
+          childId,
+          springLength,
+          springStiffness,
+          springDamping,
+          false,
+        );
+
+        // Create physics constraint
+        const constraintData = this.acts.getConstraint(constraintId);
+        if (constraintData) {
+          const physicsConstraint = Physics.createConstraint(constraintData);
+          if (physicsConstraint) {
+            constraintIds.push(constraintId);
+          }
+        }
+
+        // Add leaf nodes between parent and child (skip for root level)
+        if (parentDepth > 0) {
+          this.acts.addLeafNodes(parentId, childId, canvasHeight);
+        }
+      }
+
       // Remove node (matches TreeDataManager.removeNode())
       removeNode(value: SerializableTreeState, nodeId: string): boolean {
-        if (!value.nodes[nodeId]) return false;
+        if (!value.nodes[nodeId]) {
+          return false;
+        }
 
         const forest = this as unknown as Forest<SerializableTreeState, any>;
         forest.mutate((draft) => {
@@ -126,7 +185,7 @@ export function createForestryTreeData() {
           // Remove associated constraints
           const constraintsToRemove = Object.keys(draft.constraints).filter(
             (id) =>
-              draft.constraints[id].parentId === nodeId || draft.constraints[id].childId === nodeId
+              draft.constraints[id].parentId === nodeId || draft.constraints[id].childId === nodeId,
           );
 
           constraintsToRemove.forEach((id) => delete draft.constraints[id]);
@@ -177,13 +236,15 @@ export function createForestryTreeData() {
         length: number,
         stiffness: number,
         damping: number,
-        isLeaf: boolean = false
+        isLeaf: boolean = false,
       ): string {
         const forest = this as unknown as Forest<SerializableTreeState, any>;
 
         const parent = value.nodes[parentId];
         const child = value.nodes[childId];
-        if (!parent || !child) throw new Error('Parent or child node not found');
+        if (!parent || !child) {
+          throw new Error('Parent or child node not found');
+        }
 
         let constraintId = '';
 
@@ -191,7 +252,7 @@ export function createForestryTreeData() {
           // Clean up any existing constraints to this child
           const childConstraintPattern = new RegExp(`_${childId}$`);
           const constraintsToRemove = Object.keys(draft.constraints).filter((id) =>
-            childConstraintPattern.test(id)
+            childConstraintPattern.test(id),
           );
 
           constraintsToRemove.forEach((id) => {
@@ -262,7 +323,7 @@ export function createForestryTreeData() {
 
         for (let i = 0; i < trunkHeight; i++) {
           const nextTrunkNode = `trunk_${i}`;
-          adjacency.set(currentTrunkNode, [nextTrunkNode]);
+          adjacency.set(currentTrunkNode, [ nextTrunkNode ]);
           currentTrunkNode = nextTrunkNode;
           nodeCounter.value++;
         }
@@ -281,16 +342,18 @@ export function createForestryTreeData() {
         adjacency: Map<string, string[]>,
         parentId: string,
         depth: number,
-        nodeCounter: { value: number }
+        nodeCounter: { value: number },
       ): void {
         // Get possible child counts for this depth
-        const childCountOptions = BRANCH_CHILD_COUNTS[depth] ?? [0];
+        const childCountOptions = BRANCH_CHILD_COUNTS[depth] ?? [ 0 ];
 
         // Randomly select number of children from the available options
-        const shuffledOptions = shuffle([...childCountOptions]);
+        const shuffledOptions = shuffle([ ...childCountOptions ]);
         const numChildren = shuffledOptions.pop() ?? 0;
 
-        if (numChildren === 0) return; // No children for this node
+        if (numChildren === 0) {
+          return;
+        } // No children for this node
 
         const children: string[] = [];
         for (let i = 0; i < numChildren; i++) {
@@ -312,7 +375,9 @@ export function createForestryTreeData() {
 
       getParent(value: SerializableTreeState, nodeId: string) {
         const node = value.nodes[nodeId];
-        if (!node?.parentId) return undefined;
+        if (!node?.parentId) {
+          return undefined;
+        }
         return value.nodes[node.parentId];
       },
 
@@ -324,11 +389,13 @@ export function createForestryTreeData() {
       traverse(
         value: SerializableTreeState,
         nodeId: string,
-        fn: (node: SerializableNodeData) => void
+        fn: (node: SerializableNodeData) => void,
       ): void {
         const forest = this as unknown as Forest<SerializableTreeState, any>;
         const node = value.nodes[nodeId];
-        if (!node) return;
+        if (!node) {
+          return;
+        }
 
         fn(node);
         const children = forest.acts.getChildren(nodeId);
@@ -358,7 +425,14 @@ export function createForestryTreeData() {
 
       // === PHYSICS BODY MANAGEMENT (from PhysicsManager) ===
 
-      createBody(value: SerializableTreeState, nodeData: SerializableNodeData, x: number, y: number, radius: number, options: any): any {
+      createBody(
+        value: SerializableTreeState,
+        nodeData: SerializableNodeData,
+        x: number,
+        y: number,
+        radius: number,
+        options: any,
+      ): any {
         const forest = this as unknown as Forest<SerializableTreeState, any>;
 
         // Use imported Matter.js modules
@@ -395,7 +469,9 @@ export function createForestryTreeData() {
         const forest = this as unknown as Forest<SerializableTreeState, any>;
         const bodies = forest.res.get('matterBodies') as Map<string, any>;
         const body = bodies?.get(nodeId);
-        if (!body) return false;
+        if (!body) {
+          return false;
+        }
 
         // Remove from world
         const world = forest.res.get('matterWorld');
@@ -412,7 +488,14 @@ export function createForestryTreeData() {
 
       // === CONSTRAINT MANAGEMENT (from PhysicsManager) ===
 
-      createConstraint(value: SerializableTreeState, parentId: string, childId: string, length: number, stiffness: number, damping: number): any {
+      createConstraint(
+        value: SerializableTreeState,
+        parentId: string,
+        childId: string,
+        length: number,
+        stiffness: number,
+        damping: number,
+      ): any {
         const forest = this as unknown as Forest<SerializableTreeState, any>;
 
         // Get bodies from resources
@@ -431,7 +514,7 @@ export function createForestryTreeData() {
           length,
           stiffness,
           damping,
-          render: { visible: true, strokeStyle: '#90EE90', lineWidth: 2 }
+          render: { visible: true, strokeStyle: '#90EE90', lineWidth: 2 },
         });
 
         // Store in resources
@@ -455,7 +538,13 @@ export function createForestryTreeData() {
 
       // === TREE OPERATIONS (from TreeController) ===
 
-      scaleTree(value: SerializableTreeState, oldWidth: number, oldHeight: number, newWidth: number, newHeight: number): void {
+      scaleTree(
+        value: SerializableTreeState,
+        oldWidth: number,
+        oldHeight: number,
+        newWidth: number,
+        newHeight: number,
+      ): void {
         console.log(`🔄 Scaling tree from ${oldWidth}x${oldHeight} to ${newWidth}x${newHeight}`);
 
         const forest = this as unknown as Forest<SerializableTreeState, any>;
@@ -476,7 +565,15 @@ export function createForestryTreeData() {
       },
 
       // Create node and body (from TreeController.createNodeAndBody)
-      createNodeAndBody(value: SerializableTreeState, id: string, depth: Map<string, number>, idxByDepth: Map<number, number>, counts: Map<number, number>, canvasWidth: number, canvasHeight: number): string {
+      createNodeAndBody(
+        value: SerializableTreeState,
+        id: string,
+        depth: Map<string, number>,
+        idxByDepth: Map<number, number>,
+        counts: Map<number, number>,
+        canvasWidth: number,
+        canvasHeight: number,
+      ): string {
         const forest = this as unknown as Forest<SerializableTreeState, any>;
 
         const d = depth.get(id) ?? 0;
@@ -506,8 +603,8 @@ export function createForestryTreeData() {
           render: {
             fillStyle: '#DC143C',
             strokeStyle: '#8B0000',
-            lineWidth: 1
-          }
+            lineWidth: 1,
+          },
         });
 
         return id;
@@ -546,7 +643,9 @@ export function createForestryTreeData() {
               const physicsConstraint = Physics.getConstraint(constraintId);
               if (physicsConstraint) {
                 // Update constraint length based on type
-                const newLength = constraintData.isLeaf ? springs.leafSpring.length : springs.spring.length;
+                const newLength = constraintData.isLeaf
+                  ? springs.leafSpring.length
+                  : springs.spring.length;
                 physicsConstraint.length = newLength;
               }
             }
@@ -555,14 +654,21 @@ export function createForestryTreeData() {
       },
 
       // Add leaf nodes between parent and child (from TreeController.addLeafNodes)
-      addLeafNodes(value: SerializableTreeState, parentNodeId: string, childNodeId: string, canvasHeight: number): void {
+      addLeafNodes(
+        value: SerializableTreeState,
+        parentNodeId: string,
+        childNodeId: string,
+        canvasHeight: number,
+      ): void {
         const forest = this as unknown as Forest<SerializableTreeState, any>;
         const numLeaves = 2 + Math.floor(Math.random() * 3); // 2-4 leaves
         const springs = forest.acts.getSpringSettings(canvasHeight);
 
         const parentBody = Physics.getBody(parentNodeId);
         const childBody = Physics.getBody(childNodeId);
-        if (!parentBody || !childBody) return;
+        if (!parentBody || !childBody) {
+          return;
+        }
 
         for (let i = 0; i < numLeaves; i++) {
           const parentPos = parentBody.position;
@@ -592,8 +698,8 @@ export function createForestryTreeData() {
             render: {
               fillStyle: '#90EE90',
               strokeStyle: '#228B22',
-              lineWidth: 1
-            }
+              lineWidth: 1,
+            },
           });
 
           // Create constraint
@@ -603,89 +709,106 @@ export function createForestryTreeData() {
             springs.leafSpring.length,
             springs.leafSpring.stiffness,
             springs.leafSpring.damping,
-            true
+            true,
           );
 
           const constraintData = forest.acts.getConstraint(constraintId);
           if (constraintData) {
             const physicsConstraint = Physics.createConstraint(constraintData);
             if (physicsConstraint) {
-              Physics.addConstraintsToWorld([constraintId]);
-              Physics.addBodiesToWorld([leafId]);
+              Physics.addConstraintsToWorld([ constraintId ]);
+              Physics.addBodiesToWorld([ leafId ]);
             }
           }
         }
       },
 
       // Build physics tree (from TreeController.buildPhysicsTree)
-      buildPhysicsTree(value: SerializableTreeState, adjacency: Map<string, string[]>, rootId: string, canvasWidth: number, canvasHeight: number): void {
+      buildPhysicsTree(
+        value: SerializableTreeState,
+        adjacency: Map<string, string[]>,
+        rootId: string,
+        canvasWidth: number,
+        canvasHeight: number,
+      ): void {
         console.log('🌳 ForestryTreeData.buildPhysicsTree called');
         const forest = this as unknown as Forest<SerializableTreeState, any>;
 
         // Clear existing physics
         Physics.clear();
 
-          // Calculate depth for each node
-          const depth = new Map<string, number>();
-          const counts = new Map<number, number>();
-          const idxByDepth = new Map();
+        // Calculate depth for each node
+        const depth = new Map<string, number>();
+        const counts = new Map<number, number>();
+        const idxByDepth = new Map();
 
-          // BFS to assign depths
-          const queue = [{ id: rootId, d: 0 }];
-          depth.set(rootId, 0);
+        // BFS to assign depths
+        const queue = [ { id: rootId, d: 0 } ];
+        depth.set(rootId, 0);
 
-          while (queue.length > 0) {
-            const { id, d } = queue.shift()!;
-            counts.set(d, (counts.get(d) || 0) + 1);
+        while (queue.length > 0) {
+          const { id, d } = queue.shift()!;
+          counts.set(d, (counts.get(d) || 0) + 1);
 
-            const children = adjacency.get(id) || [];
-            children.forEach((childId) => {
-              if (!depth.has(childId)) {
-                depth.set(childId, d + 1);
-                queue.push({ id: childId, d: d + 1 });
+          const children = adjacency.get(id) || [];
+          children.forEach((childId) => {
+            if (!depth.has(childId)) {
+              depth.set(childId, d + 1);
+              queue.push({ id: childId, d: d + 1 });
+            }
+          });
+        }
+
+        // Create all nodes and bodies
+        const allNodeIds = new Set([ rootId ]);
+        adjacency.forEach((children, parent) => {
+          allNodeIds.add(parent);
+          children.forEach((child) => allNodeIds.add(child));
+        });
+
+        const bodyIds: string[] = [];
+        allNodeIds.forEach((id) => {
+          const bodyId = forest.acts.createNodeAndBody(
+            id,
+            depth,
+            idxByDepth,
+            counts,
+            canvasWidth,
+            canvasHeight,
+          );
+          bodyIds.push(bodyId);
+        });
+
+        // Add all bodies to physics world
+        console.log('🌳 Adding', bodyIds.length, 'bodies to world');
+        Physics.addBodiesToWorld(bodyIds);
+
+        // Create constraints between connected nodes
+        const constraintIds: string[] = [];
+        adjacency.forEach((children, parentId) => {
+          children.forEach((childId) => {
+            const constraintId = forest.acts.connectNodes(parentId, childId, 50, 0.8, 0.1, false);
+
+            const constraintData = forest.acts.getConstraint(constraintId);
+            if (constraintData) {
+              const physicsConstraint = Physics.createConstraint(constraintData);
+              if (physicsConstraint) {
+                constraintIds.push(constraintId);
               }
-            });
-          }
-
-          // Create all nodes and bodies
-          const allNodeIds = new Set([rootId]);
-          adjacency.forEach((children, parent) => {
-            allNodeIds.add(parent);
-            children.forEach((child) => allNodeIds.add(child));
+            }
           });
-
-          const bodyIds: string[] = [];
-          allNodeIds.forEach((id) => {
-            const bodyId = forest.acts.createNodeAndBody(id, depth, idxByDepth, counts, canvasWidth, canvasHeight);
-            bodyIds.push(bodyId);
-          });
-
-          // Add all bodies to physics world
-          console.log('🌳 Adding', bodyIds.length, 'bodies to world');
-          Physics.addBodiesToWorld(bodyIds);
-
-          // Create constraints between connected nodes
-          const constraintIds: string[] = [];
-          adjacency.forEach((children, parentId) => {
-            children.forEach((childId) => {
-              const constraintId = forest.acts.connectNodes(parentId, childId, 50, 0.8, 0.1, false);
-
-              const constraintData = forest.acts.getConstraint(constraintId);
-              if (constraintData) {
-                const physicsConstraint = Physics.createConstraint(constraintData);
-                if (physicsConstraint) {
-                  constraintIds.push(constraintId);
-                }
-              }
-            });
-          });
+        });
 
         // Add constraints to world
         Physics.addConstraintsToWorld(constraintIds);
       },
 
       // Generate complete tree (from TreeController.generateTree)
-      generateCompleteTree(value: SerializableTreeState, canvasWidth: number, canvasHeight: number): string {
+      generateCompleteTree(
+        value: SerializableTreeState,
+        canvasWidth: number,
+        canvasHeight: number,
+      ): string {
         console.log('🌳 Generating new tree with Forestry...');
         const forest = this as unknown as Forest<SerializableTreeState, any>;
 
@@ -700,7 +823,13 @@ export function createForestryTreeData() {
       },
 
       // Build physics tree (from TreeController.buildPhysicsTree)
-      buildPhysicsTree(value: SerializableTreeState, adjacency: Map<string, string[]>, rootId: string, canvasWidth: number, canvasHeight: number): void {
+      buildPhysicsTree(
+        value: SerializableTreeState,
+        adjacency: Map<string, string[]>,
+        rootId: string,
+        canvasWidth: number,
+        canvasHeight: number,
+      ): void {
         const forest = this as unknown as Forest<SerializableTreeState, any>;
 
         // Clear existing physics
@@ -710,18 +839,18 @@ export function createForestryTreeData() {
         });
 
         // Create all nodes and bodies
-        const allNodeIds = new Set([rootId]);
+        const allNodeIds = new Set([ rootId ]);
         adjacency.forEach((children, parent) => {
           allNodeIds.add(parent);
-          children.forEach(child => allNodeIds.add(child));
+          children.forEach((child) => allNodeIds.add(child));
         });
 
         // Create nodes and bodies for each
-        allNodeIds.forEach(nodeId => {
+        allNodeIds.forEach((nodeId) => {
           // Create serializable node data
           const nodeData = {
             id: nodeId,
-            nodeType: nodeId === rootId ? 'branch' as const : 'branch' as const,
+            nodeType: nodeId === rootId ? ('branch' as const) : ('branch' as const),
             constraintIds: [],
           };
           forest.acts.addNode(nodeData);
@@ -732,13 +861,13 @@ export function createForestryTreeData() {
 
           forest.acts.createBody(nodeData, x, y, 8, {
             frictionAir: 0.01,
-            render: { fillStyle: '#228B22' }
+            render: { fillStyle: '#228B22' },
           });
         });
 
         // Create constraints between connected nodes
         adjacency.forEach((children, parentId) => {
-          children.forEach(childId => {
+          children.forEach((childId) => {
             const constraintId = forest.acts.connectNodes(parentId, childId, 50, 0.8, 0.1, false);
             // Physics constraint creation handled by connectNodes
           });

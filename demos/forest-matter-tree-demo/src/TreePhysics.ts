@@ -41,18 +41,9 @@ export class TreePhysics {
   private lastCanvasSize: { width: number; height: number };
 
   constructor(canvas: HTMLCanvasElement) {
-    // Initialize or get global resources
-    if (!globalResources.has(RESOURCES.ENGINE)) {
-      const engine = Engine.create();
-      const world = engine.world;
-
-      globalResources.set(RESOURCES.ENGINE, engine);
-      globalResources.set(RESOURCES.WORLD, world);
-    }
-
     // Create render for this canvas (canvas-specific)
-    const engine = globalResources.get(RESOURCES.ENGINE) as MatterEngine;
-    const world = globalResources.get(RESOURCES.WORLD) as MatterWorld;
+    const engine = forestryTreeData.res.get(RESOURCES.ENGINE) as MatterEngine;
+    const world = forestryTreeData.res.get(RESOURCES.WORLD) as MatterWorld;
 
     const width = canvas.width;
     const height = canvas.height;
@@ -74,7 +65,7 @@ export class TreePhysics {
       },
     });
 
-    globalResources.set(RESOURCES.RENDER, render);
+    forestryTreeData.res.set(RESOURCES.RENDER, render);
 
     // Set initial render bounds
     render.bounds.min.x = 0;
@@ -85,9 +76,9 @@ export class TreePhysics {
     Render.run(render);
 
     // Use Matter.js Runner for proper physics timing (only create once)
-    if (!globalResources.has(RESOURCES.RUNNER)) {
+    if (!forestryTreeData.res.has(RESOURCES.RUNNER)) {
       const runner = Runner.create();
-      globalResources.set(RESOURCES.RUNNER, runner);
+      forestryTreeData.res.set(RESOURCES.RUNNER, runner);
       Runner.run(runner, engine);
 
       // Debug: log that engine is running
@@ -165,7 +156,7 @@ export class TreePhysics {
   }
 
   get center(): { x: number; y: number } {
-    const render = globalResources.get(RESOURCES.RENDER) as MatterRender;
+    const render = forestryTreeData.res.get(RESOURCES.RENDER) as MatterRender;
     return {
       x: render.canvas.width * 0.5,
       y: render.canvas.height * 0.5,
@@ -178,7 +169,7 @@ export class TreePhysics {
     twigSpring: SpringSettings;
     leafSpring: SpringSettings;
   } {
-    const render = globalResources.get(RESOURCES.RENDER) as MatterRender;
+    const render = forestryTreeData.res.get(RESOURCES.RENDER) as MatterRender;
     const canvasHeight = render.canvas.height;
     return {
       spring: {
@@ -229,7 +220,7 @@ export class TreePhysics {
     // Update root pin if it exists
     if (this.rootPin) {
       // Root pin length stays at 0 (fixed position)
-      const render = globalResources.get(RESOURCES.RENDER) as MatterRender;
+      const render = forestryTreeData.res.get(RESOURCES.RENDER) as MatterRender;
       this.rootPin.pointA.x = this.center.x;
       this.rootPin.pointA.y = render.canvas.height - 100;
     }
@@ -238,7 +229,7 @@ export class TreePhysics {
   // Handle window resize events
   handleResize(): void {
     console.log('🔄 Window resize detected');
-    const render = globalResources.get(RESOURCES.RENDER) as MatterRender;
+    const render = forestryTreeData.res.get(RESOURCES.RENDER) as MatterRender;
     const canvas = render.canvas;
     const container = canvas.parentElement;
 
@@ -290,8 +281,8 @@ export class TreePhysics {
       return;
     }
 
-    const render = globalResources.get(RESOURCES.RENDER) as MatterRender;
-    const world = globalResources.get(RESOURCES.WORLD) as MatterWorld;
+    const render = forestryTreeData.res.get(RESOURCES.RENDER) as MatterRender;
+    const world = forestryTreeData.res.get(RESOURCES.WORLD) as MatterWorld;
 
     this.rootPin = Constraint.create({
       pointA: { x: this.center.x, y: render.canvas.height - 100 }, // Pin near bottom of canvas
@@ -315,7 +306,7 @@ export class TreePhysics {
       return;
     }
 
-    const render = globalResources.get(RESOURCES.RENDER) as MatterRender;
+    const render = forestryTreeData.res.get(RESOURCES.RENDER) as MatterRender;
     const newCenter = this.center;
     const oldX = this.rootPin.pointA.x;
     const oldY = this.rootPin.pointA.y;
@@ -384,7 +375,9 @@ export class TreePhysics {
   // Update local arrays from Forestry storage
   updateLocalArrays(): void {
     this.nodes = forestryTreeData.acts.getAllNodes();
-    this.nodeBodies = this.nodes.map((node) => Physics.getBody(node.id)).filter(Boolean) as MatterBody[];
+    this.nodeBodies = this.nodes
+      .map((node) => Physics.getBody(node.id))
+      .filter(Boolean) as MatterBody[];
   }
 
   applyForces(): void {
@@ -485,7 +478,7 @@ export class TreePhysics {
       idxByDepth.set(d, k + 1);
       const slots = counts.get(d);
       // Distribute nodes across 60% of canvas width, centered
-      const render = globalResources.get(RESOURCES.RENDER) as MatterRender;
+      const render = forestryTreeData.res.get(RESOURCES.RENDER) as MatterRender;
       const spreadWidth = render.canvas.width * 0.6;
       const nodePosition = ((k + 1) / (slots + 1)) * spreadWidth;
       const x = this.center.x - spreadWidth * 0.5 + nodePosition;
@@ -537,7 +530,7 @@ export class TreePhysics {
         };
 
         const constraintId = forestryTreeData.acts.connectNodes(id, childId, springSettings);
-        const world = globalResources.get(RESOURCES.WORLD) as MatterWorld;
+        const world = forestryTreeData.res.get(RESOURCES.WORLD) as MatterWorld;
         const constraint = forestryTreeData.acts.getConstraint(constraintId);
         if (constraint) {
           World.add(world, constraint);
@@ -559,8 +552,8 @@ export class TreePhysics {
 
     const rootNodeId = buildRec(rootId);
     const bodies = [...bodyCache.values()];
-    const world = globalResources.get(RESOURCES.WORLD) as MatterWorld;
-    const render = globalResources.get(RESOURCES.RENDER) as MatterRender;
+    const world = forestryTreeData.res.get(RESOURCES.WORLD) as MatterWorld;
+    const render = forestryTreeData.res.get(RESOURCES.RENDER) as MatterRender;
     World.add(world, bodies);
 
     // Pin root firmly at bottom so the tree grows upward like a real tree
@@ -619,7 +612,7 @@ export class TreePhysics {
   removeUnconstrainedBodies(): void {
     console.log('🔍 Checking for unconstrained bodies...');
 
-    const world = globalResources.get(RESOURCES.WORLD) as MatterWorld;
+    const world = forestryTreeData.res.get(RESOURCES.WORLD) as MatterWorld;
     const bodiesToRemove: MatterBody[] = [];
     const nodeIdsToRemove: string[] = [];
 
@@ -665,7 +658,7 @@ export class TreePhysics {
   pruneUnconstrainedBodies(): void {
     console.log('🔍 Starting pruning algorithm...');
 
-    const world = globalResources.get(RESOURCES.WORLD) as MatterWorld;
+    const world = forestryTreeData.res.get(RESOURCES.WORLD) as MatterWorld;
     const allConstraints = forestryTreeData.acts.getAllConstraints();
 
     // Get all bodies that are connected by constraints
@@ -798,9 +791,14 @@ export class TreePhysics {
       // Connect leaf to parent with flexible spring
       console.log(`🍃 Creating leaf ${leafId} -> parent ${parentNodeId}`);
       const springs = this.getSpringSettings();
-      const constraintId = forestryTreeData.acts.connectNodes(parentNodeId, leafId, springs.leafSpring, true);
+      const constraintId = forestryTreeData.acts.connectNodes(
+        parentNodeId,
+        leafId,
+        springs.leafSpring,
+        true
+      );
 
-      const world = globalResources.get(RESOURCES.WORLD) as MatterWorld;
+      const world = forestryTreeData.res.get(RESOURCES.WORLD) as MatterWorld;
       const constraint = forestryTreeData.acts.getConstraint(constraintId);
       if (constraint) {
         World.add(world, [leafBody, constraint]);
@@ -861,9 +859,14 @@ export class TreePhysics {
 
       // Connect leaf to terminal node with flexible spring
       const springs = this.getSpringSettings();
-      const constraintId = forestryTreeData.acts.connectNodes(terminalNodeId, leafId, springs.leafSpring, true);
+      const constraintId = forestryTreeData.acts.connectNodes(
+        terminalNodeId,
+        leafId,
+        springs.leafSpring,
+        true
+      );
 
-      const world = globalResources.get(RESOURCES.WORLD) as MatterWorld;
+      const world = forestryTreeData.res.get(RESOURCES.WORLD) as MatterWorld;
       const constraint = forestryTreeData.acts.getConstraint(constraintId);
       if (constraint) {
         World.add(world, [leafBody, constraint]);

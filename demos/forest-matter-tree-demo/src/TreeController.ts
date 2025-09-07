@@ -61,45 +61,6 @@ export class TreeController {
     // Create physics bodies and serializable nodes
     const bodyIds: string[] = [];
 
-    const createNodeAndBody = (id: string): void => {
-      const d = depth.get(id) ?? 0;
-      const k = idxByDepth.get(d) || 0;
-      idxByDepth.set(d, k + 1);
-      const slots = counts.get(d);
-
-      // Position calculation
-      const spreadWidth = canvasWidth * 0.6;
-      const nodePosition = ((k + 1) / (slots + 1)) * spreadWidth;
-      const x = canvasWidth * 0.5 - spreadWidth * 0.5 + nodePosition;
-      const y = canvasHeight - 80 - d * 45;
-
-      // Create serializable node data
-      const nodeData: SerializableNodeData = {
-        id,
-        nodeType: 'branch',
-        constraintIds: [],
-      };
-      forestryTreeData.acts.addNode(nodeData);
-
-      // Create physics body with low inertia
-      const body = Physics.createBody(nodeData, x, y, CFG.nodeRadius, {
-        frictionAir: CFG.airFriction,
-        inertia: Infinity, // Prevent rotation for more stable movement
-        inverseInertia: 0, // No rotational inertia
-        render: {
-          fillStyle: '#DC143C', // Crimson red for branches
-          strokeStyle: '#8B0000', // Dark red border
-          lineWidth: 2,
-        },
-        collisionFilter: { group: -1 }, // Prevent collisions between tree nodes
-      });
-
-      // Branches have full repulsion strength
-      (body as any).repulsionFactor = 1.0;
-
-      bodyIds.push(id);
-    };
-
     // Create all nodes first
     const allNodeIds = new Set([rootId]);
     adjacency.forEach((children, parent) => {
@@ -108,7 +69,14 @@ export class TreeController {
     });
 
     allNodeIds.forEach((id) => {
-      const bodyId = forestryTreeData.acts.createNodeAndBody(id, depth, idxByDepth, counts, canvasWidth, canvasHeight);
+      const bodyId = forestryTreeData.acts.createNodeAndBody(
+        id,
+        depth,
+        idxByDepth,
+        counts,
+        canvasWidth,
+        canvasHeight
+      );
       bodyIds.push(bodyId);
     });
 

@@ -2,6 +2,7 @@ import { Forest } from '@wonderlandlabs/forestry4';
 import { Bodies, Constraint, Engine, World } from 'matter-js';
 import { Physics } from './PhysicsManager';
 import { CFG, RESOURCES } from './constants';
+import { generateUUID } from './GenerateUUID.ts';
 
 // Define types inline to avoid import issues
 interface SerializableNodeData {
@@ -81,7 +82,7 @@ const BRANCH_CHILD_COUNTS = [
   [ 1, 2 ], // Depth 5: Twigs - 1-2 children
 ];
 
-type ProcessChildParams = {
+export type ProcessChildParams = {
   childId: string,
   depth: Map<string, any>,
   maxDepth: number,
@@ -89,6 +90,14 @@ type ProcessChildParams = {
   canvasHeight: number,
   parentDepth: number, parentId: string
 };
+
+export type CreateTerminalLeafBodyParams = {
+  i: number,
+  numLeaves: number,
+  terminalNodeId: string,
+  terminalBody: any,
+  canvasHeight: number
+}
 
 // Forestry store that mirrors TreeDataManager's state structure
 export function createForestryTreeData() {
@@ -112,94 +121,83 @@ export function createForestryTreeData() {
       [ RESOURCES.WORLD, world ],
     ]),
     actions: {
-      // Note: getState() and loadState() removed - use forest.value and forest.next() directly
-
-      // Get node by ID (matches TreeDataManager.getNode())
-      getNode(value: SerializableTreeState, id: string) {
-        return value.nodes[id];
+      makeDepth(value: SerializableTreeState, rootId: string, adjacency: Map<string, any>) {
+        // Compute depths for layout
+        const depth = new Map([[rootId, 0]]);
+        const q = [rootId];
+        while (q.length) {
+          const p = q.shift();
+          for (const c of adjacency.get(p!) || []) {
+            if (!depth.has(c)) {
+              depth.set(c, (depth.get(p!) ?? 0) + 1);
+              q.push(c);
+            }
+          }
+        }
+        const maxDepth = Math.max(...depth.values());
+        return [depth, maxDepth];
       },
-
-      // Add node (matches TreeDataManager.addNode())
-      addNode(value: SerializableTreeState, nodeData: any): void {
-        const forest = this as unknown as Forest<SerializableTreeState, any>;
-        forest.mutate((draft) => {
-          draft.nodes[nodeData.id] = nodeData;
-        });
-      },
-
-      processChildren(value: SerializableTreeState, {
-        childId,
-        parentId,
-        depth,
-        parentDepth,
-        maxDepth,
+      createTerminalLeafBody(value, {
+        i,
+        numLeaves,
+        terminalNodeId,
+        terminalBody,
         canvasHeight,
-        constraintIds,
-      }: ProcessChildParams) {
+      }: CreateTerminalLeafBodyParams) {
+        const nodePos = terminalBody.position;
+        const angle = (i / numLeaves) * Math.PI * 2;
+        const radius = 25 + Math.random() * 20;
         const springs = this.acts.getSpringSettings(canvasHeight);
 
-        const childDepth = depth.get(childId) ?? 0;
+        const leafX = nodePos.x + Math.cos(angle) * radius;
+        const leafY = nodePos.y + Math.sin(angle) * radius;
 
-        // Calculate spring settings based on depth
-        const depthFactor = childDepth / maxDepth;
-        const springLength = springs.spring.length * (1 - depthFactor * 0.4);
-        const springStiffness = springs.spring.stiffness * (1 + depthFactor * 2);
-        const springDamping = springs.spring.damping * (1 + depthFactor * 0.5);
+        const leafId = `terminal_leaf_${generateUUID()}`;
 
-        // Create constraint in data layer
+        // Create serializable leaf data
+        const leafData: SerializableNodeData = {
+          id: leafId,
+          parentId: terminalNodeId,
+          nodeType: 'terminal_leaf',
+          constraintIds: [],
+        };
+
+        this.acts.addNode(leafData);
+        const terminalLeafBody = Physics.createBody(leafData, springs, leafX, leafY, CFG.leafRadius, {
+          frictionAir: CFG.airFriction * 1.5,
+          inertia: Infinity, // Prevent rotation
+          inverseInertia: 0, // No rotational inertia
+          render: {
+            fillStyle: '#32CD32', // Bright lime green for leaves
+            strokeStyle: '#006400', // Dark green border
+            lineWidth: 2,
+          },
+          collisionFilter: { group: -1 },
+        });
+
+        // Assign random repulsion factor to this terminal leaf (0.0 to 0.4)
+        // Terminal leaves can have slightly higher variation for more clustering
+        (terminalLeafBody as any).repulsionFactor = Math.random() * 0.4;
         const constraintId = this.acts.connectNodes(
-          parentId,
-          childId,
-          springLength,
-          springStiffness,
-          springDamping,
-          false,
+          terminalNodeId,
+          leafId,
+          springs.leafSpring.length,
+          springs.leafSpring.stiffness,
+          springs.leafSpring.damping,
+          true,
         );
 
-        // Create physics constraint
         const constraintData = this.acts.getConstraint(constraintId);
         if (constraintData) {
           const physicsConstraint = Physics.createConstraint(constraintData);
           if (physicsConstraint) {
-            constraintIds.push(constraintId);
+            Physics.addConstraintsToWorld([ constraintId ]);
+            Physics.addBodiesToWorld([ leafId ]);
           }
         }
-
-        // Add leaf nodes between parent and child (skip for root level)
-        if (parentDepth > 0) {
-          this.acts.addLeafNodes(parentId, childId, canvasHeight);
-        }
-      }
-
-      // Remove node (matches TreeDataManager.removeNode())
-      removeNode(value: SerializableTreeState, nodeId: string): boolean {
-        if (!value.nodes[nodeId]) {
-          return false;
-        }
-
-        const forest = this as unknown as Forest<SerializableTreeState, any>;
-        forest.mutate((draft) => {
-          // Remove node
-          delete draft.nodes[nodeId];
-
-          // Remove associated constraints
-          const constraintsToRemove = Object.keys(draft.constraints).filter(
-            (id) =>
-              draft.constraints[id].parentId === nodeId || draft.constraints[id].childId === nodeId,
-          );
-
-          constraintsToRemove.forEach((id) => delete draft.constraints[id]);
-        });
-
-        return true;
       },
 
-      // Get all nodes (matches TreeDataManager.getAllNodes())
-      getAllNodes(value: SerializableTreeState) {
-        return Object.values(value.nodes);
-      },
-
-      // Add constraint (matches TreeDataManager.addConstraint())
+      // Get node by ID (matches TreeDataManager.getNode())
       addConstraint(value: SerializableTreeState, constraintData: any): void {
         const forest = this as unknown as Forest<SerializableTreeState, any>;
         forest.mutate((draft) => {
@@ -218,442 +216,7 @@ export function createForestryTreeData() {
         });
       },
 
-      // Get constraint by ID (matches TreeDataManager.getConstraint())
-      getConstraint(value: SerializableTreeState, id: string) {
-        return value.constraints[id];
-      },
-
-      // Get all constraints (matches TreeDataManager.getAllConstraints())
-      getAllConstraints(value: SerializableTreeState) {
-        return Object.values(value.constraints);
-      },
-
-      // Connect two nodes with constraint (matches TreeDataManager.connectNodes())
-      connectNodes(
-        value: SerializableTreeState,
-        parentId: string,
-        childId: string,
-        length: number,
-        stiffness: number,
-        damping: number,
-        isLeaf: boolean = false,
-      ): string {
-        const forest = this as unknown as Forest<SerializableTreeState, any>;
-
-        const parent = value.nodes[parentId];
-        const child = value.nodes[childId];
-        if (!parent || !child) {
-          throw new Error('Parent or child node not found');
-        }
-
-        let constraintId = '';
-
-        forest.mutate((draft) => {
-          // Clean up any existing constraints to this child
-          const childConstraintPattern = new RegExp(`_${childId}$`);
-          const constraintsToRemove = Object.keys(draft.constraints).filter((id) =>
-            childConstraintPattern.test(id),
-          );
-
-          constraintsToRemove.forEach((id) => {
-            delete draft.constraints[id];
-            // Remove from node constraint lists
-            Object.values(draft.nodes).forEach((node: any) => {
-              const index = node.constraintIds.indexOf(id);
-              if (index > -1) {
-                node.constraintIds.splice(index, 1);
-              }
-            });
-          });
-
-          // Update parent-child relationship
-          draft.nodes[childId].parentId = parentId;
-
-          // Create constraint metadata
-          constraintId = `constraint_${parentId}_${childId}`;
-          const constraintData: SerializableConstraintData = {
-            id: constraintId,
-            parentId,
-            childId,
-            length,
-            stiffness,
-            damping,
-            isLeaf,
-          };
-
-          // Add constraint
-          draft.constraints[constraintData.id] = constraintData;
-
-          // Add constraint ID to parent and child nodes
-          const parentNode = draft.nodes[constraintData.parentId];
-          const childNode = draft.nodes[constraintData.childId];
-
-          if (parentNode && !parentNode.constraintIds.includes(constraintData.id)) {
-            parentNode.constraintIds.push(constraintData.id);
-          }
-          if (childNode && !childNode.constraintIds.includes(constraintData.id)) {
-            childNode.constraintIds.push(constraintData.id);
-          }
-        });
-
-        return constraintId;
-      },
-
-      // Generate random tree structure (matches TreeDataManager.generateRandomTree())
-      generateRandomTree(value: SerializableTreeState): {
-        adjacency: Map<string, string[]>;
-        rootId: string;
-      } {
-        const forest = this as unknown as Forest<SerializableTreeState, any>;
-
-        // Clear existing state
-        forest.mutate(() => ({
-          nodes: {},
-          constraints: {},
-          rootId: '',
-        }));
-
-        const adjacency = new Map<string, string[]>();
-        const rootId = 'root';
-        const nodeCounter = { value: 0 };
-
-        // First, create the trunk (2-3 nodes in a straight line)
-        const trunkHeight = 2 + Math.floor(Math.random() * 2); // 2-3 trunk nodes
-        let currentTrunkNode = rootId;
-
-        for (let i = 0; i < trunkHeight; i++) {
-          const nextTrunkNode = `trunk_${i}`;
-          adjacency.set(currentTrunkNode, [ nextTrunkNode ]);
-          currentTrunkNode = nextTrunkNode;
-          nodeCounter.value++;
-        }
-
-        // Start branching from the top of the trunk
-        forest.acts.createBranches(adjacency, currentTrunkNode, 0, nodeCounter);
-
-        forest.set('rootId', rootId);
-
-        return { adjacency, rootId };
-      },
-
-      // Helper method for creating branches recursively
-      createBranches(
-        value: SerializableTreeState,
-        adjacency: Map<string, string[]>,
-        parentId: string,
-        depth: number,
-        nodeCounter: { value: number },
-      ): void {
-        // Get possible child counts for this depth
-        const childCountOptions = BRANCH_CHILD_COUNTS[depth] ?? [ 0 ];
-
-        // Randomly select number of children from the available options
-        const shuffledOptions = shuffle([ ...childCountOptions ]);
-        const numChildren = shuffledOptions.pop() ?? 0;
-
-        if (numChildren === 0) {
-          return;
-        } // No children for this node
-
-        const children: string[] = [];
-        for (let i = 0; i < numChildren; i++) {
-          const childId = `branch_${nodeCounter.value++}`;
-          children.push(childId);
-          const forest = this as unknown as Forest<SerializableTreeState, any>;
-          forest.acts.createBranches(adjacency, childId, depth + 1, nodeCounter);
-        }
-
-        if (children.length > 0) {
-          adjacency.set(parentId, children);
-        }
-      },
-
-      // Tree structure queries (matches TreeDataManager methods)
-      getChildren(value: SerializableTreeState, nodeId: string) {
-        return Object.values(value.nodes).filter((node) => node.parentId === nodeId);
-      },
-
-      getParent(value: SerializableTreeState, nodeId: string) {
-        const node = value.nodes[nodeId];
-        if (!node?.parentId) {
-          return undefined;
-        }
-        return value.nodes[node.parentId];
-      },
-
-      getRootNodes(value: SerializableTreeState) {
-        return Object.values(value.nodes).filter((node) => !node.parentId);
-      },
-
-      // Tree traversal (matches TreeDataManager.traverse())
-      traverse(
-        value: SerializableTreeState,
-        nodeId: string,
-        fn: (node: SerializableNodeData) => void,
-      ): void {
-        const forest = this as unknown as Forest<SerializableTreeState, any>;
-        const node = value.nodes[nodeId];
-        if (!node) {
-          return;
-        }
-
-        fn(node);
-        const children = forest.acts.getChildren(nodeId);
-        for (const child of children) {
-          forest.acts.traverse(child.id, fn);
-        }
-      },
-
-      // Utility methods
-      clear(value: SerializableTreeState): void {
-        const forest = this as unknown as Forest<SerializableTreeState, any>;
-        forest.mutate(() => ({
-          nodes: {},
-          constraints: {},
-          rootId: '',
-        }));
-      },
-
-      // Getters (matches TreeDataManager getters)
-      getNodeCount(value: SerializableTreeState): number {
-        return Object.keys(value.nodes).length;
-      },
-
-      getRootId(value: SerializableTreeState): string {
-        return value.rootId;
-      },
-
-      // === PHYSICS BODY MANAGEMENT (from PhysicsManager) ===
-
-      createBody(
-        value: SerializableTreeState,
-        nodeData: SerializableNodeData,
-        x: number,
-        y: number,
-        radius: number,
-        options: any,
-      ): any {
-        const forest = this as unknown as Forest<SerializableTreeState, any>;
-
-        // Use imported Matter.js modules
-
-        const body = Bodies.circle(x, y, radius, {
-          ...options,
-          label: nodeData.id,
-        });
-
-        // Store in resources
-        let bodies = forest.res.get('matterBodies') as Map<string, any>;
-        if (!bodies) {
-          bodies = new Map();
-          forest.res.set('matterBodies', bodies);
-        }
-        bodies.set(nodeData.id, body);
-
-        // Add to world if it exists
-        const world = forest.res.get('matterWorld');
-        if (world) {
-          World.add(world, body);
-        }
-
-        return body;
-      },
-
-      getBody(value: SerializableTreeState, nodeId: string): any {
-        const forest = this as unknown as Forest<SerializableTreeState, any>;
-        const bodies = forest.res.get('matterBodies') as Map<string, any>;
-        return bodies?.get(nodeId);
-      },
-
-      removeBody(value: SerializableTreeState, nodeId: string): boolean {
-        const forest = this as unknown as Forest<SerializableTreeState, any>;
-        const bodies = forest.res.get('matterBodies') as Map<string, any>;
-        const body = bodies?.get(nodeId);
-        if (!body) {
-          return false;
-        }
-
-        // Remove from world
-        const world = forest.res.get('matterWorld');
-        if (world) {
-          import('matter-js').then(({ World }) => {
-            World.remove(world, body);
-          });
-        }
-
-        // Remove from resources
-        bodies.delete(nodeId);
-        return true;
-      },
-
-      // === CONSTRAINT MANAGEMENT (from PhysicsManager) ===
-
-      createConstraint(
-        value: SerializableTreeState,
-        parentId: string,
-        childId: string,
-        length: number,
-        stiffness: number,
-        damping: number,
-      ): any {
-        const forest = this as unknown as Forest<SerializableTreeState, any>;
-
-        // Get bodies from resources
-        const bodies = forest.res.get('matterBodies') as Map<string, any>;
-        const parentBody = bodies?.get(parentId);
-        const childBody = bodies?.get(childId);
-
-        if (!parentBody || !childBody) {
-          console.error(`Cannot create constraint: missing bodies for ${parentId} or ${childId}`);
-          return null;
-        }
-
-        const constraint = Constraint.create({
-          bodyA: parentBody,
-          bodyB: childBody,
-          length,
-          stiffness,
-          damping,
-          render: { visible: true, strokeStyle: '#90EE90', lineWidth: 2 },
-        });
-
-        // Store in resources
-        let constraints = forest.res.get('matterConstraints') as Map<string, any>;
-        if (!constraints) {
-          constraints = new Map();
-          forest.res.set('matterConstraints', constraints);
-        }
-
-        const constraintId = `constraint_${parentId}_${childId}`;
-        constraints.set(constraintId, constraint);
-
-        // Add to world
-        const world = forest.res.get('matterWorld');
-        if (world) {
-          World.add(world, constraint);
-        }
-
-        return constraint;
-      },
-
-      // === TREE OPERATIONS (from TreeController) ===
-
-      scaleTree(
-        value: SerializableTreeState,
-        oldWidth: number,
-        oldHeight: number,
-        newWidth: number,
-        newHeight: number,
-      ): void {
-        console.log(`🔄 Scaling tree from ${oldWidth}x${oldHeight} to ${newWidth}x${newHeight}`);
-
-        const forest = this as unknown as Forest<SerializableTreeState, any>;
-        const scaleX = newWidth / oldWidth;
-        const scaleY = newHeight / oldHeight;
-        const oldCenterX = oldWidth * 0.5;
-        const oldCenterY = oldHeight * 0.5;
-        const newCenterX = newWidth * 0.5;
-        const newCenterY = newHeight * 0.5;
-
-        // Scale all physics bodies from old center to new center
-        Physics.scaleAllPositions(scaleX, scaleY, oldCenterX, oldCenterY, newCenterX, newCenterY);
-
-        // Update spring lengths for new canvas size
-        forest.acts.updateSpringLengths(newHeight);
-
-        console.log(`✅ Tree scaling complete`);
-      },
-
-      // Create node and body (from TreeController.createNodeAndBody)
-      createNodeAndBody(
-        value: SerializableTreeState,
-        id: string,
-        depth: Map<string, number>,
-        idxByDepth: Map<number, number>,
-        counts: Map<number, number>,
-        canvasWidth: number,
-        canvasHeight: number,
-      ): string {
-        const forest = this as unknown as Forest<SerializableTreeState, any>;
-
-        const d = depth.get(id) ?? 0;
-        const k = idxByDepth.get(d) || 0;
-        idxByDepth.set(d, k + 1);
-        const slots = counts.get(d);
-
-        // Position calculation
-        const spreadWidth = canvasWidth * 0.6;
-        const nodePosition = ((k + 1) / (slots + 1)) * spreadWidth;
-        const x = canvasWidth * 0.5 - spreadWidth * 0.5 + nodePosition;
-        const y = canvasHeight - 80 - d * 45;
-
-        // Create serializable node data
-        const nodeData = {
-          id,
-          nodeType: 'branch' as const,
-          constraintIds: [],
-        };
-        forest.acts.addNode(nodeData);
-
-        // Create physics body
-        forest.acts.createBody(nodeData, x, y, 8, {
-          frictionAir: 0.01,
-          inertia: Infinity,
-          inverseInertia: 0,
-          render: {
-            fillStyle: '#DC143C',
-            strokeStyle: '#8B0000',
-            lineWidth: 1,
-          },
-        });
-
-        return id;
-      },
-
-      // Calculate spring settings based on canvas size (from TreeController.getSpringSettings)
-      getSpringSettings(value: SerializableTreeState, canvasHeight: number) {
-        return {
-          spring: {
-            length: canvasHeight * CFG.springLengthPercent,
-            stiffness: CFG.springStiffness,
-            damping: CFG.springDamping,
-          },
-          twigSpring: {
-            length: canvasHeight * CFG.twigSpringLengthPercent,
-            stiffness: CFG.twigSpringStiffness,
-            damping: CFG.twigSpringDamping,
-          },
-          leafSpring: {
-            length: canvasHeight * CFG.leafSpringLengthPercent,
-            stiffness: CFG.leafSpringStiffness,
-            damping: CFG.leafSpringDamping,
-          },
-        };
-      },
-
-      // Update spring lengths (from TreeController.updateSpringLengths)
-      updateSpringLengths(value: SerializableTreeState, canvasHeight: number): void {
-        const forest = this as unknown as Forest<SerializableTreeState, any>;
-        const springs = forest.acts.getSpringSettings(canvasHeight);
-
-        forest.acts.traverse(forest.acts.getRootId(), (node) => {
-          node.constraintIds.forEach((constraintId) => {
-            const constraintData = forest.acts.getConstraint(constraintId);
-            if (constraintData) {
-              const physicsConstraint = Physics.getConstraint(constraintId);
-              if (physicsConstraint) {
-                // Update constraint length based on type
-                const newLength = constraintData.isLeaf
-                  ? springs.leafSpring.length
-                  : springs.spring.length;
-                physicsConstraint.length = newLength;
-              }
-            }
-          });
-        });
-      },
-
-      // Add leaf nodes between parent and child (from TreeController.addLeafNodes)
+      // Add node (matches TreeDataManager.addNode())
       addLeafNodes(
         value: SerializableTreeState,
         parentNodeId: string,
@@ -723,7 +286,14 @@ export function createForestryTreeData() {
         }
       },
 
-      // Build physics tree (from TreeController.buildPhysicsTree)
+      addNode(value: SerializableTreeState, nodeData: any): void {
+        const forest = this as unknown as Forest<SerializableTreeState, any>;
+        forest.mutate((draft) => {
+          draft.nodes[nodeData.id] = nodeData;
+        });
+      }
+
+      // Remove node (matches TreeDataManager.removeNode())
       buildPhysicsTree(
         value: SerializableTreeState,
         adjacency: Map<string, string[]>,
@@ -803,26 +373,7 @@ export function createForestryTreeData() {
         Physics.addConstraintsToWorld(constraintIds);
       },
 
-      // Generate complete tree (from TreeController.generateTree)
-      generateCompleteTree(
-        value: SerializableTreeState,
-        canvasWidth: number,
-        canvasHeight: number,
-      ): string {
-        console.log('🌳 Generating new tree with Forestry...');
-        const forest = this as unknown as Forest<SerializableTreeState, any>;
-
-        // 1. Generate tree structure (serializable)
-        const { adjacency, rootId } = forest.acts.generateRandomTree();
-
-        // 2. Build physics representation
-        forest.acts.buildPhysicsTree(adjacency, rootId, canvasWidth, canvasHeight);
-
-        console.log(`✅ Tree generated with ${forest.acts.getNodeCount()} nodes`);
-        return rootId;
-      },
-
-      // Build physics tree (from TreeController.buildPhysicsTree)
+      // Get all nodes (matches TreeDataManager.getAllNodes())
       buildPhysicsTree(
         value: SerializableTreeState,
         adjacency: Map<string, string[]>,
@@ -870,6 +421,538 @@ export function createForestryTreeData() {
           children.forEach((childId) => {
             const constraintId = forest.acts.connectNodes(parentId, childId, 50, 0.8, 0.1, false);
             // Physics constraint creation handled by connectNodes
+          });
+        });
+      },
+
+      // Add constraint (matches TreeDataManager.addConstraint())
+      clear(value: SerializableTreeState): void {
+        const forest = this as unknown as Forest<SerializableTreeState, any>;
+        forest.mutate(() => ({
+          nodes: {},
+          constraints: {},
+          rootId: '',
+        }));
+      },
+
+      // Get constraint by ID (matches TreeDataManager.getConstraint())
+      connectNodes(
+        value: SerializableTreeState,
+        parentId: string,
+        childId: string,
+        length: number,
+        stiffness: number,
+        damping: number,
+        isLeaf: boolean = false,
+      ): string {
+        const forest = this as unknown as Forest<SerializableTreeState, any>;
+
+        const parent = value.nodes[parentId];
+        const child = value.nodes[childId];
+        if (!parent || !child) {
+          throw new Error('Parent or child node not found');
+        }
+
+        let constraintId = '';
+
+        forest.mutate((draft) => {
+          // Clean up any existing constraints to this child
+          const childConstraintPattern = new RegExp(`_${childId}$`);
+          const constraintsToRemove = Object.keys(draft.constraints).filter((id) =>
+            childConstraintPattern.test(id),
+          );
+
+          constraintsToRemove.forEach((id) => {
+            delete draft.constraints[id];
+            // Remove from node constraint lists
+            Object.values(draft.nodes).forEach((node: any) => {
+              const index = node.constraintIds.indexOf(id);
+              if (index > -1) {
+                node.constraintIds.splice(index, 1);
+              }
+            });
+          });
+
+          // Update parent-child relationship
+          draft.nodes[childId].parentId = parentId;
+
+          // Create constraint metadata
+          constraintId = `constraint_${parentId}_${childId}`;
+          const constraintData: SerializableConstraintData = {
+            id: constraintId,
+            parentId,
+            childId,
+            length,
+            stiffness,
+            damping,
+            isLeaf,
+          };
+
+          // Add constraint
+          draft.constraints[constraintData.id] = constraintData;
+
+          // Add constraint ID to parent and child nodes
+          const parentNode = draft.nodes[constraintData.parentId];
+          const childNode = draft.nodes[constraintData.childId];
+
+          if (parentNode && !parentNode.constraintIds.includes(constraintData.id)) {
+            parentNode.constraintIds.push(constraintData.id);
+          }
+          if (childNode && !childNode.constraintIds.includes(constraintData.id)) {
+            childNode.constraintIds.push(constraintData.id);
+          }
+        });
+
+        return constraintId;
+      },
+
+      // Get all constraints (matches TreeDataManager.getAllConstraints())
+      createBody(
+        value: SerializableTreeState,
+        nodeData: SerializableNodeData,
+        x: number,
+        y: number,
+        radius: number,
+        options: any,
+      ): any {
+        const forest = this as unknown as Forest<SerializableTreeState, any>;
+
+        // Use imported Matter.js modules
+
+        const body = Bodies.circle(x, y, radius, {
+          ...options,
+          label: nodeData.id,
+        });
+
+        // Store in resources
+        let bodies = forest.res.get('matterBodies') as Map<string, any>;
+        if (!bodies) {
+          bodies = new Map();
+          forest.res.set('matterBodies', bodies);
+        }
+        bodies.set(nodeData.id, body);
+
+        // Add to world if it exists
+        const world = forest.res.get('matterWorld');
+        if (world) {
+          World.add(world, body);
+        }
+
+        return body;
+      },
+
+      // Connect two nodes with constraint (matches TreeDataManager.connectNodes())
+      createBranches(
+        value: SerializableTreeState,
+        adjacency: Map<string, string[]>,
+        parentId: string,
+        depth: number,
+        nodeCounter: { value: number },
+      ): void {
+        // Get possible child counts for this depth
+        const childCountOptions = BRANCH_CHILD_COUNTS[depth] ?? [ 0 ];
+
+        // Randomly select number of children from the available options
+        const shuffledOptions = shuffle([ ...childCountOptions ]);
+        const numChildren = shuffledOptions.pop() ?? 0;
+
+        if (numChildren === 0) {
+          return;
+        } // No children for this node
+
+        const children: string[] = [];
+        for (let i = 0; i < numChildren; i++) {
+          const childId = `branch_${nodeCounter.value++}`;
+          children.push(childId);
+          const forest = this as unknown as Forest<SerializableTreeState, any>;
+          forest.acts.createBranches(adjacency, childId, depth + 1, nodeCounter);
+        }
+
+        if (children.length > 0) {
+          adjacency.set(parentId, children);
+        }
+      },
+
+      // Generate random tree structure (matches TreeDataManager.generateRandomTree())
+      createConstraint(
+        value: SerializableTreeState,
+        parentId: string,
+        childId: string,
+        length: number,
+        stiffness: number,
+        damping: number,
+      ): any {
+        const forest = this as unknown as Forest<SerializableTreeState, any>;
+
+        // Get bodies from resources
+        const bodies = forest.res.get('matterBodies') as Map<string, any>;
+        const parentBody = bodies?.get(parentId);
+        const childBody = bodies?.get(childId);
+
+        if (!parentBody || !childBody) {
+          console.error(`Cannot create constraint: missing bodies for ${parentId} or ${childId}`);
+          return null;
+        }
+
+        const constraint = Constraint.create({
+          bodyA: parentBody,
+          bodyB: childBody,
+          length,
+          stiffness,
+          damping,
+          render: { visible: true, strokeStyle: '#90EE90', lineWidth: 2 },
+        });
+
+        // Store in resources
+        let constraints = forest.res.get('matterConstraints') as Map<string, any>;
+        if (!constraints) {
+          constraints = new Map();
+          forest.res.set('matterConstraints', constraints);
+        }
+
+        const constraintId = `constraint_${parentId}_${childId}`;
+        constraints.set(constraintId, constraint);
+
+        // Add to world
+        const world = forest.res.get('matterWorld');
+        if (world) {
+          World.add(world, constraint);
+        }
+
+        return constraint;
+      },
+
+      // Helper method for creating branches recursively
+      createNodeAndBody(
+        value: SerializableTreeState,
+        id: string,
+        depth: Map<string, number>,
+        idxByDepth: Map<number, number>,
+        counts: Map<number, number>,
+        canvasWidth: number,
+        canvasHeight: number,
+      ): string {
+        const forest = this as unknown as Forest<SerializableTreeState, any>;
+
+        const d = depth.get(id) ?? 0;
+        const k = idxByDepth.get(d) || 0;
+        idxByDepth.set(d, k + 1);
+        const slots = counts.get(d);
+
+        // Position calculation
+        const spreadWidth = canvasWidth * 0.6;
+        const nodePosition = ((k + 1) / (slots + 1)) * spreadWidth;
+        const x = canvasWidth * 0.5 - spreadWidth * 0.5 + nodePosition;
+        const y = canvasHeight - 80 - d * 45;
+
+        // Create serializable node data
+        const nodeData = {
+          id,
+          nodeType: 'branch' as const,
+          constraintIds: [],
+        };
+        forest.acts.addNode(nodeData);
+
+        // Create physics body
+        forest.acts.createBody(nodeData, x, y, 8, {
+          frictionAir: 0.01,
+          inertia: Infinity,
+          inverseInertia: 0,
+          render: {
+            fillStyle: '#DC143C',
+            strokeStyle: '#8B0000',
+            lineWidth: 1,
+          },
+        });
+
+        return id;
+      },
+
+      // Tree structure queries (matches TreeDataManager methods)
+      generateCompleteTree(
+        value: SerializableTreeState,
+        canvasWidth: number,
+        canvasHeight: number,
+      ): string {
+        console.log('🌳 Generating new tree with Forestry...');
+        const forest = this as unknown as Forest<SerializableTreeState, any>;
+
+        // 1. Generate tree structure (serializable)
+        const { adjacency, rootId } = forest.acts.generateRandomTree();
+
+        // 2. Build physics representation
+        forest.acts.buildPhysicsTree(adjacency, rootId, canvasWidth, canvasHeight);
+
+        console.log(`✅ Tree generated with ${forest.acts.getNodeCount()} nodes`);
+        return rootId;
+      },
+
+      generateRandomTree(value: SerializableTreeState): {
+        adjacency: Map<string, string[]>;
+        rootId: string;
+      } {
+        const forest = this as unknown as Forest<SerializableTreeState, any>;
+
+        // Clear existing state
+        forest.mutate(() => ({
+          nodes: {},
+          constraints: {},
+          rootId: '',
+        }));
+
+        const adjacency = new Map<string, string[]>();
+        const rootId = 'root';
+        const nodeCounter = { value: 0 };
+
+        // First, create the trunk (2-3 nodes in a straight line)
+        const trunkHeight = 2 + Math.floor(Math.random() * 2); // 2-3 trunk nodes
+        let currentTrunkNode = rootId;
+
+        for (let i = 0; i < trunkHeight; i++) {
+          const nextTrunkNode = `trunk_${i}`;
+          adjacency.set(currentTrunkNode, [ nextTrunkNode ]);
+          currentTrunkNode = nextTrunkNode;
+          nodeCounter.value++;
+        }
+
+        // Start branching from the top of the trunk
+        forest.acts.createBranches(adjacency, currentTrunkNode, 0, nodeCounter);
+
+        forest.set('rootId', rootId);
+
+        return { adjacency, rootId };
+      },
+
+      getAllConstraints(value: SerializableTreeState) {
+        return Object.values(value.constraints);
+      },
+
+      // Tree traversal (matches TreeDataManager.traverse())
+      getAllNodes(value: SerializableTreeState) {
+        return Object.values(value.nodes);
+      },
+
+      // Utility methods
+      getBody(value: SerializableTreeState, nodeId: string): any {
+        const forest = this as unknown as Forest<SerializableTreeState, any>;
+        const bodies = forest.res.get('matterBodies') as Map<string, any>;
+        return bodies?.get(nodeId);
+      },
+
+      // Getters (matches TreeDataManager getters)
+      getChildren(value: SerializableTreeState, nodeId: string) {
+        return Object.values(value.nodes).filter((node) => node.parentId === nodeId);
+      },
+
+      getConstraint(value: SerializableTreeState, id: string) {
+        return value.constraints[id];
+      },
+
+      // === PHYSICS BODY MANAGEMENT (from PhysicsManager) ===
+
+      getNode(value: SerializableTreeState, id: string) {
+        return value.nodes[id];
+      },
+
+      getNodeCount(value: SerializableTreeState): number {
+        return Object.keys(value.nodes).length;
+      },
+
+      getParent(value: SerializableTreeState, nodeId: string) {
+        const node = value.nodes[nodeId];
+        if (!node?.parentId) {
+          return undefined;
+        }
+        return value.nodes[node.parentId];
+      },
+
+      // === CONSTRAINT MANAGEMENT (from PhysicsManager) ===
+
+      getRootId(value: SerializableTreeState): string {
+        return value.rootId;
+      },
+
+      // === TREE OPERATIONS (from TreeController) ===
+
+      getRootNodes(value: SerializableTreeState) {
+        return Object.values(value.nodes).filter((node) => !node.parentId);
+      },
+
+      // Create node and body (from TreeController.createNodeAndBody)
+      getSpringSettings(value: SerializableTreeState, canvasHeight: number) {
+        return {
+          spring: {
+            length: canvasHeight * CFG.springLengthPercent,
+            stiffness: CFG.springStiffness,
+            damping: CFG.springDamping,
+          },
+          twigSpring: {
+            length: canvasHeight * CFG.twigSpringLengthPercent,
+            stiffness: CFG.twigSpringStiffness,
+            damping: CFG.twigSpringDamping,
+          },
+          leafSpring: {
+            length: canvasHeight * CFG.leafSpringLengthPercent,
+            stiffness: CFG.leafSpringStiffness,
+            damping: CFG.leafSpringDamping,
+          },
+        };
+      },
+
+      // Calculate spring settings based on canvas size (from TreeController.getSpringSettings)
+      processChildren(value: SerializableTreeState, {
+        childId,
+        parentId,
+        depth,
+        parentDepth,
+        maxDepth,
+        canvasHeight,
+        constraintIds,
+      }: ProcessChildParams) {
+        const springs = this.acts.getSpringSettings(canvasHeight);
+
+        const childDepth = depth.get(childId) ?? 0;
+
+        // Calculate spring settings based on depth
+        const depthFactor = childDepth / maxDepth;
+        const springLength = springs.spring.length * (1 - depthFactor * 0.4);
+        const springStiffness = springs.spring.stiffness * (1 + depthFactor * 2);
+        const springDamping = springs.spring.damping * (1 + depthFactor * 0.5);
+
+        // Create constraint in data layer
+        const constraintId = this.acts.connectNodes(
+          parentId,
+          childId,
+          springLength,
+          springStiffness,
+          springDamping,
+          false,
+        );
+
+        // Create physics constraint
+        const constraintData = this.acts.getConstraint(constraintId);
+        if (constraintData) {
+          const physicsConstraint = Physics.createConstraint(constraintData);
+          if (physicsConstraint) {
+            constraintIds.push(constraintId);
+          }
+        }
+
+        // Add leaf nodes between parent and child (skip for root level)
+        if (parentDepth > 0) {
+          this.acts.addLeafNodes(parentId, childId, canvasHeight);
+        }
+      },
+
+      // Update spring lengths (from TreeController.updateSpringLengths)
+      removeBody(value: SerializableTreeState, nodeId: string): boolean {
+        const forest = this as unknown as Forest<SerializableTreeState, any>;
+        const bodies = forest.res.get('matterBodies') as Map<string, any>;
+        const body = bodies?.get(nodeId);
+        if (!body) {
+          return false;
+        }
+
+        // Remove from world
+        const world = forest.res.get('matterWorld');
+        if (world) {
+          import('matter-js').then(({ World }) => {
+            World.remove(world, body);
+          });
+        }
+
+        // Remove from resources
+        bodies.delete(nodeId);
+        return true;
+      },
+
+      // Add leaf nodes between parent and child (from TreeController.addLeafNodes)
+      removeNode(value: SerializableTreeState, nodeId: string): boolean {
+        if (!value.nodes[nodeId]) {
+          return false;
+        }
+
+        const forest = this as unknown as Forest<SerializableTreeState, any>;
+        forest.mutate((draft) => {
+          // Remove node
+          delete draft.nodes[nodeId];
+
+          // Remove associated constraints
+          const constraintsToRemove = Object.keys(draft.constraints).filter(
+            (id) =>
+              draft.constraints[id].parentId === nodeId || draft.constraints[id].childId === nodeId,
+          );
+
+          constraintsToRemove.forEach((id) => delete draft.constraints[id]);
+        });
+
+        return true;
+      },
+
+      // Build physics tree (from TreeController.buildPhysicsTree)
+      scaleTree(
+        value: SerializableTreeState,
+        oldWidth: number,
+        oldHeight: number,
+        newWidth: number,
+        newHeight: number,
+      ): void {
+        console.log(`🔄 Scaling tree from ${oldWidth}x${oldHeight} to ${newWidth}x${newHeight}`);
+
+        const forest = this as unknown as Forest<SerializableTreeState, any>;
+        const scaleX = newWidth / oldWidth;
+        const scaleY = newHeight / oldHeight;
+        const oldCenterX = oldWidth * 0.5;
+        const oldCenterY = oldHeight * 0.5;
+        const newCenterX = newWidth * 0.5;
+        const newCenterY = newHeight * 0.5;
+
+        // Scale all physics bodies from old center to new center
+        Physics.scaleAllPositions(scaleX, scaleY, oldCenterX, oldCenterY, newCenterX, newCenterY);
+
+        // Update spring lengths for new canvas size
+        forest.acts.updateSpringLengths(newHeight);
+
+        console.log(`✅ Tree scaling complete`);
+      },
+
+      // Generate complete tree (from TreeController.generateTree)
+      traverse(
+        value: SerializableTreeState,
+        nodeId: string,
+        fn: (node: SerializableNodeData) => void,
+      ): void {
+        const forest = this as unknown as Forest<SerializableTreeState, any>;
+        const node = value.nodes[nodeId];
+        if (!node) {
+          return;
+        }
+
+        fn(node);
+        const children = forest.acts.getChildren(nodeId);
+        for (const child of children) {
+          forest.acts.traverse(child.id, fn);
+        }
+      },
+
+      // Build physics tree (from TreeController.buildPhysicsTree)
+      updateSpringLengths(value: SerializableTreeState, canvasHeight: number): void {
+        const store = this as unknown as Forest<SerializableTreeState, any>;
+        const springs = store.acts.getSpringSettings(canvasHeight);
+
+        store.acts.traverse(forest.acts.getRootId(), (node) => {
+          node.constraintIds.forEach((constraintId) => {
+            const constraintData = forest.acts.getConstraint(constraintId);
+            if (constraintData) {
+              const physicsConstraint = Physics.getConstraint(constraintId);
+              if (physicsConstraint) {
+                // Update constraint length based on type
+                const newLength = constraintData.isLeaf
+                  ? springs.leafSpring.length
+                  : springs.spring.length;
+                physicsConstraint.length = newLength;
+              }
+            }
           });
         });
       },

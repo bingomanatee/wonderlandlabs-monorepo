@@ -38,8 +38,8 @@ export class TreeController {
     // Clear existing physics
     Physics.clear();
 
-    // Calculate spring settings based on canvas size
-    const springs = this.getSpringSettings(canvasHeight);
+    // Calculate spring settings based on canvas size using Forestry
+    const springs = forestryTreeData.acts.getSpringSettings(canvasHeight);
 
     // Compute depths for layout
     const depth = new Map([[rootId, 0]]);
@@ -107,7 +107,10 @@ export class TreeController {
       children.forEach((child) => allNodeIds.add(child));
     });
 
-    allNodeIds.forEach((id) => createNodeAndBody(id));
+    allNodeIds.forEach((id) => {
+      const bodyId = forestryTreeData.acts.createNodeAndBody(id, depth, idxByDepth, counts, canvasWidth, canvasHeight);
+      bodyIds.push(bodyId);
+    });
 
     // Add all bodies to physics world
     Physics.addBodiesToWorld(bodyIds);
@@ -148,7 +151,7 @@ export class TreeController {
 
         // Add leaf nodes between parent and child (skip for root level)
         if (parentDepth > 0) {
-          this.addLeafNodes(parentId, childId, canvasHeight);
+          forestryTreeData.acts.addLeafNodes(parentId, childId, canvasHeight);
         }
       });
     });
@@ -169,83 +172,12 @@ export class TreeController {
     console.log(`🔗 Created ${constraintIds.length} constraints`);
   }
 
-  // Add leaf nodes between parent and child
-  private addLeafNodes(parentNodeId: string, childNodeId: string, canvasHeight: number): void {
-    const numLeaves = 2 + Math.floor(Math.random() * 3); // 2-4 leaves
-    const springs = this.getSpringSettings(canvasHeight);
-
-    const parentBody = Physics.getBody(parentNodeId);
-    const childBody = Physics.getBody(childNodeId);
-    if (!parentBody || !childBody) return;
-
-    for (let i = 0; i < numLeaves; i++) {
-      const parentPos = parentBody.position;
-      const childPos = childBody.position;
-      const midX = (parentPos.x + childPos.x) * 0.5;
-      const midY = (parentPos.y + childPos.y) * 0.5;
-
-      const offsetX = (Math.random() - 0.5) * 60;
-      const offsetY = (Math.random() - 0.5) * 40;
-
-      const leafId = `leaf_${generateUUID()}`;
-
-      // Create serializable leaf data
-      const leafData: SerializableNodeData = {
-        id: leafId,
-        parentId: parentNodeId,
-        nodeType: 'leaf',
-        constraintIds: [],
-      };
-      forestryTreeData.acts.addNode(leafData);
-
-      // Create physics body with low inertia
-      const leafBody = Physics.createBody(
-        leafData,
-        midX + offsetX,
-        midY + offsetY,
-        CFG.leafRadius,
-        {
-          frictionAir: CFG.airFriction * 1.5,
-          inertia: Infinity, // Prevent rotation
-          inverseInertia: 0, // No rotational inertia
-          render: {
-            fillStyle: '#32CD32', // Bright lime green for leaves
-            strokeStyle: '#006400', // Dark green border
-            lineWidth: 2,
-          },
-          collisionFilter: { group: -1 },
-        }
-      );
-
-      // Assign random repulsion factor to this leaf (0.0 to 0.3)
-      // Lower values allow leaves to cluster and overlap
-      (leafBody as any).repulsionFactor = Math.random() * 0.3;
-
-      // Create constraint
-      const constraintId = forestryTreeData.acts.connectNodes(
-        parentNodeId,
-        leafId,
-        springs.leafSpring.length,
-        springs.leafSpring.stiffness,
-        springs.leafSpring.damping,
-        true
-      );
-
-      const constraintData = forestryTreeData.acts.getConstraint(constraintId);
-      if (constraintData) {
-        const physicsConstraint = Physics.createConstraint(constraintData);
-        if (physicsConstraint) {
-          Physics.addConstraintsToWorld([constraintId]);
-          Physics.addBodiesToWorld([leafId]);
-        }
-      }
-    }
-  }
+  // addLeafNodes moved to ForestryTreeData
 
   // Add terminal leaves to end nodes
   private addTerminalLeaves(terminalNodeId: string, canvasHeight: number): void {
     const numLeaves = 3 + Math.floor(Math.random() * 4); // 3-6 leaves
-    const springs = this.getSpringSettings(canvasHeight);
+    const springs = forestryTreeData.acts.getSpringSettings(canvasHeight);
 
     const terminalBody = Physics.getBody(terminalNodeId);
     if (!terminalBody) return;
@@ -307,32 +239,13 @@ export class TreeController {
     }
   }
 
-  // Calculate spring settings based on canvas size
-  private getSpringSettings(canvasHeight: number) {
-    return {
-      spring: {
-        length: canvasHeight * CFG.springLengthPercent,
-        stiffness: CFG.springStiffness,
-        damping: CFG.springDamping,
-      },
-      twigSpring: {
-        length: canvasHeight * CFG.twigSpringLengthPercent,
-        stiffness: CFG.twigSpringStiffness,
-        damping: CFG.twigSpringDamping,
-      },
-      leafSpring: {
-        length: canvasHeight * CFG.leafSpringLengthPercent,
-        stiffness: CFG.leafSpringStiffness,
-        damping: CFG.leafSpringDamping,
-      },
-    };
-  }
+  // getSpringSettings moved to ForestryTreeData
 
   // Removed unused methods: getSerializableState, loadFromState, cleanupUnconstrainedBodies
 
   // Update spring lengths (for resize)
   updateSpringLengths(canvasHeight: number): void {
-    const springs = this.getSpringSettings(canvasHeight);
+    const springs = forestryTreeData.acts.getSpringSettings(canvasHeight);
 
     forestryTreeData.acts.traverse(forestryTreeData.acts.getRootId(), (node) => {
       node.constraintIds.forEach((constraintId) => {
@@ -350,24 +263,9 @@ export class TreeController {
     });
   }
 
-  // Scale tree for resize
+  // Scale tree for resize - now delegates to Forestry
   scaleTree(oldWidth: number, oldHeight: number, newWidth: number, newHeight: number): void {
-    console.log(`🔄 Scaling tree from ${oldWidth}x${oldHeight} to ${newWidth}x${newHeight}`);
-
-    const scaleX = newWidth / oldWidth;
-    const scaleY = newHeight / oldHeight;
-    const oldCenterX = oldWidth * 0.5;
-    const oldCenterY = oldHeight * 0.5;
-    const newCenterX = newWidth * 0.5;
-    const newCenterY = newHeight * 0.5;
-
-    // Scale all physics bodies from old center to new center
-    Physics.scaleAllPositions(scaleX, scaleY, oldCenterX, oldCenterY, newCenterX, newCenterY);
-
-    // Update spring lengths for new canvas size
-    this.updateSpringLengths(newHeight);
-
-    console.log(`✅ Tree scaling complete`);
+    forestryTreeData.acts.scaleTree(oldWidth, oldHeight, newWidth, newHeight);
   }
 }
 

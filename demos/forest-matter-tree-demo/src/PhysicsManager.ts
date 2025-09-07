@@ -237,12 +237,15 @@ export class PhysicsManager {
     newCenterX: number,
     newCenterY: number
   ): void {
+    // Get bodies from ForestryTreeData instead of local Map
+    const bodies = forestryTreeData.res.get('matterBodies') as Map<string, any>;
+
     console.log(
-      `🔄 Scaling ${this.bodies.size} bodies by ${scaleX.toFixed(3)}x${scaleY.toFixed(3)}`
+      `🔄 Scaling ${bodies?.size || 0} bodies by ${scaleX.toFixed(3)}x${scaleY.toFixed(3)}`
     );
     console.log(`📍 From center (${oldCenterX}, ${oldCenterY}) to (${newCenterX}, ${newCenterY})`);
 
-    this.bodies.forEach((body, nodeId) => {
+    bodies?.forEach((body, nodeId) => {
       // Calculate relative position from old center
       const relativeX = body.position.x - oldCenterX;
       const relativeY = body.position.y - oldCenterY;

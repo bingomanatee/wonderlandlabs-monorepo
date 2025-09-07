@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { TreePhysics } from './TreePhysics';
-import { treeController } from './TreeController';
+import { forestryTreeData } from './ForestryTreeData.ts';
 
 export function Tree() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -44,7 +44,7 @@ export function Tree() {
 
       // Initialize tree using TreePhysics and TreeController
       const scene = new TreePhysics(canvas);
-      const rootId = treeController.generateTree(canvas.width, canvas.height);
+      const rootId = forestryTreeData.acts.generateTree(canvas.width, canvas.height);
       scene.createRootPin(rootId);
 
       isInitializedRef.current = true;

@@ -10,8 +10,7 @@ import {
   Runner,
   World,
 } from 'matter-js';
-import { CFG, globalResources, RESOURCES } from './constants';
-import { treeController } from './TreeController';
+import { CFG, RESOURCES } from './constants';
 import { Physics } from './PhysicsManager';
 import { forestryTreeData } from './ForestryTreeData';
 import type {

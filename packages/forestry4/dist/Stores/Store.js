@@ -45,9 +45,6 @@ class Store {
     }
     if (p.res && p.res instanceof Map) {
       p.res.forEach((value, key) => this.res.set(key, value));
-      console.log("---- set res", p.res, "... to state", this.name, this.res);
-    } else {
-      console.log("--- no res in ", this.name);
     }
   }
   debug;
@@ -123,7 +120,9 @@ class Store {
         } else if (typeof this.tests === "function") {
           this.#test(this.tests, value);
         } else {
-          throw new Error("bad value for tests - must be function or array of functions");
+          throw new Error(
+            "bad value for tests - must be function or array of functions"
+          );
         }
       }
       return {
@@ -166,7 +165,9 @@ class Store {
     return this.#subject.value;
   }
   subscribe(listener) {
-    return this.subject.pipe(distinctUntilChanged(isEqual)).subscribe(listener);
+    return this.subject.pipe(distinctUntilChanged(isEqual)).subscribe(
+      listener
+    );
   }
   get(path) {
     if (!path || Array.isArray(path) && path.length === 0) {

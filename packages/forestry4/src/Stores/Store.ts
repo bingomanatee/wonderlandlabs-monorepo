@@ -1,4 +1,11 @@
-import { ActionExposedRecord, Listener, StoreIF, StoreParams, ValueTestFn, Path } from '../types';
+import {
+  ActionExposedRecord,
+  Listener,
+  StoreIF,
+  StoreParams,
+  ValueTestFn,
+  Path,
+} from '../types';
 import { BehaviorSubject, Observable, Subscription } from 'rxjs';
 import { distinctUntilChanged } from 'rxjs/operators';
 import { isEqual } from 'lodash-es';
@@ -12,8 +19,10 @@ import { pathString } from '../lib/combinePaths';
 // Enable Immer support for Map and Set
 enableMapSet();
 
-export class Store<DataType, Actions extends ActionExposedRecord = ActionExposedRecord>
-  implements StoreIF<DataType, Actions>
+export class Store<
+  DataType,
+  Actions extends ActionExposedRecord = ActionExposedRecord,
+> implements StoreIF<DataType, Actions>
 {
   /**
    * note - for consistency with the types subject is a generic subject;
@@ -63,15 +72,15 @@ export class Store<DataType, Actions extends ActionExposedRecord = ActionExposed
     }
     if (p.res && p.res instanceof Map) {
       p.res.forEach((value, key) => this.res.set(key, value));
-
-      console.log('---- set res', p.res, '... to state', this.name, this.res);
-    } else {
-      console.log('--- no res in ', this.name);
     }
   }
 
   public debug: boolean; // more alerts on validation failures;
-  public prep?: (input: Partial<DataType>, current: DataType, initial: DataType) => DataType;
+  public prep?: (
+    input: Partial<DataType>,
+    current: DataType,
+    initial: DataType,
+  ) => DataType;
   protected initialValue: DataType;
   public res: Map<string, any> = new Map();
 
@@ -133,7 +142,7 @@ export class Store<DataType, Actions extends ActionExposedRecord = ActionExposed
         '(current: ',
         this.value,
         ')',
-        error
+        error,
       );
     }
     throw asError(error);
@@ -160,7 +169,9 @@ export class Store<DataType, Actions extends ActionExposedRecord = ActionExposed
         } else if (typeof this.tests === 'function') {
           this.#test(this.tests, value);
         } else {
-          throw new Error('bad value for tests - must be function or array of functions');
+          throw new Error(
+            'bad value for tests - must be function or array of functions',
+          );
         }
       }
       return {
@@ -211,7 +222,9 @@ export class Store<DataType, Actions extends ActionExposedRecord = ActionExposed
   }
 
   subscribe(listener: Listener<DataType>): Subscription {
-    return this.subject!.pipe(distinctUntilChanged(isEqual)).subscribe(listener);
+    return this.subject!.pipe(distinctUntilChanged(isEqual)).subscribe(
+      listener,
+    );
   }
 
   get(path?: Path): any {
@@ -230,7 +243,9 @@ export class Store<DataType, Actions extends ActionExposedRecord = ActionExposed
       return this.value;
     } else {
       // Mutate a specific path within the state
-      const pathArray = Array.isArray(path) ? path : pathString(path).split('.');
+      const pathArray = Array.isArray(path)
+        ? path
+        : pathString(path).split('.');
       const newValue = produce(this.value, (draft) => {
         // Get the target object at the specified path
         const target = getPath(draft, pathArray);

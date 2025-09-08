@@ -4,7 +4,7 @@ import type {
   SerializableConstraintData,
   SerializableTreeState,
 } from './types';
-import { BRANCH_CHILD_COUNTS } from './constants.ts';
+import { BRANCH_CHILD_COUNTS } from './constants';
 
 // Simple shuffle function
 function shuffle<T>(array: T[]): T[] {
@@ -18,7 +18,7 @@ function shuffle<T>(array: T[]): T[] {
 
 // Manages serializable tree data and structure
 export class TreeDataManager {
-  private treeState: SerializableTreeState;
+  public treeState: SerializableTreeState;
 
   constructor() {
     this.treeState = {
@@ -26,16 +26,6 @@ export class TreeDataManager {
       constraints: {},
       rootId: '',
     };
-  }
-
-  // Get current serializable state
-  getState(): SerializableTreeState {
-    return JSON.parse(JSON.stringify(this.treeState)); // Deep copy
-  }
-
-  // Load state from serialized data
-  loadState(state: SerializableTreeState): void {
-    this.treeState = JSON.parse(JSON.stringify(state)); // Deep copy
   }
 
   // Node management
@@ -46,46 +36,13 @@ export class TreeDataManager {
   addNode(nodeData: SerializableNodeData): void {
     this.treeState.nodes[nodeData.id] = nodeData;
   }
-
-  removeNode(nodeId: string): boolean {
-    if (!this.treeState.nodes[nodeId]) return false;
-
-    // Remove node
-    delete this.treeState.nodes[nodeId];
-
-    // Remove associated constraints
-    const constraintsToRemove = Object.keys(this.treeState.constraints).filter(
-      (id) =>
-        this.treeState.constraints[id].parentId === nodeId ||
-        this.treeState.constraints[id].childId === nodeId
-    );
-
-    constraintsToRemove.forEach((id) => delete this.treeState.constraints[id]);
-
-    return true;
-  }
-
-  getAllNodes(): SerializableNodeData[] {
-    return Object.values(this.treeState.nodes);
-  }
-
   // Tree structure queries
   getChildren(nodeId: string): SerializableNodeData[] {
     return Object.values(this.treeState.nodes).filter((node) => node.parentId === nodeId);
   }
 
-  getParent(nodeId: string): SerializableNodeData | undefined {
-    const node = this.getNode(nodeId);
-    if (!node?.parentId) return undefined;
-    return this.getNode(node.parentId);
-  }
-
-  getRootNodes(): SerializableNodeData[] {
-    return Object.values(this.treeState.nodes).filter((node) => !node.parentId);
-  }
-
   // Tree traversal
-  traverse(nodeId: string, fn: (node: SerializableNodeData) => void): void {
+  traverseNodes(nodeId: string, fn: (node: SerializableNodeData) => void): void {
     const node = this.getNode(nodeId);
     if (!node) return;
 
@@ -115,11 +72,6 @@ export class TreeDataManager {
   getConstraint(id: string): SerializableConstraintData | undefined {
     return this.treeState.constraints[id];
   }
-
-  getAllConstraints(): SerializableConstraintData[] {
-    return Object.values(this.treeState.constraints);
-  }
-
   // Connect two nodes with constraint metadata
   connectNodes(
     parentId: string,
@@ -226,14 +178,6 @@ export class TreeDataManager {
     if (children.length > 0) {
       adjacency.set(parentId, children);
     }
-  }
-
-  // Update physics state from external source
-  updatePhysicsState(
-    positions: Record<string, { x: number; y: number }>,
-    velocities: Record<string, { x: number; y: number }>
-  ): void {
-    this.treeState.physicsState = { positions, velocities };
   }
 
   // Clear all data

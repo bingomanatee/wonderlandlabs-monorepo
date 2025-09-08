@@ -4,15 +4,8 @@ import { CFG } from './constants';
 import { TreeState } from '../types.ts';
 import type { StoreIF } from '@wonderlandlabs/forestry4';
 import { TreeStoreData } from './forestDataStore.ts';
-
-// Simple UUID generator
-function generateUUID(): string {
-  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-    const r = (Math.random() * 16) | 0;
-    const v = c == 'x' ? r : (r & 0x3) | 0x8;
-    return v.toString(16);
-  });
-}
+import { SerializableNodeData, SerializableTreeState } from './types.ts';
+import { generateUUID } from '../GenerateUUID.ts';
 
 // Coordinates between serializable data and physics runtime
 export class TreeController {
@@ -31,7 +24,9 @@ export class TreeController {
     // 2. Build physics representation
     this.buildPhysicsTree(adjacency, rootId, canvasWidth, canvasHeight);
 
-    console.log(`✅ Tree generated with ${TreeData.nodeCount} nodes`);
+    console.log(
+      `✅ Tree generated with ${Array.from(Object.keys(TreeData.treeState.nodes)).length} nodes`
+    );
     return rootId;
   }
 
@@ -341,38 +336,11 @@ export class TreeController {
     };
   }
 
-  // Get serializable state
-  getSerializableState(): SerializableTreeState {
-    const physicsState = PhysicsMgr.extractPhysicsState();
-    TreeData.updatePhysicsState(physicsState.positions, physicsState.velocities);
-    return TreeData.getState();
-  }
-
-  // Load from serializable state
-  loadFromState(state: SerializableTreeState): void {
-    TreeData.loadState(state);
-    // Note: PhysicsMgr objects would need to be recreated from the data
-    // This would be implemented based on specific use case needs
-  }
-
-  // Clean up unconstrained bodies
-  cleanupUnconstrainedBodies(): string[] {
-    const rootId = TreeData.rootId;
-    const unconstrainedIds = PhysicsMgr.removeUnconstrainedBodies(rootId);
-
-    // Remove from data layer too
-    unconstrainedIds.forEach((nodeId) => {
-      TreeData.removeNode(nodeId);
-    });
-
-    return unconstrainedIds;
-  }
-
   // Update spring lengths (for resize)
   updateSpringLengths(canvasHeight: number): void {
     const springs = this.getSpringSettings(canvasHeight);
 
-    TreeData.traverse(TreeData.rootId, (node) => {
+    TreeData.traverseNodes(TreeData.rootId, (node) => {
       node.constraintIds.forEach((constraintId) => {
         const constraintData = TreeData.getConstraint(constraintId);
         if (constraintData) {

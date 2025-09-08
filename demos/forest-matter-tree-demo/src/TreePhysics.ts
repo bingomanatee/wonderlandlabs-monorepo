@@ -89,6 +89,35 @@ export class TreePhysics {
       console.log('Physics engine started with Runner');
     }
 
+  // === PHYSICS CONSTRAINT CREATION (moved from PhysicsManager) ===
+  createConstraint(constraintData: any): any | null {
+    const parentBody = this.forestryStore.acts.getPhysicsBody(constraintData.parentId);
+    const childBody = this.forestryStore.acts.getPhysicsBody(constraintData.childId);
+
+    if (!parentBody || !childBody) {
+      console.error(`Cannot create constraint ${constraintData.id}: missing bodies`);
+      return null;
+    }
+
+    const constraint = Constraint.create({
+      bodyA: parentBody,
+      bodyB: childBody,
+      length: constraintData.length,
+      stiffness: constraintData.stiffness,
+      damping: constraintData.damping,
+      render: {
+        strokeStyle: constraintData.isLeaf ? '#4a9d4a' : '#6af08e',
+        lineWidth: constraintData.isLeaf ? 1 : 2,
+      },
+    });
+
+    // Store in ForestryTreeData resources
+    const constraints = this.forestryStore.res.get('matterConstraints') as Map<string, any>;
+    constraints.set(constraintData.id, constraint);
+
+    return constraint;
+  }
+
     // Create world boundaries
     const wallOpts = { isStatic: true, render: { visible: false } };
 
@@ -351,7 +380,7 @@ export class TreePhysics {
 
     // Reposition all tree nodes
     this.forestryStore.acts.getAllNodes().forEach((node) => {
-      const body = Physics.getBody(node.id);
+      const body = this.forestryStore.acts.getPhysicsBody(node.id);
       if (!body) return;
       const oldX = body.position.x;
       const oldY = body.position.y;
@@ -380,7 +409,7 @@ export class TreePhysics {
   updateLocalArrays(): void {
     this.nodes = this.forestryStore.acts.getAllNodes();
     this.nodeBodies = this.nodes
-      .map((node) => Physics.getBody(node.id))
+      .map((node) => this.forestryStore.acts.getPhysicsBody(node.id))
       .filter(Boolean) as MatterBody[];
   }
 
@@ -482,7 +511,7 @@ export class TreePhysics {
       idxByDepth.set(d, k + 1);
       const slots = counts.get(d);
       // Distribute nodes across 60% of canvas width, centered
-      const render = forestryTreeData.res.get(RESOURCES.RENDER) as MatterRender;
+      const render = this.forestryStore.res.get(RESOURCES.RENDER) as MatterRender;
       const spreadWidth = render.canvas.width * 0.6;
       const nodePosition = ((k + 1) / (slots + 1)) * spreadWidth;
       const x = this.center.x - spreadWidth * 0.5 + nodePosition;
@@ -516,7 +545,7 @@ export class TreePhysics {
         constraintIds: [],
         nodeType: 'branch' as const,
       };
-      forestryTreeData.acts.addNode(nodeData);
+      this.forestryStore.acts.addNode(nodeData);
 
       // Store the body in PhysicsManager
       Physics.addBody(id, body);
@@ -533,9 +562,9 @@ export class TreePhysics {
           damping: springs.spring.damping * (1 + depthFactor * 0.5), // More damping at higher levels
         };
 
-        const constraintId = forestryTreeData.acts.connectNodes(id, childId, springSettings);
-        const world = forestryTreeData.res.get(RESOURCES.WORLD) as MatterWorld;
-        const constraint = forestryTreeData.acts.getConstraint(constraintId);
+        const constraintId = this.forestryStore.acts.connectNodes(id, childId, springSettings);
+        const world = this.forestryStore.res.get(RESOURCES.WORLD) as MatterWorld;
+        const constraint = this.forestryStore.acts.getConstraint(constraintId);
         if (constraint) {
           World.add(world, constraint);
         }
@@ -556,13 +585,13 @@ export class TreePhysics {
 
     const rootNodeId = buildRec(rootId);
     const bodies = [...bodyCache.values()];
-    const world = forestryTreeData.res.get(RESOURCES.WORLD) as MatterWorld;
-    const render = forestryTreeData.res.get(RESOURCES.RENDER) as MatterRender;
+    const world = this.forestryStore.res.get(RESOURCES.WORLD) as MatterWorld;
+    const render = this.forestryStore.res.get(RESOURCES.RENDER) as MatterRender;
     World.add(world, bodies);
 
     // Pin root firmly at bottom so the tree grows upward like a real tree
-    const rootNode = forestryTreeData.acts.getNode(rootNodeId);
-    const rootBody = Physics.getBody(rootNodeId);
+    const rootNode = this.forestryStore.acts.getNode(rootNodeId);
+    const rootBody = this.forestryStore.acts.getPhysicsBody(rootNodeId);
     if (rootNode && rootBody) {
       this.rootPin = Constraint.create({
         pointA: { x: this.center.x, y: render.canvas.height - 100 }, // Pin near bottom of canvas
@@ -589,11 +618,11 @@ export class TreePhysics {
       });
     });
 
-    console.log(`Tree created with ${forestryTreeData.acts.getNodeCount()} nodes`);
+    console.log(`Tree created with ${this.forestryStore.acts.getNodeCount()} nodes`);
 
     // Debug: log positions occasionally to see if bodies are moving
     setInterval(() => {
-      const rootBody = Physics.getBody(rootNodeId);
+      const rootBody = this.forestryStore.acts.getPhysicsBody(rootNodeId);
       if (rootBody) {
         console.log(
           'Root body position:',
@@ -616,11 +645,11 @@ export class TreePhysics {
   removeUnconstrainedBodies(): void {
     console.log('🔍 Checking for unconstrained bodies...');
 
-    const world = forestryTreeData.res.get(RESOURCES.WORLD) as MatterWorld;
+    const world = this.forestryStore.res.get(RESOURCES.WORLD) as MatterWorld;
     const bodiesToRemove: MatterBody[] = [];
     const nodeIdsToRemove: string[] = [];
 
-    forestryTreeData.acts.getAllNodes().forEach((node) => {
+    this.forestryStore.acts.getAllNodes().forEach((node) => {
       // Root node is special - it's constrained by rootPin, not regular constraints
       if (node.id === this.rootId) return;
 
@@ -629,7 +658,7 @@ export class TreePhysics {
         console.log(
           `🚨 Found unconstrained ${node.nodeType}: ${node.id} (parent: ${node.parentId})`
         );
-        const body = Physics.getBody(node.id);
+        const body = this.forestryStore.acts.getPhysicsBody(node.id);
         if (body) {
           bodiesToRemove.push(body);
         }
@@ -645,7 +674,7 @@ export class TreePhysics {
 
       // Remove from Forestry data structure
       nodeIdsToRemove.forEach((nodeId) => {
-        forestryTreeData.acts.removeNode(nodeId);
+        this.forestryStore.acts.removeNode(nodeId);
         console.log(`   Removed: ${nodeId}`);
       });
 
@@ -662,8 +691,8 @@ export class TreePhysics {
   pruneUnconstrainedBodies(): void {
     console.log('🔍 Starting pruning algorithm...');
 
-    const world = forestryTreeData.res.get(RESOURCES.WORLD) as MatterWorld;
-    const allConstraints = forestryTreeData.acts.getAllConstraints();
+    const world = this.forestryStore.res.get(RESOURCES.WORLD) as MatterWorld;
+    const allConstraints = this.forestryStore.acts.getAllConstraints();
 
     // Get all bodies that are connected by constraints
     const constrainedBodyIds = new Set<string>();
@@ -681,7 +710,7 @@ export class TreePhysics {
     const orphanedBodies: MatterBody[] = [];
     const orphanedNodeIds: string[] = [];
 
-    forestryTreeData.acts.getAllNodes().forEach((node) => {
+    this.forestryStore.acts.getAllNodes().forEach((node) => {
       if (!constrainedBodyIds.has(node.id) && node.id !== this.rootId) {
         // This body is not connected by any constraint (except root which is pinned)
         const body = Physics.getBody(node.id);
@@ -700,11 +729,11 @@ export class TreePhysics {
 
       // Remove from our data structures too
       orphanedNodeIds.forEach((nodeId) => {
-        const node = forestryTreeData.acts.getNode(nodeId);
+        const node = this.forestryStore.acts.getNode(nodeId);
         if (node) {
           // Clean up any constraints this node owns
           node.constraintIds.forEach((constraintId) => {
-            const constraint = forestryTreeData.acts.getConstraint(constraintId);
+            const constraint = this.forestryStore.acts.getConstraint(constraintId);
             if (constraint) {
               World.remove(world, constraint);
             }
@@ -721,7 +750,7 @@ export class TreePhysics {
       }
     });
 
-    const treeNodeIds = new Set(forestryTreeData.acts.getAllNodes().map((node) => node.id));
+    const treeNodeIds = new Set(this.forestryStore.acts.getAllNodes().map((node) => node.id));
     const unknownBodies: MatterBody[] = [];
 
     world.bodies.forEach((body) => {
@@ -748,8 +777,8 @@ export class TreePhysics {
     // Create 2-4 small leaf/twig nodes between parent and child
     const numLeaves = 2 + Math.floor(Math.random() * 3); // 2-4 leaves
 
-    const parentNode = forestryTreeData.acts.getNode(parentNodeId);
-    const childNode = forestryTreeData.acts.getNode(childNodeId);
+    const parentNode = this.forestryStore.acts.getNode(parentNodeId);
+    const childNode = this.forestryStore.acts.getNode(childNodeId);
     const parentBody = Physics.getBody(parentNodeId);
     const childBody = Physics.getBody(childNodeId);
 
@@ -787,7 +816,7 @@ export class TreePhysics {
         constraintIds: [],
         nodeType: 'leaf' as const,
       };
-      forestryTreeData.acts.addNode(leafNodeData);
+      this.forestryStore.acts.addNode(leafNodeData);
 
       // Store the body in PhysicsManager
       Physics.addBody(leafId, leafBody);
@@ -795,21 +824,21 @@ export class TreePhysics {
       // Connect leaf to parent with flexible spring
       console.log(`🍃 Creating leaf ${leafId} -> parent ${parentNodeId}`);
       const springs = this.getSpringSettings();
-      const constraintId = forestryTreeData.acts.connectNodes(
+      const constraintId = this.forestryStore.acts.connectNodes(
         parentNodeId,
         leafId,
         springs.leafSpring,
         true
       );
 
-      const world = forestryTreeData.res.get(RESOURCES.WORLD) as MatterWorld;
-      const constraint = forestryTreeData.acts.getConstraint(constraintId);
+      const world = this.forestryStore.res.get(RESOURCES.WORLD) as MatterWorld;
+      const constraint = this.forestryStore.acts.getConstraint(constraintId);
       if (constraint) {
         World.add(world, [leafBody, constraint]);
         console.log(`✅ Added leaf ${leafId} with constraint ${constraintId} to physics world`);
 
         // Verify the leaf node has the constraint in its list
-        const leafNode = forestryTreeData.acts.getNode(leafId);
+        const leafNode = this.forestryStore.acts.getNode(leafId);
         console.log(`📋 Leaf ${leafId} constraint count: ${leafNode?.constraintIds.length || 0}`);
       } else {
         console.error(`❌ Failed to create constraint for leaf ${leafId}`);
@@ -821,7 +850,7 @@ export class TreePhysics {
     // Create 3-6 leaves around terminal nodes for a fuller appearance
     const numLeaves = 3 + Math.floor(Math.random() * 4); // 3-6 leaves
 
-    const terminalNode = forestryTreeData.acts.getNode(terminalNodeId);
+    const terminalNode = this.forestryStore.acts.getNode(terminalNodeId);
     const terminalBody = Physics.getBody(terminalNodeId);
     if (!terminalNode || !terminalBody) {
       return;
@@ -856,22 +885,22 @@ export class TreePhysics {
         constraintIds: [],
         nodeType: 'terminal_leaf' as const,
       };
-      forestryTreeData.acts.addNode(leafNodeData);
+      this.forestryStore.acts.addNode(leafNodeData);
 
       // Store the body in PhysicsManager
       Physics.addBody(leafId, leafBody);
 
       // Connect leaf to terminal node with flexible spring
       const springs = this.getSpringSettings();
-      const constraintId = forestryTreeData.acts.connectNodes(
+      const constraintId = this.forestryStore.acts.connectNodes(
         terminalNodeId,
         leafId,
         springs.leafSpring,
         true
       );
 
-      const world = forestryTreeData.res.get(RESOURCES.WORLD) as MatterWorld;
-      const constraint = forestryTreeData.acts.getConstraint(constraintId);
+      const world = this.forestryStore.res.get(RESOURCES.WORLD) as MatterWorld;
+      const constraint = this.forestryStore.acts.getConstraint(constraintId);
       if (constraint) {
         World.add(world, [leafBody, constraint]);
       }

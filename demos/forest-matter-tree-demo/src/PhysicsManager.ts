@@ -19,79 +19,10 @@ export class PhysicsManager {
     this.forestryStore = forestryStore;
   }
 
-  // Helper to get TreePhysics instance from store resources
-  private getTreePhysics(): any {
-    return this.forestryStore.res.get('treePhysics');
-  }
-
-  // Example method showing PhysicsManager can interact with TreePhysics
-  updateTreePhysicsNodes(): void {
-    const treePhysics = this.getTreePhysics();
-    if (treePhysics) {
-      // PhysicsManager can call TreePhysics methods
-      treePhysics.updateNodeList?.();
-    }
-  }
-  // Body management
-  createBody(
-    nodeData: SerializableNodeData,
-    x: number,
-    y: number,
-    radius: number,
-    options: any
-  ): MatterBody {
-    const body = Bodies.circle(x, y, radius, {
-      ...options,
-      label: nodeData.id,
-    });
-
-    // Store in ForestryTreeData instead of local Map
-    const bodies = this.forestryStore.res.get('matterBodies') as Map<string, any>;
-    bodies.set(nodeData.id, body);
-    return body;
-  }
-
-  getBody(nodeId: string): MatterBody | undefined {
-    // Get from ForestryTreeData instead of local Map
-    const bodies = this.forestryStore.res.get('matterBodies') as Map<string, any>;
-    return bodies?.get(nodeId);
-  }
-
-  addBody(nodeId: string, body: MatterBody): void {
-    this.bodies.set(nodeId, body);
-  }
-
-  get bodies() {
-    return this.forestryStore.res.get('matterBodies') as Map<string, any>;
-  }
-
-  removeBody(nodeId: string): boolean {
-    // Get from ForestryTreeData instead of local Map
-    const bodies = this.forestryStore.res.get('matterBodies') as Map<string, any>;
-    const body = bodies?.get(nodeId);
-    if (!body) return false;
-
-    // Remove from physics world
-    const world = this.forestryStore.res.get(RESOURCES.WORLD) as MatterWorld;
-    if (world) {
-      World.remove(world, body);
-    }
-
-    // Remove from ForestryTreeData tracking
-    bodies.delete(nodeId);
-    return true;
-  }
-
-  getAllBodies(): MatterBody[] {
-    // Get from ForestryTreeData instead of local Map
-    const bodies = this.forestryStore.res.get('matterBodies') as Map<string, any>;
-    return bodies ? Array.from(bodies.values()) : [];
-  }
-
   // Constraint management
   createConstraint(constraintData: SerializableConstraintData): MatterConstraint | null {
-    const parentBody = this.getBody(constraintData.parentId);
-    const childBody = this.getBody(constraintData.childId);
+    const parentBody = this.forestryStore.acts.getPhysicsBody(constraintData.parentId);
+    const childBody = this.forestryStore.acts.getPhysicsBody(constraintData.childId);
 
     if (!parentBody || !childBody) {
       console.error(`Cannot create constraint ${constraintData.id}: missing bodies`);
@@ -122,77 +53,14 @@ export class PhysicsManager {
     return constraints?.get(constraintId);
   }
 
-  /**
-   * THIS METHOD IS out of date and not currently used
-   * @param constraintId
-   */
-  removeConstraint(constraintId: string): boolean {
-    const constraint = this.getConstraint(constraintId);
-    if (!constraint) return false;
-
-    // Remove from physics world
-    const world = this.forestryStore.res.get(RESOURCES.WORLD) as MatterWorld;
-    if (world) {
-      World.remove(world, constraint);
-    }
-
-    // Remove from our tracking
-    this.constraints.delete(constraintId); // this is out of date
-    return true;
-  }
-
-  // Update constraint properties
-  updateConstraint(
-    constraintId: string,
-    updates: Partial<{ length: number; stiffness: number; damping: number }>
-  ): boolean {
-    const constraint = this.getConstraint(constraintId);
-    if (!constraint) return false;
-
-    if (updates.length !== undefined) constraint.length = updates.length;
-    if (updates.stiffness !== undefined) constraint.stiffness = updates.stiffness;
-    if (updates.damping !== undefined) constraint.damping = updates.damping;
-
-    return true;
-  }
-
-  // Body property updates
-  setBodyPosition(nodeId: string, x: number, y: number): boolean {
-    const body = this.getBody(nodeId);
-    if (!body) return false;
-
-    Body.setPosition(body, { x, y });
-    return true;
-  }
-
-  setBodyVelocity(nodeId: string, x: number, y: number): boolean {
-    const body = this.getBody(nodeId);
-    if (!body) return false;
-
-    Body.setVelocity(body, { x, y });
-    return true;
-  }
-
-  getBodyPosition(nodeId: string): { x: number; y: number } | null {
-    const body = this.getBody(nodeId);
-    if (!body) return null;
-
-    return { x: body.position.x, y: body.position.y };
-  }
-
-  getBodyVelocity(nodeId: string): { x: number; y: number } | null {
-    const body = this.getBody(nodeId);
-    if (!body) return null;
-
-    return { x: body.velocity.x, y: body.velocity.y };
-  }
-
   // Batch operations
   addBodiesToWorld(nodeIds: string[]): void {
     const world = this.forestryStore.res.get(RESOURCES.WORLD) as MatterWorld;
     if (!world) return;
 
-    const bodies = nodeIds.map((id) => this.getBody(id)).filter(Boolean) as MatterBody[];
+    const bodies = nodeIds
+      .map((id) => this.forestryStore.acts.getPhysicsBody(id))
+      .filter(Boolean) as MatterBody[];
     if (bodies.length > 0) {
       World.add(world, bodies);
     }
@@ -208,36 +76,6 @@ export class PhysicsManager {
     if (constraints.length > 0) {
       World.add(world, constraints);
     }
-  }
-
-  // Extract current physics state for serialization
-  extractPhysicsState(): {
-    positions: Record<string, { x: number; y: number }>;
-    velocities: Record<string, { x: number; y: number }>;
-  } {
-    const positions: Record<string, { x: number; y: number }> = {};
-    const velocities: Record<string, { x: number; y: number }> = {};
-
-    this.bodies.forEach((body, nodeId) => {
-      positions[nodeId] = { x: body.position.x, y: body.position.y };
-      velocities[nodeId] = { x: body.velocity.x, y: body.velocity.y };
-    });
-
-    return { positions, velocities };
-  }
-
-  // Apply physics state from serialized data
-  applyPhysicsState(
-    positions: Record<string, { x: number; y: number }>,
-    velocities: Record<string, { x: number; y: number }>
-  ): void {
-    Object.entries(positions).forEach(([nodeId, pos]) => {
-      this.setBodyPosition(nodeId, pos.x, pos.y);
-    });
-
-    Object.entries(velocities).forEach(([nodeId, vel]) => {
-      this.setBodyVelocity(nodeId, vel.x, vel.y);
-    });
   }
 
   // Scale all body positions (for resize)
@@ -273,41 +111,6 @@ export class PhysicsManager {
     console.log(`✅ All bodies repositioned`);
   }
 
-  // Find unconstrained bodies
-  findUnconstrainedBodies(rootNodeId: string): string[] {
-    const unconstrainedIds: string[] = [];
-
-    this.bodies.forEach((body, nodeId) => {
-      if (nodeId === rootNodeId) return; // Root is special (has rootPin)
-
-      // Check if this body is referenced by any constraint
-      let isConstrained = false;
-      for (const constraint of this.constraints.values()) {
-        if (constraint.bodyA?.label === nodeId || constraint.bodyB?.label === nodeId) {
-          isConstrained = true;
-          break;
-        }
-      }
-
-      if (!isConstrained) {
-        unconstrainedIds.push(nodeId);
-      }
-    });
-
-    return unconstrainedIds;
-  }
-
-  // Remove unconstrained bodies
-  removeUnconstrainedBodies(rootNodeId: string): string[] {
-    const unconstrainedIds = this.findUnconstrainedBodies(rootNodeId);
-
-    unconstrainedIds.forEach((nodeId) => {
-      this.removeBody(nodeId);
-    });
-
-    return unconstrainedIds;
-  }
-
   // Clear all physics objects
   clear(): void {
     const world = this.forestryStore.res.get(RESOURCES.WORLD) as MatterWorld;
@@ -328,17 +131,6 @@ export class PhysicsManager {
     const constraints = this.forestryStore.res.get('matterConstraints') as Map<string, any>;
     bodies?.clear();
     constraints?.clear();
-  }
-
-  // Get counts
-  get bodyCount(): number {
-    const bodies = this.forestryStore.res.get('matterBodies') as Map<string, any>;
-    return bodies?.size || 0;
-  }
-
-  get constraintCount(): number {
-    const constraints = this.forestryStore.res.get('matterConstraints') as Map<string, any>;
-    return constraints?.size || 0;
   }
 
   get constraints() {

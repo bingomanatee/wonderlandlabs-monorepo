@@ -208,6 +208,99 @@ export function createForestryTreeData(canvasWidth: number, canvasHeight: number
         return bodies ? Array.from(bodies.values()) : [];
       },
 
+      // === PHYSICS CONSTRAINT ACCESS ===
+      getPhysicsConstraint(value: SerializableTreeState, constraintId: string): any {
+        const forest = this as unknown as Forest<SerializableTreeState, any>;
+        const constraints = forest.res.get('matterConstraints') as Map<string, any>;
+        return constraints?.get(constraintId);
+      },
+
+      getAllPhysicsConstraints(value: SerializableTreeState): any[] {
+        const forest = this as unknown as Forest<SerializableTreeState, any>;
+        const constraints = forest.res.get('matterConstraints') as Map<string, any>;
+        return constraints ? Array.from(constraints.values()) : [];
+      },
+
+      // === PHYSICS WORLD ACCESS ===
+      getPhysicsWorld(value: SerializableTreeState): any {
+        const forest = this as unknown as Forest<SerializableTreeState, any>;
+        return forest.res.get(RESOURCES.WORLD);
+      },
+
+      // === PHYSICS COUNTS ===
+      getPhysicsBodyCount(value: SerializableTreeState): number {
+        const forest = this as unknown as Forest<SerializableTreeState, any>;
+        const bodies = forest.res.get('matterBodies') as Map<string, any>;
+        return bodies?.size || 0;
+      },
+
+      getPhysicsConstraintCount(value: SerializableTreeState): number {
+        const forest = this as unknown as Forest<SerializableTreeState, any>;
+        const constraints = forest.res.get('matterConstraints') as Map<string, any>;
+        return constraints?.size || 0;
+      },
+
+      // === PHYSICS BODY CRUD ===
+      removePhysicsBody(value: SerializableTreeState, nodeId: string): boolean {
+        const forest = this as unknown as Forest<SerializableTreeState, any>;
+        const bodies = forest.res.get('matterBodies') as Map<string, any>;
+        const body = bodies?.get(nodeId);
+        if (!body) return false;
+
+        // Remove from physics world
+        const world = forest.res.get(RESOURCES.WORLD);
+        if (world) {
+          World.remove(world, body);
+        }
+
+        // Remove from ForestryTreeData tracking
+        bodies.delete(nodeId);
+        return true;
+      },
+
+      // === PHYSICS CONSTRAINT CRUD ===
+      removePhysicsConstraint(value: SerializableTreeState, constraintId: string): boolean {
+        const forest = this as unknown as Forest<SerializableTreeState, any>;
+        const constraints = forest.res.get('matterConstraints') as Map<string, any>;
+        const constraint = constraints?.get(constraintId);
+        if (!constraint) return false;
+
+        // Remove from physics world
+        const world = forest.res.get(RESOURCES.WORLD);
+        if (world) {
+          World.remove(world, constraint);
+        }
+
+        // Remove from ForestryTreeData tracking
+        constraints.delete(constraintId);
+        return true;
+      },
+
+      // === PHYSICS BATCH OPERATIONS ===
+      addBodiesToPhysicsWorld(value: SerializableTreeState, nodeIds: string[]): void {
+        const forest = this as unknown as Forest<SerializableTreeState, any>;
+        const world = forest.res.get(RESOURCES.WORLD);
+        if (!world) return;
+
+        const bodies = forest.res.get('matterBodies') as Map<string, any>;
+        const bodiesToAdd = nodeIds.map((id) => bodies?.get(id)).filter(Boolean);
+        if (bodiesToAdd.length > 0) {
+          World.add(world, bodiesToAdd);
+        }
+      },
+
+      addConstraintsToPhysicsWorld(value: SerializableTreeState, constraintIds: string[]): void {
+        const forest = this as unknown as Forest<SerializableTreeState, any>;
+        const world = forest.res.get(RESOURCES.WORLD);
+        if (!world) return;
+
+        const constraints = forest.res.get('matterConstraints') as Map<string, any>;
+        const constraintsToAdd = constraintIds.map((id) => constraints?.get(id)).filter(Boolean);
+        if (constraintsToAdd.length > 0) {
+          World.add(world, constraintsToAdd);
+        }
+      },
+
       // === PHYSICS MANAGER ACCESS (deprecated - will be removed) ===
       getPhysicsManager(value: SerializableTreeState): PhysicsManager {
         const forest = this as unknown as Forest<SerializableTreeState, any>;

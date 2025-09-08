@@ -49,7 +49,7 @@ export class TreeDataManager {
     fn(node);
     const children = this.getChildren(nodeId);
     for (const child of children) {
-      this.traverse(child.id, fn);
+      this.traverseNodes(child.id, fn);
     }
   }
 

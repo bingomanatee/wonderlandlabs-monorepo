@@ -1,6 +1,7 @@
 import { Forest } from '@wonderlandlabs/forestry4';
 import { Bodies, Constraint, Engine, World } from 'matter-js';
-import { Physics } from './PhysicsManager';
+import { PhysicsManager } from './PhysicsManager';
+import { TreePhysics } from './TreePhysics';
 import { CFG, RESOURCES } from './constants';
 import { generateUUID } from './GenerateUUID.ts';
 
@@ -100,8 +101,8 @@ export type CreateTerminalLeafBodyParams = {
   canvasHeight: number;
 };
 
-// Forestry store that mirrors TreeDataManager's state structure
-export function createForestryTreeData() {
+// Forestry store factory that creates tree data with embedded physics
+export function createForestryTreeData(canvasWidth: number, canvasHeight: number) {
   const engine = Engine.create();
   const world = engine.world;
 
@@ -122,6 +123,97 @@ export function createForestryTreeData() {
       [RESOURCES.WORLD, world],
     ]),
     actions: {
+      // === RESOURCE CREATION ===
+      createResources(value: SerializableTreeState, canvas: HTMLCanvasElement): void {
+        const forest = this as unknown as Forest<SerializableTreeState, any>;
+
+        // Only create if not already created
+        if (!forest.res.get('physicsManager')) {
+          console.log(
+            '🔧 Creating physics resources with canvas:',
+            canvas.width,
+            'x',
+            canvas.height
+          );
+
+          // Create PhysicsManager
+          const physicsManager = new PhysicsManager(forest);
+          forest.res.set('physicsManager', physicsManager);
+
+          // Create TreePhysics with actual canvas
+          const treePhysics = new TreePhysics(canvas, forest);
+          forest.res.set('treePhysics', treePhysics);
+
+          // Initialize physics with the tree data
+          forest.acts.initializePhysics();
+
+          console.log('✅ Physics resources created and initialized');
+        }
+      },
+
+      // Initialize physics with existing tree data
+      initializePhysics(value: SerializableTreeState): void {
+        const forest = this as unknown as Forest<SerializableTreeState, any>;
+        const physicsManager = forest.res.get('physicsManager') as PhysicsManager;
+        const treePhysics = forest.res.get('treePhysics');
+
+        if (!physicsManager || !treePhysics) {
+          console.error('Physics resources not available for initialization');
+          return;
+        }
+
+        console.log('🚀 Initializing physics with existing tree data');
+
+        // Create physics bodies for all existing nodes
+        const allNodes = forest.acts.getAllNodes();
+        allNodes.forEach((node) => {
+          // Create physics body for each node (simplified positioning for now)
+          const x = 400 + (Math.random() - 0.5) * 200;
+          const y = 400 - Math.random() * 300;
+
+          forest.acts.createBody(node, x, y, 8, {
+            frictionAir: 0.01,
+            render: { fillStyle: '#228B22' },
+          });
+        });
+
+        // Create physics constraints for all existing constraints
+        const allConstraints = forest.acts.getAllConstraints();
+        allConstraints.forEach((constraint) => {
+          const physicsConstraint = physicsManager.createConstraint(constraint);
+          if (physicsConstraint) {
+            physicsManager.addConstraintsToWorld([constraint.id]);
+          }
+        });
+
+        console.log(
+          '✅ Physics initialized with',
+          allNodes.length,
+          'nodes and',
+          allConstraints.length,
+          'constraints'
+        );
+      },
+
+      // === PHYSICS BODY ACCESS (from PhysicsManager) ===
+      getPhysicsBody(value: SerializableTreeState, nodeId: string): any {
+        const forest = this as unknown as Forest<SerializableTreeState, any>;
+        const bodies = forest.res.get('matterBodies') as Map<string, any>;
+        return bodies?.get(nodeId);
+      },
+
+      getAllPhysicsBodies(value: SerializableTreeState): any[] {
+        const forest = this as unknown as Forest<SerializableTreeState, any>;
+        const bodies = forest.res.get('matterBodies') as Map<string, any>;
+        return bodies ? Array.from(bodies.values()) : [];
+      },
+
+      // === PHYSICS MANAGER ACCESS (deprecated - will be removed) ===
+      getPhysicsManager(value: SerializableTreeState): PhysicsManager {
+        const forest = this as unknown as Forest<SerializableTreeState, any>;
+        return forest.res.get('physicsManager') as PhysicsManager;
+      },
+
       makeDepth(value: SerializableTreeState, rootId: string, adjacency: Map<string, any>) {
         // Compute depths for layout
         const depth = new Map([[rootId, 0]]);
@@ -305,7 +397,7 @@ export function createForestryTreeData() {
         canvasHeight: number
       ): void {
         // Clear existing physics
-        Physics.clear();
+        forest.acts.getPhysicsManager().clear();
 
         const [depth, maxDepth] = this.acts.makeDepth(rootId, adjacency);
         const counts = new Map();
@@ -668,6 +760,25 @@ export function createForestryTreeData() {
         // Start branching from the top of the trunk
         forest.acts.createBranches(adjacency, currentTrunkNode, 0, nodeCounter);
 
+        // Now create actual nodes in the store from the adjacency map
+        const allNodeIds = new Set([rootId]);
+        adjacency.forEach((children, parent) => {
+          allNodeIds.add(parent);
+          children.forEach(child => allNodeIds.add(child));
+        });
+
+        console.log('🌳 Creating nodes:', Array.from(allNodeIds));
+
+        // Create nodes in the store
+        allNodeIds.forEach(nodeId => {
+          const nodeData = {
+            id: nodeId,
+            constraintIds: [],
+            nodeType: nodeId === rootId ? 'branch' as const : 'branch' as const
+          };
+          forest.acts.addNode(nodeData);
+        });
+
         forest.set('rootId', rootId);
 
         return { adjacency, rootId };
@@ -849,8 +960,6 @@ export function createForestryTreeData() {
         newWidth: number,
         newHeight: number
       ): void {
-        console.log(`🔄 Scaling tree from ${oldWidth}x${oldHeight} to ${newWidth}x${newHeight}`);
-
         const forest = this as unknown as Forest<SerializableTreeState, any>;
         const scaleX = newWidth / oldWidth;
         const scaleY = newHeight / oldHeight;
@@ -889,14 +998,15 @@ export function createForestryTreeData() {
 
       generateTree(canvasWidth: number, canvasHeight: number): string {
         console.log('🌳 Generating new tree...');
+        const forest = this as unknown as Forest<SerializableTreeState, any>;
 
         // 1. Generate tree structure (serializable)
-        const { adjacency, rootId } = this.acts.generateRandomTree();
+        const { adjacency, rootId } = forest.acts.generateRandomTree();
 
         // 2. Build physics representation
-        forestryTreeData.acts.buildPhysicsTree(adjacency, rootId, canvasWidth, canvasHeight);
+        this.acts.buildPhysicsTree(adjacency, rootId, canvasWidth, canvasHeight);
 
-        console.log(`✅ Tree generated with ${this.acts.getNodeCount()} nodes`);
+        console.log(`✅ Tree generated with ${forest.acts.getNodeCount()} nodes`);
         return rootId;
       },
 
@@ -923,13 +1033,15 @@ export function createForestryTreeData() {
     },
   });
 
-  console.log('Forest created successfully:', forest);
+  // Resources will be created later when canvas is available
+  // Auto-generate tree structure (no physics yet)
+  console.log('🌳 Creating tree structure with dimensions:', canvasWidth, 'x', canvasHeight);
+  const { adjacency, rootId } = forest.acts.generateRandomTree();
+
+  console.log(
+    '✅ ForestryTreeData created with',
+    forest.acts.getNodeCount(),
+    'nodes (physics resources pending)'
+  );
   return forest;
 }
-
-// Global instance (matching TreeDataManager pattern)
-export const forestryTreeData = createForestryTreeData();
-
-// Debug logging
-console.log('ForestryTreeData created:', forestryTreeData);
-console.log('ForestryTreeData acts:', forestryTreeData.acts);

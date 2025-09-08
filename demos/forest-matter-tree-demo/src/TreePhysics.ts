@@ -11,8 +11,9 @@ import {
   World,
 } from 'matter-js';
 import { CFG, RESOURCES } from './constants';
-import { Physics } from './PhysicsManager';
-import { forestryTreeData } from './ForestryTreeData';
+import { PhysicsManager } from './PhysicsManager';
+import type { StoreIF } from '@wonderlandlabs/forestry4';
+import type { SerializableTreeState } from './ForestryTreeData';
 import type {
   MatterBody,
   MatterConstraint,
@@ -38,11 +39,15 @@ export class TreePhysics {
   public nodes: SerializableNodeData[] = [];
   public nodeBodies: MatterBody[] = [];
   private lastCanvasSize: { width: number; height: number };
+  private forestryStore: StoreIF<SerializableTreeState>;
+  private physicsManager: PhysicsManager;
 
-  constructor(canvas: HTMLCanvasElement) {
+  constructor(canvas: HTMLCanvasElement, forestryStore: StoreIF<SerializableTreeState>) {
+    this.forestryStore = forestryStore;
+    this.physicsManager = forestryStore.res.get('physicsManager') as PhysicsManager;
     // Create render for this canvas (canvas-specific)
-    const engine = forestryTreeData.res.get(RESOURCES.ENGINE) as MatterEngine;
-    const world = forestryTreeData.res.get(RESOURCES.WORLD) as MatterWorld;
+    const engine = this.forestryStore.res.get(RESOURCES.ENGINE) as MatterEngine;
+    const world = this.forestryStore.res.get(RESOURCES.WORLD) as MatterWorld;
 
     const width = canvas.width;
     const height = canvas.height;
@@ -64,7 +69,7 @@ export class TreePhysics {
       },
     });
 
-    forestryTreeData.res.set(RESOURCES.RENDER, render);
+    this.forestryStore.res.set(RESOURCES.RENDER, render);
 
     // Set initial render bounds
     render.bounds.min.x = 0;
@@ -75,9 +80,9 @@ export class TreePhysics {
     Render.run(render);
 
     // Use Matter.js Runner for proper physics timing (only create once)
-    if (!forestryTreeData.res.has(RESOURCES.RUNNER)) {
+    if (!this.forestryStore.res.has(RESOURCES.RUNNER)) {
       const runner = Runner.create();
-      forestryTreeData.res.set(RESOURCES.RUNNER, runner);
+      this.forestryStore.res.set(RESOURCES.RUNNER, runner);
       Runner.run(runner, engine);
 
       // Debug: log that engine is running
@@ -139,7 +144,7 @@ export class TreePhysics {
             window.dispatchEvent(fallEvent);
 
             // Check if it's a tree node
-            const treeNode = forestryTreeData.acts.getNode(fallingBody.label);
+            const treeNode = this.forestryStore.acts.getNode(fallingBody.label);
             if (treeNode) {
               console.log(`🌳 Tree node fell: ${treeNode.nodeType} - ${fallingBody.label}`);
               console.log(`   Parent: ${treeNode.parentId || 'none'}`);
@@ -155,7 +160,7 @@ export class TreePhysics {
   }
 
   get center(): { x: number; y: number } {
-    const render = forestryTreeData.res.get(RESOURCES.RENDER) as MatterRender;
+    const render = this.forestryStore.res.get(RESOURCES.RENDER) as MatterRender;
     return {
       x: render.canvas.width * 0.5,
       y: render.canvas.height * 0.5,
@@ -168,7 +173,7 @@ export class TreePhysics {
     twigSpring: SpringSettings;
     leafSpring: SpringSettings;
   } {
-    const render = forestryTreeData.res.get(RESOURCES.RENDER) as MatterRender;
+    const render = this.forestryStore.res.get(RESOURCES.RENDER) as MatterRender;
     const canvasHeight = render.canvas.height;
     return {
       spring: {
@@ -198,9 +203,9 @@ export class TreePhysics {
     const springs = this.getSpringSettings();
 
     // Update all constraints in the tree
-    forestryTreeData.acts.traverse(this.rootId, (node) => {
+    this.forestryStore.acts.traverse(this.rootId, (node) => {
       node.constraintIds.forEach((constraintId) => {
-        const constraint = forestryTreeData.acts.getConstraint(constraintId);
+        const constraint = this.forestryStore.acts.getConstraint(constraintId);
         if (constraint) {
           // Determine constraint type based on node identity
           const isLeafConstraint = node.nodeType === 'leaf' || node.nodeType === 'terminal_leaf';
@@ -219,7 +224,7 @@ export class TreePhysics {
     // Update root pin if it exists
     if (this.rootPin) {
       // Root pin length stays at 0 (fixed position)
-      const render = forestryTreeData.res.get(RESOURCES.RENDER) as MatterRender;
+      const render = this.forestryStore.res.get(RESOURCES.RENDER) as MatterRender;
       this.rootPin.pointA.x = this.center.x;
       this.rootPin.pointA.y = render.canvas.height - 100;
     }
@@ -228,7 +233,7 @@ export class TreePhysics {
   // Handle window resize events
   handleResize(): void {
     console.log('🔄 Window resize detected');
-    const render = forestryTreeData.res.get(RESOURCES.RENDER) as MatterRender;
+    const render = this.forestryStore.res.get(RESOURCES.RENDER) as MatterRender;
     const canvas = render.canvas;
     const container = canvas.parentElement;
 
@@ -258,7 +263,7 @@ export class TreePhysics {
     render.bounds.max.y = newHeight;
 
     // Use ForestryTreeData to handle resize
-    forestryTreeData.acts.scaleTree(
+    this.forestryStore.acts.scaleTree(
       this.lastCanvasSize.width,
       this.lastCanvasSize.height,
       newWidth,
@@ -274,14 +279,14 @@ export class TreePhysics {
 
   // Create root pin to anchor the tree
   createRootPin(rootId: string): void {
-    const rootBody = Physics.getBody(rootId);
+    const rootBody = this.forestryStore.acts.getPhysicsBody(rootId);
     if (!rootBody) {
       console.error('❌ Cannot create root pin: root body not found');
       return;
     }
 
-    const render = forestryTreeData.res.get(RESOURCES.RENDER) as MatterRender;
-    const world = forestryTreeData.res.get(RESOURCES.WORLD) as MatterWorld;
+    const render = this.forestryStore.res.get(RESOURCES.RENDER) as MatterRender;
+    const world = this.forestryStore.res.get(RESOURCES.WORLD) as MatterWorld;
 
     this.rootPin = Constraint.create({
       pointA: { x: this.center.x, y: render.canvas.height - 100 }, // Pin near bottom of canvas
@@ -305,7 +310,7 @@ export class TreePhysics {
       return;
     }
 
-    const render = forestryTreeData.res.get(RESOURCES.RENDER) as MatterRender;
+    const render = this.forestryStore.res.get(RESOURCES.RENDER) as MatterRender;
     const newCenter = this.center;
     const oldX = this.rootPin.pointA.x;
     const oldY = this.rootPin.pointA.y;
@@ -345,7 +350,7 @@ export class TreePhysics {
     let repositionedCount = 0;
 
     // Reposition all tree nodes
-    forestryTreeData.acts.getAllNodes().forEach((node) => {
+    this.forestryStore.acts.getAllNodes().forEach((node) => {
       const body = Physics.getBody(node.id);
       if (!body) return;
       const oldX = body.position.x;
@@ -373,14 +378,14 @@ export class TreePhysics {
 
   // Update local arrays from Forestry storage
   updateLocalArrays(): void {
-    this.nodes = forestryTreeData.acts.getAllNodes();
+    this.nodes = this.forestryStore.acts.getAllNodes();
     this.nodeBodies = this.nodes
       .map((node) => Physics.getBody(node.id))
       .filter(Boolean) as MatterBody[];
   }
 
   applyForces(): void {
-    const list = Physics.getAllBodies();
+    const list = this.forestryStore.acts.getAllPhysicsBodies();
 
     // Debug: log occasionally
     if (Math.random() < 0.001) {

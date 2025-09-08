@@ -6,6 +6,8 @@ export const RESOURCES = {
   WORLD: 'world',
   RENDER: 'render',
   RUNNER: 'runner',
+  NODES: 'nodes',
+  CONSTRAINTS: 'constraints',
 } as const;
 
 // ---------- Config
@@ -32,13 +34,12 @@ export const CFG = {
   velocityDamping: 0.92, // Much stronger velocity damping for low inertia
 };
 
-export // Constants for tree generation - arrays of possible child counts for each depth
-const BRANCH_CHILD_COUNTS = [
-  [2, 3, 4], // Depth 0: Trunk top - 2-4 main branches
-  [2, 3], // Depth 1: Primary branches - 2-3 children
-  [2, 2, 3], // Depth 2: Secondary branches - mostly 2, some 3
-  [2, 2, 2, 3], // Depth 3: Tertiary branches - mostly 2, few 3
-  [1, 2], // Depth 4: Small branches - 1-2 children
-  [1, 2], // Depth 5: Twigs - 1-2 children
-  [0], // Depth 6+: No children (terminal)
+export const BRANCH_CHILD_COUNTS = [
+  [2, 2, 2, 3],
+  [2, 2, 2, 2, 3, 3],
+  [2, 2, 3],
+  [1, 2, 2, 2, 3],
+  [1, 2],
+  [1, 2],
+  [0],
 ];

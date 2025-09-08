@@ -14,70 +14,43 @@ export default function forestDataStore(canvas: HTMLCanvasElement): StoreIF<Tree
       ['constraints', new Map()],
     ]),
     actions: {
-      // Helper methods
-      getNode(value: TreeStoreData, id: string): TreeNodeData | undefined {
+      // these methods are all "sugar" to access nodes and constraints from ref.
+      getNodeRef(value: TreeStoreData, id: string): TreeNodeData | undefined {
         return this.res['nodes'].get(id);
       },
-      addNode(value: TreeStoreData, nodeData: TreeNodeData): void {
-        this.res['nodes'].set(nodeData.id, nodeData);
+      removeNodeRef(_, nodeId: string) {
+        this.res[RESOURCES.NODES].delete(nodeId);
       },
-      addConstraint(value: TreeStoreData, id: string, constraint: MatterConstraint): void {
+      addNodeRef(value: TreeStoreData, nodeData: TreeNodeData): void {
+        this.res[RESOURCES.NODES].set(nodeData.id, nodeData);
+      },
+      addConstraintRef(value: TreeStoreData, id: string, constraint: MatterConstraint): void {
         this.res['constraints'].set(id, constraint);
       },
-      getConstraint(value: TreeStoreData, id: string): MatterConstraint | undefined {
+      getConstraintRef(value: TreeStoreData, id: string): MatterConstraint | undefined {
         return this.res['constraints'].get(id);
-      },
-      getChildren(value: TreeStoreData, nodeId: string): TreeNodeData[] {
-        const children: TreeNodeData[] = [];
-        this.res['nodes'].forEach((node, id) => {
-          if (node.parentId === nodeId) {
-            children.push(node);
-          }
-        });
-        return children;
-      },
-      getParent(value: TreeStoreData, nodeId: string): TreeNodeData | undefined {
-        const node = this.getNode(nodeId);
-        if (!node?.parentId) {
-          return undefined;
-        }
-        return this.getNode(node.parentId);
       },
 
       // Get all nodes
-      getAllNodes(value: TreeStoreData): TreeNodeData[] {
-        return Array.from(this.res['nodes'].values());
+      getAllNodeRefs(value: TreeStoreData): TreeNodeData[] {
+        return Array.from(this.res[RESOURCES.NODES].values());
       },
 
       // Get all constraints
-      getAllConstraints(): MatterConstraint[] {
+      getAllConstraintRefs(): MatterConstraint[] {
         return Array.from(this.res['constraints'].values());
       },
 
-      // DFS traversal
-      traverse(value: TreeStoreData, nodeId: string, fn: (node: TreeNodeData) => void): void {
-        const node = this.getNode(nodeId);
-        if (!node) {
-          return;
-        }
-
-        fn(node);
-        const children = this.getChildren(nodeId);
-        for (const child of children) {
-          this.traverse(child.id, fn);
-        }
-      },
-
       // Create connection between parent and child
-      connectNodes(
+      connectNodeRefs(
         value: TreeStoreData,
         parentId: string,
         childId: string,
         springSettings: SpringSettings,
         isLeaf: boolean = false
       ): string {
-        const parent = this.getNode(parentId);
-        const child = this.getNode(childId);
+        const parent = this.acts.getNodeRef(parentId);
+        const child = this.acts.getNodeRef(childId);
         if (!parent || !child) {
           throw new Error('Parent or child node not found');
         }
@@ -105,7 +78,7 @@ export default function forestDataStore(canvas: HTMLCanvasElement): StoreIF<Tree
           this.res['constraints'].delete(oldConstraintId);
 
           // Remove from all nodes' constraint lists
-          this.res['nodes'].forEach((node) => {
+          this.res[RESOURCES.NODES].forEach((node) => {
             const index = node.constraintIds.indexOf(oldConstraintId);
             if (index > -1) {
               node.constraintIds.splice(index, 1);
@@ -135,33 +108,15 @@ export default function forestDataStore(canvas: HTMLCanvasElement): StoreIF<Tree
           return constraintId;
         }
 
-        this.addConstraint(constraintId, constraint);
+        this.acts.addConstraintRef(constraintId, constraint);
         parent.constraintIds.push(constraintId);
         child.constraintIds.push(constraintId); // IMPORTANT: Child also needs to know about this constraint!
         return constraintId;
       },
 
-      // Remove a specific node and its constraints
-      removeNode(value: TreeStoreData, nodeId: string): boolean {
-        const node = this.getNode(nodeId);
-        if (!node) {
-          return false;
-        }
-
-        // Remove all constraints owned by this node
-        node.constraintIds.forEach((constraintId) => {
-          this.res['constraints'].delete(constraintId);
-        });
-
-        // Remove the node itself
-        this.res['nodes'].delete(nodeId);
-
-        return true;
-      },
-
       // Clear all data (useful for cleanup)
-      clear(): void {
-        this.res['nodes'].clear();
+      clearRefs(): void {
+        this.res[RESOURCES.NODES].clear();
         this.res['constraints'].clear();
       },
     },

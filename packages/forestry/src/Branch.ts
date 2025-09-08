@@ -8,7 +8,7 @@ import { isAssert, isMutator } from './types/types.guards';
 export class Branch<ValueType> implements BranchIF<ValueType> {
   constructor(
     public readonly tree: TreeIF<ValueType>,
-    public readonly change: ChangeIF<ValueType>
+    public readonly change: ChangeIF<ValueType>,
   ) {
     if (!tree || !change) {
       throw new Error('unparameterized branch');
@@ -77,7 +77,7 @@ export class Branch<ValueType> implements BranchIF<ValueType> {
   }
 
   _flushCache() {
-    // clear out any non-top caches; use cached value one last time.
+    // clearData out any non-top caches; use cached value one last time.
     const out = this._cached;
     delete this._cached;
     this._hasBeenCached = null;
@@ -87,11 +87,11 @@ export class Branch<ValueType> implements BranchIF<ValueType> {
   clone(toAssert?: boolean): BranchIF<ValueType> {
     const value = this.tree.params?.serializer
       ? this.tree.params.serializer({
-        branch: this,
-        tree: this.tree,
-        context: ValueProviderContext.truncation,
-        value: this.value,
-      })
+          branch: this,
+          tree: this.tree,
+          context: ValueProviderContext.truncation,
+          value: this.value,
+        })
       : this.value;
     const change = toAssert
       ? { assert: value, name: 'cloned', time: this.time }
@@ -146,7 +146,7 @@ export class Branch<ValueType> implements BranchIF<ValueType> {
       this.change,
       isAssert(this.change),
       isMutator(this.change),
-      this
+      this,
     );
     throw new Error('impossible');
   }
@@ -156,7 +156,7 @@ export class Branch<ValueType> implements BranchIF<ValueType> {
   }
   static link(
     branchA: BranchIF<unknown> | undefined,
-    branchB: BranchIF<unknown> | undefined
+    branchB: BranchIF<unknown> | undefined,
   ) {
     if (branchA) {
       branchA.next = branchB;
@@ -168,7 +168,7 @@ export class Branch<ValueType> implements BranchIF<ValueType> {
 
   static unlink(
     branchA: BranchIF<unknown> | undefined,
-    branchB: BranchIF<unknown> | undefined
+    branchB: BranchIF<unknown> | undefined,
   ) {
     if (branchA) {
       branchA.next = undefined;
@@ -179,8 +179,10 @@ export class Branch<ValueType> implements BranchIF<ValueType> {
   }
 
   toString() {
-    return `branch ${this.time} of tree {${this.tree.name ?? '(anon)'
-    }} - value = ${this.value} next=${this.next ? this.next.time : '<null>'
+    return `branch ${this.time} of tree {${
+      this.tree.name ?? '(anon)'
+    }} - value = ${this.value} next=${
+      this.next ? this.next.time : '<null>'
     } prev=${this.prev ? this.prev.time : '<null>'}`;
   }
 

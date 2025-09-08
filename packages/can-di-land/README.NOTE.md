@@ -6,9 +6,9 @@ create a single context provided global "manager".
 
 This manager had multiple components that the UX could call and have the modules wrapped in a
 HOC delayed providing a view component until its required components were present in the manager.
-Also, it was clear that some components would require _other_ components to be present.
+Also, it was clearData that some components would require _other_ components to be present.
 
-Given the number of moving parts it soon became clear that it would be better to move the manager
+Given the number of moving parts it soon became clearData that it would be better to move the manager
 definition into a more rigorously tested system.
 
 To be concrete -- some fo the components present were:

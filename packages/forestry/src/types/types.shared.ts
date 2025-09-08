@@ -29,7 +29,7 @@ export interface Mutator<ValueType> {
 
 /**
  * a change is an "assertion of a new value."
- * All changes must be named, to define clear journaling of acuase.
+ * All changes must be named, to define clearData journaling of acuase.
  */
 export type ChangeIF<ValueType> = Mutator<ValueType> | Assertion<ValueType>;
 

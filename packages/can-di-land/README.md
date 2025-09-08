@@ -173,7 +173,7 @@ As mentioned before only type is a required parameter.
 ## Setting a resource multiple times.
 
 You can redefine (`set(key, value)`) an entry as many times as you want -- unless the value is `final`.
-Redefining 'comp' or 'func' values is possible and will clear the cache.
+Redefining 'comp' or 'func' values is possible and will clearData the cache.
 
 ## Removing an entry
 

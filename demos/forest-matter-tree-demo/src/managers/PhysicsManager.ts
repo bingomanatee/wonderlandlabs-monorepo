@@ -83,25 +83,6 @@ export class PhysicsManager {
     return this.constraints.get(constraintId);
   }
 
-  removeConstraint(constraintId: string): boolean {
-    const constraint = this.constraints.get(constraintId);
-    if (!constraint) return false;
-
-    // Remove from physics world
-    const world = globalResources.get(RESOURCES.WORLD) as MatterWorld;
-    if (world) {
-      World.remove(world, constraint);
-    }
-
-    // Remove from our tracking
-    this.constraints.delete(constraintId);
-    return true;
-  }
-
-  getAllConstraints(): MatterConstraint[] {
-    return Array.from(this.constraints.values());
-  }
-
   // Update constraint properties
   updateConstraint(
     constraintId: string,

@@ -190,7 +190,7 @@ with a cache is found, the cache is trusted and no further parent branches are p
 Forest by default will cache every eight branches. You can manually lower the cacheInterval when you configure forest by passing it as a constructor parameter. (todo: tree-level config for cacheInterval). You can even set it to 0 to create rolling
 caches for each branch, 
 
-Caches can of course get pretty heavy after a while. However, every time you create a cache, it will clear out caches above it, 
+Caches can of course get pretty heavy after a while. However, every time you create a cache, it will clearData out caches above it, 
 so a tree will never have more than one cached branch -- unless it has a transaction(scope); cache-clearing is blocked by a scope, so that you're not constantly destroying/recreatig caches when scopes are active. But clearing out the last transaction should garbage-collect caches below the last one. 
 
 ### The Tradeoffs
@@ -198,7 +198,7 @@ so a tree will never have more than one cached branch -- unless it has a transac
 If you don't cache, writing becomes MUCH faster - you never transport values from the root to any branches' cache. The 
 cost for that is every _get_ (read) becomes a loop through the data. If the data is distributed eqsully along all branches it will be `On/2`, with n being the numver of branches. If most of the data is in the root it will be nearly `On`. 
 
-You can manually cache at any point by calling `myTree.top?.cache = myTree.top?.mergedData()`. You can even clear out all branches by calling 
+You can manually cache at any point by calling `myTree.top?.cache = myTree.top?.mergedData()`. You can even clearData out all branches by calling 
 ```
 const data = myTree.top?.mergedData() || new Map(); 
 myTree,root.prune();
@@ -220,7 +220,7 @@ There is no limit to the number of key/values that can be changed, deleted or ad
 of the keys within the branches' data. 
 
 * If the action type is `Action_s.replace` then _all_ the data in the tree is replaced by the branches' data; 
-* If the action type is `Action_s.clear` then _all_ the data in the tree is _erased_ by the branch. 
+* If the action type is `Action_s.clearData` then _all_ the data in the tree is _erased_ by the branch. 
 
 (the "replace" functionality has not been implemented yet). 
 

@@ -33,8 +33,8 @@ export interface SerializableConstraintData {
 }
 
 export interface SerializableTreeState {
-    nodes: Record<string, SerializableNodeData>;
-    constraints: Record<string, SerializableConstraintData>;
+    nodes: Map<string, SerializableNodeData>;
+    constraints: Map<string, SerializableConstraintData>;
     rootId: string;
     physicsState?: {
         positions: Record<string, {x: number, y: number}>;

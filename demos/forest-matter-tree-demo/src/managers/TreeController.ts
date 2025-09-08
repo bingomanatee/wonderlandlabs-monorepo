@@ -4,7 +4,7 @@ import { CFG } from './constants';
 import { TreeState } from '../types.ts';
 import type { StoreIF } from '@wonderlandlabs/forestry4';
 import { TreeStoreData } from './forestDataStore.ts';
-import { SerializableNodeData, SerializableTreeState } from './types.ts';
+import { SerializableNodeData } from './types.ts';
 import { generateUUID } from '../GenerateUUID.ts';
 
 // Coordinates between serializable data and physics runtime
@@ -24,9 +24,6 @@ export class TreeController {
     // 2. Build physics representation
     this.buildPhysicsTree(adjacency, rootId, canvasWidth, canvasHeight);
 
-    console.log(
-      `✅ Tree generated with ${Array.from(Object.keys(TreeData.treeState.nodes)).length} nodes`
-    );
     return rootId;
   }
 

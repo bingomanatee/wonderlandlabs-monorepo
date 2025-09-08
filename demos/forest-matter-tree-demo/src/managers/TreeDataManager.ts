@@ -18,27 +18,27 @@ function shuffle<T>(array: T[]): T[] {
 
 // Manages serializable tree data and structure
 export class TreeDataManager {
-  public treeState: SerializableTreeState;
+  private treeState: SerializableTreeState;
 
   constructor() {
     this.treeState = {
-      nodes: {},
-      constraints: {},
+      nodes: new Map(),
+      constraints: new Map(),
       rootId: '',
     };
   }
 
   // Node management
   getNode(id: string): SerializableNodeData | undefined {
-    return this.treeState.nodes[id];
+    return this.treeState.nodes.get(id);
   }
 
   addNode(nodeData: SerializableNodeData): void {
-    this.treeState.nodes[nodeData.id] = nodeData;
+    this.treeState.nodes.set(nodeData.id, nodeData);
   }
   // Tree structure queries
   getChildren(nodeId: string): SerializableNodeData[] {
-    return Object.values(this.treeState.nodes).filter((node) => node.parentId === nodeId);
+    return Array.from(this.treeState.nodes.values()).filter((node) => node.parentId === nodeId);
   }
 
   // Tree traversal
@@ -55,7 +55,7 @@ export class TreeDataManager {
 
   // Constraint management
   addConstraint(constraintData: SerializableConstraintData): void {
-    this.treeState.constraints[constraintData.id] = constraintData;
+    this.treeState.constraints.set(constraintData.id, constraintData);
 
     // Add constraint ID to parent node
     const parent = this.getNode(constraintData.parentId);
@@ -70,7 +70,7 @@ export class TreeDataManager {
   }
 
   getConstraint(id: string): SerializableConstraintData | undefined {
-    return this.treeState.constraints[id];
+    return this.treeState.constraints.get(id);
   }
   // Connect two nodes with constraint metadata
   connectNodes(
@@ -87,14 +87,14 @@ export class TreeDataManager {
 
     // Clean up any existing constraints to this child
     const childConstraintPattern = new RegExp(`_${childId}$`);
-    const constraintsToRemove = Object.keys(this.treeState.constraints).filter((id) =>
+    const constraintsToRemove = Array.from(this.treeState.constraints.keys()).filter((id) =>
       childConstraintPattern.test(id)
     );
 
     constraintsToRemove.forEach((id) => {
-      delete this.treeState.constraints[id];
+      this.treeState.constraints.delete(id);
       // Remove from node constraint lists
-      Object.values(this.treeState.nodes).forEach((node) => {
+      Array.from(this.treeState.nodes.values()).forEach((node) => {
         const index = node.constraintIds.indexOf(id);
         if (index > -1) {
           node.constraintIds.splice(index, 1);
@@ -125,8 +125,8 @@ export class TreeDataManager {
   generateRandomTree(): { adjacency: Map<string, string[]>; rootId: string } {
     // Clear existing state
     this.treeState = {
-      nodes: {},
-      constraints: {},
+      nodes: new Map(),
+      constraints: new Map(),
       rootId: '',
     };
 
@@ -178,20 +178,6 @@ export class TreeDataManager {
     if (children.length > 0) {
       adjacency.set(parentId, children);
     }
-  }
-
-  // Clear all data
-  clear(): void {
-    this.treeState = {
-      nodes: {},
-      constraints: {},
-      rootId: '',
-    };
-  }
-
-  // Get node count
-  get nodeCount(): number {
-    return Object.keys(this.treeState.nodes).length;
   }
 
   // Get root ID

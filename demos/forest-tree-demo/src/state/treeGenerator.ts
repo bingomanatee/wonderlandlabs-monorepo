@@ -39,7 +39,7 @@ export function generateTree(config: TreeConfig): Branch {
     ancestralOffsetSum: 0, // No ancestors
     levelChangeOffset: 0, // Trunk has no level change
     ancestralLevelSum: 0, // No ancestors
-    // Physics properties
+    // PhysicsMgr properties
     velocity: { x: 0, y: 0 },
     force: { x: 0, y: 0 },
     springConstant: 0.01, // Trunk is stiff
@@ -136,8 +136,10 @@ function addLeaves(branch: Branch, config: TreeConfig) {
         const branchStartY = branch.absolutePosition.y - Math.sin(branch.angle) * branch.length;
 
         // Calculate point along branch
-        const branchPointX = branchStartX + (branch.absolutePosition.x - branchStartX) * positionAlongBranch;
-        const branchPointY = branchStartY + (branch.absolutePosition.y - branchStartY) * positionAlongBranch;
+        const branchPointX =
+          branchStartX + (branch.absolutePosition.x - branchStartX) * positionAlongBranch;
+        const branchPointY =
+          branchStartY + (branch.absolutePosition.y - branchStartY) * positionAlongBranch;
 
         const leafX = branchPointX + Math.cos(leafAngle) * leafDistance;
         const leafY = branchPointY + Math.sin(leafAngle) * leafDistance;
@@ -358,7 +360,7 @@ function generateBranches(parent: Branch, config: TreeConfig, generation: number
       ancestralOffsetSum: parent.ancestralOffsetSum + actualOffset, // Cumulative sum
       levelChangeOffset: levelChangeOffset, // +1 if level increased, 0 if stayed same
       ancestralLevelSum: parent.ancestralLevelSum + levelChangeOffset, // Cumulative level changes
-      // Physics properties - mass halves with each generation
+      // PhysicsMgr properties - mass halves with each generation
       velocity: { x: 0, y: 0 },
       force: { x: 0, y: 0 },
       springConstant: 0.02,
@@ -372,7 +374,6 @@ function generateBranches(parent: Branch, config: TreeConfig, generation: number
 
 function generateLeaves(branch: Branch, config: TreeConfig) {
   const numLeaves = Math.floor(config.leafDensity * (2 + Math.random() * 3));
-
 
   for (let i = 0; i < numLeaves; i++) {
     const t = Math.random(); // Position along parent branch (0-1 lerp)

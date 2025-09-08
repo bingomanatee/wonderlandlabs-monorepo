@@ -9,7 +9,7 @@ A visual demonstration of the Forestry4 state management library using a literal
 - **Forestry4 Integration**: Uses Forest as root state and branches for wind force management
 - **Real-time Animation**: Smooth 20 FPS animation loop with wind effects
 - **Season Controls**: Switch between seasons (future feature for leaf color changes)
-- **Force-Directed Physics**: Branches curve upward naturally and respond to wind
+- **Force-Directed PhysicsMgr**: Branches curve upward naturally and respond to wind
 
 ## Expanding the ESLint configuration
 

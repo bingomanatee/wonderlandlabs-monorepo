@@ -11,7 +11,7 @@ export interface Leaf {
   color: string;
   opacity: number;
   rotation: number;
-  // Physics properties
+  // PhysicsMgr properties
   velocity: Point;
   force: Point;
   area: number; // For wind resistance calculation
@@ -33,7 +33,7 @@ export interface Branch {
   ancestralOffsetSum: number; // Sum of all ancestor offsets (for density balancing)
   levelChangeOffset: number; // +1 if level increased, 0 if stayed same
   ancestralLevelSum: number; // Sum of level changes in ancestry
-  // Physics properties
+  // PhysicsMgr properties
   velocity: Point; // Current velocity
   force: Point; // Accumulated forces
   springConstant: number; // Spring stiffness

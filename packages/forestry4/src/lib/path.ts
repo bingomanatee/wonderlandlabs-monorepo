@@ -17,26 +17,30 @@ export function getPath(source: any, pathArray: Path): unknown {
     }
 
     const currentType = type.describe(current, true);
+    try {
+      switch (currentType) {
+        case TypeEnum.map:
+          return current.get(pathSegment);
 
-    switch (currentType) {
-      case TypeEnum.map:
-        return current.get(pathSegment);
-
-      case TypeEnum.array: {
-        if (typeof pathSegment === 'number') {
+        case TypeEnum.array: {
+          if (typeof pathSegment === 'number') {
+            return current[pathSegment];
+          }
+          const index = parseInt(pathSegment, 10);
+          if (isNaN(index)) {
+            return undefined;
+          }
+          return current[index];
+        }
+        case TypeEnum.object:
           return current[pathSegment];
-        }
-        const index = parseInt(pathSegment, 10);
-        if (isNaN(index)) {
-          return undefined;
-        }
-        return current[index];
-      }
-      case TypeEnum.object:
-        return current[pathSegment];
 
-      default:
-        return undefined;
+        default:
+          return undefined;
+      }
+    } catch (err) {
+      console.error('error in getPath: ', err);
+      return undefined;
     }
   }, source);
 

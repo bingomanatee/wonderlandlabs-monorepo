@@ -38,7 +38,7 @@ export interface TreeNode {
   parentId?: string;
   nodeType: 'branch' | 'leaf' | 'terminal_leaf';
   constraintIds: string[];
-  // Physics properties
+  // PhysicsMgr properties
   position: { x: number; y: number };
   velocity: { x: number; y: number };
   // Visual properties
@@ -62,7 +62,7 @@ export interface TreeState {
   nodes: Map<string, TreeNode>;
   constraints: Map<string, TreeConstraint>;
   rootId: string;
-  // Physics settings
+  // PhysicsMgr settings
   gravity: { x: number; y: number };
   windForce: { x: number; y: number };
   // Canvas dimensions
@@ -91,7 +91,7 @@ export interface TreeActions {
     isLeaf?: boolean
   ) => string;
 
-  // Physics updates
+  // PhysicsMgr updates
   updatePhysics: () => void;
   applyWind: (force: { x: number; y: number }) => void;
 

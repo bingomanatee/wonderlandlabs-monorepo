@@ -13,7 +13,7 @@ import asError from '../lib/asError';
 import { isZodParser, ZodParser } from '../typeguards';
 import { enableMapSet, produce } from 'immer';
 import { methodize, testize } from './helpers';
-import { getPath } from '../lib/path';
+import { getPath, setPath } from '../lib/path';
 import { pathString } from '../lib/combinePaths';
 
 // Enable Immer support for Map and Set
@@ -83,6 +83,12 @@ export class Store<
   ) => DataType;
   protected initialValue: DataType;
   public res: Map<string, any> = new Map();
+  public getRes(path: Path) {
+    return getPath(this.res, path);
+  }
+  public setRes(path: Path, value: any) {
+    setPath(this.res, path, value);
+  }
 
   #name?: string;
   get name(): string {

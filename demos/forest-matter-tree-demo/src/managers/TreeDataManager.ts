@@ -5,16 +5,7 @@ import type {
   SerializableTreeState,
 } from './types';
 import { BRANCH_CHILD_COUNTS } from './constants';
-
-// Simple shuffle function
-function shuffle<T>(array: T[]): T[] {
-  const result = [...array];
-  for (let i = result.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [result[i], result[j]] = [result[j], result[i]];
-  }
-  return result;
-}
+import createBranches from './createBranches.ts';
 
 // Manages serializable tree data and structure
 export class TreeDataManager {
@@ -146,38 +137,10 @@ export class TreeDataManager {
     }
 
     // Start branching from the top of the trunk
-    TreeDataManager.createBranches(adjacency, currentTrunkNode, 0, nodeCounter);
+    createBranches(adjacency, currentTrunkNode, 0, nodeCounter);
 
     this.treeState.rootId = rootId;
     return { adjacency, rootId };
-  }
-
-  // Static method for creating branches recursively
-  static createBranches(
-    adjacency: Map<string, string[]>,
-    parentId: string,
-    depth: number,
-    nodeCounter: { value: number }
-  ): void {
-    // Get possible child counts for this depth
-    const childCountOptions = BRANCH_CHILD_COUNTS[depth] ?? [0];
-
-    // Randomly select number of children from the available options
-    const shuffledOptions = shuffle([...childCountOptions]);
-    const numChildren = shuffledOptions.pop() ?? 0;
-
-    if (numChildren === 0) return; // No children for this node
-
-    const children: string[] = [];
-    for (let i = 0; i < numChildren; i++) {
-      const childId = `branch_${nodeCounter.value++}`;
-      children.push(childId);
-      TreeDataManager.createBranches(adjacency, childId, depth + 1, nodeCounter);
-    }
-
-    if (children.length > 0) {
-      adjacency.set(parentId, children);
-    }
   }
 
   // Get root ID
@@ -185,6 +148,3 @@ export class TreeDataManager {
     return this.treeState.rootId;
   }
 }
-
-// Global instance
-export const TreeData = new TreeDataManager();

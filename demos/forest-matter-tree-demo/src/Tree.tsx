@@ -2,14 +2,14 @@ import { useEffect, useRef, useCallback } from 'react';
 import useForestryLocal from './hooks/useForestryLocal';
 import { TreeController } from './managers/TreeController.ts';
 import { TreePhysics } from './managers/TreePhysics.ts';
-import forestDataStore, { TreeStoreData } from './managers/forestDataStore.ts';
-
+import forestDataStore from './managers/forestDataStore';
+import type { TreeStoreData } from './managers/forestDataStore';
 export function Tree() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const isInitializedRef = useRef(false);
 
   // Create local Forestry store with default dimensions (will be updated)
-  const [treeState, forestryTreeData] = useForestryLocal<TreeStoreData>(
+  const [treeState, dataStore] = useForestryLocal<TreeStoreData>(
     forestDataStore,
     canvasRef.current
   );
@@ -48,10 +48,10 @@ export function Tree() {
     // Wait for resources to be created, then initialize
     let onComplete: (() => void) | undefined;
 
-    const treeController = new TreeController(treeState);
+    const treeController = new TreeController(dataStore);
 
     // Initialize physics simulation
-    const scene = new TreePhysics(canvas, treeController, treeState);
+    const scene = new TreePhysics(canvas, treeController, dataStore);
 
     // Generate and build complete tree using TreeController
     const rootId = treeController.generateTree(canvas.width, canvas.height);
@@ -63,7 +63,7 @@ export function Tree() {
     return () => {
       onComplete?.();
     };
-  }, [updateCanvasSize, treeState]);
+  }, [updateCanvasSize, forestDataStore]);
 
   return (
     <div style={{ width: '100%', height: '100%', position: 'relative' }}>

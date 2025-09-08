@@ -1,4 +1,3 @@
-import { TreeData } from './TreeDataManager';
 import { PhysicsMgr } from './PhysicsManager';
 import { CFG } from './constants';
 import { TreeState } from '../types.ts';
@@ -9,9 +8,9 @@ import { generateUUID } from '../GenerateUUID.ts';
 
 // Coordinates between serializable data and physics runtime
 export class TreeController {
-  public state: StoreIF<TreeStoreData>;
-  constructor(state: StoreIF<TreeState>) {
-    this.state = state;
+  public store: StoreIF<TreeStoreData>;
+  constructor(store: StoreIF<TreeState>) {
+    this.store = store;
   }
 
   // Generate and build a complete tree
@@ -19,7 +18,7 @@ export class TreeController {
     console.log('🌳 Generating new tree...');
 
     // 1. Generate tree structure (serializable)
-    const { adjacency, rootId } = TreeData.generateRandomTree();
+    const { adjacency, rootId } = this.store.acts.generateRandomTree();
 
     // 2. Build physics representation
     this.buildPhysicsTree(adjacency, rootId, canvasWidth, canvasHeight);
@@ -80,7 +79,7 @@ export class TreeController {
         nodeType: 'branch',
         constraintIds: [],
       };
-      TreeData.addNode(nodeData);
+      this.store.acts.addNode(nodeData);
 
       // Create physics body with low inertia
       const body = PhysicsMgr.createBody(nodeData, x, y, CFG.nodeRadius, {
@@ -129,7 +128,7 @@ export class TreeController {
         const springDamping = springs.spring.damping * (1 + depthFactor * 0.5);
 
         // Create constraint in data layer
-        const constraintId = TreeData.connectNodes(
+        const constraintId = this.store.acts.connectNodes(
           parentId,
           childId,
           springLength,
@@ -139,7 +138,7 @@ export class TreeController {
         );
 
         // Create physics constraint
-        const constraintData = TreeData.getConstraint(constraintId);
+        const constraintData = this.store.acts.getConstraint(constraintId);
         if (constraintData) {
           const physicsConstraint = PhysicsMgr.createConstraint(constraintData);
           if (physicsConstraint) {
@@ -199,7 +198,7 @@ export class TreeController {
         nodeType: 'leaf',
         constraintIds: [],
       };
-      TreeData.addNode(leafData);
+      this.store.acts.addNode(leafData);
 
       // Create physics body with low inertia
       const leafBody = PhysicsMgr.createBody(
@@ -225,7 +224,7 @@ export class TreeController {
       (leafBody as any).repulsionFactor = Math.random() * 0.3;
 
       // Create constraint
-      const constraintId = TreeData.connectNodes(
+      const constraintId = this.store.acts.connectNodes(
         parentNodeId,
         leafId,
         springs.leafSpring.length,
@@ -234,7 +233,7 @@ export class TreeController {
         true
       );
 
-      const constraintData = TreeData.getConstraint(constraintId);
+      const constraintData = this.store.acts.getConstraint(constraintId);
       if (constraintData) {
         const physicsConstraint = PhysicsMgr.createConstraint(constraintData);
         if (physicsConstraint) {
@@ -272,7 +271,7 @@ export class TreeController {
         nodeType: 'terminal_leaf',
         constraintIds: [],
       };
-      TreeData.addNode(leafData);
+      this.store.acts.addNode(leafData);
 
       // Create physics body with low inertia
       const terminalLeafBody = PhysicsMgr.createBody(leafData, leafX, leafY, CFG.leafRadius, {
@@ -292,7 +291,7 @@ export class TreeController {
       (terminalLeafBody as any).repulsionFactor = Math.random() * 0.4;
 
       // Create constraint
-      const constraintId = TreeData.connectNodes(
+      const constraintId = this.store.acts.connectNodes(
         terminalNodeId,
         leafId,
         springs.leafSpring.length,
@@ -301,7 +300,7 @@ export class TreeController {
         true
       );
 
-      const constraintData = TreeData.getConstraint(constraintId);
+      const constraintData = this.store.acts.getConstraint(constraintId);
       if (constraintData) {
         const physicsConstraint = PhysicsMgr.createConstraint(constraintData);
         if (physicsConstraint) {
@@ -337,16 +336,16 @@ export class TreeController {
   updateSpringLengths(canvasHeight: number): void {
     const springs = this.getSpringSettings(canvasHeight);
 
-    TreeData.traverseNodes(TreeData.rootId, (node) => {
+    this.store.acts.traverseNodes(this.store.value.rootId, (node) => {
       node.constraintIds.forEach((constraintId) => {
-        const constraintData = TreeData.getConstraint(constraintId);
+        const constraintData = this.store.acts.getConstraint(constraintId);
         if (constraintData) {
           const newLength = constraintData.isLeaf
             ? springs.leafSpring.length
             : springs.spring.length;
 
           // Update both data and physics
-          constraintData.length = newLength;
+          this.store.acts.setConstraintLength(constraintId, newLength);
           PhysicsMgr.updateConstraint(constraintId, { length: newLength });
         }
       });
@@ -373,5 +372,3 @@ export class TreeController {
     console.log(`✅ Tree scaling complete`);
   }
 }
-
-// Global instance

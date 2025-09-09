@@ -26,8 +26,8 @@ export default function forestDataStore(canvas: HTMLCanvasElement): StoreIF<Tree
     },
     res: new Map<string, any>([
       ['canvas', canvas],
-      ['nodes', new Map()],
-      ['constraints', new Map()],
+      [RESOURCES.NODES, new Map()],
+      [RESOURCES.CONSTRAINTS, new Map()],
     ]),
     actions: {
       // Node management
@@ -129,7 +129,7 @@ export default function forestDataStore(canvas: HTMLCanvasElement): StoreIF<Tree
         });
 
         // Update parent-child relationship
-        this.set(['nodes', childId, 'parentId'], parentId);
+        this.set([RESOURCES.NODES, childId, 'parentId'], parentId);
 
         // Create constraint metadata
         const constraintId = `constraint_${parentId}_${childId}`;
@@ -180,13 +180,13 @@ export default function forestDataStore(canvas: HTMLCanvasElement): StoreIF<Tree
 
       // these methods are all "sugar" to access nodes and constraints from ref.
       getNodeRef(value: TreeStoreData, id: string): TreeNodeData | undefined {
-        return this.res['nodes'].get(id);
+        return this.res.get(RESOURCES.NODES).get(id);
       },
       removeNodeRef(_, nodeId: string) {
-        this.res[RESOURCES.NODES].delete(nodeId);
+        this.res.get(RESOURCES.NODES).delete(nodeId);
       },
       addNodeRef(value: TreeStoreData, nodeData: TreeNodeData): void {
-        this.res[RESOURCES.NODES].set(nodeData.id, nodeData);
+        this.res.get(RESOURCES.NODES).set(nodeData.id, nodeData);
       },
       addConstraintRef(value: TreeStoreData, id: string, constraint: MatterConstraint): void {
         this.res['constraints'].set(id, constraint);
@@ -197,7 +197,7 @@ export default function forestDataStore(canvas: HTMLCanvasElement): StoreIF<Tree
 
       // Get all nodes
       getAllNodeRefs(value: TreeStoreData): TreeNodeData[] {
-        return Array.from(this.res[RESOURCES.NODES].values());
+        return Array.from(this.res.get(RESOURCES.NODES).values());
       },
 
       // Get all constraints
@@ -242,7 +242,7 @@ export default function forestDataStore(canvas: HTMLCanvasElement): StoreIF<Tree
           this.res['constraints'].delete(oldConstraintId);
 
           // Remove from all nodes' constraint lists
-          this.res[RESOURCES.NODES].forEach((node) => {
+          this.res.get(RESOURCES.NODES).forEach((node) => {
             const index = node.constraintIds.indexOf(oldConstraintId);
             if (index > -1) {
               node.constraintIds.splice(index, 1);
@@ -280,7 +280,7 @@ export default function forestDataStore(canvas: HTMLCanvasElement): StoreIF<Tree
 
       // Clear all data (useful for cleanup)
       clearRefs(): void {
-        this.res[RESOURCES.NODES].clear();
+        this.res.get(RESOURCES.NODES).clear();
         this.res['constraints'].clear();
       },
     },

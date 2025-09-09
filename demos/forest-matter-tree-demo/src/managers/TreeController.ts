@@ -1,16 +1,18 @@
-import { PhysicsMgr } from './PhysicsManager';
 import { CFG } from './constants';
 import { TreeState } from '../types';
 import type { StoreIF } from '@wonderlandlabs/forestry4';
 import { TreeStoreData } from './forestDataStore';
 import { SerializableNodeData } from './types';
 import { generateUUID } from '../GenerateUUID';
+import { PhysicsManager } from './PhysicsManager';
 
 // Coordinates between serializable data and physics runtime
 export class TreeController {
   public store: StoreIF<TreeStoreData>;
+  public mgr: PhysicsManager;
   constructor(store: StoreIF<TreeState>) {
     this.store = store;
+    this.mgr = new PhysicsManager();
   }
 
   // Generate and build a complete tree
@@ -34,7 +36,7 @@ export class TreeController {
     canvasHeight: number
   ): void {
     // Clear existing physics
-    PhysicsMgr.clear();
+    this.mgr.clear();
 
     // Calculate spring settings based on canvas size
     const springs = this.getSpringSettings(canvasHeight);
@@ -82,7 +84,7 @@ export class TreeController {
       this.store.acts.addNode(nodeData);
 
       // Create physics body with low inertia
-      const body = PhysicsMgr.createBody(nodeData, x, y, CFG.nodeRadius, {
+      const body = this.mgr.createBody(nodeData, x, y, CFG.nodeRadius, {
         frictionAir: CFG.airFriction,
         inertia: Infinity, // Prevent rotation for more stable movement
         inverseInertia: 0, // No rotational inertia
@@ -110,7 +112,7 @@ export class TreeController {
     allNodeIds.forEach((id) => createNodeAndBody(id));
 
     // Add all bodies to physics world
-    PhysicsMgr.addBodiesToWorld(bodyIds);
+    this.mgr.addBodiesToWorld(bodyIds);
 
     // Create constraints between connected nodes
     const constraintIds: string[] = [];
@@ -140,7 +142,7 @@ export class TreeController {
         // Create physics constraint
         const constraintData = this.store.acts.getConstraint(constraintId);
         if (constraintData) {
-          const physicsConstraint = PhysicsMgr.createConstraint(constraintData);
+          const physicsConstraint = this.mgr.createConstraint(constraintData);
           if (physicsConstraint) {
             constraintIds.push(constraintId);
           }
@@ -164,7 +166,7 @@ export class TreeController {
     });
 
     // Add all constraints to physics world
-    PhysicsMgr.addConstraintsToWorld(constraintIds);
+    this.mgr.addConstraintsToWorld(constraintIds);
 
     console.log(`🔗 Created ${constraintIds.length} constraints`);
   }
@@ -174,8 +176,8 @@ export class TreeController {
     const numLeaves = 2 + Math.floor(Math.random() * 3); // 2-4 leaves
     const springs = this.getSpringSettings(canvasHeight);
 
-    const parentBody = PhysicsMgr.getBody(parentNodeId);
-    const childBody = PhysicsMgr.getBody(childNodeId);
+    const parentBody = this.mgr.getBody(parentNodeId);
+    const childBody = this.mgr.getBody(childNodeId);
     if (!parentBody || !childBody) {
       return;
     }
@@ -201,7 +203,7 @@ export class TreeController {
       this.store.acts.addNode(leafData);
 
       // Create physics body with low inertia
-      const leafBody = PhysicsMgr.createBody(
+      const leafBody = this.mgr.createBody(
         leafData,
         midX + offsetX,
         midY + offsetY,
@@ -235,10 +237,10 @@ export class TreeController {
 
       const constraintData = this.store.acts.getConstraint(constraintId);
       if (constraintData) {
-        const physicsConstraint = PhysicsMgr.createConstraint(constraintData);
+        const physicsConstraint = this.mgr.createConstraint(constraintData);
         if (physicsConstraint) {
-          PhysicsMgr.addConstraintsToWorld([constraintId]);
-          PhysicsMgr.addBodiesToWorld([leafId]);
+          this.mgr.addConstraintsToWorld([constraintId]);
+          this.mgr.addBodiesToWorld([leafId]);
         }
       }
     }
@@ -249,7 +251,7 @@ export class TreeController {
     const numLeaves = 3 + Math.floor(Math.random() * 4); // 3-6 leaves
     const springs = this.getSpringSettings(canvasHeight);
 
-    const terminalBody = PhysicsMgr.getBody(terminalNodeId);
+    const terminalBody = this.mgr.getBody(terminalNodeId);
     if (!terminalBody) {
       return;
     }
@@ -274,7 +276,7 @@ export class TreeController {
       this.store.acts.addNode(leafData);
 
       // Create physics body with low inertia
-      const terminalLeafBody = PhysicsMgr.createBody(leafData, leafX, leafY, CFG.leafRadius, {
+      const terminalLeafBody = this.mgr.createBody(leafData, leafX, leafY, CFG.leafRadius, {
         frictionAir: CFG.airFriction * 1.5,
         inertia: Infinity, // Prevent rotation
         inverseInertia: 0, // No rotational inertia
@@ -302,10 +304,10 @@ export class TreeController {
 
       const constraintData = this.store.acts.getConstraint(constraintId);
       if (constraintData) {
-        const physicsConstraint = PhysicsMgr.createConstraint(constraintData);
+        const physicsConstraint = this.mgr.createConstraint(constraintData);
         if (physicsConstraint) {
-          PhysicsMgr.addConstraintsToWorld([constraintId]);
-          PhysicsMgr.addBodiesToWorld([leafId]);
+          this.mgr.addConstraintsToWorld([constraintId]);
+          this.mgr.addBodiesToWorld([leafId]);
         }
       }
     }
@@ -346,7 +348,7 @@ export class TreeController {
 
           // Update both data and physics
           this.store.acts.setConstraintLength(constraintId, newLength);
-          PhysicsMgr.updateConstraint(constraintId, { length: newLength });
+          this.mgr.updateConstraint(constraintId, { length: newLength });
         }
       });
     });
@@ -364,7 +366,7 @@ export class TreeController {
     const newCenterY = newHeight * 0.5;
 
     // Scale all physics bodies from old center to new center
-    PhysicsMgr.scaleAllPositions(scaleX, scaleY, oldCenterX, oldCenterY, newCenterX, newCenterY);
+    this.mgr.scaleAllPositions(scaleX, scaleY, oldCenterX, oldCenterY, newCenterX, newCenterY);
 
     // Update spring lengths for new canvas size
     this.updateSpringLengths(newHeight);

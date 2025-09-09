@@ -13,6 +13,9 @@ export class PhysicsManager {
   private bodies = new Map<string, MatterBody>();
   private constraints = new Map<string, MatterConstraint>();
 
+  constructor() {
+    console.log('new physics manager');
+  }
   // Body management
   createBody(
     nodeData: SerializableNodeData,
@@ -278,6 +281,3 @@ export class PhysicsManager {
     return this.constraints.size;
   }
 }
-
-// Global instance
-export const PhysicsMgr = new PhysicsManager();

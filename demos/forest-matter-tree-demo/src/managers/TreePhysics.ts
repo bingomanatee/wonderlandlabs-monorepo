@@ -23,7 +23,7 @@ import type {
 import type { TreeController } from './TreeController';
 import { TreeStoreData } from './forestDataStore';
 import type { StoreIF } from '@wonderlandlabs/forestry4';
-import { PhysicsMgr } from './PhysicsManager';
+import { generateUUID } from '../GenerateUUID';
 
 export class TreePhysics {
   public rootId?: string;
@@ -88,9 +88,6 @@ export class TreePhysics {
       const runner = Runner.create();
       globalResources.set(RESOURCES.RUNNER, runner);
       Runner.run(runner, engine);
-
-      // Debug: log that engine is running
-      console.log('PhysicsMgr engine started with Runner');
     }
 
     // Create world boundaries
@@ -247,7 +244,7 @@ export class TreePhysics {
 
   // Create root pin to anchor the tree
   createRootPin(rootId: string): void {
-    const rootBody = PhysicsMgr.getBody(rootId);
+    const rootBody = this.treeController.mgr.getBody(rootId);
     if (!rootBody) {
       console.error('❌ Cannot create root pin: root body not found');
       return;
@@ -350,7 +347,7 @@ export class TreePhysics {
   }
 
   applyForces(): void {
-    const list = PhysicsMgr.getAllBodies();
+    const list = this.treeController.mgr.getAllBodies();
 
     // Debug: log occasionally
     if (Math.random() < 0.001) {

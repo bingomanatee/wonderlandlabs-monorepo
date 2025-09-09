@@ -8,23 +8,28 @@ function getPath(source, pathArray) {
       return void 0;
     }
     const currentType = type.describe(current, true);
-    switch (currentType) {
-      case TypeEnum.map:
-        return current.get(pathSegment);
-      case TypeEnum.array: {
-        if (typeof pathSegment === "number") {
+    try {
+      switch (currentType) {
+        case TypeEnum.map:
+          return current.get(pathSegment);
+        case TypeEnum.array: {
+          if (typeof pathSegment === "number") {
+            return current[pathSegment];
+          }
+          const index = parseInt(pathSegment, 10);
+          if (isNaN(index)) {
+            return void 0;
+          }
+          return current[index];
+        }
+        case TypeEnum.object:
           return current[pathSegment];
-        }
-        const index = parseInt(pathSegment, 10);
-        if (isNaN(index)) {
+        default:
           return void 0;
-        }
-        return current[index];
       }
-      case TypeEnum.object:
-        return current[pathSegment];
-      default:
-        return void 0;
+    } catch (err) {
+      console.error("error in getPath: ", err);
+      return void 0;
     }
   }, source);
   return result;

@@ -4,7 +4,7 @@ import asError from "../lib/asError.js";
 import { isZodParser } from "../typeguards.js";
 import { enableMapSet, produce } from "immer";
 import { methodize, testize } from "./helpers.js";
-import { getPath } from "../lib/path.js";
+import { getPath, setPath } from "../lib/path.js";
 import { pathString } from "../lib/combinePaths.js";
 import { distinctUntilChanged } from "../node_modules/rxjs/dist/esm5/internal/operators/distinctUntilChanged.js";
 enableMapSet();
@@ -52,6 +52,12 @@ class Store {
   prep;
   initialValue;
   res = /* @__PURE__ */ new Map();
+  getRes(path) {
+    return getPath(this.res, path);
+  }
+  setRes(path, value) {
+    setPath(this.res, path, value);
+  }
   #name;
   get name() {
     if (!this.#name) {

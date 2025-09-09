@@ -2,11 +2,10 @@ import { useEffect, useRef, useState } from 'react';
 import type { StoreIF } from '@wonderlandlabs/forestry4';
 
 export default function useForestryLocal<ValueType>(
-  factory: () => StoreIF<ValueType>,
-  ...rest: any[]
+  factory: () => StoreIF<ValueType>
 ): [ValueType, StoreIF<ValueType>] {
   const state = useRef<StoreIF<ValueType> | null>(null);
-  state.current ||= factory(...rest);
+  state.current ||= factory();
 
   const [value, setValue] = useState(state.current?.value);
 

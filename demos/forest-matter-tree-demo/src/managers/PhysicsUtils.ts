@@ -70,7 +70,11 @@ export class PhysicsUtils {
     }
   }
 
-  createConstraint(constraintData: SerializableConstraintData): MatterConstraint | null {
+  createConstraint(
+    constraintData: SerializableConstraintData,
+    depth: number = 0,
+    maxDepth: number = 1
+  ): MatterConstraint | null {
     const bodies = this.store.res.get(RESOURCES.BODIES);
     const parentBody = bodies.get(constraintData.parentId);
     const childBody = bodies.get(constraintData.childId);
@@ -78,6 +82,11 @@ export class PhysicsUtils {
     if (!parentBody || !childBody) {
       return null;
     }
+
+    // Calculate thickness based on depth - thicker at root, thinner at leaves
+    const depthFactor = maxDepth > 0 ? (maxDepth - depth) / maxDepth : 1;
+    const baseThickness = constraintData.isLeaf ? 1 : 8; // Start with thicker base
+    const lineWidth = Math.max(1, Math.round(baseThickness * depthFactor));
 
     const constraint = Constraint.create({
       bodyA: parentBody,
@@ -87,7 +96,7 @@ export class PhysicsUtils {
       damping: constraintData.damping,
       render: {
         strokeStyle: constraintData.isLeaf ? '#4a9d4a' : '#6af08e',
-        lineWidth: constraintData.isLeaf ? 1 : 2,
+        lineWidth: lineWidth,
       },
     });
 
@@ -148,6 +157,7 @@ export class PhysicsUtils {
       id,
       nodeType: 'branch',
       constraintIds: [],
+      depth: d,
     };
     this.store.acts.addNode(nodeData);
 
@@ -192,11 +202,14 @@ export class PhysicsUtils {
       const leafId = `leaf_${generateUUID()}`;
 
       // Create serializable leaf data
+      const parentNode = this.store.acts.getNode(parentNodeId);
+      const parentDepth = parentNode?.depth ?? 0;
       const leafData: SerializableNodeData = {
         id: leafId,
         parentId: parentNodeId,
         nodeType: 'leaf',
         constraintIds: [],
+        depth: parentDepth + 1,
       };
       this.store.acts.addNode(leafData);
 
@@ -212,7 +225,17 @@ export class PhysicsUtils {
         collisionFilter: { group: -1 },
       });
 
-      (leafBody as any).repulsionFactor = Math.random() * 0.3;
+      if (leafBody) {
+        (leafBody as any).repulsionFactor = Math.random() * 0.3;
+
+        // IMPORTANT: Add the leaf node to the physics refs so it can be rendered
+        this.store.acts.addNodeRef(leafId, {
+          id: leafId,
+          nodeType: 'leaf',
+          body: leafBody,
+          constraintIds: []
+        });
+      }
 
       const constraintId = this.store.acts.connectNodes(
         parentNodeId,
@@ -223,7 +246,7 @@ export class PhysicsUtils {
 
       const constraintData = this.store.acts.getConstraint(constraintId);
       if (constraintData) {
-        const physicsConstraint = this.createConstraint(constraintData);
+        const physicsConstraint = this.createConstraint(constraintData, 10, 10); // Leaf constraints
         if (physicsConstraint) {
           this.addConstraintsToWorld([constraintId]);
           this.addBodiesToWorld([leafId]);
@@ -252,11 +275,14 @@ export class PhysicsUtils {
       const leafId = `terminal_leaf_${generateUUID()}`;
 
       // Create serializable leaf data
+      const terminalNode = this.store.acts.getNode(terminalNodeId);
+      const terminalDepth = terminalNode?.depth ?? 0;
       const leafData: SerializableNodeData = {
         id: leafId,
         parentId: terminalNodeId,
         nodeType: 'terminal_leaf',
         constraintIds: [],
+        depth: terminalDepth + 1,
       };
       this.store.acts.addNode(leafData);
 
@@ -272,7 +298,17 @@ export class PhysicsUtils {
         collisionFilter: { group: -1 },
       });
 
-      (terminalLeafBody as any).repulsionFactor = Math.random() * 0.4;
+      if (terminalLeafBody) {
+        (terminalLeafBody as any).repulsionFactor = Math.random() * 0.4;
+
+        // IMPORTANT: Add the terminal leaf node to the physics refs so it can be rendered
+        this.store.acts.addNodeRef(leafId, {
+          id: leafId,
+          nodeType: 'terminal_leaf',
+          body: terminalLeafBody,
+          constraintIds: []
+        });
+      }
 
       const constraintId = this.store.acts.connectNodes(
         terminalNodeId,
@@ -283,7 +319,7 @@ export class PhysicsUtils {
 
       const constraintData = this.store.acts.getConstraint(constraintId);
       if (constraintData) {
-        const physicsConstraint = this.createConstraint(constraintData);
+        const physicsConstraint = this.createConstraint(constraintData, 10, 10); // Terminal leaf constraints
         if (physicsConstraint) {
           this.addConstraintsToWorld([constraintId]);
           this.addBodiesToWorld([leafId]);

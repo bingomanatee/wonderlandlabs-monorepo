@@ -20,6 +20,7 @@ export interface SerializableNodeData {
   parentId?: string;
   nodeType: 'branch' | 'leaf' | 'terminal_leaf';
   constraintIds: string[];
+  depth: number;
 }
 
 export interface SerializableConstraintData {
@@ -66,6 +67,7 @@ export interface TreeNode {
   parentId?: string;
   nodeType: 'branch' | 'leaf' | 'terminal_leaf';
   constraintIds: string[];
+  depth: number;
   // PhysicsMgr properties
   position: { x: number; y: number };
   velocity: { x: number; y: number };

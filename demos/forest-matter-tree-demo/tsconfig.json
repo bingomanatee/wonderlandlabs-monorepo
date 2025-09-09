@@ -22,5 +22,5 @@
     "noUncheckedSideEffectImports": false
   },
   "include": ["src"],
-  "exclude": ["src/deprecated"]
+  "exclude": ["src/deprecated", "src/managers/deprecated"]
 }

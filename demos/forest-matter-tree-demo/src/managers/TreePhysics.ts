@@ -250,4 +250,45 @@ export class TreePhysics {
       });
     }
   }
+
+  // Wind force application
+  private windForce = { x: 0, y: 0 };
+
+  applyWind(force: { x: number; y: number }): void {
+    this.windForce = { ...force };
+  }
+
+  // Update physics simulation
+  update(): void {
+    const engine = this.store.res.get(RESOURCES.ENGINE) as MatterEngine;
+    if (!engine) return;
+
+    // Apply wind forces to all bodies
+    if (this.windForce.x !== 0 || this.windForce.y !== 0) {
+      const list = Array.from(this.store.res.get(RESOURCES.BODIES).values()) as Body[];
+      for (const body of list) {
+        Body.applyForce(body, body.position, {
+          x: this.windForce.x * body.mass,
+          y: this.windForce.y * body.mass
+        });
+      }
+    }
+
+    // Update the physics engine
+    Engine.update(engine, 16.666); // ~60 FPS
+  }
+
+  // Cleanup resources
+  cleanup(): void {
+    const engine = this.store.res.get(RESOURCES.ENGINE) as MatterEngine;
+    const render = this.store.res.get(RESOURCES.RENDER) as MatterRender;
+
+    if (render) {
+      Render.stop(render);
+    }
+
+    if (engine) {
+      Engine.clear(engine);
+    }
+  }
 }

@@ -121,7 +121,11 @@ export default function forestDataStore(canvas: HTMLCanvasElement): StoreIF<Tree
 
             const constraintData = this.acts.getConstraint(constraintId);
             if (constraintData) {
-              const physicsConstraint = utils.createConstraint(constraintData);
+              const physicsConstraint = utils.createConstraint(
+                constraintData,
+                childDepth,
+                maxDepth
+              );
               if (physicsConstraint) {
                 constraintIds.push(constraintId);
               }
@@ -163,7 +167,8 @@ export default function forestDataStore(canvas: HTMLCanvasElement): StoreIF<Tree
         return value.nodes.get(id);
       },
 
-      addNode(value: TreeStoreData, nodeData: SerializableNodeData): void {
+      addNode(_, nodeData: SerializableNodeData): void {
+        console.log('adding node ', nodeData.id, nodeData);
         this.set([RESOURCES.NODES, nodeData.id], nodeData);
       },
       // Tree structure queries
@@ -191,7 +196,7 @@ export default function forestDataStore(canvas: HTMLCanvasElement): StoreIF<Tree
 
       // Constraint management
       addConstraint(value: TreeStoreData, constraintData: SerializableConstraintData): void {
-        this.set(['constraints', constraintData.id], constraintData);
+        this.set([RESOURCES.CONSTRAINTS, constraintData.id], constraintData);
 
         // Add constraint ID to parent node
         const parent = this.acts.getNode(constraintData.parentId);
@@ -314,14 +319,19 @@ export default function forestDataStore(canvas: HTMLCanvasElement): StoreIF<Tree
       removeNodeRef(_, nodeId: string) {
         this.res.get(RESOURCES.NODES).delete(nodeId);
       },
-      addNodeRef(value: TreeStoreData, nodeData: TreeNodeData): void {
-        this.res.get(RESOURCES.NODES).set(nodeData.id, nodeData);
+      addNodeRef(value: TreeStoreData, id: string, nodeData: TreeNodeData): void {
+        if (id && nodeData && typeof id === 'string' && typeof nodeData == 'object') {
+          this.res.get(RESOURCES.NODES).set(id, nodeData);
+        } else {
+          console.log('bad leaf:', id, nodeData);
+          throw new Error('cannot add bad leaf:');
+        }
       },
       addConstraintRef(value: TreeStoreData, id: string, constraint: MatterConstraint): void {
-        this.res['constraints'].set(id, constraint);
+        this.res.get(RESOURCES.CONSTRAINTS).set(id, constraint);
       },
       getConstraintRef(value: TreeStoreData, id: string): MatterConstraint | undefined {
-        return this.res['constraints'].get(id);
+        return this.res.get(RESOURCES.CONSTRAINTS).get(id);
       },
 
       // Get all nodes
@@ -331,7 +341,7 @@ export default function forestDataStore(canvas: HTMLCanvasElement): StoreIF<Tree
 
       // Get all constraints
       getAllConstraintRefs(): MatterConstraint[] {
-        return Array.from(this.res['constraints'].values());
+        return Array.from(this.res.get(RESOURCES.CONSTRAINTS).values());
       },
 
       // Create connection between parent and child
@@ -352,7 +362,7 @@ export default function forestDataStore(canvas: HTMLCanvasElement): StoreIF<Tree
         const childConstraintPattern = new RegExp(`_${childId}$`);
         const constraintsToRemove: string[] = [];
 
-        this.res['constraints'].forEach((constraint, constraintId) => {
+        this.res.get(RESOURCES.CONSTRAINTS).forEach((constraint, constraintId) => {
           if (childConstraintPattern.test(constraintId)) {
             constraintsToRemove.push(constraintId);
           }
@@ -361,14 +371,14 @@ export default function forestDataStore(canvas: HTMLCanvasElement): StoreIF<Tree
         // Remove old constraints from Matter.js world and clean up data structures
         const world = this.res.get(RESOURCES.WORLD) as MatterWorld;
         constraintsToRemove.forEach((oldConstraintId) => {
-          const oldConstraint = this.res['constraints'].get(oldConstraintId);
+          const oldConstraint = this.res.get(RESOURCES.CONSTRAINTS).get(oldConstraintId);
           if (oldConstraint && world) {
             // Remove from Matter.js physics world
             World.remove(world, oldConstraint);
           }
 
           // Remove from our data structures
-          this.res['constraints'].delete(oldConstraintId);
+          this.res.get(RESOURCES.CONSTRAINTS).delete(oldConstraintId);
 
           // Remove from all nodes' constraint lists
           this.res.get(RESOURCES.NODES).forEach((node) => {
@@ -410,7 +420,7 @@ export default function forestDataStore(canvas: HTMLCanvasElement): StoreIF<Tree
       // Clear all data (useful for cleanup)
       clearRefs(): void {
         this.res.get(RESOURCES.NODES).clear();
-        this.res['constraints'].clear();
+        this.res.get(RESOURCES.CONSTRAINTS).clear();
       },
     },
   });

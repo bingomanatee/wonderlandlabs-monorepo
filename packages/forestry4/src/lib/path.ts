@@ -60,34 +60,27 @@ export function setPath(draft: any, pathArray: Path, value: unknown): void {
   const [target] = pathArray.slice(0, pathArray.length - 1).reduce(
     ([current], pathSegment) => {
       const currentType = type.describe(current, true);
-
+      if (typeof current === 'undefined') {
+        return [undefined];
+      }
       switch (currentType) {
         case TypeEnum.map:
           if (!current.has(pathSegment)) {
-            current.set(pathSegment, {});
+            return undefined;
           }
-          return [current.get(pathSegment)];
+          return current.get(pathSegment);
 
         case TypeEnum.array: {
           if (typeof pathSegment === 'number') {
-            return current[pathSegment];
+            return [current[pathSegment]];
           }
           const index = parseInt(pathSegment, 10);
           if (isNaN(index)) {
-            throw new Error(`Invalid array index: ${pathSegment}`);
-          }
-          if (current[index] === undefined) {
-            current[index] = {};
+            return [undefined];
           }
           return [current[index]];
         }
         case TypeEnum.object:
-          if (
-            current[pathSegment] === undefined ||
-            current[pathSegment] === null
-          ) {
-            current[pathSegment] = {};
-          }
           return [current[pathSegment]];
 
         default:

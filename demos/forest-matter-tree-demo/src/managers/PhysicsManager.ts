@@ -11,9 +11,15 @@ import { TreeStoreData } from './forestDataStore';
 import type { StoreIF } from '@wonderlandlabs/forestry4';
 // Manages non-serializable Matter.js physics objects
 export class PhysicsManager {
-  private bodies = new Map<string, MatterBody>();
-  private constraints = new Map<string, MatterConstraint>();
   private store: StoreIF<TreeStoreData>;
+
+  get bodies() {
+    return this.store.res.get(RESOURCES.BODIES);
+  }
+
+  get constraints() {
+    return this.store.res.get(RESOURCES.CONSTRAINTS);
+  }
 
   constructor(store: StoreIF<TreeStoreData>) {
     console.log('new physics manager');
@@ -61,8 +67,9 @@ export class PhysicsManager {
 
   // Constraint management
   createConstraint(constraintData: SerializableConstraintData): MatterConstraint | null {
-    const parentBody = this.getBody(constraintData.parentId);
-    const childBody = this.getBody(constraintData.childId);
+    const bodies = this.store.res.get(RESOURCES.BODIES);
+    const parentBody = bodies.get(constraintData.parentId);
+    const childBody = bodies.get(constraintData.childId);
 
     if (!parentBody || !childBody) {
       console.error(`Cannot create constraint ${constraintData.id}: missing bodies`);
@@ -85,16 +92,12 @@ export class PhysicsManager {
     return constraint;
   }
 
-  getConstraint(constraintId: string): MatterConstraint | undefined {
-    return this.constraints.get(constraintId);
-  }
-
   // Update constraint properties
   updateConstraint(
     constraintId: string,
     updates: Partial<{ length: number; stiffness: number; damping: number }>
   ): boolean {
-    const constraint = this.getConstraint(constraintId);
+    const constraint = this.store.getRes([RESOURCES.CONSTRAINTS, constraintId]);
     if (!constraint) return false;
 
     if (updates.length !== undefined) constraint.length = updates.length;
@@ -104,52 +107,14 @@ export class PhysicsManager {
     return true;
   }
 
-  // Body property updates
-  setBodyPosition(nodeId: string, x: number, y: number): boolean {
-    const body = this.getBody(nodeId);
-    if (!body) return false;
-
-    Body.setPosition(body, { x, y });
-    return true;
-  }
-
-  setBodyVelocity(nodeId: string, x: number, y: number): boolean {
-    const body = this.getBody(nodeId);
-    if (!body) return false;
-
-    Body.setVelocity(body, { x, y });
-    return true;
-  }
-
-  getBodyPosition(nodeId: string): { x: number; y: number } | null {
-    const body = this.getBody(nodeId);
-    if (!body) return null;
-
-    return { x: body.position.x, y: body.position.y };
-  }
-
-  getBodyVelocity(nodeId: string): { x: number; y: number } | null {
-    const body = this.getBody(nodeId);
-    if (!body) return null;
-
-    return { x: body.velocity.x, y: body.velocity.y };
-  }
-
-  // Apply force to body
-  applyForce(nodeId: string, force: { x: number; y: number }): boolean {
-    const body = this.getBody(nodeId);
-    if (!body) return false;
-
-    Body.applyForce(body, body.position, force);
-    return true;
-  }
-
   // Batch operations
   addBodiesToWorld(nodeIds: string[]): void {
     const world = this.store.res.get(RESOURCES.WORLD) as MatterWorld;
     if (!world) return;
 
-    const bodies = nodeIds.map((id) => this.getBody(id)).filter(Boolean) as MatterBody[];
+    const bodies = nodeIds
+      .map((id) => this.store.res.get(RESOURCES.BODIES).get(id))
+      .filter(Boolean) as MatterBody[];
     if (bodies.length > 0) {
       World.add(world, bodies);
     }
@@ -160,41 +125,11 @@ export class PhysicsManager {
     if (!world) return;
 
     const constraints = constraintIds
-      .map((id) => this.getConstraint(id))
+      .map((id) => this.store.getRes([RESOURCES.CONSTRAINTS, id]))
       .filter(Boolean) as MatterConstraint[];
     if (constraints.length > 0) {
       World.add(world, constraints);
     }
-  }
-
-  // Extract current physics state for serialization
-  extractPhysicsState(): {
-    positions: Record<string, { x: number; y: number }>;
-    velocities: Record<string, { x: number; y: number }>;
-  } {
-    const positions: Record<string, { x: number; y: number }> = {};
-    const velocities: Record<string, { x: number; y: number }> = {};
-
-    this.bodies.forEach((body, nodeId) => {
-      positions[nodeId] = { x: body.position.x, y: body.position.y };
-      velocities[nodeId] = { x: body.velocity.x, y: body.velocity.y };
-    });
-
-    return { positions, velocities };
-  }
-
-  // Apply physics state from serialized data
-  applyPhysicsState(
-    positions: Record<string, { x: number; y: number }>,
-    velocities: Record<string, { x: number; y: number }>
-  ): void {
-    Object.entries(positions).forEach(([nodeId, pos]) => {
-      this.setBodyPosition(nodeId, pos.x, pos.y);
-    });
-
-    Object.entries(velocities).forEach(([nodeId, vel]) => {
-      this.setBodyVelocity(nodeId, vel.x, vel.y);
-    });
   }
 
   // Scale all body positions (for resize)
@@ -244,17 +179,6 @@ export class PhysicsManager {
     return unconstrainedIds;
   }
 
-  // Remove unconstrained bodies
-  removeUnconstrainedBodies(rootNodeId: string): string[] {
-    const unconstrainedIds = this.findUnconstrainedBodies(rootNodeId);
-
-    unconstrainedIds.forEach((nodeId) => {
-      this.removeBody(nodeId);
-    });
-
-    return unconstrainedIds;
-  }
-
   // Clear all physics objects
   clear(): void {
     const world = this.store.res.get(RESOURCES.WORLD) as MatterWorld;
@@ -266,14 +190,5 @@ export class PhysicsManager {
 
     this.bodies.clear();
     this.constraints.clear();
-  }
-
-  // Get counts
-  get bodyCount(): number {
-    return this.bodies.size;
-  }
-
-  get constraintCount(): number {
-    return this.constraints.size;
   }
 }

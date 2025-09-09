@@ -347,20 +347,10 @@ export class TreePhysics {
   }
 
   applyForces(): void {
-    const list = this.treeController.mgr.getAllBodies();
+    const list = Array.from(this.store.res.get(RESOURCES.BODIES).values()) as Body[];
 
-    // Debug: log occasionally
-    if (Math.random() < 0.001) {
-      console.log('Applying forces to', list.length, 'bodies');
-    }
-
-    // 1) gravity (constant downward force)
     for (const b of list) {
       Body.applyForce(b, b.position, { x: 0, y: CFG.gravity * b.mass });
-    }
-
-    // 2) upward force (tree growth force - stronger than gravity)
-    for (const b of list) {
       Body.applyForce(b, b.position, { x: 0, y: -CFG.upwardForce * b.mass });
     }
 

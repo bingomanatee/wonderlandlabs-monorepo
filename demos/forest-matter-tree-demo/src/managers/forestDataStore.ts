@@ -7,7 +7,7 @@ import type {
   SpringSettings,
   TreeNodeData,
 } from './types';
-import { globalResources, RESOURCES } from './constants';
+import { RESOURCES } from './constants';
 import { Constraint, World } from 'matter-js';
 import createBranches from './createBranches';
 
@@ -28,6 +28,7 @@ export default function forestDataStore(canvas: HTMLCanvasElement): StoreIF<Tree
       ['canvas', canvas],
       [RESOURCES.NODES, new Map()],
       [RESOURCES.CONSTRAINTS, new Map()],
+      [RESOURCES.BODIES, new Map()],
     ]),
     actions: {
       // Node management

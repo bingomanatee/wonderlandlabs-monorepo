@@ -1,6 +1,6 @@
 import { Constraint, World } from 'matter-js';
-import { BRANCH_CHILD_COUNTS, globalResources, RESOURCES } from './constants';
-import type { MatterConstraint, MatterWorld, SpringSettings, TreeNodeData } from './types.ts';
+import { BRANCH_CHILD_COUNTS, globalResources, RESOURCES } from '../constants';
+import type { MatterConstraint, MatterWorld, SpringSettings, TreeNodeData } from '../../types';
 import { shuffle } from 'lodash-es';
 
 // Global tree node manager class

@@ -11,25 +11,18 @@ import {
   World,
 } from 'matter-js';
 import { CFG, RESOURCES } from './constants';
-import type {
-  MatterBody,
-  MatterConstraint,
-  MatterEngine,
-  MatterRender,
-  MatterWorld,
-  SpringSettings,
-  TreeNodeData,
-} from './types';
-import type { TreeController } from './deprecated/TreeController';
+import type { MatterConstraint, MatterEngine, MatterRender, MatterWorld } from '../types';
 import { TreeStoreData } from './forestDataStore';
 import type { StoreIF } from '@wonderlandlabs/forestry4';
-import { generateUUID } from '../GenerateUUID';
+
+const wallOpts = { isStatic: true, render: { visible: false } };
 
 export class TreePhysics {
   public rootId?: string;
   public rootPin?: MatterConstraint;
   private lastCanvasSize: { width: number; height: number };
   public store: StoreIF<TreeStoreData>;
+
   constructor(canvas: HTMLCanvasElement, treeState: StoreIF<TreeStoreData>) {
     this.store = treeState;
     if (!this.store.res.has(RESOURCES.ENGINE)) {
@@ -78,8 +71,6 @@ export class TreePhysics {
       Runner.run(runner, engine);
     }
 
-    const wallOpts = { isStatic: true, render: { visible: false } };
-
     const fallDetector = Bodies.rectangle(canvas.width / 2, canvas.height + 25, canvas.width, 50, {
       ...wallOpts,
       isSensor: true,
@@ -115,8 +106,6 @@ export class TreePhysics {
               },
             });
             window.dispatchEvent(fallEvent);
-
-            const treeNode = this.store.acts.getNodeRef(fallingBody.label);
           }
         }
       });
@@ -133,38 +122,14 @@ export class TreePhysics {
     };
   }
 
-  getSpringSettings(): {
-    spring: SpringSettings;
-    twigSpring: SpringSettings;
-    leafSpring: SpringSettings;
-  } {
-    const render = this.store.res.get(RESOURCES.RENDER) as MatterRender;
-    const canvasHeight = render.canvas.height;
-    return {
-      spring: {
-        length: canvasHeight * CFG.springLengthPercent,
-        stiffness: CFG.springStiffness,
-        damping: CFG.springDamping,
-      },
-      twigSpring: {
-        length: canvasHeight * CFG.twigSpringLengthPercent,
-        stiffness: CFG.twigSpringStiffness,
-        damping: CFG.twigSpringDamping,
-      },
-      leafSpring: {
-        length: canvasHeight * CFG.leafSpringLengthPercent,
-        stiffness: CFG.leafSpringStiffness,
-        damping: CFG.leafSpringDamping,
-      },
-    };
-  }
-
   handleResize(): void {
     const render = this.store.res.get(RESOURCES.RENDER) as MatterRender;
     const canvas = render.canvas;
     const container = canvas.parentElement;
 
-    if (!container) return;
+    if (!container) {
+      return;
+    }
 
     const containerStyle = getComputedStyle(container);
     const paddingLeft = parseFloat(containerStyle.paddingLeft);

@@ -7,7 +7,7 @@ import {
   NabParams,
   SerializableConstraintData,
   SerializableNodeData,
-} from './types';
+} from '../types';
 import { TreeStoreData } from './forestDataStore';
 import type { StoreIF } from '@wonderlandlabs/forestry4';
 import { generateUUID } from '../GenerateUUID';

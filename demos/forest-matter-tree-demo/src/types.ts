@@ -7,7 +7,14 @@ export type MatterRender = Render;
 export type MatterBody = Body;
 export type MatterConstraint = Constraint;
 
-// Serializable data types (for Forestry store)
+// Spring configuration
+export interface SpringSettings {
+  length: number;
+  stiffness: number;
+  damping: number;
+}
+
+// Serializable data structures (no Matter.js objects)
 export interface SerializableNodeData {
   id: string;
   parentId?: string;
@@ -25,12 +32,33 @@ export interface SerializableConstraintData {
   isLeaf: boolean;
 }
 
-// Spring configuration
-export interface SpringSettings {
-  length: number;
-  stiffness: number;
-  damping: number;
+export interface SerializableTreeState {
+  nodes: Map<string, SerializableNodeData>;
+  constraints: Map<string, SerializableConstraintData>;
+  rootId: string;
+  physicsState?: {
+    positions: Record<string, { x: number; y: number }>;
+    velocities: Record<string, { x: number; y: number }>;
+  };
 }
+
+// Legacy non-serializable structure (for backward compatibility)
+export interface TreeNodeData {
+  id: string;
+  parentId?: string;
+  body: MatterBody;
+  constraintIds: string[];
+  nodeType: 'branch' | 'leaf' | 'terminal_leaf';
+}
+
+export type NabParams = {
+  depth: Map<string, number>;
+  idxByDepth: Map<Number, number>;
+  canvasWidth: number;
+  canvasHeight: number;
+  counts: Map<number, number>;
+  bodyIds: string[];
+};
 
 // Tree node data structure for Forestry state
 export interface TreeNode {

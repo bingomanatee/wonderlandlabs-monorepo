@@ -7,7 +7,7 @@ import type {
   SerializableNodeData,
   SpringSettings,
   TreeNodeData,
-} from './types';
+} from '../types';
 import { RESOURCES } from './constants';
 import { Constraint, World } from 'matter-js';
 import { PhysicsUtils } from './PhysicsUtils';
@@ -198,10 +198,10 @@ export default function forestDataStore(canvas: HTMLCanvasElement): StoreIF<Tree
         const child = this.acts.getNode(constraintData.childId);
 
         if (parent && !parent.constraintIds.includes(constraintData.id)) {
-          this.acts.addConstraintId(constraintData.parentId, constraintData.id);
+          this.acts.addConstraintIdToNode(constraintData.parentId, constraintData.id);
         }
         if (child && !child.constraintIds.includes(constraintData.id)) {
-          this.acts.addConstraintId(constraintData.childId, constraintData.id);
+          this.acts.addConstraintIdToNode(constraintData.childId, constraintData.id);
         }
       },
 
@@ -213,7 +213,8 @@ export default function forestDataStore(canvas: HTMLCanvasElement): StoreIF<Tree
           }
         });
       },
-      addConstraintId(_, nodeId, constraintId) {
+
+      addConstraintIdToNode(_, nodeId, constraintId) {
         this.mutate((draft) => {
           draft.nodes.get(nodeId)?.constraintIds.push(constraintId);
           return draft;

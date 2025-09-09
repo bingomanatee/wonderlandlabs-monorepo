@@ -3,7 +3,7 @@ import type {
   SerializableNodeData,
   SerializableConstraintData,
   SerializableTreeState,
-} from '../types';
+} from '../../types';
 import createBranches from '../createBranches';
 
 // Manages serializable tree data and structure

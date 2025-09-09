@@ -230,7 +230,7 @@ export default function forestDataStore(canvas: HTMLCanvasElement): StoreIF<Tree
         });
 
         // Remove old constraints from Matter.js world and clean up data structures
-        const world = globalResources.get(RESOURCES.WORLD) as MatterWorld;
+        const world = this.res.get(RESOURCES.WORLD) as MatterWorld;
         constraintsToRemove.forEach((oldConstraintId) => {
           const oldConstraint = this.res['constraints'].get(oldConstraintId);
           if (oldConstraint && world) {

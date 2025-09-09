@@ -7,14 +7,17 @@ import type {
   SerializableNodeData,
   SerializableConstraintData,
 } from './types';
-
+import { TreeStoreData } from './forestDataStore';
+import type { StoreIF } from '@wonderlandlabs/forestry4';
 // Manages non-serializable Matter.js physics objects
 export class PhysicsManager {
   private bodies = new Map<string, MatterBody>();
   private constraints = new Map<string, MatterConstraint>();
+  private store: StoreIF<TreeStoreData>;
 
-  constructor() {
+  constructor(store: StoreIF<TreeStoreData>) {
     console.log('new physics manager');
+    this.store = store;
   }
   // Body management
   createBody(
@@ -42,7 +45,7 @@ export class PhysicsManager {
     if (!body) return false;
 
     // Remove from physics world
-    const world = globalResources.get(RESOURCES.WORLD) as MatterWorld;
+    const world = this.store.res.get(RESOURCES.WORLD) as MatterWorld;
     if (world) {
       World.remove(world, body);
     }
@@ -143,7 +146,7 @@ export class PhysicsManager {
 
   // Batch operations
   addBodiesToWorld(nodeIds: string[]): void {
-    const world = globalResources.get(RESOURCES.WORLD) as MatterWorld;
+    const world = this.store.res.get(RESOURCES.WORLD) as MatterWorld;
     if (!world) return;
 
     const bodies = nodeIds.map((id) => this.getBody(id)).filter(Boolean) as MatterBody[];
@@ -153,7 +156,7 @@ export class PhysicsManager {
   }
 
   addConstraintsToWorld(constraintIds: string[]): void {
-    const world = globalResources.get(RESOURCES.WORLD) as MatterWorld;
+    const world = this.store.res.get(RESOURCES.WORLD) as MatterWorld;
     if (!world) return;
 
     const constraints = constraintIds
@@ -203,11 +206,6 @@ export class PhysicsManager {
     newCenterX: number,
     newCenterY: number
   ): void {
-    console.log(
-      `🔄 Scaling ${this.bodies.size} bodies by ${scaleX.toFixed(3)}x${scaleY.toFixed(3)}`
-    );
-    console.log(`📍 From center (${oldCenterX}, ${oldCenterY}) to (${newCenterX}, ${newCenterY})`);
-
     this.bodies.forEach((body, nodeId) => {
       // Calculate relative position from old center
       const relativeX = body.position.x - oldCenterX;
@@ -220,8 +218,6 @@ export class PhysicsManager {
       Body.setPosition(body, { x: newX, y: newY });
       Body.setVelocity(body, { x: 0, y: 0 }); // Reset velocity
     });
-
-    console.log(`✅ All bodies repositioned`);
   }
 
   // Find unconstrained bodies
@@ -261,7 +257,7 @@ export class PhysicsManager {
 
   // Clear all physics objects
   clear(): void {
-    const world = globalResources.get(RESOURCES.WORLD) as MatterWorld;
+    const world = this.store.res.get(RESOURCES.WORLD) as MatterWorld;
 
     if (world) {
       // Remove all bodies and constraints from world

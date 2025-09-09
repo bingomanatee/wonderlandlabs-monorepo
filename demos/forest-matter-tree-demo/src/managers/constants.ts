@@ -30,7 +30,7 @@ export const CFG = {
   leafSpringDamping: 0.98, // Very high leaf damping for minimal bounce
   repulsion: { k: 0.1, min: 8, max: 60 }, // Much lower repulsion force
   gravity: 0.0002, // Much lower gravity
-  upwardForce: 0.0015, // Increased by 30% for better tree posture
+  upwardForce: 0.00125, // Increased by 30% for better tree posture
   centerPull: 1e-8, // Much lower center pull
   velocityDamping: 0.92, // Much stronger velocity damping for low inertia
 };

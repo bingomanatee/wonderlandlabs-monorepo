@@ -12,7 +12,7 @@ export class TreeController {
   public mgr: PhysicsManager;
   constructor(store: StoreIF<TreeState>) {
     this.store = store;
-    this.mgr = new PhysicsManager();
+    this.mgr = new PhysicsManager(store);
   }
 
   // Generate and build a complete tree

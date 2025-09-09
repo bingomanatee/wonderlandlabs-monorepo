@@ -8,6 +8,7 @@ export const RESOURCES = {
   NODES: 'nodes',
   CONSTRAINTS: 'constraints',
   BODIES: 'bodies',
+  UTILS: 'utils,',
 } as const;
 
 export const CFG = {

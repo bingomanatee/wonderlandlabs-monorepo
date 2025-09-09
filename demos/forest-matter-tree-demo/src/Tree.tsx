@@ -1,6 +1,5 @@
 import { useEffect, useRef, useCallback } from 'react';
 import useForestryLocal from './hooks/useForestryLocal';
-import { TreeController } from './managers/TreeController.ts';
 import { TreePhysics } from './managers/TreePhysics.ts';
 import forestDataStore from './managers/forestDataStore';
 import type { TreeStoreData } from './managers/forestDataStore';
@@ -48,13 +47,11 @@ export function Tree() {
     // Wait for resources to be created, then initialize
     let onComplete: (() => void) | undefined;
 
-    const treeController = new TreeController(dataStore);
-
     // Initialize physics simulation
-    const scene = new TreePhysics(canvas, treeController, dataStore);
+    const scene = new TreePhysics(canvas, dataStore);
 
     // Generate and build complete tree using TreeController
-    const rootId = treeController.generateTree(canvas.width, canvas.height);
+    const rootId = dataStore.acts.generateTree(canvas.width, canvas.height);
 
     // Create root pin to anchor the tree
     scene.createRootPin(rootId);
@@ -63,7 +60,7 @@ export function Tree() {
     return () => {
       onComplete?.();
     };
-  }, [updateCanvasSize, forestDataStore]);
+  }, [updateCanvasSize, dataStore]);
 
   return (
     <div style={{ width: '100%', height: '100%', position: 'relative' }}>

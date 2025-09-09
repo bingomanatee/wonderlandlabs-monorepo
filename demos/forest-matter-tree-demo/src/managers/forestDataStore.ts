@@ -2,6 +2,7 @@ import { Forest, type StoreIF } from '@wonderlandlabs/forestry4';
 import type {
   MatterConstraint,
   MatterWorld,
+  NabParams,
   SerializableConstraintData,
   SerializableNodeData,
   SpringSettings,
@@ -9,7 +10,7 @@ import type {
 } from './types';
 import { RESOURCES } from './constants';
 import { Constraint, World } from 'matter-js';
-import createBranches from './createBranches';
+import { PhysicsUtils } from './PhysicsUtils';
 
 export type TreeStoreData = {
   nodes: Map<string, SerializableNodeData>;
@@ -18,7 +19,7 @@ export type TreeStoreData = {
 };
 
 export default function forestDataStore(canvas: HTMLCanvasElement): StoreIF<TreeStoreData> {
-  return new Forest({
+  const forest = new Forest({
     value: {
       nodes: new Map(),
       constraints: new Map(),
@@ -31,6 +32,132 @@ export default function forestDataStore(canvas: HTMLCanvasElement): StoreIF<Tree
       [RESOURCES.BODIES, new Map()],
     ]),
     actions: {
+      // Controller methods
+
+      generateTree(_, canvasWidth: number, canvasHeight: number): string {
+        const { adjacency, rootId } = this.acts.generateRandomTree();
+        this.acts.buildPhysicsTree(adjacency, rootId, canvasWidth, canvasHeight);
+        return rootId;
+      },
+      updateSpringLengths(_, canvasHeight: number): void {
+        const utils = this.res.get(RESOURCES.UTILS);
+        const springs = utils.getSpringSettings(canvasHeight);
+
+        this.acts.traverseNodes(this.value.rootId, (node) => {
+          node.constraintIds.forEach((constraintId) => {
+            const constraintData = this.acts.getConstraint(constraintId);
+            if (constraintData) {
+              const newLength = constraintData.isLeaf
+                ? springs.leafSpring.length
+                : springs.spring.length;
+
+              this.acts.setConstraintLength(constraintId, newLength);
+              utils.updateConstraint(constraintId, { length: newLength });
+            }
+          });
+        });
+      },
+
+      buildPhysicsTree(
+        _,
+        adjacency: Map<string, string[]>,
+        rootId: string,
+        canvasWidth: number,
+        canvasHeight: number
+      ): void {
+        const utils = this.res.get(RESOURCES.UTILS);
+        utils.clear();
+
+        const springs = utils.getSpringSettings(canvasHeight);
+
+        const depth = utils.makeDepth(rootId, adjacency);
+        const maxDepth = Math.max(...depth.values());
+        const counts = new Map();
+        for (const [id, d] of depth) {
+          counts.set(d, (counts.get(d) || 0) + 1);
+        }
+        const idxByDepth = new Map();
+
+        const bodyIds: string[] = [];
+
+        const allNodeIds = new Set([rootId]);
+        adjacency.forEach((children, parent) => {
+          allNodeIds.add(parent);
+          children.forEach((child) => allNodeIds.add(child));
+        });
+
+        const nabProps: NabParams = {
+          bodyIds,
+          canvasWidth,
+          canvasHeight,
+          counts,
+          idxByDepth,
+          depth,
+        };
+
+        allNodeIds.forEach((id) => utils.createNodeAndBody(id, nabProps));
+
+        utils.addBodiesToWorld(bodyIds);
+
+        const constraintIds: string[] = [];
+
+        adjacency.forEach((children, parentId) => {
+          const parentDepth = depth.get(parentId) ?? 0;
+
+          children.forEach((childId) => {
+            const childDepth = depth.get(childId) ?? 0;
+
+            const depthFactor = childDepth / maxDepth;
+            const length = springs.spring.length * (1 - depthFactor * 0.4);
+            const stiffness = springs.spring.stiffness * (1 + depthFactor * 2);
+            const damping = springs.spring.damping * (1 + depthFactor * 0.5);
+
+            const constraintId = this.acts.connectNodes(
+              parentId,
+              childId,
+              { length, stiffness, damping },
+              false
+            );
+
+            const constraintData = this.acts.getConstraint(constraintId);
+            if (constraintData) {
+              const physicsConstraint = utils.createConstraint(constraintData);
+              if (physicsConstraint) {
+                constraintIds.push(constraintId);
+              }
+            }
+
+            if (parentDepth > 0) {
+              utils.addLeafNodes(parentId, childId, canvasHeight);
+            }
+          });
+        });
+
+        allNodeIds.forEach((nodeId) => {
+          const children = adjacency.get(nodeId) || [];
+          const nodeDepth = depth.get(nodeId) ?? 0;
+
+          if (children.length === 0 && nodeDepth > 0) {
+            utils.addTerminalLeaves(nodeId, canvasHeight);
+          }
+        });
+
+        utils.addConstraintsToWorld(constraintIds);
+      },
+
+      scaleTree(_, oldWidth: number, oldHeight: number, newWidth: number, newHeight: number): void {
+        const scaleX = newWidth / oldWidth;
+        const scaleY = newHeight / oldHeight;
+        const oldCenterX = oldWidth * 0.5;
+        const oldCenterY = oldHeight * 0.5;
+        const newCenterX = newWidth * 0.5;
+        const newCenterY = newHeight * 0.5;
+        const utils = this.res.get(RESOURCES.UTILS);
+
+        utils.scaleAllPositions(scaleX, scaleY, oldCenterX, oldCenterY, newCenterX, newCenterY);
+
+        this.acts.updateSpringLengths(newHeight);
+      },
       // Node management
       getNode(value: TreeStoreData, id: string): SerializableNodeData | undefined {
         return value.nodes.get(id);
@@ -149,6 +276,7 @@ export default function forestDataStore(canvas: HTMLCanvasElement): StoreIF<Tree
 
       // Generate random tree structure
       generateRandomTree(): { adjacency: Map<string, string[]>; rootId: string } {
+        const utils = this.res.get(RESOURCES.UTILS);
         // Clear existing state
         this.mutate(() => ({
           nodes: new Map(),
@@ -172,7 +300,7 @@ export default function forestDataStore(canvas: HTMLCanvasElement): StoreIF<Tree
         }
 
         // Start branching from the top of the trunk
-        createBranches(adjacency, currentTrunkNode, 0, nodeCounter);
+        utils.createBranches(adjacency, currentTrunkNode, 0, nodeCounter);
 
         this.set('rootId', rootId);
         return { adjacency, rootId };
@@ -285,4 +413,9 @@ export default function forestDataStore(canvas: HTMLCanvasElement): StoreIF<Tree
       },
     },
   });
+
+  const utils = new PhysicsUtils(forest);
+  forest.res.set(RESOURCES.UTILS, utils);
+
+  return forest;
 }

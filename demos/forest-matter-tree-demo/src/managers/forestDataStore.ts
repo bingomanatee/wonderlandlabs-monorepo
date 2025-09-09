@@ -168,7 +168,6 @@ export default function forestDataStore(canvas: HTMLCanvasElement): StoreIF<Tree
       },
 
       addNode(_, nodeData: SerializableNodeData): void {
-        console.log('adding node ', nodeData.id, nodeData);
         this.set([RESOURCES.NODES, nodeData.id], nodeData);
       },
       // Tree structure queries
@@ -323,8 +322,7 @@ export default function forestDataStore(canvas: HTMLCanvasElement): StoreIF<Tree
         if (id && nodeData && typeof id === 'string' && typeof nodeData == 'object') {
           this.res.get(RESOURCES.NODES).set(id, nodeData);
         } else {
-          console.log('bad leaf:', id, nodeData);
-          throw new Error('cannot add bad leaf:');
+          throw new Error('cannot add bad leaf: invalid id or nodeData');
         }
       },
       addConstraintRef(value: TreeStoreData, id: string, constraint: MatterConstraint): void {

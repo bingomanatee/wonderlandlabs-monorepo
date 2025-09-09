@@ -1,7 +1,6 @@
 import React from 'react';
 import { Tree } from './components/Tree';
 import  style from './App.module.css';
-console.log('app style:', style);
 
 function App() {
   return (

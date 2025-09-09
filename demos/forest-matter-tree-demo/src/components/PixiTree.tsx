@@ -18,6 +18,7 @@ export function PixiTree() {
   const isInitializedRef = useRef(false);
   const pixiAppRef = useRef<PIXI.Application | null>(null);
   const physicsRef = useRef<TreePhysics | null>(null);
+  const lastSizeRef = useRef<{width: number, height: number} | null>(null);
   const graphicsRef = useRef<{
     backgroundGraphics: PIXI.Graphics;
     treeGraphics: PIXI.Graphics;
@@ -41,6 +42,12 @@ export function PixiTree() {
         // Create PIXI application
         const pixiApp = await makePixi(container);
         pixiAppRef.current = pixiApp;
+
+        // Store initial canvas size
+        lastSizeRef.current = { width: pixiApp.screen.width, height: pixiApp.screen.height };
+
+        // Store initial canvas size
+        lastSizeRef.current = { width: pixiApp.screen.width, height: pixiApp.screen.height };
 
         // Store PIXI app in Forestry store for Controls access
         dataStore.res.set('pixiApp', pixiApp);
@@ -107,7 +114,7 @@ export function PixiTree() {
         isInitializedRef.current = true;
 
       } catch (error) {
-        console.error('Failed to initialize PIXI:', error);
+        // Failed to initialize PIXI - error handling could be added here
       }
     };
 
@@ -126,23 +133,31 @@ export function PixiTree() {
       if (!pixiApp || !container || !graphics || !physics) return;
 
       // PIXI auto-resizes the canvas, but we need to redraw the background
-      // and regenerate the tree for the new dimensions
+      // and manually trigger tree scaling
       setTimeout(() => {
         // Small delay to ensure PIXI has finished resizing
         renderBackground(graphics.backgroundGraphics, pixiApp, 'summer');
 
-        // Clear existing tree and regenerate for new canvas size
-        dataStore.acts.clearTree();
-        const utils = dataStore.res.get('utils');
-        if (utils) {
-          utils.clear();
+        // Get old and new dimensions for scaling
+        const lastSize = lastSizeRef.current;
+        const newWidth = pixiApp.screen.width;
+        const newHeight = pixiApp.screen.height;
+
+        // Only scale if dimensions actually changed and we have previous size
+        if (lastSize && (lastSize.width !== newWidth || lastSize.height !== newHeight)) {
+          // Scale all bodies first
+          dataStore.acts.scaleTree(lastSize.width, lastSize.height, newWidth, newHeight);
+
+          // Reposition the root pin relative to new screen center and size
+          // Pin should be at horizontal center and in the ground area (bottom half)
+          if (physics.rootPin) {
+            physics.rootPin.pointA.x = newWidth / 2;  // Center horizontally
+            physics.rootPin.pointA.y = newHeight * 0.75; // 75% down (in ground area)
+          }
+
+          // Update stored size
+          lastSizeRef.current = { width: newWidth, height: newHeight };
         }
-
-        // Generate new tree with new dimensions
-        const rootId = dataStore.acts.generateTree(pixiApp.screen.width, pixiApp.screen.height);
-
-        // Create root pin to anchor the new tree
-        physics.createRootPin(rootId);
       }, 10);
     };
 

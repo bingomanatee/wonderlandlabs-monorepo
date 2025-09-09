@@ -28,8 +28,6 @@ import { generateUUID } from '../GenerateUUID';
 export class TreePhysics {
   public rootId?: string;
   public rootPin?: MatterConstraint;
-  public nodes: TreeNodeData[] = [];
-  public nodeBodies: MatterBody[] = [];
   private lastCanvasSize: { width: number; height: number };
   private treeController: TreeController;
   public store: StoreIF<TreeStoreData>;
@@ -38,7 +36,6 @@ export class TreePhysics {
     treeController: TreeController,
     treeState: StoreIF<TreeStoreData>
   ) {
-    // Initialize or get global resources
     this.treeController = treeController;
     this.store = treeState;
     if (!this.store.res.has(RESOURCES.ENGINE)) {
@@ -49,14 +46,12 @@ export class TreePhysics {
       this.store.res.set(RESOURCES.WORLD, world);
     }
 
-    // Create render for this canvas (canvas-specific)
     const engine = this.store.res.get(RESOURCES.ENGINE) as MatterEngine;
     const world = this.store.res.get(RESOURCES.WORLD) as MatterWorld;
 
     const width = canvas.width;
     const height = canvas.height;
 
-    // Store initial canvas size for resize calculations
     this.lastCanvasSize = { width, height };
 
     const render = Render.create({
@@ -83,34 +78,23 @@ export class TreePhysics {
 
     Render.run(render);
 
-    // Use Matter.js Runner for proper physics timing (only create once)
     if (!this.store.res.has(RESOURCES.RUNNER)) {
       const runner = Runner.create();
       this.store.res.set(RESOURCES.RUNNER, runner);
       Runner.run(runner, engine);
     }
 
-    // Create world boundaries
     const wallOpts = { isStatic: true, render: { visible: false } };
 
-    // Create collision detector at bottom (below tree line)
-    const fallDetector = Bodies.rectangle(
-      canvas.width / 2,
-      canvas.height + 25, // 25px below canvas bottom
-      canvas.width,
-      50,
-      {
-        ...wallOpts,
-        isSensor: true, // Sensor doesn't physically block, just detects
-        label: 'fall-detector',
-        render: { visible: false },
-      }
-    );
+    const fallDetector = Bodies.rectangle(canvas.width / 2, canvas.height + 25, canvas.width, 50, {
+      ...wallOpts,
+      isSensor: true,
+      label: 'fall-detector',
+      render: { visible: false },
+    });
 
-    // Only add the fall detector - no boundary walls to allow natural tree growth
     World.add(world, [fallDetector]);
 
-    // Mouse drag
     const mouse = Mouse.create(canvas);
     const mouseConstraint = MouseConstraint.create(engine, {
       mouse,
@@ -119,22 +103,16 @@ export class TreePhysics {
     World.add(world, mouseConstraint);
     render.mouse = mouse;
 
-    // per-tick forces
     Events.on(engine, 'beforeUpdate', () => this.applyForces());
 
-    // Collision detection for falling bodies
     Events.on(engine, 'collisionStart', (event) => {
       event.pairs.forEach((pair) => {
         const { bodyA, bodyB } = pair;
 
-        // Check if one of the bodies is our fall detector
         if (bodyA.label === 'fall-detector' || bodyB.label === 'fall-detector') {
           const fallingBody = bodyA.label === 'fall-detector' ? bodyB : bodyA;
 
           if (fallingBody.label && fallingBody.label !== 'fall-detector') {
-            console.log(`🍂 FALLING BODY DETECTED: ${fallingBody.label}`);
-
-            // Emit custom event
             const fallEvent = new CustomEvent('bodyFell', {
               detail: {
                 bodyLabel: fallingBody.label,
@@ -144,19 +122,12 @@ export class TreePhysics {
             });
             window.dispatchEvent(fallEvent);
 
-            // Check if it's a tree node
             const treeNode = this.store.acts.getNodeRef(fallingBody.label);
-            if (treeNode) {
-              console.log(`🌳 Tree node fell: ${treeNode.nodeType} - ${fallingBody.label}`);
-              console.log(`   Parent: ${treeNode.parentId || 'none'}`);
-              console.log(`   Constraints: ${treeNode.constraintIds.length}`);
-            }
           }
         }
       });
     });
 
-    // Handle canvas resize
     window.addEventListener('resize', () => this.handleResize());
   }
 
@@ -168,7 +139,6 @@ export class TreePhysics {
     };
   }
 
-  // Calculate spring settings based on current canvas size
   getSpringSettings(): {
     spring: SpringSettings;
     twigSpring: SpringSettings;
@@ -195,9 +165,7 @@ export class TreePhysics {
     };
   }
 
-  // Handle window resize events
   handleResize(): void {
-    console.log('🔄 Window resize detected');
     const render = this.store.res.get(RESOURCES.RENDER) as MatterRender;
     const canvas = render.canvas;
     const container = canvas.parentElement;
@@ -227,7 +195,6 @@ export class TreePhysics {
     render.bounds.max.x = newWidth;
     render.bounds.max.y = newHeight;
 
-    // Use TreeController to handle resize across all layers
     this.treeController.scaleTree(
       this.lastCanvasSize.width,
       this.lastCanvasSize.height,
@@ -235,18 +202,14 @@ export class TreePhysics {
       newHeight
     );
 
-    // Reposition the root pin to the new center bottom
     this.repositionRootPin();
 
-    // Update stored canvas size
     this.lastCanvasSize = { width: newWidth, height: newHeight };
   }
 
-  // Create root pin to anchor the tree
   createRootPin(rootId: string): void {
-    const rootBody = this.treeController.mgr.getBody(rootId);
+    const rootBody = this.store.getRes([RESOURCES.BODIES, rootId]);
     if (!rootBody) {
-      console.error('❌ Cannot create root pin: root body not found');
       return;
     }
 
@@ -254,96 +217,25 @@ export class TreePhysics {
     const world = this.store.res.get(RESOURCES.WORLD) as MatterWorld;
 
     this.rootPin = Constraint.create({
-      pointA: { x: this.center.x, y: render.canvas.height - 100 }, // Pin near bottom of canvas
+      pointA: { x: this.center.x, y: render.canvas.height - 100 },
       bodyB: rootBody,
-      length: 0, // No distance - root is fixed at this point
-      stiffness: 1.0, // Maximum stiffness - root cannot move
-      damping: 0.9, // High damping to prevent oscillation
+      length: 0,
+      stiffness: 1.0,
+      damping: 0.9,
       render: { visible: false },
     });
 
     World.add(world, this.rootPin);
-    console.log('📍 Root pin created and anchored');
   }
 
-  // Reposition the root pin when canvas resizes
   repositionRootPin(): void {
-    console.log('📍 repositionRootPin called');
-
-    if (!this.rootPin) {
-      console.log('❌ No root pin found!');
-      return;
-    }
-
     const render = this.store.res.get(RESOURCES.RENDER) as MatterRender;
     const newCenter = this.center;
     const oldX = this.rootPin.pointA.x;
     const oldY = this.rootPin.pointA.y;
 
-    // Update the root pin's anchor point to the new center bottom
     this.rootPin.pointA.x = newCenter.x;
     this.rootPin.pointA.y = render.canvas.height - 100;
-
-    console.log(
-      `📍 Root pin moved from (${oldX}, ${oldY}) to (${newCenter.x}, ${render.canvas.height - 100})`
-    );
-    console.log(`📐 Canvas size: ${render.canvas.width} x ${render.canvas.height}`);
-  }
-
-  // Reposition all tree nodes proportionally when canvas resizes
-  repositionAllNodes(
-    oldWidth: number,
-    oldHeight: number,
-    newWidth: number,
-    newHeight: number
-  ): void {
-    console.log(
-      `🔄 Repositioning all nodes from ${oldWidth}x${oldHeight} to ${newWidth}x${newHeight}`
-    );
-
-    const scaleX = newWidth / oldWidth;
-    const scaleY = newHeight / oldHeight;
-
-    console.log(`📏 Scale factors: X=${scaleX.toFixed(3)}, Y=${scaleY.toFixed(3)}`);
-
-    // Get the old and new center points
-    const oldCenterX = oldWidth * 0.5;
-    const oldCenterY = oldHeight * 0.5;
-    const newCenterX = newWidth * 0.5;
-    const newCenterY = newHeight * 0.5;
-
-    let repositionedCount = 0;
-
-    // Reposition all tree nodes
-    this.store.acts.getAllNodeRefs().forEach((node) => {
-      const body = node.body;
-      const oldX = body.position.x;
-      const oldY = body.position.y;
-
-      // Calculate relative position from old center
-      const relativeX = oldX - oldCenterX;
-      const relativeY = oldY - oldCenterY;
-
-      // Scale the relative position and apply to new center
-      const newX = newCenterX + relativeX * scaleX;
-      const newY = newCenterY + relativeY * scaleY;
-
-      // Update body position
-      Body.setPosition(body, { x: newX, y: newY });
-
-      // Reset velocity to prevent jarring movement
-      Body.setVelocity(body, { x: 0, y: 0 });
-
-      repositionedCount++;
-    });
-
-    console.log(`✅ Repositioned ${repositionedCount} nodes`);
-  }
-
-  // Update local arrays from global TreeNodes storage
-  updateLocalArrays(): void {
-    this.nodes = this.store.acts.getAllNodeRefs();
-    this.nodeBodies = this.nodes.map((node) => node.body);
   }
 
   applyForces(): void {
@@ -354,7 +246,6 @@ export class TreePhysics {
       Body.applyForce(b, b.position, { x: 0, y: -CFG.upwardForce * b.mass });
     }
 
-    // 3) repulsion (inverse-square, clamped) - different strengths for different node types
     const { k, min, max } = CFG.repulsion;
     for (let i = 0; i < list.length; i++) {
       const A = list[i];
@@ -371,12 +262,9 @@ export class TreePhysics {
           continue;
         }
 
-        // Use stored repulsion factors for consistent behavior
         const repulsionFactorA = (A as any).repulsionFactor || 1.0;
         const repulsionFactorB = (B as any).repulsionFactor || 1.0;
 
-        // Calculate combined repulsion strength
-        // Use the minimum factor so that if one body wants to cluster, it can
         const combinedRepulsionFactor = Math.min(repulsionFactorA, repulsionFactorB);
         const repulsionStrength = k * combinedRepulsionFactor;
 
@@ -389,7 +277,6 @@ export class TreePhysics {
       }
     }
 
-    // 4) gentle center pull to keep frame
     for (const b of list) {
       Body.applyForce(b, b.position, {
         x: (this.center.x - b.position.x) * CFG.centerPull,
@@ -397,7 +284,6 @@ export class TreePhysics {
       });
     }
 
-    // 5) velocity damping to reduce excessive jiggle
     for (const b of list) {
       Body.setVelocity(b, {
         x: b.velocity.x * CFG.velocityDamping,
@@ -406,12 +292,9 @@ export class TreePhysics {
     }
   }
 
-  /** Build a tree from adjacency (parent->children) and rootId, with layered initial positions */
   buildTree({ adjacency, rootId }: { adjacency: Map<string, string[]>; rootId: string }): string {
-    // group to disable collisions among nodes
     const group = -Math.abs(Bodies.circle(0, 0, 1).collisionFilter.group || Body.nextGroup(true));
 
-    // compute depths for layout
     const depth = new Map([[rootId, 0]]);
     const q = [rootId];
     while (q.length) {
@@ -433,17 +316,16 @@ export class TreePhysics {
       const k = idxByDepth.get(d) || 0;
       idxByDepth.set(d, k + 1);
       const slots = counts.get(d);
-      // Distribute nodes across 60% of canvas width, centered
       const render = this.store.res.get(RESOURCES.RENDER) as MatterRender;
       const spreadWidth = render.canvas.width * 0.6;
       const nodePosition = ((k + 1) / (slots + 1)) * spreadWidth;
       const x = this.center.x - spreadWidth * 0.5 + nodePosition;
-      const y = render.canvas.height - 80 - d * 45; // Start from bottom, grow upward (halved spacing)
+      const y = render.canvas.height - 80 - d * 45;
       const b = Bodies.circle(x, y, CFG.nodeRadius, {
         frictionAir: CFG.airFriction,
         render: {
-          fillStyle: '#DC143C', // Crimson red for branches
-          strokeStyle: '#8B0000', // Dark red border
+          fillStyle: '#DC143C',
+          strokeStyle: '#8B0000',
           lineWidth: 2,
         },
         collisionFilter: { group },
@@ -462,7 +344,6 @@ export class TreePhysics {
       const nodeDepth = depth.get(id) ?? 0;
       const springs = this.getSpringSettings();
 
-      // Create node data
       const nodeData: TreeNodeData = {
         id,
         body,
@@ -475,12 +356,11 @@ export class TreePhysics {
         const childId = buildRec(cid);
         const childDepth = depth.get(cid) ?? 0;
 
-        // Calculate spring settings based on depth - higher levels have shorter, stiffer springs
-        const depthFactor = childDepth / maxDepth; // 0 to 1, where 1 is deepest
+        const depthFactor = childDepth / maxDepth;
         const springSettings = {
-          length: springs.spring.length * (1 - depthFactor * 0.4), // Shorter springs at higher levels
-          stiffness: springs.spring.stiffness * (1 + depthFactor * 2), // Stiffer springs at higher levels
-          damping: springs.spring.damping * (1 + depthFactor * 0.5), // More damping at higher levels
+          length: springs.spring.length * (1 - depthFactor * 0.4),
+          stiffness: springs.spring.stiffness * (1 + depthFactor * 2),
+          damping: springs.spring.damping * (1 + depthFactor * 0.5),
         };
 
         const constraintId = this.store.acts.connectNodeRefs(id, childId, springSettings);
@@ -490,13 +370,11 @@ export class TreePhysics {
           World.add(world, constraint);
         }
 
-        // Add leaf/twig nodes between parent and child (skip for root level)
         if (nodeDepth > 0) {
           this.addLeafNodes(id, childId);
         }
       }
 
-      // Add leaves to terminal nodes (end nodes with no children)
       if (children.length === 0 && nodeDepth > 0) {
         this.addTerminalLeaves(id);
       }
@@ -510,105 +388,65 @@ export class TreePhysics {
     const render = this.store.res.get(RESOURCES.RENDER) as MatterRender;
     World.add(world, bodies);
 
-    // Pin root firmly at bottom so the tree grows upward like a real tree
     const rootNode = this.store.acts.getNodeRef(rootNodeId);
     if (rootNode) {
       this.rootPin = Constraint.create({
-        pointA: { x: this.center.x, y: render.canvas.height - 100 }, // Pin near bottom of canvas
+        pointA: { x: this.center.x, y: render.canvas.height - 100 },
         bodyB: rootNode.body,
-        length: 0, // No distance - root is fixed at this point
-        stiffness: 1.0, // Maximum stiffness - root cannot move
-        damping: 0.9, // High damping to prevent oscillation
+        length: 0,
+        stiffness: 1.0,
+        damping: 0.9,
         render: { visible: false },
       });
       World.add(world, this.rootPin);
     }
 
-    // store refs
     this.rootId = rootNodeId;
 
-    // Update local arrays from global storage
-    this.updateLocalArrays();
-
-    // Add extremely gentle initial random velocities to all bodies
-    this.nodeBodies.forEach((body) => {
-      Body.setVelocity(body, {
-        x: (Math.random() - 0.5) * 0.1,
-        y: (Math.random() - 0.5) * 0.1,
+    this.store.acts
+      .getAllNodeRefs()
+      .map((node) => node.body)
+      .forEach((body) => {
+        Body.setVelocity(body, {
+          x: (Math.random() - 0.5) * 0.1,
+          y: (Math.random() - 0.5) * 0.1,
+        });
       });
-    });
 
-    // Debug: log positions occasionally to see if bodies are moving
-    setInterval(() => {
-      const rootNode = this.store.acts.getNodeRef(rootNodeId);
-      if (rootNode) {
-        console.log(
-          'Root body position:',
-          rootNode.body.position.x.toFixed(2),
-          rootNode.body.position.y.toFixed(2)
-        );
-      }
-    }, 2000);
-
-    // Run pruning algorithm to find and fix unconstrained bodies
     this.pruneUnconstrainedBodies();
 
-    // Clean up any unconstrained bodies after tree creation
     this.removeUnconstrainedBodies();
 
     return rootNodeId;
   }
 
-  // Find and remove bodies that have no constraints (except root which has rootPin)
   removeUnconstrainedBodies(): void {
-    console.log('🔍 Checking for unconstrained bodies...');
-
     const world = this.store.res.get(RESOURCES.WORLD) as MatterWorld;
     const bodiesToRemove: MatterBody[] = [];
     const nodeIdsToRemove: string[] = [];
 
     this.store.acts.getAllNodeRefs().forEach((node) => {
-      // Root node is special - it's constrained by rootPin, not regular constraints
       if (node.id === this.rootId) return;
 
-      // Check if this node has any constraints
       if (node.constraintIds.length === 0) {
-        console.log(
-          `🚨 Found unconstrained ${node.nodeType}: ${node.id} (parent: ${node.parentId})`
-        );
         bodiesToRemove.push(node.body);
         nodeIdsToRemove.push(node.id);
       }
     });
 
     if (bodiesToRemove.length > 0) {
-      console.log(`🧹 Removing ${bodiesToRemove.length} unconstrained bodies from physics world`);
-
-      // Remove from Matter.js physics world
       World.remove(world, bodiesToRemove);
 
-      // Remove from TreeNodes data structure
       nodeIdsToRemove.forEach((nodeId) => {
         this.store.acts.removeNodeRef(nodeId);
       });
-
-      // Update local arrays
-      this.updateLocalArrays();
-
-      console.log(`✅ Cleanup complete. Removed ${bodiesToRemove.length} unconstrained bodies`);
-    } else {
-      console.log('✅ No unconstrained bodies found');
     }
   }
 
-  // Pruning algorithm to find and remove unconstrained bodies
   pruneUnconstrainedBodies(): void {
-    console.log('🔍 Starting pruning algorithm...');
-
     const world = this.store.res.get(RESOURCES.WORLD) as MatterWorld;
     const allConstraints = this.store.acts.getAllConstraintRefs();
 
-    // Get all bodies that are connected by constraints
     const constrainedBodyIds = new Set<string>();
 
     allConstraints.forEach((constraint) => {
@@ -620,29 +458,22 @@ export class TreePhysics {
       }
     });
 
-    // Check all bodies in our tree nodes
     const orphanedBodies: MatterBody[] = [];
     const orphanedNodeIds: string[] = [];
 
     this.store.acts.getAllNodeRefs().forEach((node) => {
       if (!constrainedBodyIds.has(node.id) && node.id !== this.rootId) {
-        // This body is not connected by any constraint (except root which is pinned)
         orphanedBodies.push(node.body);
         orphanedNodeIds.push(node.id);
-        console.log(`🚨 Found orphaned body: ${node.id} (${node.nodeType})`);
       }
     });
 
-    // Remove orphaned bodies from physics world
     if (orphanedBodies.length > 0) {
-      console.log(`🧹 Removing ${orphanedBodies.length} orphaned bodies from physics world`);
       World.remove(world, orphanedBodies);
 
-      // Remove from our data structures too
       orphanedNodeIds.forEach((nodeId) => {
         const node = this.store.acts.getNodeRef(nodeId);
         if (node) {
-          // Clean up any constraints this node owns
           node.constraintIds.forEach((constraintId) => {
             const constraint = this.store.acts.getConstraintRef(constraintId);
             if (constraint) {
@@ -654,7 +485,6 @@ export class TreePhysics {
       });
     }
 
-    // Also check for bodies in physics world that aren't in our tree
     const physicsBodyLabels = new Set<string>();
     world.bodies.forEach((body) => {
       if (body.label && !body.isStatic) {
@@ -668,26 +498,16 @@ export class TreePhysics {
     world.bodies.forEach((body) => {
       if (body.label && !body.isStatic && !treeNodeIds.has(body.label)) {
         unknownBodies.push(body);
-        console.log(`🤔 Found unknown body in physics world: ${body.label}`);
       }
     });
 
     if (unknownBodies.length > 0) {
-      console.log(`🧹 Removing ${unknownBodies.length} unknown bodies from physics world`);
       World.remove(world, unknownBodies);
     }
-
-    console.log(
-      `✅ Pruning complete. Removed ${orphanedBodies.length + unknownBodies.length} problematic bodies`
-    );
-
-    // Update local arrays after cleanup
-    this.updateLocalArrays();
   }
 
   addLeafNodes(parentNodeId: string, childNodeId: string): void {
-    // Create 2-4 small leaf/twig nodes between parent and child
-    const numLeaves = 2 + Math.floor(Math.random() * 3); // 2-4 leaves
+    const numLeaves = 2 + Math.floor(Math.random() * 3);
 
     const parentNode = this.store.acts.getNodeRef(parentNodeId);
     const childNode = this.store.acts.getNodeRef(childNodeId);
@@ -696,40 +516,35 @@ export class TreePhysics {
     }
 
     for (let i = 0; i < numLeaves; i++) {
-      // Position leaves around the midpoint between parent and child
       const parentPos = parentNode.body.position;
       const childPos = childNode.body.position;
       const midX = (parentPos.x + childPos.x) * 0.5;
       const midY = (parentPos.y + childPos.y) * 0.5;
 
-      // Add some random offset for natural spread
       const offsetX = (Math.random() - 0.5) * 60;
       const offsetY = (Math.random() - 0.5) * 40;
 
       const leafBody = Bodies.circle(midX + offsetX, midY + offsetY, CFG.leafRadius, {
-        frictionAir: CFG.airFriction * 1.5, // Leaves have more air resistance
+        frictionAir: CFG.airFriction * 1.5,
         render: {
-          fillStyle: '#32CD32', // Bright lime green for leaves
-          strokeStyle: '#006400', // Dark green border
-          lineWidth: 2, // Thicker border to make them more visible
+          fillStyle: '#32CD32',
+          strokeStyle: '#006400',
+          lineWidth: 2,
         },
         collisionFilter: { group: parentNode.body.collisionFilter.group },
       });
       const leafId = `leaf_${generateUUID()}`;
       leafBody.label = leafId;
 
-      // Create leaf node data with parentId set directly
       const leafNodeData: TreeNodeData = {
         id: leafId,
-        parentId: parentNodeId, // Set parent directly since we know it exists
+        parentId: parentNodeId,
         body: leafBody,
         constraintIds: [],
         nodeType: 'leaf',
       };
-      treeState.acts.addNodeRef(leafNodeData);
+      this.store.acts.addNodeRef(leafNodeData);
 
-      // Connect leaf to parent with flexible spring
-      console.log(`🍃 Creating leaf ${leafId} -> parent ${parentNodeId}`);
       const springs = this.getSpringSettings();
       const constraintId = this.store.acts.connectNodeRefs(
         parentNodeId,
@@ -742,20 +557,12 @@ export class TreePhysics {
       const constraint = this.store.acts.getConstraintRef(constraintId);
       if (constraint) {
         World.add(world, [leafBody, constraint]);
-        console.log(`✅ Added leaf ${leafId} with constraint ${constraintId} to physics world`);
-
-        // Verify the leaf node has the constraint in its list
-        const leafNode = this.store.acts.getNodeRef(leafId);
-        console.log(`📋 Leaf ${leafId} constraint count: ${leafNode?.constraintIds.length || 0}`);
-      } else {
-        console.error(`❌ Failed to create constraint for leaf ${leafId}`);
       }
     }
   }
 
   addTerminalLeaves(terminalNodeId: string): void {
-    // Create 3-6 leaves around terminal nodes for a fuller appearance
-    const numLeaves = 3 + Math.floor(Math.random() * 4); // 3-6 leaves
+    const numLeaves = 3 + Math.floor(Math.random() * 4);
 
     const terminalNode = this.store.acts.getNodeRef(terminalNodeId);
     if (!terminalNode) {
@@ -765,17 +572,16 @@ export class TreePhysics {
     for (let i = 0; i < numLeaves; i++) {
       const nodePos = terminalNode.body.position;
 
-      // Create leaves in a circle around the terminal node
       const angle = (i / numLeaves) * Math.PI * 2;
-      const radius = 25 + Math.random() * 20; // 25-45 pixels from center
+      const radius = 25 + Math.random() * 20;
 
       const leafX = nodePos.x + Math.cos(angle) * radius;
       const leafY = nodePos.y + Math.sin(angle) * radius;
 
       const leafBody = Bodies.circle(leafX, leafY, CFG.leafRadius, {
-        frictionAir: CFG.airFriction * 1.5, // Leaves have more air resistance
+        frictionAir: CFG.airFriction * 1.5,
         render: {
-          fillStyle: '#90EE90', // Light green for leaves
+          fillStyle: '#90EE90',
           strokeStyle: '#228B22',
           lineWidth: 1,
         },
@@ -784,17 +590,15 @@ export class TreePhysics {
       const leafId = `terminal_leaf_${generateUUID()}`;
       leafBody.label = leafId;
 
-      // Create leaf node data with parentId set directly
       const leafNodeData: TreeNodeData = {
         id: leafId,
-        parentId: terminalNodeId, // Set parent directly since we know it exists
+        parentId: terminalNodeId,
         body: leafBody,
         constraintIds: [],
         nodeType: 'terminal_leaf',
       };
       this.store.acts.addNodeRef(leafNodeData);
 
-      // Connect leaf to terminal node with flexible spring
       const springs = this.getSpringSettings();
       const constraintId = this.store.acts.connectNodeRefs(
         terminalNodeId,

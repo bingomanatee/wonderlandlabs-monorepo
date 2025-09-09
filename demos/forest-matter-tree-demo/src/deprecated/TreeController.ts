@@ -1,4 +1,4 @@
-import { Physics } from './PhysicsManager';
+import { Physics } from './PhysicsUtils';
 import {
   CreateTerminalLeafBodyParams,
   forestryTreeData,

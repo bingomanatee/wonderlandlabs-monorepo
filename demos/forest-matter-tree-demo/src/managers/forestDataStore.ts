@@ -101,13 +101,12 @@ export default function forestDataStore(canvas: HTMLCanvasElement): StoreIF<Tree
         value: TreeStoreData,
         parentId: string,
         childId: string,
-        length: number,
-        stiffness: number,
-        damping: number,
+        spring: SpringSettings,
         isLeaf: boolean = false
       ): string {
         const parent = this.acts.getNode(parentId);
         const child = this.acts.getNode(childId);
+        const { length, stiffness, damping } = spring;
         if (!parent || !child) {
           throw new Error('Parent or child node not found');
         }

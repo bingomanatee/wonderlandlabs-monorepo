@@ -1,47 +1,36 @@
-import { CFG } from './constants';
+import { CFG, RESOURCES } from './constants';
 import { TreeState } from '../types';
 import type { StoreIF } from '@wonderlandlabs/forestry4';
 import { TreeStoreData } from './forestDataStore';
 import { SerializableNodeData } from './types';
 import { generateUUID } from '../GenerateUUID';
-import { PhysicsManager } from './PhysicsManager';
+import { PhysicsUtils } from './PhysicsUtils';
 
-// Coordinates between serializable data and physics runtime
+type NabParams = {
+  depth: Map<string, number>;
+  idxByDepth: Map<Number, number>;
+  canvasWidth: number;
+  canvasHeight: number;
+  counts: Map<number, number>;
+  bodyIds: string[];
+};
+
 export class TreeController {
   public store: StoreIF<TreeStoreData>;
-  public mgr: PhysicsManager;
+  public utils: PhysicsUtils;
+
   constructor(store: StoreIF<TreeState>) {
     this.store = store;
-    this.mgr = new PhysicsManager(store);
+    this.utils = new PhysicsUtils(store);
   }
 
-  // Generate and build a complete tree
   generateTree(canvasWidth: number, canvasHeight: number): string {
-    console.log('🌳 Generating new tree...');
-
-    // 1. Generate tree structure (serializable)
     const { adjacency, rootId } = this.store.acts.generateRandomTree();
-
-    // 2. Build physics representation
     this.buildPhysicsTree(adjacency, rootId, canvasWidth, canvasHeight);
-
     return rootId;
   }
 
-  // Build physics objects from tree structure
-  private buildPhysicsTree(
-    adjacency: Map<string, string[]>,
-    rootId: string,
-    canvasWidth: number,
-    canvasHeight: number
-  ): void {
-    // Clear existing physics
-    this.mgr.clear();
-
-    // Calculate spring settings based on canvas size
-    const springs = this.getSpringSettings(canvasHeight);
-
-    // Compute depths for layout
+  private makeDepth(rootId, adjacency) {
     const depth = new Map([[rootId, 0]]);
     const q = [rootId];
     while (q.length) {
@@ -53,6 +42,58 @@ export class TreeController {
         }
       }
     }
+    return depth;
+  }
+
+  private createNodeAndBody = (id: string, nabParams: NabParams): void => {
+    const { depth, idxByDepth, canvasHeight, canvasWidth, counts, bodyIds } = nabParams;
+    const d = depth.get(id) ?? 0;
+    const k = idxByDepth.get(d) || 0;
+    idxByDepth.set(d, k + 1);
+    const slots = counts.get(d);
+
+    const spreadWidth = canvasWidth * 0.6;
+    const nodePosition = ((k + 1) / (slots + 1)) * spreadWidth;
+    const x = canvasWidth * 0.5 - spreadWidth * 0.5 + nodePosition;
+    const y = canvasHeight - 80 - d * 45;
+
+    const nodeData: SerializableNodeData = {
+      id,
+      nodeType: 'branch',
+      constraintIds: [],
+    };
+    this.store.acts.addNode(nodeData);
+
+    const bodyProps = {
+      frictionAir: CFG.airFriction,
+      inertia: Infinity,
+      inverseInertia: 0,
+      render: {
+        fillStyle: '#DC143C',
+        strokeStyle: '#8B0000',
+        lineWidth: 2,
+      },
+      collisionFilter: { group: -1 },
+    };
+
+    const body = this.utils.createBody(nodeData, x, y, CFG.nodeRadius, bodyProps);
+
+    (body as any).repulsionFactor = 1.0;
+
+    bodyIds.push(id);
+  };
+
+  private buildPhysicsTree(
+    adjacency: Map<string, string[]>,
+    rootId: string,
+    canvasWidth: number,
+    canvasHeight: number
+  ): void {
+    this.utils.clear();
+
+    const springs = this.utils.getSpringSettings(canvasHeight);
+
+    const depth = this.makeDepth(rootId, adjacency);
     const maxDepth = Math.max(...depth.values());
     const counts = new Map();
     for (const [id, d] of depth) {
@@ -60,61 +101,27 @@ export class TreeController {
     }
     const idxByDepth = new Map();
 
-    // Create physics bodies and serializable nodes
     const bodyIds: string[] = [];
 
-    const createNodeAndBody = (id: string): void => {
-      const d = depth.get(id) ?? 0;
-      const k = idxByDepth.get(d) || 0;
-      idxByDepth.set(d, k + 1);
-      const slots = counts.get(d);
-
-      // Position calculation
-      const spreadWidth = canvasWidth * 0.6;
-      const nodePosition = ((k + 1) / (slots + 1)) * spreadWidth;
-      const x = canvasWidth * 0.5 - spreadWidth * 0.5 + nodePosition;
-      const y = canvasHeight - 80 - d * 45;
-
-      // Create serializable node data
-      const nodeData: SerializableNodeData = {
-        id,
-        nodeType: 'branch',
-        constraintIds: [],
-      };
-      this.store.acts.addNode(nodeData);
-
-      // Create physics body with low inertia
-      const body = this.mgr.createBody(nodeData, x, y, CFG.nodeRadius, {
-        frictionAir: CFG.airFriction,
-        inertia: Infinity, // Prevent rotation for more stable movement
-        inverseInertia: 0, // No rotational inertia
-        render: {
-          fillStyle: '#DC143C', // Crimson red for branches
-          strokeStyle: '#8B0000', // Dark red border
-          lineWidth: 2,
-        },
-        collisionFilter: { group: -1 }, // Prevent collisions between tree nodes
-      });
-
-      // Branches have full repulsion strength
-      (body as any).repulsionFactor = 1.0;
-
-      bodyIds.push(id);
-    };
-
-    // Create all nodes first
     const allNodeIds = new Set([rootId]);
     adjacency.forEach((children, parent) => {
       allNodeIds.add(parent);
       children.forEach((child) => allNodeIds.add(child));
     });
 
-    allNodeIds.forEach((id) => createNodeAndBody(id));
+    const nabProps: NabParams = {
+      bodyIds,
+      canvasWidth,
+      canvasHeight,
+      counts,
+      idxByDepth,
+      depth,
+    };
 
-    // Add all bodies to physics world
-    this.mgr.addBodiesToWorld(bodyIds);
+    allNodeIds.forEach((id) => this.createNodeAndBody(id, nabProps));
 
-    // Create constraints between connected nodes
+    this.utils.addBodiesToWorld(bodyIds);
+
     const constraintIds: string[] = [];
 
     adjacency.forEach((children, parentId) => {
@@ -123,39 +130,32 @@ export class TreeController {
       children.forEach((childId) => {
         const childDepth = depth.get(childId) ?? 0;
 
-        // Calculate spring settings based on depth
         const depthFactor = childDepth / maxDepth;
-        const springLength = springs.spring.length * (1 - depthFactor * 0.4);
-        const springStiffness = springs.spring.stiffness * (1 + depthFactor * 2);
-        const springDamping = springs.spring.damping * (1 + depthFactor * 0.5);
+        const length = springs.spring.length * (1 - depthFactor * 0.4);
+        const stiffness = springs.spring.stiffness * (1 + depthFactor * 2);
+        const damping = springs.spring.damping * (1 + depthFactor * 0.5);
 
-        // Create constraint in data layer
         const constraintId = this.store.acts.connectNodes(
           parentId,
           childId,
-          springLength,
-          springStiffness,
-          springDamping,
+          { length, stiffness, damping },
           false
         );
 
-        // Create physics constraint
         const constraintData = this.store.acts.getConstraint(constraintId);
         if (constraintData) {
-          const physicsConstraint = this.mgr.createConstraint(constraintData);
+          const physicsConstraint = this.utils.createConstraint(constraintData);
           if (physicsConstraint) {
             constraintIds.push(constraintId);
           }
         }
 
-        // Add leaf nodes between parent and child (skip for root level)
         if (parentDepth > 0) {
           this.addLeafNodes(parentId, childId, canvasHeight);
         }
       });
     });
 
-    // Add terminal leaves to end nodes
     allNodeIds.forEach((nodeId) => {
       const children = adjacency.get(nodeId) || [];
       const nodeDepth = depth.get(nodeId) ?? 0;
@@ -165,19 +165,15 @@ export class TreeController {
       }
     });
 
-    // Add all constraints to physics world
-    this.mgr.addConstraintsToWorld(constraintIds);
-
-    console.log(`🔗 Created ${constraintIds.length} constraints`);
+    this.utils.addConstraintsToWorld(constraintIds);
   }
 
-  // Add leaf nodes between parent and child
   private addLeafNodes(parentNodeId: string, childNodeId: string, canvasHeight: number): void {
-    const numLeaves = 2 + Math.floor(Math.random() * 3); // 2-4 leaves
-    const springs = this.getSpringSettings(canvasHeight);
+    const numLeaves = 2 + Math.floor(Math.random() * 3);
+    const springs = this.utils.getSpringSettings(canvasHeight);
 
-    const parentBody = this.mgr.getBody(parentNodeId);
-    const childBody = this.mgr.getBody(childNodeId);
+    const parentBody = this.store.getRes([RESOURCES.BODIES, parentNodeId]);
+    const childBody = this.store.getRes([RESOURCES.BODIES, childNodeId]);
     if (!parentBody || !childBody) {
       return;
     }
@@ -202,56 +198,49 @@ export class TreeController {
       };
       this.store.acts.addNode(leafData);
 
-      // Create physics body with low inertia
-      const leafBody = this.mgr.createBody(
+      const leafBody = this.utils.createBody(
         leafData,
         midX + offsetX,
         midY + offsetY,
         CFG.leafRadius,
         {
           frictionAir: CFG.airFriction * 1.5,
-          inertia: Infinity, // Prevent rotation
-          inverseInertia: 0, // No rotational inertia
+          inertia: Infinity,
+          inverseInertia: 0,
           render: {
-            fillStyle: '#32CD32', // Bright lime green for leaves
-            strokeStyle: '#006400', // Dark green border
+            fillStyle: '#32CD32',
+            strokeStyle: '#006400',
             lineWidth: 2,
           },
           collisionFilter: { group: -1 },
         }
       );
 
-      // Assign random repulsion factor to this leaf (0.0 to 0.3)
-      // Lower values allow leaves to cluster and overlap
       (leafBody as any).repulsionFactor = Math.random() * 0.3;
 
-      // Create constraint
       const constraintId = this.store.acts.connectNodes(
         parentNodeId,
         leafId,
-        springs.leafSpring.length,
-        springs.leafSpring.stiffness,
-        springs.leafSpring.damping,
+        springs.leafSpring,
         true
       );
 
       const constraintData = this.store.acts.getConstraint(constraintId);
       if (constraintData) {
-        const physicsConstraint = this.mgr.createConstraint(constraintData);
+        const physicsConstraint = this.utils.createConstraint(constraintData);
         if (physicsConstraint) {
-          this.mgr.addConstraintsToWorld([constraintId]);
-          this.mgr.addBodiesToWorld([leafId]);
+          this.utils.addConstraintsToWorld([constraintId]);
+          this.utils.addBodiesToWorld([leafId]);
         }
       }
     }
   }
 
-  // Add terminal leaves to end nodes
   private addTerminalLeaves(terminalNodeId: string, canvasHeight: number): void {
-    const numLeaves = 3 + Math.floor(Math.random() * 4); // 3-6 leaves
-    const springs = this.getSpringSettings(canvasHeight);
+    const numLeaves = 3 + Math.floor(Math.random() * 4);
+    const springs = this.utils.getSpringSettings(canvasHeight);
 
-    const terminalBody = this.mgr.getBody(terminalNodeId);
+    const terminalBody = this.store.getRes([RESOURCES.BODIES, terminalNodeId]);
     if (!terminalBody) {
       return;
     }
@@ -275,68 +264,40 @@ export class TreeController {
       };
       this.store.acts.addNode(leafData);
 
-      // Create physics body with low inertia
-      const terminalLeafBody = this.mgr.createBody(leafData, leafX, leafY, CFG.leafRadius, {
+      const terminalLeafBody = this.utils.createBody(leafData, leafX, leafY, CFG.leafRadius, {
         frictionAir: CFG.airFriction * 1.5,
-        inertia: Infinity, // Prevent rotation
-        inverseInertia: 0, // No rotational inertia
+        inertia: Infinity,
+        inverseInertia: 0,
         render: {
-          fillStyle: '#32CD32', // Bright lime green for leaves
-          strokeStyle: '#006400', // Dark green border
+          fillStyle: '#32CD32',
+          strokeStyle: '#006400',
           lineWidth: 2,
         },
         collisionFilter: { group: -1 },
       });
 
-      // Assign random repulsion factor to this terminal leaf (0.0 to 0.4)
-      // Terminal leaves can have slightly higher variation for more clustering
       (terminalLeafBody as any).repulsionFactor = Math.random() * 0.4;
 
-      // Create constraint
       const constraintId = this.store.acts.connectNodes(
         terminalNodeId,
         leafId,
-        springs.leafSpring.length,
-        springs.leafSpring.stiffness,
-        springs.leafSpring.damping,
+        springs.leafSpring,
         true
       );
 
       const constraintData = this.store.acts.getConstraint(constraintId);
       if (constraintData) {
-        const physicsConstraint = this.mgr.createConstraint(constraintData);
+        const physicsConstraint = this.utils.createConstraint(constraintData);
         if (physicsConstraint) {
-          this.mgr.addConstraintsToWorld([constraintId]);
-          this.mgr.addBodiesToWorld([leafId]);
+          this.utils.addConstraintsToWorld([constraintId]);
+          this.utils.addBodiesToWorld([leafId]);
         }
       }
     }
   }
 
-  // Calculate spring settings based on canvas size
-  private getSpringSettings(canvasHeight: number) {
-    return {
-      spring: {
-        length: canvasHeight * CFG.springLengthPercent,
-        stiffness: CFG.springStiffness,
-        damping: CFG.springDamping,
-      },
-      twigSpring: {
-        length: canvasHeight * CFG.twigSpringLengthPercent,
-        stiffness: CFG.twigSpringStiffness,
-        damping: CFG.twigSpringDamping,
-      },
-      leafSpring: {
-        length: canvasHeight * CFG.leafSpringLengthPercent,
-        stiffness: CFG.leafSpringStiffness,
-        damping: CFG.leafSpringDamping,
-      },
-    };
-  }
-
-  // Update spring lengths (for resize)
   updateSpringLengths(canvasHeight: number): void {
-    const springs = this.getSpringSettings(canvasHeight);
+    const springs = this.utils.getSpringSettings(canvasHeight);
 
     this.store.acts.traverseNodes(this.store.value.rootId, (node) => {
       node.constraintIds.forEach((constraintId) => {
@@ -346,18 +307,14 @@ export class TreeController {
             ? springs.leafSpring.length
             : springs.spring.length;
 
-          // Update both data and physics
           this.store.acts.setConstraintLength(constraintId, newLength);
-          this.mgr.updateConstraint(constraintId, { length: newLength });
+          this.utils.updateConstraint(constraintId, { length: newLength });
         }
       });
     });
   }
 
-  // Scale tree for resize
   scaleTree(oldWidth: number, oldHeight: number, newWidth: number, newHeight: number): void {
-    console.log(`🔄 Scaling tree from ${oldWidth}x${oldHeight} to ${newWidth}x${newHeight}`);
-
     const scaleX = newWidth / oldWidth;
     const scaleY = newHeight / oldHeight;
     const oldCenterX = oldWidth * 0.5;
@@ -365,12 +322,8 @@ export class TreeController {
     const newCenterX = newWidth * 0.5;
     const newCenterY = newHeight * 0.5;
 
-    // Scale all physics bodies from old center to new center
-    this.mgr.scaleAllPositions(scaleX, scaleY, oldCenterX, oldCenterY, newCenterX, newCenterY);
+    this.utils.scaleAllPositions(scaleX, scaleY, oldCenterX, oldCenterY, newCenterX, newCenterY);
 
-    // Update spring lengths for new canvas size
     this.updateSpringLengths(newHeight);
-
-    console.log(`✅ Tree scaling complete`);
   }
 }

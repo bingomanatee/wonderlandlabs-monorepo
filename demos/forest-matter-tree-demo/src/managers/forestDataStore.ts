@@ -6,10 +6,10 @@ import type {
   SerializableNodeData,
   SpringSettings,
   TreeNodeData,
-} from './types.ts';
-import { globalResources, RESOURCES } from './constants.ts';
+} from './types';
+import { globalResources, RESOURCES } from './constants';
 import { Constraint, World } from 'matter-js';
-import createBranches from './createBranches.ts';
+import createBranches from './createBranches';
 
 export type TreeStoreData = {
   nodes: Map<string, SerializableNodeData>;

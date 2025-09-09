@@ -1,4 +1,4 @@
-import { BRANCH_CHILD_COUNTS } from './constants.ts';
+import { BRANCH_CHILD_COUNTS } from './constants';
 import { shuffle } from 'lodash-es';
 
 export default function createBranches(

@@ -20,10 +20,10 @@ import type {
   SpringSettings,
   TreeNodeData,
 } from './types';
-import type { TreeController } from './TreeController.ts';
-import { TreeStoreData } from './forestDataStore.ts';
+import type { TreeController } from './TreeController';
+import { TreeStoreData } from './forestDataStore';
 import type { StoreIF } from '@wonderlandlabs/forestry4';
-import { PhysicsMgr } from './PhysicsManager.ts';
+import { PhysicsMgr } from './PhysicsManager';
 
 export class TreePhysics {
   public rootId?: string;

@@ -1,10 +1,10 @@
 import { PhysicsMgr } from './PhysicsManager';
 import { CFG } from './constants';
-import { TreeState } from '../types.ts';
+import { TreeState } from '../types';
 import type { StoreIF } from '@wonderlandlabs/forestry4';
-import { TreeStoreData } from './forestDataStore.ts';
-import { SerializableNodeData } from './types.ts';
-import { generateUUID } from '../GenerateUUID.ts';
+import { TreeStoreData } from './forestDataStore';
+import { SerializableNodeData } from './types';
+import { generateUUID } from '../GenerateUUID';
 
 // Coordinates between serializable data and physics runtime
 export class TreeController {

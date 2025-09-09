@@ -31,6 +31,22 @@ export function PixiTree() {
     () => forestDataStore(document.createElement('canvas')) // Create dummy canvas for now
   );
 
+  // Listen for season changes and redraw background + update leaf colors
+  useEffect(() => {
+    const graphics = graphicsRef.current;
+    const app = pixiAppRef.current;
+
+    if (graphics && app) {
+      // Update background
+      renderBackground(graphics.backgroundGraphics, app, dataStore.value.colors);
+
+      // Update leaf colors
+      if (graphics.leafParticleSystem) {
+        graphics.leafParticleSystem.updateAllLeafColors(dataStore.value.colors.leafColor);
+      }
+    }
+  }, [dataStore.value.season]); // Redraw when season changes
+
   useEffect(() => {
     const container = containerRef.current;
     if (!container || isInitializedRef.current) return;
@@ -60,8 +76,8 @@ export function PixiTree() {
         const { backgroundGraphics, treeGraphics, coordGraphics, leafParticleSystem } = graphics;
         graphicsRef.current = graphics;
 
-        // Render initial background
-        renderBackground(backgroundGraphics, pixiApp, 'summer');
+        // Render initial background using colors from store
+        renderBackground(backgroundGraphics, pixiApp, dataStore.value.colors);
 
         // Create physics simulation with a dummy canvas (we'll use PIXI for rendering)
         const dummyCanvas = document.createElement('canvas');
@@ -136,7 +152,7 @@ export function PixiTree() {
       // and manually trigger tree scaling
       setTimeout(() => {
         // Small delay to ensure PIXI has finished resizing
-        renderBackground(graphics.backgroundGraphics, pixiApp, 'summer');
+        renderBackground(graphics.backgroundGraphics, pixiApp, dataStore.value.colors);
 
         // Get old and new dimensions for scaling
         const lastSize = lastSizeRef.current;

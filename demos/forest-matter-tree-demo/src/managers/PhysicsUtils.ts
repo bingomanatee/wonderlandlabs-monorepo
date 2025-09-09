@@ -148,7 +148,9 @@ export class PhysicsUtils {
     idxByDepth.set(d, k + 1);
     const slots = counts.get(d);
 
-    const spreadWidth = canvasWidth * 0.6;
+    // Use scaleBasis for consistent scaling instead of canvasWidth
+    const scaleBasis = this.store.value.scaleBasis || canvasWidth; // Fallback to canvasWidth if undefined
+    const spreadWidth = scaleBasis * 0.6;
     const nodePosition = ((k + 1) / (slots + 1)) * spreadWidth;
     const x = canvasWidth * 0.5 - spreadWidth * 0.5 + nodePosition;
     const y = canvasHeight - 80 - d * 45;
@@ -343,19 +345,21 @@ export class PhysicsUtils {
   }
 
   getSpringSettings(canvasHeight: number) {
+    // Use scaleBasis for consistent spring lengths instead of canvasHeight
+    const scaleBasis = this.store.value.scaleBasis || canvasHeight; // Fallback to canvasHeight if undefined
     return {
       spring: {
-        length: canvasHeight * CFG.springLengthPercent,
+        length: scaleBasis * CFG.springLengthPercent,
         stiffness: CFG.springStiffness,
         damping: CFG.springDamping,
       },
       twigSpring: {
-        length: canvasHeight * CFG.twigSpringLengthPercent,
+        length: scaleBasis * CFG.twigSpringLengthPercent,
         stiffness: CFG.twigSpringStiffness,
         damping: CFG.twigSpringDamping,
       },
       leafSpring: {
-        length: canvasHeight * CFG.leafSpringLengthPercent,
+        length: scaleBasis * CFG.leafSpringLengthPercent,
         stiffness: CFG.leafSpringStiffness,
         damping: CFG.leafSpringDamping,
       },

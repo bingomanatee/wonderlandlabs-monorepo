@@ -61,7 +61,7 @@ export class LeafParticleSystem {
     console.log('Using fallback textures (white squares with tinting)');
   }
 
-  addLeaf(leafData: LeafParticle): void {
+  addLeaf(leafData: LeafParticle, leafColor?: number): void {
     if (this.leafTextures.length === 0) {
       console.warn('Leaf textures not loaded yet');
       return;
@@ -89,11 +89,16 @@ export class LeafParticleSystem {
       sprite.scale.set(finalScale); // Use calculated scale for actual leaf images
     }
 
-    // Set color based on season
-    if (leafData.season === 'autumn' || leafData.season === 'winter') {
-      sprite.tint = 0x8B4513; // Brown
+    // Set color based on seasonal color or fallback to season-based logic
+    if (leafColor !== undefined) {
+      sprite.tint = leafColor;
     } else {
-      sprite.tint = 0x32CD32; // Green
+      // Fallback to hardcoded seasonal colors
+      if (leafData.season === 'autumn' || leafData.season === 'winter') {
+        sprite.tint = 0x8B4513; // Brown
+      } else {
+        sprite.tint = 0x32CD32; // Green
+      }
     }
 
     // Use the pre-calculated rotation from leafData
@@ -210,6 +215,13 @@ export class LeafParticleSystem {
           }
         }
       }
+    });
+  }
+
+  // Update all leaf colors for season change
+  updateAllLeafColors(leafColor: number): void {
+    this.particles.forEach((sprite) => {
+      sprite.tint = leafColor;
     });
   }
 }

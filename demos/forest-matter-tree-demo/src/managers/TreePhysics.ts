@@ -251,6 +251,8 @@ export class TreePhysics {
     }
   }
 
+
+
   // Wind force application
   private windForce = { x: 0, y: 0 };
 
@@ -273,6 +275,8 @@ export class TreePhysics {
         });
       }
     }
+
+
 
     // Update the physics engine
     Engine.update(engine, 16.666); // ~60 FPS

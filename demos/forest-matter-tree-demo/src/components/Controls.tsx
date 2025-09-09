@@ -24,64 +24,20 @@ export default function Controls({ state }: ControlsProps) {
     }
   };
 
-  const handleApplyWind = () => {
-    // Apply some wind force
-    const physics = state.res.get('physics');
-    if (physics && physics.applyWind) {
-      physics.applyWind({ x: Math.random() * 0.01 - 0.005, y: 0 });
-    }
-  };
-
-  const handleResetWind = () => {
-    // Reset wind forces
-    const physics = state.res.get('physics');
-    if (physics && physics.applyWind) {
-      physics.applyWind({ x: 0, y: 0 });
-    }
-  };
-
-  const handleSeasonChange = (season: string) => {
-    // Update background based on season
-    const backgroundGraphics = state.res.get('backgroundGraphics');
-    const pixiApp = state.res.get('pixiApp');
-
-    if (backgroundGraphics && pixiApp) {
-      // Re-render background with new season
-      const { renderBackground } = require('../utils/pixiGraphics');
-      renderBackground(backgroundGraphics, pixiApp, season);
-    }
+  const handleSeasonChange = (season: 'spring' | 'summer' | 'autumn' | 'winter') => {
+    // Update season in store (this also updates colors and triggers redraw)
+    state.acts.setSeason(season);
   };
 
   return (
     <div className={styles.controls}>
-      <h3>Tree Controls</h3>
-
       <button
         onClick={handleRegenerateTree}
         className={`${styles.button} ${styles.generateButton}`}
+        style={{ display: 'none' }}
       >
         Generate New Tree
       </button>
-
-      <div>
-        <h4>Wind Effects</h4>
-
-        <div className={styles.windControls}>
-          <button
-            onClick={handleApplyWind}
-            className={`${styles.button} ${styles.windButton}`}
-          >
-            Apply Wind
-          </button>
-
-          <button
-            onClick={handleResetWind}
-            className={`${styles.button} ${styles.resetButton}`}
-          >
-            Reset Wind
-          </button>
-        </div>
-      </div>
 
       <div>
         <h4>Seasons</h4>
@@ -92,27 +48,16 @@ export default function Controls({ state }: ControlsProps) {
               key={season}
               onClick={() => handleSeasonChange(season)}
               className={`${styles.button} ${styles.windButton}`}
-              style={{ fontSize: '11px', padding: '6px 8px' }}
+              style={{
+                fontSize: '11px',
+                padding: '6px 8px',
+                border: state.value.season === season ? '2px solid white' : 'none',
+              }}
             >
               {season}
             </button>
           ))}
         </div>
-      </div>
-
-      <div className={styles.instructions}>
-        <p><strong>Status:</strong></p>
-        <p>• Nodes: {state.value.nodes.size}</p>
-        <p>• Constraints: {state.value.constraints.size}</p>
-        <p>• Root ID: {state.value.rootId || 'None'}</p>
-      </div>
-
-      <div className={styles.instructions}>
-        <p><strong>Instructions:</strong></p>
-        <p>• Click "Generate New Tree" to create a new tree structure</p>
-        <p>• Use wind controls to see physics effects</p>
-        <p>• Change seasons to see different backgrounds</p>
-        <p>• Tree uses Matter.js physics with PIXI.js rendering</p>
       </div>
     </div>
   );

@@ -12,33 +12,118 @@ import { RESOURCES } from './constants';
 import { Constraint, World } from 'matter-js';
 import { PhysicsUtils } from './PhysicsUtils';
 
+export type SeasonalColors = {
+  skyTop: number;
+  skyBottom: number;
+  groundTop: number;
+  groundBottom: number;
+  branchColor: number;
+  leafColor: number;
+  stemColor: number;
+};
+
 export type TreeStoreData = {
   nodes: Map<string, SerializableNodeData>;
   constraints: Map<string, SerializableConstraintData>;
   rootId: string;
+  scaleBasis: number;
+  season: 'spring' | 'summer' | 'autumn' | 'winter';
+  colors: SeasonalColors;
 };
 
+// Get seasonal colors
+function getSeasonalColors(season: 'spring' | 'summer' | 'autumn' | 'winter'): SeasonalColors {
+  switch (season) {
+    case 'spring':
+      return {
+        skyTop: 0x87ceeb, // Sky blue
+        skyBottom: 0xb0e0e6, // Powder blue (lighter at horizon)
+        groundTop: 0x90ee90, // Light green
+        groundBottom: 0x228b22, // Forest green
+        branchColor: 0x8b4513, // Saddle brown
+        leafColor: 0x90ee90, // Light green
+        stemColor: 0x32cd32, // Lime green
+      };
+    case 'summer':
+      return {
+        skyTop: 0x4169e1, // Royal blue
+        skyBottom: 0x87ceeb, // Sky blue (lighter at horizon)
+        groundTop: 0x32cd32, // Lime green
+        groundBottom: 0x006400, // Dark green
+        branchColor: 0x654321, // Dark brown
+        leafColor: 0x228b22, // Forest green
+        stemColor: 0x32cd32, // Lime green
+      };
+    case 'autumn':
+      return {
+        skyTop: 0xff8c00, // Dark orange
+        skyBottom: 0xffd700, // Gold (lighter at horizon)
+        groundTop: 0xd2691e, // Chocolate
+        groundBottom: 0x8b4513, // Saddle brown
+        branchColor: 0x8b4513, // Saddle brown
+        leafColor: 0xff8c00, // Dark orange
+        stemColor: 0xd2691e, // Chocolate
+      };
+    case 'winter':
+      return {
+        skyTop: 0xffffff, // Slate gray
+        skyBottom: 0xc0c0c0, // Silver (lighter at horizon)
+        groundTop: 0xf0f8ff, // Alice blue (snow)
+        groundBottom: 0x333339, // Dim gray
+        branchColor: 0x2f4f4f, // Dark slate gray
+        leafColor: 0x8fbc8f, // Dark sea green (evergreen)
+        stemColor: 0x556b2f, // Dark olive green
+      };
+    default:
+      return getSeasonalColors('summer');
+  }
+}
+
 export default function forestDataStore(canvas: HTMLCanvasElement): StoreIF<TreeStoreData> {
+  // Calculate scale basis from canvas dimensions
+  const scaleBasis = (canvas.width + canvas.height) / 2;
+
+  const initialValue: TreeStoreData = {
+    nodes: new Map(),
+    constraints: new Map(),
+    rootId: '',
+    scaleBasis: scaleBasis,
+    season: 'summer' as const,
+    colors: getSeasonalColors('summer'),
+  };
+
+  console.log('---- initial value:', initialValue);
   const forest = new Forest({
-    value: {
-      nodes: new Map(),
-      constraints: new Map(),
-      rootId: '',
-    },
+    value: initialValue,
     res: new Map<string, any>([
       ['canvas', canvas],
       [RESOURCES.NODES, new Map()],
       [RESOURCES.CONSTRAINTS, new Map()],
       [RESOURCES.BODIES, new Map()],
     ]),
+    tests: (value) => {
+      if (!value.scaleBasis) {
+        console.log('bad value:', value);
+        throw new Error('no scaleBasis');
+      }
+    },
     actions: {
       // Controller methods
 
       generateTree(_, canvasWidth: number, canvasHeight: number): string {
+        console.log('generateTree called with canvas:', canvasWidth, 'x', canvasHeight);
         const { adjacency, rootId } = this.acts.generateRandomTree();
+        console.log('Generated tree structure - rootId:', rootId, 'adjacency size:', adjacency.size);
         this.acts.buildPhysicsTree(adjacency, rootId, canvasWidth, canvasHeight);
+        console.log('Built physics tree - nodes:', this.value.nodes.size, 'constraints:', this.value.constraints.size);
         return rootId;
       },
+
+      setSeason(_, season: 'spring' | 'summer' | 'autumn' | 'winter'): void {
+        this.set('season', season);
+        this.set('colors', getSeasonalColors(season));
+      },
+
       updateSpringLengths(_, canvasHeight: number): void {
         const utils = this.res.get(RESOURCES.UTILS);
         const springs = utils.getSpringSettings(canvasHeight);
@@ -283,7 +368,8 @@ export default function forestDataStore(canvas: HTMLCanvasElement): StoreIF<Tree
       generateRandomTree(): { adjacency: Map<string, string[]>; rootId: string } {
         const utils = this.res.get(RESOURCES.UTILS);
         // Clear existing state
-        this.mutate(() => ({
+        this.mutate((value) => ({
+          ...value,
           nodes: new Map(),
           constraints: new Map(),
           roodId: '',

@@ -5,22 +5,7 @@ import type { TreeStoreData } from '../managers/forestDataStore';
 import type { TreeNodeData, SerializableNodeData } from '../types';
 import { LeafParticleSystem, type LeafParticle } from './leafParticleSystem';
 
-// Get seasonal background colors for PIXI
-function getSeasonalBackgroundColor(season: string): number {
-  switch (season) {
-    case 'spring':
-      return 0x87ceeb; // Sky blue
-    case 'summer':
-      return 0x87ceeb; // Sky blue
-    case 'autumn':
-    case 'fall':
-      return 0xffa500; // Orange
-    case 'winter':
-      return 0x708090; // Slate gray
-    default:
-      return 0x87ceeb; // Default sky blue
-  }
-}
+// Colors are now managed in the store - this function is no longer needed
 
 // Create PIXI application
 export async function makePixi(container: HTMLElement): Promise<PIXI.Application> {
@@ -79,7 +64,7 @@ export async function createContainers(state: StoreIF<TreeStoreData>, pixiApp: P
 export function renderBackground(
   backgroundGraphics: PIXI.Graphics,
   pixiApp: PIXI.Application,
-  season: string = 'summer'
+  colors: { skyTop: number; skyBottom: number; groundTop: number; groundBottom: number }
 ) {
   if (!backgroundGraphics || !pixiApp) return;
 
@@ -87,18 +72,62 @@ export function renderBackground(
 
   const width = pixiApp.screen.width;
   const height = pixiApp.screen.height;
+  const horizon = height / 2;
 
-  // Sky gradient (top half)
-  const skyColor = getSeasonalBackgroundColor(season);
-  backgroundGraphics.setFillStyle({ color: skyColor });
-  backgroundGraphics.rect(0, 0, width, height / 2);
-  backgroundGraphics.fill();
+  // Create gradient effect by drawing multiple horizontal strips
+  const strips = 50; // Number of gradient strips for smooth transition
 
-  // Ground (bottom half of screen)
-  const groundColor = 0x228B22; // Forest green
-  backgroundGraphics.setFillStyle({ color: groundColor });
-  backgroundGraphics.rect(0, height / 2, width, height / 2);
-  backgroundGraphics.fill();
+  // Sky gradient (top half) - from skyTop at top to skyBottom at horizon
+  for (let i = 0; i < strips; i++) {
+    const y = (i / strips) * horizon;
+    const stripHeight = horizon / strips;
+    const ratio = i / (strips - 1); // 0 at top, 1 at horizon
+
+    // Interpolate between skyTop and skyBottom
+    const r1 = (colors.skyTop >> 16) & 0xFF;
+    const g1 = (colors.skyTop >> 8) & 0xFF;
+    const b1 = colors.skyTop & 0xFF;
+
+    const r2 = (colors.skyBottom >> 16) & 0xFF;
+    const g2 = (colors.skyBottom >> 8) & 0xFF;
+    const b2 = colors.skyBottom & 0xFF;
+
+    const r = Math.round(r1 + (r2 - r1) * ratio);
+    const g = Math.round(g1 + (g2 - g1) * ratio);
+    const b = Math.round(b1 + (b2 - b1) * ratio);
+
+    const color = (r << 16) | (g << 8) | b;
+
+    backgroundGraphics.setFillStyle({ color });
+    backgroundGraphics.rect(0, y, width, stripHeight + 1); // +1 to avoid gaps
+    backgroundGraphics.fill();
+  }
+
+  // Ground gradient (bottom half) - from skyBottom at horizon to groundBottom at bottom
+  for (let i = 0; i < strips; i++) {
+    const y = horizon + (i / strips) * horizon;
+    const stripHeight = horizon / strips;
+    const ratio = i / (strips - 1); // 0 at horizon, 1 at bottom
+
+    // Interpolate between skyBottom (horizon) and groundBottom (bottom)
+    const r1 = (colors.skyBottom >> 16) & 0xFF;
+    const g1 = (colors.skyBottom >> 8) & 0xFF;
+    const b1 = colors.skyBottom & 0xFF;
+
+    const r2 = (colors.groundBottom >> 16) & 0xFF;
+    const g2 = (colors.groundBottom >> 8) & 0xFF;
+    const b2 = colors.groundBottom & 0xFF;
+
+    const r = Math.round(r1 + (r2 - r1) * ratio);
+    const g = Math.round(g1 + (g2 - g1) * ratio);
+    const b = Math.round(b1 + (b2 - b1) * ratio);
+
+    const color = (r << 16) | (g << 8) | b;
+
+    backgroundGraphics.setFillStyle({ color });
+    backgroundGraphics.rect(0, y, width, stripHeight + 1); // +1 to avoid gaps
+    backgroundGraphics.fill();
+  }
 }
 
 // Render coordinate validation grid
@@ -144,10 +173,15 @@ export function renderTree(
 
   treeGraphics.clear();
 
+  // Get seasonal colors from store
+  const colors = state.value.colors;
+
   // Get all nodes and constraints from the store
   const allNodes = state.acts.getAllNodeRefs();
   const allConstraints = state.acts.getAllConstraintRefs();
   const serializedNodes = Array.from(state.value.nodes.values());
+
+  console.log('renderTree called - nodes:', allNodes.length, 'constraints:', allConstraints.length, 'serialized:', serializedNodes.length);
 
   // Find max depth for scaling
   let maxDepth = 0;
@@ -170,15 +204,15 @@ export function renderTree(
                       (nodeBData && (nodeBData.nodeType === 'leaf' || nodeBData.nodeType === 'terminal_leaf'));
 
     if (isLeafStem) {
-      // Draw stem (green, 2px wide)
-      treeGraphics.setStrokeStyle({ color: 0x228B22, width: 2 });
+      // Draw stem using seasonal stem color
+      treeGraphics.setStrokeStyle({ color: colors.stemColor, width: 2 });
       treeGraphics.moveTo(startPos.x, startPos.y);
       treeGraphics.lineTo(endPos.x, endPos.y);
       treeGraphics.stroke();
     } else {
-      // Draw branch with depth-based thickness
+      // Draw branch with depth-based thickness using seasonal branch color
       const width = constraint.render?.lineWidth || 2;
-      const color = 0x8b4513; // Brown for branches
+      const color = colors.branchColor;
 
       treeGraphics.setStrokeStyle({ color, width });
       treeGraphics.moveTo(startPos.x, startPos.y);

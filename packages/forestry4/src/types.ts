@@ -75,6 +75,13 @@ export type Validity = {
   error?: Error;
 };
 
+export type TransFn<DataType = unknown> = (value: DataType) => void;
+export type PendingValue<DataType = unknown> = {
+  id: string;
+  value: DataType;
+  isTransaction: boolean;
+};
+
 export interface StoreIF<
   DataType,
   Actions extends ActionExposedRecord = ActionExposedRecord,
@@ -83,7 +90,7 @@ export interface StoreIF<
   name: string;
 
   subscribe(listener: Listener<DataType>): Subscription;
-
+  transact(fn: TransFn<DataType>, suspendValidation: boolean): void;
   acts: Actions;
   $: Actions;
   next: (value: Partial<DataType>) => void;
@@ -102,11 +109,7 @@ export interface StoreIF<
   // validators
   schema?: ZodParser;
   tests?: ValueTestFn<DataType> | ValueTestFn<DataType>[];
-  prep?: (
-    input: Partial<DataType>,
-    current: DataType,
-    initial: DataType,
-  ) => DataType;
+  prep?: (input: Partial<DataType>, current: DataType) => DataType;
 
   validate(value: unknown): Validity;
 

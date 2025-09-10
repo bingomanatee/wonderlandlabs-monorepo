@@ -48,16 +48,7 @@ class Forest extends Store {
     const { isValid, error } = this.validate(preparedValue);
     if (!isValid) {
       if (this.debug) {
-        console.error(
-          "cannot update ",
-          this.name,
-          "with",
-          preparedValue,
-          "(current: ",
-          this.value,
-          ")",
-          error
-        );
+        console.error(`cannot update ${this.name} with `, preparedValue, error);
       }
       throw asError(error);
     }

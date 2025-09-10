@@ -57,13 +57,8 @@ export class ForestBranch<
       const forestMessage = message as ForestMessage;
 
       switch (forestMessage.type) {
-        case 'set-pending':
-          this.setPendingFromRoot(forestMessage.payload);
-          break;
         case 'validate-all':
           this.validateAndReport();
-          // Clear pending value after validation
-          this.clearPending();
           break;
         case 'complete':
           // Complete this branch when receiving complete message
@@ -74,12 +69,6 @@ export class ForestBranch<
 
     // Continue broadcasting to children
     this.broadcast(message, true);
-  }
-
-  // Set pending value from root's new value
-  private setPendingFromRoot(rootValue: any): void {
-    const pendingValue = getPath(rootValue, this.path) as DataType;
-    this.setPending(pendingValue);
   }
 
   // Override value getter to return pending value during validation or parent value
@@ -130,7 +119,7 @@ export class ForestBranch<
 
     // Apply prep function if it exists to transform partial input to complete data
     const preparedValue = this.prep
-      ? this.prep(value, this.value, this.initialValue)
+      ? this.prep(value, this.value)
       : (value as DataType);
 
     const { isValid, error } = this.validate(preparedValue);

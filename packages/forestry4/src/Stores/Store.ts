@@ -31,7 +31,7 @@ export class Store<
    */
   #subject?: BehaviorSubject<DataType>;
   get subject(): Observable<DataType> {
-    return this.#subject;
+    return this.#subject!;
   }
 
   $: Actions;
@@ -41,9 +41,6 @@ export class Store<
   }
 
   constructor(p: StoreParams<DataType, Actions>, noSubject = false) {
-    // Store initial value
-    this.initialValue = p.value;
-
     // Apply prep function to initial value if it exists
     const processedValue = p.prep ? p.prep({}, p.value, p.value) : p.value;
 
@@ -62,10 +59,7 @@ export class Store<
     if (p.tests) {
       this.tests = testize<DataType>(p.tests, self);
     }
-
-    if (p.prep) {
-      this.prep = p.prep;
-    }
+    this.prep = p.prep;
 
     if (p.name && typeof p.name === 'string') {
       this.#name = p.name;
@@ -76,12 +70,7 @@ export class Store<
   }
 
   public debug: boolean; // more alerts on validation failures;
-  public prep?: (
-    input: Partial<DataType>,
-    current: DataType,
-    initial: DataType,
-  ) => DataType;
-  protected initialValue: DataType;
+  public prep?: (input: Partial<DataType>, current: DataType) => DataType;
   public res: Map<string, any> = new Map();
 
   #name?: string;
@@ -122,7 +111,7 @@ export class Store<
 
     // Apply prep function if it exists to transform partial input to complete data
     const preparedValue = this.prep
-      ? this.prep(value, this.value, this.initialValue)
+      ? this.prep(value, this.value!)
       : (value as DataType);
 
     const { isValid, error } = this.validate(preparedValue);

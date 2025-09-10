@@ -23,7 +23,6 @@ class Store {
     return this.$;
   }
   constructor(p, noSubject = false) {
-    this.initialValue = p.value;
     const processedValue = p.prep ? p.prep({}, p.value, p.value) : p.value;
     if (!noSubject) {
       this.#subject = new BehaviorSubject(processedValue);
@@ -37,9 +36,7 @@ class Store {
     if (p.tests) {
       this.tests = testize(p.tests, self);
     }
-    if (p.prep) {
-      this.prep = p.prep;
-    }
+    this.prep = p.prep;
     if (p.name && typeof p.name === "string") {
       this.#name = p.name;
     }
@@ -50,7 +47,6 @@ class Store {
   debug;
   // more alerts on validation failures;
   prep;
-  initialValue;
   res = /* @__PURE__ */ new Map();
   #name;
   get name() {
@@ -78,7 +74,7 @@ class Store {
     if (!this.isActive) {
       throw new Error("Cannot update completed store");
     }
-    const preparedValue = this.prep ? this.prep(value, this.value, this.initialValue) : value;
+    const preparedValue = this.prep ? this.prep(value, this.value) : value;
     const { isValid, error } = this.validate(preparedValue);
     if (!this.subject) {
       throw new Error("Store requires subject -- or override of next()");

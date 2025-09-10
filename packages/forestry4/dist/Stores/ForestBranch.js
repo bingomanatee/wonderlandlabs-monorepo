@@ -31,12 +31,8 @@ class ForestBranch extends Store {
     if (message && typeof message === "object" && message.type) {
       const forestMessage = message;
       switch (forestMessage.type) {
-        case "set-pending":
-          this.setPendingFromRoot(forestMessage.payload);
-          break;
         case "validate-all":
           this.validateAndReport();
-          this.clearPending();
           break;
         case "complete":
           this.complete();
@@ -44,11 +40,6 @@ class ForestBranch extends Store {
       }
     }
     this.broadcast(message, true);
-  }
-  // Set pending value from root's new value
-  setPendingFromRoot(rootValue) {
-    const pendingValue = getPath(rootValue, this.path);
-    this.setPending(pendingValue);
   }
   // Override value getter to return pending value during validation or parent value
   get value() {
@@ -84,7 +75,7 @@ class ForestBranch extends Store {
     if (!this.isActive) {
       throw new Error("Cannot update completed store");
     }
-    const preparedValue = this.prep ? this.prep(value, this.value, this.initialValue) : value;
+    const preparedValue = this.prep ? this.prep(value, this.value) : value;
     const { isValid, error } = this.validate(preparedValue);
     if (!isValid) {
       throw error;

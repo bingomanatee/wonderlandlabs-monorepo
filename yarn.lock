@@ -6048,25 +6048,25 @@ __metadata:
 
 "@wonderlandlabs/forestry4@file:../../packages/forestry4::locator=forest-matter-tree-demo%40workspace%3Ademos%2Fforest-matter-tree-demo":
   version: 4.0.3
-  resolution: "@wonderlandlabs/forestry4@file:../../packages/forestry4#../../packages/forestry4::hash=a538ba&locator=forest-matter-tree-demo%40workspace%3Ademos%2Fforest-matter-tree-demo"
+  resolution: "@wonderlandlabs/forestry4@file:../../packages/forestry4#../../packages/forestry4::hash=6c51f7&locator=forest-matter-tree-demo%40workspace%3Ademos%2Fforest-matter-tree-demo"
   dependencies:
     "@wonderlandlabs/walrus": "npm:0.1.3"
     immer: "npm:^10.1.1"
     lodash-es: "npm:^4.17.21"
     rxjs: "npm:^7.8.1"
-  checksum: 10c0/fea7a77f053defa16e11ee9983b5d9b0d838cfa2622a3a46122afee0fa02ccf271e140088aaa4d4f8894afe8ceca0de080f7f6909090564a4dbed57294b207ab
+  checksum: 10c0/5c53abdce7b4e572105e1e34f69c9e6e736b3fd1b4577b1f4875f7a78928cc914514da64cc4e0661b5f1f55f7d999a113bc48dab3bd65508e104e80ca59c600c
   languageName: node
   linkType: hard
 
 "@wonderlandlabs/forestry4@file:../../packages/forestry4::locator=forest-tree-demo%40workspace%3Ademos%2Fforest-tree-demo":
   version: 4.0.3
-  resolution: "@wonderlandlabs/forestry4@file:../../packages/forestry4#../../packages/forestry4::hash=a538ba&locator=forest-tree-demo%40workspace%3Ademos%2Fforest-tree-demo"
+  resolution: "@wonderlandlabs/forestry4@file:../../packages/forestry4#../../packages/forestry4::hash=6c51f7&locator=forest-tree-demo%40workspace%3Ademos%2Fforest-tree-demo"
   dependencies:
     "@wonderlandlabs/walrus": "npm:0.1.3"
     immer: "npm:^10.1.1"
     lodash-es: "npm:^4.17.21"
     rxjs: "npm:^7.8.1"
-  checksum: 10c0/fea7a77f053defa16e11ee9983b5d9b0d838cfa2622a3a46122afee0fa02ccf271e140088aaa4d4f8894afe8ceca0de080f7f6909090564a4dbed57294b207ab
+  checksum: 10c0/5c53abdce7b4e572105e1e34f69c9e6e736b3fd1b4577b1f4875f7a78928cc914514da64cc4e0661b5f1f55f7d999a113bc48dab3bd65508e104e80ca59c600c
   languageName: node
   linkType: hard
 

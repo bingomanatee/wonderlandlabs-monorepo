@@ -75,7 +75,7 @@ export class Forest<
 
     // Apply prep function if it exists to transform partial input to complete data
     const preparedValue = this.prep
-      ? this.prep(value, this.value!, this.initialValue)
+      ? this.prep(value, this.value!)
       : (value as DataType);
 
     // First validate using Store's validation

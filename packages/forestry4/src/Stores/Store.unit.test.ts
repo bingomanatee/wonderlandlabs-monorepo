@@ -1,7 +1,11 @@
 import { describe, it, expect, vi } from 'vitest';
 import { z } from 'zod';
 import { Store } from './Store';
-import type { ActionParamsRecord, ActionExposedRecord, StoreIF } from '../types';
+import type {
+  ActionParamsRecord,
+  ActionExposedRecord,
+  StoreIF,
+} from '../types';
 import { isStore, isObj } from '../typeguards';
 
 describe('Store', () => {
@@ -13,8 +17,10 @@ describe('Store', () => {
 
     it('should create a store with actions', () => {
       const acts: ActionParamsRecord = {
-        increment: (value: number, store: StoreIF<number>) => store.next(value + 1),
-        add: (value: number, store: StoreIF<number>, amount: number) => store.next(value + amount),
+        increment: (value: number, store: StoreIF<number>) =>
+          store.next(value + 1),
+        add: (value: number, store: StoreIF<number>, amount: number) =>
+          store.next(value + amount),
       };
       const store = new Store({ value: 0, actions: acts });
 
@@ -42,9 +48,7 @@ describe('Store', () => {
   describe('value management', () => {
     it('should update value with next()', () => {
       const store = new Store({ value: 10, acts: {} });
-      const result = store.next(20);
-
-      expect(result).toBe(true);
+      store.next(20);
       expect(store.value).toBe(20);
     });
 
@@ -117,7 +121,11 @@ describe('Store', () => {
     });
 
     it('should pass additional arguments to actions', () => {
-      const mockAction = vi.fn(function (this: StoreIF<string>, value: string, suffix: string) {
+      const mockAction = vi.fn(function (
+        this: StoreIF<string>,
+        value: string,
+        suffix: string,
+      ) {
         this.next(value + suffix);
       });
       const acts: ActionParamsRecord = { append: mockAction };
@@ -145,7 +153,9 @@ describe('Store', () => {
       expect(store.isActive).toBe(false);
 
       // Should not allow updates after completion
-      expect(() => store.next('updated')).toThrow('Cannot update completed store');
+      expect(() => store.next('updated')).toThrow(
+        'Cannot update completed store',
+      );
 
       // Calling complete again should return the same value
       expect(store.complete()).toBe('test');
@@ -253,7 +263,11 @@ describe('Store', () => {
       }
 
       const acts: ActionParamsRecord = {
-        setName: function (this: Store<UserData>, user: UserData, name: string) {
+        setName: function (
+          this: Store<UserData>,
+          user: UserData,
+          name: string,
+        ) {
           this.next({ ...user, name });
         },
         incrementAge: function (this: Store<UserData>, user: UserData) {

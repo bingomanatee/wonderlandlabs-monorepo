@@ -85,10 +85,15 @@ class ForestBranch extends Store {
       throw new Error("Cannot update completed store");
     }
     const preparedValue = this.prep ? this.prep(value, this.value, this.initialValue) : value;
-    const newRootValue = produce(this.parent.value, (draft) => {
-      setPath(draft, this.path, preparedValue);
-    });
-    return this.root.next(newRootValue);
+    const { isValid, error } = this.validate(preparedValue);
+    if (!isValid) {
+      throw error;
+    }
+    if (this.parent) {
+      this.parent.set(this.path, preparedValue);
+    } else {
+      super.next(preparedValue);
+    }
   }
   get subject() {
     const path = pathString(this.path);
@@ -119,7 +124,9 @@ class ForestBranch extends Store {
     } else if (this.parent) {
       this.parent.broadcast(message);
     } else {
-      console.warn("strange broadcast pattern; node that is not root has no parent");
+      console.warn(
+        "strange broadcast pattern; node that is not root has no parent"
+      );
     }
   }
   branch(path, params) {

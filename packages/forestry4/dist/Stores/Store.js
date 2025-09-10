@@ -85,7 +85,7 @@ class Store {
     }
     if (isValid) {
       this.#subject.next(preparedValue);
-      return true;
+      return;
     }
     if (this.debug) {
       console.error(

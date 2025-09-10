@@ -115,7 +115,7 @@ export class Store<
   protected pending: DataType | undefined;
   private _hasPending: boolean = false;
 
-  next(value: Partial<DataType>): boolean {
+  next(value: Partial<DataType>): void {
     if (!this.isActive) {
       throw new Error('Cannot update completed store');
     }
@@ -131,7 +131,7 @@ export class Store<
     }
     if (isValid) {
       this.#subject!.next(preparedValue);
-      return true;
+      return;
     }
     if (this.debug) {
       console.error(

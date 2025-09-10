@@ -4,6 +4,7 @@ import { pathString } from "../lib/combinePaths.js";
 import { produce } from "immer";
 import { ForestBranch } from "./ForestBranch.js";
 import { setPath } from "../lib/path.js";
+import asError from "../lib/asError.js";
 class Forest extends Store {
   constructor(p) {
     super(p);
@@ -39,7 +40,9 @@ class Forest extends Store {
   // Override next to implement validation messaging system
   next(value) {
     if (this.hasPending()) {
-      throw new Error("Cannot start new validation while another validation is in progress");
+      throw new Error(
+        "Cannot start new validation while another validation is in progress"
+      );
     }
     const preparedValue = this.prep ? this.prep(value, this.value, this.initialValue) : value;
     const { isValid, error } = this.validate(preparedValue);
@@ -56,40 +59,43 @@ class Forest extends Store {
           error
         );
       }
-      throw new Error(typeof error === "string" ? error : error?.toString() || "Validation failed");
+      throw asError(error);
     }
     this.setPending(preparedValue);
     try {
-      let validationError = null;
-      const transientSub = this.receiver.subscribe((message) => {
-        if (message && message.type === "validation-failure") {
-          validationError = `Branch ${pathString(message.branchPath)}: ${message.error}`;
-        }
-      });
-      try {
-        const setPendingMessage = {
-          type: "set-pending",
-          payload: preparedValue,
-          timestamp: Date.now()
-        };
-        this.broadcast(setPendingMessage, true);
-        const validateMessage = {
-          type: "validate-all",
-          timestamp: Date.now()
-        };
-        this.broadcast(validateMessage, true);
-        if (validationError) {
-          if (this.debug) {
-            console.error("Branch validation failed:", validationError);
-          }
-          throw new Error(`Validation failed: ${validationError}`);
-        }
-        return super.next(preparedValue);
-      } finally {
-        transientSub.unsubscribe();
-      }
+      this.#validatePending(preparedValue);
     } finally {
       this.clearPending();
+    }
+    super.next(preparedValue);
+  }
+  #validatePending(preparedValue) {
+    let validationError = null;
+    const transientSub = this.receiver.subscribe((message) => {
+      if (message && message.type === "validation-failure") {
+        validationError = `Branch ${pathString(message.branchPath)}: ${message.error}`;
+      }
+    });
+    try {
+      const setPendingMessage = {
+        type: "set-pending",
+        payload: preparedValue,
+        timestamp: Date.now()
+      };
+      this.broadcast(setPendingMessage, true);
+      const validateMessage = {
+        type: "validate-all",
+        timestamp: Date.now()
+      };
+      this.broadcast(validateMessage, true);
+      if (validationError) {
+        if (this.debug) {
+          console.error("Branch validation failed:", validationError);
+        }
+        throw new Error(`Validation failed: ${validationError}`);
+      }
+    } finally {
+      transientSub.unsubscribe();
     }
   }
   set(path, value) {

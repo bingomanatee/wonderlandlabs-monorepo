@@ -11,9 +11,13 @@ import { Subject } from 'rxjs';
 import { pathString } from '../lib/combinePaths';
 import { produce } from 'immer';
 import { ForestBranch } from './ForestBranch';
-import { setPath, getPath } from '../lib/path';
+import { setPath } from '../lib/path';
+import asError from '../lib/asError';
 
-export class Forest<DataType, Actions extends ActionExposedRecord = ActionExposedRecord>
+export class Forest<
+    DataType,
+    Actions extends ActionExposedRecord = ActionExposedRecord,
+  >
   extends Store<DataType, Actions>
   implements StoreBranch<DataType, Actions>
 {
@@ -61,15 +65,17 @@ export class Forest<DataType, Actions extends ActionExposedRecord = ActionExpose
   }
 
   // Override next to implement validation messaging system
-  next(value: Partial<DataType>): boolean {
+  next(value: Partial<DataType>) {
     // Prevent concurrent validation
     if (this.hasPending()) {
-      throw new Error('Cannot start new validation while another validation is in progress');
+      throw new Error(
+        'Cannot start new validation while another validation is in progress',
+      );
     }
 
     // Apply prep function if it exists to transform partial input to complete data
     const preparedValue = this.prep
-      ? this.prep(value, this.value, this.initialValue)
+      ? this.prep(value, this.value!, this.initialValue)
       : (value as DataType);
 
     // First validate using Store's validation
@@ -84,55 +90,53 @@ export class Forest<DataType, Actions extends ActionExposedRecord = ActionExpose
           '(current: ',
           this.value,
           ')',
-          error
+          error,
         );
       }
-      throw new Error(typeof error === 'string' ? error : error?.toString() || 'Validation failed');
+      throw asError(error);
     }
 
     this.setPending(preparedValue);
 
     try {
-      // Step 1: Create transient listener for validation failures
-      let validationError: string | null = null;
-      const transientSub = this.receiver.subscribe((message: any) => {
-        if (message && message.type === 'validation-failure') {
-          validationError = `Branch ${pathString(message.branchPath)}: ${message.error}`;
-        }
-      });
-
-      try {
-        // Step 2: Send setPending message to all branches
-        const setPendingMessage: ForestMessage = {
-          type: 'set-pending',
-          payload: preparedValue,
-          timestamp: Date.now(),
-        };
-        this.broadcast(setPendingMessage, true);
-
-        // Step 3: Send validate message to trigger validation
-        const validateMessage: ForestMessage = {
-          type: 'validate-all',
-          timestamp: Date.now(),
-        };
-        this.broadcast(validateMessage, true);
-
-        // Step 4: Check if any validation failure was received
-        if (validationError) {
-          if (this.debug) {
-            console.error('Branch validation failed:', validationError);
-          }
-          throw new Error(`Validation failed: ${validationError}`);
-        }
-
-        // Step 5: All validations passed, call super.next()
-        return super.next(preparedValue);
-      } finally {
-        // Clean up transient subscription
-        transientSub.unsubscribe();
-      }
+      this.#validatePending(preparedValue);
     } finally {
       this.clearPending();
+    }
+    super.next(preparedValue);
+  }
+
+  #validatePending(preparedValue: DataType) {
+    // Step 1: Create transient listener for validation failures
+    let validationError: string | null = null;
+    const transientSub = this.receiver.subscribe((message: any) => {
+      if (message && message.type === 'validation-failure') {
+        validationError = `Branch ${pathString(message.branchPath)}: ${message.error}`;
+      }
+    });
+
+    try {
+      // Step 2: Send setPending message to all branches
+      const setPendingMessage: ForestMessage = {
+        type: 'set-pending',
+        payload: preparedValue,
+        timestamp: Date.now(),
+      };
+      this.broadcast(setPendingMessage, true);
+
+      const validateMessage: ForestMessage = {
+        type: 'validate-all',
+        timestamp: Date.now(),
+      };
+      this.broadcast(validateMessage, true);
+      if (validationError) {
+        if (this.debug) {
+          console.error('Branch validation failed:', validationError);
+        }
+        throw new Error(`Validation failed: ${validationError}`);
+      }
+    } finally {
+      transientSub.unsubscribe();
     }
   }
 
@@ -147,7 +151,7 @@ export class Forest<DataType, Actions extends ActionExposedRecord = ActionExpose
 
   branch<Type, BranchActions extends ActionExposedRecord = ActionExposedRecord>(
     path: Path,
-    params: BranchParams<Type, BranchActions>
+    params: BranchParams<Type, BranchActions>,
   ) {
     const name = this.name + '.' + pathString(path);
     return new ForestBranch<Type, BranchActions>(
@@ -156,7 +160,7 @@ export class Forest<DataType, Actions extends ActionExposedRecord = ActionExpose
         ...params,
       },
       path,
-      this
+      this,
     );
   }
 }

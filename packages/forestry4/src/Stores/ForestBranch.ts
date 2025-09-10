@@ -19,14 +19,17 @@ import { getPath, setPath } from '../lib/path';
  * ForestBranch is a shard store for a forest;
  * it cannot be the root and it always must have parent and path.
  */
-export class ForestBranch<DataType, Actions extends ActionExposedRecord = ActionExposedRecord>
+export class ForestBranch<
+    DataType,
+    Actions extends ActionExposedRecord = ActionExposedRecord,
+  >
   extends Store<DataType, Actions>
   implements StoreBranch<DataType, Actions>
 {
   constructor(
     p: BranchParams<DataType, Actions>,
     public readonly path: Path,
-    public readonly parent: StoreBranch<unknown>
+    public readonly parent: StoreBranch<unknown>,
   ) {
     if (!isStore(parent)) {
       throw new Error('ForestBranches must have parents');
@@ -38,7 +41,7 @@ export class ForestBranch<DataType, Actions extends ActionExposedRecord = Action
         ...p,
         value: branchValue,
       },
-      true
+      true,
     );
 
     this.#parentSub = parent.receiver.subscribe((message) => {
@@ -96,7 +99,10 @@ export class ForestBranch<DataType, Actions extends ActionExposedRecord = Action
       const failureMessage: ForestMessage = {
         type: 'validation-failure',
         branchPath: this.path,
-        error: typeof error === 'string' ? error : error?.toString() || 'Unknown validation error',
+        error:
+          typeof error === 'string'
+            ? error
+            : error?.toString() || 'Unknown validation error',
         timestamp: Date.now(),
       };
 
@@ -117,7 +123,7 @@ export class ForestBranch<DataType, Actions extends ActionExposedRecord = Action
     return !this.parent;
   }
 
-  next(value: Partial<DataType>): boolean {
+  next(value: Partial<DataType>) {
     if (!this.isActive) {
       throw new Error('Cannot update completed store');
     }
@@ -127,20 +133,24 @@ export class ForestBranch<DataType, Actions extends ActionExposedRecord = Action
       ? this.prep(value, this.value, this.initialValue)
       : (value as DataType);
 
-    // Calculate what the new root value would be
-    const newRootValue = produce(this.parent.value, (draft) => {
-      setPath(draft, this.path, preparedValue);
-    });
+    const { isValid, error } = this.validate(preparedValue);
+    if (!isValid) {
+      throw error;
+    }
 
-    // Use the root's next method which will handle validation of all branches
-    return this.root.next(newRootValue);
+    if (this.parent) {
+      // the expected path
+      this.parent.set(this.path, preparedValue);
+    } else {
+      super.next(preparedValue);
+    }
   }
 
   get subject() {
     const path = pathString(this.path);
     return this.parent.subject.pipe(
       map((value) => get(value, path)),
-      distinctUntilChanged(isEqual)
+      distinctUntilChanged(isEqual),
     );
   }
 
@@ -155,7 +165,9 @@ export class ForestBranch<DataType, Actions extends ActionExposedRecord = Action
     } else {
       // should be in Forest class instance but just in case:
       // Use Immer to create immutable update
-      const pathArray = Array.isArray(path) ? path : pathString(path).split('.');
+      const pathArray = Array.isArray(path)
+        ? path
+        : pathString(path).split('.');
       const newValue = produce(this.value, (draft) => {
         setPath(draft, pathArray, value);
       });
@@ -171,13 +183,15 @@ export class ForestBranch<DataType, Actions extends ActionExposedRecord = Action
     } else if (this.parent) {
       this.parent.broadcast(message);
     } else {
-      console.warn('strange broadcast pattern; node that is not root has no parent');
+      console.warn(
+        'strange broadcast pattern; node that is not root has no parent',
+      );
     }
   }
 
   branch<Type, BranchActions extends ActionExposedRecord = ActionExposedRecord>(
     path: Path,
-    params: BranchParams<Type, BranchActions>
+    params: BranchParams<Type, BranchActions>,
   ) {
     const mergedPath = combinePaths(this.path, path);
     const name = this.name + '.' + pathString(path);
@@ -187,7 +201,7 @@ export class ForestBranch<DataType, Actions extends ActionExposedRecord = Action
         ...params,
       },
       mergedPath,
-      this // Use this branch as parent, not root
+      this, // Use this branch as parent, not root
     );
   }
 

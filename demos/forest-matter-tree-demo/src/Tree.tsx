@@ -1,18 +1,20 @@
 import { useEffect, useRef, useCallback } from 'react';
-import { TreePhysics } from './TreePhysics';
 import useForestryLocal from './hooks/useForestryLocal';
-import { createForestryTreeData } from './ForestryTreeData';
-
+import { TreePhysics } from './managers/TreePhysics.ts';
+import forestDataStore from './managers/forestDataStore';
+import type { TreeStoreData } from './managers/forestDataStore';
 export function Tree() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const isInitializedRef = useRef(false);
 
   // Create local Forestry store with default dimensions (will be updated)
-  const [treeState, forestryTreeData] = useForestryLocal(() => {
-    return createForestryTreeData(800, 600); // Default dimensions
-  });
+  const [treeState, dataStore] = useForestryLocal<TreeStoreData>(
+    forestDataStore,
+    canvasRef.current
+  );
 
   // Memoized canvas size updater
+  // @TODO: does PIXI does this for us?
   const updateCanvasSize = useCallback(() => {
     const canvas = canvasRef.current;
     const container = canvas?.parentElement;
@@ -35,49 +37,31 @@ export function Tree() {
   }, []);
 
   useEffect(() => {
-    if (!canvasRef.current || !forestryTreeData || isInitializedRef.current) return;
-
     const canvas = canvasRef.current;
+    if (!canvas || isInitializedRef.current) return;
 
     // Set initial canvas size
     updateCanvasSize();
 
     // Create physics resources now that canvas is available
-    forestryTreeData.acts.createResources(canvas);
 
     // Wait for resources to be created, then initialize
     let onComplete: (() => void) | undefined;
 
-    const initializeWhenReady = () => {
-      const treePhysics = forestryTreeData.res.get('treePhysics');
-      if (treePhysics) {
-        // Resources are ready, initialize tree
-        const rootId = forestryTreeData.acts.getRootId();
-        if (rootId) {
-          treePhysics.createRootPin(rootId);
-        }
+    // Initialize physics simulation
+    const scene = new TreePhysics(canvas, dataStore);
 
-        // Handle window resize directly with updateCanvasSize
-        window.addEventListener('resize', updateCanvasSize);
-        isInitializedRef.current = true;
+    // Generate and build complete tree using TreeController
+    const rootId = dataStore.acts.generateTree(canvas.width, canvas.height);
 
-        // Set cleanup function
-        onComplete = () => {
-          window.removeEventListener('resize', updateCanvasSize);
-        };
-      } else {
-        // Resources not ready yet, try again
-        setTimeout(initializeWhenReady, 10);
-      }
-    };
-
-    initializeWhenReady();
+    // Create root pin to anchor the tree
+    scene.createRootPin(rootId);
 
     // Return cleanup function
     return () => {
       onComplete?.();
     };
-  }, [forestryTreeData, updateCanvasSize]);
+  }, [updateCanvasSize, dataStore]);
 
   return (
     <div style={{ width: '100%', height: '100%', position: 'relative' }}>

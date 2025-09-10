@@ -1,10 +1,13 @@
 import {
   ActionExposedRecord,
   Listener,
+  Path,
+  PendingValue,
+  sources,
   StoreIF,
   StoreParams,
+  TransFn,
   ValueTestFn,
-  Path,
 } from '../types';
 import { BehaviorSubject, Observable, Subscription } from 'rxjs';
 import { distinctUntilChanged } from 'rxjs/operators';
@@ -57,6 +60,7 @@ export class Store<
     this.debug = !!p.debug;
 
     const self = this;
+    // @ts-expect-error TS2345
     this.$ = methodize<DataType, Actions>(p.actions ?? {}, self);
 
     if (p.tests) {
@@ -83,9 +87,11 @@ export class Store<
   ) => DataType;
   protected initialValue: DataType;
   public res: Map<string, any> = new Map();
+
   public getRes(path: Path) {
     return getPath(this.res, path);
   }
+
   public setRes(path: Path, value: any) {
     setPath(this.res, path, value);
   }
@@ -111,32 +117,92 @@ export class Store<
       this.#subject.complete();
     }
 
-    // Clear pending state
-    this.clearPending();
-
     return finalValue;
   }
 
+  public pendingStack: BehaviorSubject<PendingValue<DataType>[]> =
+    new BehaviorSubject<PendingValue<DataType>[]>([]);
+
+  get hasTransaction(): boolean {
+    return (
+      this.pendingStack.value.filter(
+        (p: PendingValue<DataType>) => p.source === sources.TRANSACTION,
+      ).length > 0
+    );
+  }
+
+  private currentTrans() {
+    return this.pendingStack.value.reduce(
+      (memo, pv: PendingValue<DataType>, index: number) => {
+        if (pv.source === sources.TRANSACTION) {
+          return [pv, index];
+        }
+        return memo;
+      },
+      [undefined, -1],
+    );
+  }
+
+  protected updateTransaction(value: DataType) {
+    // @ts-expect-error TS25488
+    const [lastTrans, index] = this.currentTrans();
+
+    if (lastTrans) {
+      const lastTransUpdated = { ...lastTrans, value };
+      const nextPendingStack = [...this.pendingStack.value];
+      nextPendingStack[index] = lastTransUpdated;
+      this.pendingStack.next(nextPendingStack);
+    }
+  }
+
   isActive: boolean = true;
-  protected pending: DataType | undefined;
-  private _hasPending: boolean = false;
+
+  protected get pending(): DataType | undefined {
+    if (!this._hasPending) {
+      return undefined;
+    }
+    const pv = this.pendingStack.value[this.pendingStack.value.length - 1];
+    if (pv) {
+      return pv.value;
+    }
+    return undefined;
+  }
+
+  private get _hasPending() {
+    return this.pendingStack.value.length > 0;
+  }
+
+  private get suspendValidation() {
+    return this.pendingStack.value.reduce(
+      (skip, pv: PendingValue<DataType>) => {
+        return skip || pv.suspendValidation;
+      },
+      false,
+    );
+  }
 
   next(value: Partial<DataType>): boolean {
     if (!this.isActive) {
       throw new Error('Cannot update completed store');
     }
-
-    // Apply prep function if it exists to transform partial input to complete data
-    const preparedValue = this.prep
-      ? this.prep(value, this.value, this.initialValue)
-      : (value as DataType);
-
-    const { isValid, error } = this.validate(preparedValue);
-    if (!this.subject) {
-      throw new Error('Store requires subject -- or override of next()');
+    if (!this.#subject) {
+      throw new Error('next must be overridden for stores without #subject');
     }
+    // Apply prep function if it exists to transform partial input to complete data
+    const preparedValue = (
+      this.prep ? this.prep(value, this.value, this.initialValue) : value
+    ) as DataType;
+
+    const { isValid, error } = this.suspendValidation
+      ? { isValid: true }
+      : this.validate(preparedValue);
+
     if (isValid) {
-      this.#subject!.next(preparedValue);
+      if (this.hasTransaction) {
+        this.updateTransaction(preparedValue);
+      } else {
+        this.#subject.next(preparedValue);
+      }
       return true;
     }
     if (this.debug) {
@@ -200,26 +266,20 @@ export class Store<
   tests?: ValueTestFn<DataType> | ValueTestFn<DataType>[];
 
   // Pending value management
-  setPending(value: DataType): void {
-    if (this._hasPending) {
-      throw new Error('cannot overwrite a pending value');
-    }
-    this.pending = value;
-    this._hasPending = true;
+  setPending(value: DataType, source = sources.NEXT): void {
+    const pending: PendingValue<DataType> = {
+      value,
+      source,
+    };
   }
 
   hasPending(): boolean {
     return this._hasPending;
   }
 
-  clearPending(): void {
-    this.pending = undefined;
-    this._hasPending = false;
-  }
-
   get value() {
     if (this._hasPending) {
-      return this.pending;
+      return this.pending as DataType;
     }
     if (!this.#subject) {
       throw new Error('Store requires subject or overload of value');
@@ -239,6 +299,63 @@ export class Store<
     }
     const pathArray = Array.isArray(path) ? path : pathString(path).split('.');
     return getPath(this.value, pathArray);
+  }
+
+  private purgeTransaction(id: string): PendingValue<DataType> | undefined {
+    const pendingTrans = [...this.pendingStack.value];
+    const index = pendingTrans.findIndex(
+      (p: PendingValue<DataType>) => p.id === id,
+    );
+    if (index < 0) {
+      return;
+    }
+    const trans = pendingTrans[index];
+    const remainder = pendingTrans.slice(0, index);
+    this.pendingStack.next(remainder);
+    return trans;
+  }
+
+  transact(fn: TransFn<DataType>, suspend?: boolean) {
+    const id = `trans-${this.pendingStack.value.length}-${Math.random()}`;
+    const pendingTrans: PendingValue<DataType> = {
+      id,
+      rollbackValue: this.value,
+      value: this.value,
+      source: sources.TRANS,
+      suspendValidation: !!suspend,
+    };
+
+    this.pendingStack.next([...this.pendingStack.value, pendingTrans]);
+    try {
+      fn(this);
+      const currentTrans = this.purgeTransaction(id);
+
+      if (currentTrans) {
+        const { isValid, error } = this.validate(currentTrans.value);
+        if (!this.suspendValidation && !isValid) {
+          console.error(
+            'completed trans value is invalid',
+            currentTrans.value,
+            error,
+          );
+          throw error;
+        }
+        if (this.hasTransaction) {
+          this.updateTransaction(currentTrans.value);
+        } else if (isValid && this.value !== currentTrans.value) {
+          this.next(currentTrans.value);
+        }
+      } else {
+        console.warn(
+          'after transaction - cannot retrieve transaction for value',
+        );
+      }
+    } catch (err) {
+      this.purgeTransaction(id);
+      throw new Error(`transaction error: ${id} ${asError(err).message}`);
+    }
+
+    return this.value;
   }
 
   mutate(producerFn: (draft: any) => void, path?: Path): any {

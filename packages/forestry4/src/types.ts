@@ -53,6 +53,19 @@ export type Listener<DataType> =
   | Partial<Observer<DataType>>
   | ((value: DataType) => void);
 
+export const sources: Record<string, string> = {
+  TRANSACTION: 'transaction',
+  NEXT: 'next',
+};
+
+export type PendingValue<DataType> = {
+  id: string;
+  value: DataType;
+  rollbackValue?: DataType;
+  source: string;
+  suspendValidation?: boolean;
+};
+
 // Validation result type
 export type ValidationResult = string | null; // null = valid, string = error message
 
@@ -91,7 +104,6 @@ export interface StoreIF<
   // Pending value management
   setPending: (value: DataType) => void;
   hasPending: () => boolean;
-  clearPending: () => void;
 
   // Resource map for non-immutable external resources (DOM, WebGL, etc.)
   res: Map<string, any>;
@@ -117,7 +129,11 @@ export interface StoreIF<
   // Core utility methods
   get(path?: Path): any;
   mutate(producerFn: (draft: DataType) => void, path?: Path): DataType;
+
+  transact(fn: TransFn, suspendValidation?: boolean): DataType;
 }
+
+export type TransFn<DataType> = (store: StoreIF<DataType>) => void;
 
 export interface StoreBranch<
   DataType,

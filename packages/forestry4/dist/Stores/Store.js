@@ -23,9 +23,8 @@ class Store {
     return this.$;
   }
   constructor(p, noSubject = false) {
-    const processedValue = p.prep ? p.prep({}, p.value, p.value) : p.value;
     if (!noSubject) {
-      this.#subject = new BehaviorSubject(processedValue);
+      this.#subject = new BehaviorSubject(p.value);
     }
     if ("schema" in p && p.schema) {
       this.schema = p.schema;
@@ -36,7 +35,12 @@ class Store {
     if (p.tests) {
       this.tests = testize(p.tests, self);
     }
-    this.prep = p.prep;
+    if (p.prep) {
+      this.prep = p.prep.bind(this);
+      if (this.#subject) {
+        this.#subject.next(this.prep(this.value, this.value));
+      }
+    }
     if (p.name && typeof p.name === "string") {
       this.#name = p.name;
     }
@@ -101,6 +105,60 @@ class Store {
     const result = fn(value, this);
     if (result) {
       throw asError(result);
+    }
+  }
+  transact({
+    action,
+    suspendValidation
+  }) {
+    let transId = "";
+    try {
+      let boundFn = function(value) {
+        return action.call(self, value);
+      };
+      transId = this.#prepTransact(suspendValidation);
+      const self = this;
+      this.#commitTransact(transId);
+      boundFn(this.value);
+    } catch (err) {
+      if (transId) {
+        this.#revertTransact(transId);
+      }
+      throw err;
+    }
+  }
+  #transStack = [];
+  #commitTransact(id) {
+    const index = this.#transStack.findIndex((p) => p.id === id);
+    if (index >= 0) {
+      const trans = this.#transStack[index];
+      if (trans) {
+        trans.isTransaction = false;
+      }
+    }
+    if (!this.#transStack.some((p) => p.isTransaction)) {
+      const last = this.#transStack.pop();
+      this.#transStack = [];
+      if (last) {
+        this.next(last.value);
+      }
+    }
+  }
+  #prepTransact(suspendValidation = false) {
+    const digits = `${Math.random()}`.replace("0.", "");
+    const id = `level_${this.#transStack.length}-${digits}`;
+    this.#transStack.push({
+      id,
+      value: this.value,
+      suspendValidation,
+      isTransaction: true
+    });
+    return id;
+  }
+  #revertTransact(id) {
+    const index = this.#transStack.findIndex((p) => p.id === id);
+    if (index >= 0) {
+      this.#transStack = this.#transStack.slice(index);
     }
   }
   validate(value) {

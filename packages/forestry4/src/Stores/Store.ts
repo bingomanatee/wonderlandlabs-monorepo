@@ -1,10 +1,12 @@
 import {
   ActionExposedRecord,
   Listener,
+  Path,
+  PendingValue,
   StoreIF,
   StoreParams,
+  TransFn,
   ValueTestFn,
-  Path,
 } from '../types';
 import { BehaviorSubject, Observable, Subscription } from 'rxjs';
 import { distinctUntilChanged } from 'rxjs/operators';
@@ -42,11 +44,10 @@ export class Store<
 
   constructor(p: StoreParams<DataType, Actions>, noSubject = false) {
     // Apply prep function to initial value if it exists
-    const processedValue = p.prep ? p.prep({}, p.value, p.value) : p.value;
-
     if (!noSubject) {
-      this.#subject = new BehaviorSubject(processedValue);
+      this.#subject = new BehaviorSubject(p.value);
     }
+
     if ('schema' in p && p.schema) {
       this.schema = p.schema;
     }
@@ -59,7 +60,12 @@ export class Store<
     if (p.tests) {
       this.tests = testize<DataType>(p.tests, self);
     }
-    this.prep = p.prep;
+    if (p.prep) {
+      this.prep = p.prep.bind(this);
+      if (this.#subject) {
+        this.#subject.next(this.prep!(this.value!, this.value!));
+      }
+    }
 
     if (p.name && typeof p.name === 'string') {
       this.#name = p.name;
@@ -83,7 +89,7 @@ export class Store<
 
   complete(): DataType {
     if (!this.isActive) {
-      return this.value;
+      return this.value!;
     }
 
     const finalValue = this.value;
@@ -143,6 +149,71 @@ export class Store<
       throw asError(result);
     }
     // no result/output for valid elements
+  }
+
+  transact({
+    action,
+    suspendValidation,
+  }: {
+    action: TransFn;
+    suspendValidation?: boolean;
+  }) {
+    let transId: string = '';
+    try {
+      transId = this.#prepTransact(suspendValidation);
+      const self = this;
+
+      function boundFn(value: DataType) {
+        return action.call(self, value);
+      }
+
+      this.#commitTransact(transId);
+      boundFn(this.value!);
+    } catch (err) {
+      if (transId) {
+        this.#revertTransact(transId);
+      }
+      throw err;
+    }
+  }
+
+  #transStack: PendingValue<DataType>[] = [];
+
+  #commitTransact(id: string) {
+    const index = this.#transStack.findIndex((p) => p.id === id);
+    if (index >= 0) {
+      const trans = this.#transStack[index]!;
+      if (trans) {
+        trans.isTransaction = false;
+      }
+    }
+
+    if (!this.#transStack.some((p) => p.isTransaction)) {
+      const last = this.#transStack.pop();
+      this.#transStack = [];
+      if (last) {
+        this.next(last.value);
+      }
+    }
+  }
+
+  #prepTransact(suspendValidation = false) {
+    const digits = `${Math.random()}`.replace('0.', '');
+    const id = `level_${this.#transStack.length}-${digits}`;
+    this.#transStack.push({
+      id,
+      value: this.value,
+      suspendValidation,
+      isTransaction: true,
+    });
+    return id;
+  }
+
+  #revertTransact(id: string) {
+    const index = this.#transStack.findIndex((p) => p.id === id);
+    if (index >= 0) {
+      this.#transStack = this.#transStack.slice(index);
+    }
   }
 
   validate(value: unknown) {

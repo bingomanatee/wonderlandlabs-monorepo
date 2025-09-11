@@ -44,7 +44,7 @@ class Forest extends Store {
         "Cannot start new validation while another validation is in progress"
       );
     }
-    const preparedValue = this.prep ? this.prep(value, this.value, this.initialValue) : value;
+    const preparedValue = this.prep ? this.prep(value, this.value) : value;
     const { isValid, error } = this.validate(preparedValue);
     if (!isValid) {
       if (this.debug) {

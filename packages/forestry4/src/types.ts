@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-import { Subject, Subscription, Observer, Observable } from 'rxjs';
+import { Observable, Observer, Subject, Subscription } from 'rxjs';
 import { ZodParser } from './typeguards';
 
 // these are the actions as defined, in the params
@@ -80,6 +80,7 @@ export type PendingValue<DataType = unknown> = {
   id: string;
   value: DataType;
   isTransaction: boolean;
+  suspendValidation?: boolean;
 };
 
 export interface StoreIF<
@@ -90,7 +91,12 @@ export interface StoreIF<
   name: string;
 
   subscribe(listener: Listener<DataType>): Subscription;
-  transact(fn: TransFn<DataType>, suspendValidation: boolean): void;
+
+  transact(params: {
+    action: TransFn<DataType>;
+    suspendValidation: boolean;
+  }): void;
+
   acts: Actions;
   $: Actions;
   next: (value: Partial<DataType>) => void;
@@ -117,6 +123,7 @@ export interface StoreIF<
 
   // Core utility methods
   get(path?: Path): any;
+
   mutate(producerFn: (draft: DataType) => void, path?: Path): DataType;
 }
 
@@ -130,8 +137,11 @@ export interface StoreBranch<
   parent?: StoreBranch<unknown>;
   broadcast: (message: unknown, fromRoot?: boolean) => void;
   receiver: Subject<unknown>;
+
   set(path, value): boolean;
+
   subject: Observable<DataType>;
+
   branch<Type, BranchActions extends ActionExposedRecord = ActionExposedRecord>(
     path: Path,
     params: BranchParams<Type, BranchActions>,
@@ -175,6 +185,7 @@ export type BranchParams<
   ) => DataType;
   name?: string;
   debug?: boolean;
+  res?: Map<string, any>;
 };
 
 type PathElement = string;

@@ -49,6 +49,11 @@ export type ValueTestFn<DataType> = (
   store: StoreIF<DataType>,
 ) => null | void | string;
 
+export type TransParams = {
+  action: TransFn;
+  suspendValidation?: boolean;
+};
+
 export type Listener<DataType> =
   | Partial<Observer<DataType>>
   | ((value: DataType) => void);
@@ -59,7 +64,6 @@ export type ValidationResult = string | null; // null = valid, string = error me
 // Forest messaging system for validation
 export interface ForestMessage {
   type:
-    | 'set-pending'
     | 'validate-all'
     | 'validation-failure'
     | 'validation-complete'
@@ -92,25 +96,21 @@ export interface StoreIF<
 
   subscribe(listener: Listener<DataType>): Subscription;
 
-  transact(params: {
-    action: TransFn<DataType>;
-    suspendValidation: boolean;
-  }): void;
+  transact(params: TransParams): void;
 
   acts: Actions;
   $: Actions;
   next: (value: Partial<DataType>) => void;
-
-  // Pending value management
-  setPending: (value: DataType) => void;
-  hasPending: () => boolean;
-  clearPending: () => void;
 
   // Resource map for non-immutable external resources (DOM, WebGL, etc.)
   res: Map<string, any>;
 
   complete: () => DataType;
   isActive: boolean;
+
+  // pending value
+  queuePendingValue(value: DataType): string;
+  dequeuePendingValue(id: string): void;
 
   // validators
   schema?: ZodParser;

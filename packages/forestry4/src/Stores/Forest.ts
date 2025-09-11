@@ -67,11 +67,6 @@ export class Forest<
   // Override next to implement validation messaging system
   next(value: Partial<DataType>) {
     // Prevent concurrent validation
-    if (this.hasPending()) {
-      throw new Error(
-        'Cannot start new validation while another validation is in progress',
-      );
-    }
 
     // Apply prep function if it exists to transform partial input to complete data
     const preparedValue = this.prep
@@ -87,14 +82,16 @@ export class Forest<
       throw asError(error);
     }
 
-    this.setPending(preparedValue);
+    const pendingId = this.queuePendingValue(preparedValue);
 
     try {
       this.#validatePending(preparedValue);
     } finally {
-      this.clearPending();
+      const pending = this.dequeuePendingValue(pendingId);
+      if (pending) {
+        super.next(pending.value);
+      }
     }
-    super.next(preparedValue);
   }
 
   #validatePending(preparedValue: DataType) {

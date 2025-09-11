@@ -73,9 +73,6 @@ export class ForestBranch<
 
   // Override value getter to return pending value during validation or parent value
   get value(): DataType {
-    if (this.hasPending()) {
-      return this.pending!;
-    }
     return getPath(this.parent?.value, this.path) as DataType;
   }
 

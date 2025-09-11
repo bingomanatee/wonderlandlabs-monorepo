@@ -39,11 +39,6 @@ class Forest extends Store {
   }
   // Override next to implement validation messaging system
   next(value) {
-    if (this.hasPending()) {
-      throw new Error(
-        "Cannot start new validation while another validation is in progress"
-      );
-    }
     const preparedValue = this.prep ? this.prep(value, this.value) : value;
     const { isValid, error } = this.validate(preparedValue);
     if (!isValid) {
@@ -52,13 +47,15 @@ class Forest extends Store {
       }
       throw asError(error);
     }
-    this.setPending(preparedValue);
+    const pendingId = this.queuePendingValue(preparedValue);
     try {
       this.#validatePending(preparedValue);
     } finally {
-      this.clearPending();
+      const pending = this.dequeuePendingValue(pendingId);
+      if (pending) {
+        super.next(pending.value);
+      }
     }
-    super.next(preparedValue);
   }
   #validatePending(preparedValue) {
     let validationError = null;

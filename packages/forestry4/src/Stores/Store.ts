@@ -5,7 +5,7 @@ import {
   PendingValue,
   StoreIF,
   StoreParams,
-  TransFn,
+  TransParams,
   ValueTestFn,
 } from '../types';
 import { BehaviorSubject, Observable, Subscription } from 'rxjs';
@@ -100,15 +100,10 @@ export class Store<
       this.#subject.complete();
     }
 
-    // Clear pending state
-    this.clearPending();
-
     return finalValue;
   }
 
   isActive: boolean = true;
-  protected pending: DataType | undefined;
-  private _hasPending: boolean = false;
 
   next(value: Partial<DataType>): void {
     if (!this.isActive) {
@@ -151,16 +146,14 @@ export class Store<
     // no result/output for valid elements
   }
 
-  transact({
-    action,
-    suspendValidation,
-  }: {
-    action: TransFn;
-    suspendValidation?: boolean;
-  }) {
+  public get suspendValidation() {
+    return this.#transStack.value.some((p) => p.suspendValidation);
+  }
+
+  transact({ action, suspendValidation }: TransParams) {
     let transId: string = '';
     try {
-      transId = this.#prepTransact(suspendValidation);
+      transId = this.#queuePendingTrans(suspendValidation);
       const self = this;
 
       function boundFn(value: DataType) {
@@ -177,46 +170,95 @@ export class Store<
     }
   }
 
-  #transStack: PendingValue<DataType>[] = [];
+  readonly #transStack: BehaviorSubject<PendingValue<DataType>[]> =
+    new BehaviorSubject<PendingValue<DataType>[]>([]);
+
+  // for debugging
+  observeTransStack(listener: Listener<PendingValue<DataType>[]>) {
+    return this.#transStack.subscribe(listener);
+  }
 
   #commitTransact(id: string) {
-    const index = this.#transStack.findIndex((p) => p.id === id);
+    const index = this.#transStack.value.findIndex((p) => p.id === id);
     if (index >= 0) {
-      const trans = this.#transStack[index]!;
+      const trans = this.#transStack.value[index]!;
       if (trans) {
         trans.isTransaction = false;
       }
     }
 
-    if (!this.#transStack.some((p) => p.isTransaction)) {
-      const last = this.#transStack.pop();
-      this.#transStack = [];
+    if (!this.#transStack.value.some((p) => p.isTransaction)) {
+      const last = this.#transStack.value.pop();
+      this.#transStack.next([]);
       if (last) {
         this.next(last.value);
       }
     }
   }
 
-  #prepTransact(suspendValidation = false) {
+  queuePendingValue(value: DataType): string {
     const digits = `${Math.random()}`.replace('0.', '');
-    const id = `level_${this.#transStack.length}-${digits}`;
-    this.#transStack.push({
-      id,
-      value: this.value,
-      suspendValidation,
-      isTransaction: true,
-    });
+    const id = `level_${this.#transStack.value.length}-${digits}-trans`;
+
+    const next = [
+      ...this.#transStack.value,
+      {
+        id,
+        value,
+        isTransaction: false,
+      },
+    ];
+    this.#transStack.next(next);
+    return id;
+  }
+
+  #collapseTransStack = () => {
+    if (this.#transStack.value.some((p) => p.isTransaction)) {
+      return;
+    }
+
+    const last = this.#transStack.value.pop();
+    this.#transStack.next([]);
+    return last;
+  };
+
+  dequeuePendingValue(id: string): PendingValue<DataType> | undefined {
+    const queuedIndex = this.#transStack.value.findIndex((p) => p.id === id);
+    if (queuedIndex === this.#transStack.value.length - 1) {
+      if (!this.#transStack.value.some((p) => p.isTransaction)) {
+        return this.#collapseTransStack();
+      }
+    }
+  }
+
+  #queuePendingTrans(suspendValidation = false): string {
+    const digits = `${Math.random()}`.replace('0.', '');
+    const id = `level_${this.#transStack.value.length}-${digits}-trans`;
+    const next = [
+      ...this.#transStack.value,
+      {
+        id,
+        value: this.value,
+        suspendValidation,
+        isTransaction: true,
+      },
+    ];
+    this.#transStack.next(next);
     return id;
   }
 
   #revertTransact(id: string) {
-    const index = this.#transStack.findIndex((p) => p.id === id);
+    const index = this.#transStack.value.findIndex((p) => p.id === id);
     if (index >= 0) {
-      this.#transStack = this.#transStack.slice(index);
+      const next = this.#transStack.value.slice(0, index);
+      this.#transStack.next(next);
     }
   }
 
   validate(value: unknown) {
+    if (this.suspendValidation) {
+      return { isValid: true };
+    }
     try {
       if (isZodParser(this.schema)) {
         this.schema.parse(value); // throws an error if the value is not valid
@@ -228,10 +270,6 @@ export class Store<
           }
         } else if (typeof this.tests === 'function') {
           this.#test(this.tests, value);
-        } else {
-          throw new Error(
-            'bad value for tests - must be function or array of functions',
-          );
         }
       }
       return {
@@ -253,27 +291,10 @@ export class Store<
 
   tests?: ValueTestFn<DataType> | ValueTestFn<DataType>[];
 
-  // Pending value management
-  setPending(value: DataType): void {
-    if (this._hasPending) {
-      throw new Error('cannot overwrite a pending value');
-    }
-    this.pending = value;
-    this._hasPending = true;
-  }
-
-  hasPending(): boolean {
-    return this._hasPending;
-  }
-
-  clearPending(): void {
-    this.pending = undefined;
-    this._hasPending = false;
-  }
-
   get value() {
-    if (this._hasPending) {
-      return this.pending;
+    const tsv = this.#transStack.value;
+    if (tsv.length) {
+      return tsv[tsv.length - 1].value;
     }
     if (!this.#subject) {
       throw new Error('Store requires subject or overload of value');

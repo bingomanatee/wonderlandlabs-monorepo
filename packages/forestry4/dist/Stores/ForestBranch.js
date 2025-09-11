@@ -43,9 +43,6 @@ class ForestBranch extends Store {
   }
   // Override value getter to return pending value during validation or parent value
   get value() {
-    if (this.hasPending()) {
-      return this.pending;
-    }
     return getPath(this.parent?.value, this.path);
   }
   // Validate current state and report failures to root

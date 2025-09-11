@@ -68,12 +68,9 @@ class Store {
     if (this.#subject) {
       this.#subject.complete();
     }
-    this.clearPending();
     return finalValue;
   }
   isActive = true;
-  pending;
-  _hasPending = false;
   next(value) {
     if (!this.isActive) {
       throw new Error("Cannot update completed store");
@@ -107,16 +104,16 @@ class Store {
       throw asError(result);
     }
   }
-  transact({
-    action,
-    suspendValidation
-  }) {
+  get suspendValidation() {
+    return this.#transStack.value.some((p) => p.suspendValidation);
+  }
+  transact({ action, suspendValidation }) {
     let transId = "";
     try {
       let boundFn = function(value) {
         return action.call(self, value);
       };
-      transId = this.#prepTransact(suspendValidation);
+      transId = this.#queuePendingTrans(suspendValidation);
       const self = this;
       this.#commitTransact(transId);
       boundFn(this.value);
@@ -127,41 +124,83 @@ class Store {
       throw err;
     }
   }
-  #transStack = [];
+  #transStack = new BehaviorSubject([]);
+  // for debugging
+  observeTransStack(listener) {
+    return this.#transStack.subscribe(listener);
+  }
   #commitTransact(id) {
-    const index = this.#transStack.findIndex((p) => p.id === id);
+    const index = this.#transStack.value.findIndex((p) => p.id === id);
     if (index >= 0) {
-      const trans = this.#transStack[index];
+      const trans = this.#transStack.value[index];
       if (trans) {
         trans.isTransaction = false;
       }
     }
-    if (!this.#transStack.some((p) => p.isTransaction)) {
-      const last = this.#transStack.pop();
-      this.#transStack = [];
+    if (!this.#transStack.value.some((p) => p.isTransaction)) {
+      const last = this.#transStack.value.pop();
+      this.#transStack.next([]);
       if (last) {
         this.next(last.value);
       }
     }
   }
-  #prepTransact(suspendValidation = false) {
+  queuePendingValue(value) {
     const digits = `${Math.random()}`.replace("0.", "");
-    const id = `level_${this.#transStack.length}-${digits}`;
-    this.#transStack.push({
-      id,
-      value: this.value,
-      suspendValidation,
-      isTransaction: true
-    });
+    const id = `level_${this.#transStack.value.length}-${digits}-trans`;
+    const next = [
+      ...this.#transStack.value,
+      {
+        id,
+        value,
+        isTransaction: false
+      }
+    ];
+    this.#transStack.next(next);
+    return id;
+  }
+  #collapseTransStack = () => {
+    if (this.#transStack.value.some((p) => p.isTransaction)) {
+      return;
+    }
+    const last = this.#transStack.value.pop();
+    this.#transStack.next([]);
+    return last;
+  };
+  dequeuePendingValue(id) {
+    const queuedIndex = this.#transStack.value.findIndex((p) => p.id === id);
+    if (queuedIndex === this.#transStack.value.length - 1) {
+      if (!this.#transStack.value.some((p) => p.isTransaction)) {
+        return this.#collapseTransStack();
+      }
+    }
+  }
+  #queuePendingTrans(suspendValidation = false) {
+    const digits = `${Math.random()}`.replace("0.", "");
+    const id = `level_${this.#transStack.value.length}-${digits}-trans`;
+    const next = [
+      ...this.#transStack.value,
+      {
+        id,
+        value: this.value,
+        suspendValidation,
+        isTransaction: true
+      }
+    ];
+    this.#transStack.next(next);
     return id;
   }
   #revertTransact(id) {
-    const index = this.#transStack.findIndex((p) => p.id === id);
+    const index = this.#transStack.value.findIndex((p) => p.id === id);
     if (index >= 0) {
-      this.#transStack = this.#transStack.slice(index);
+      const next = this.#transStack.value.slice(0, index);
+      this.#transStack.next(next);
     }
   }
   validate(value) {
+    if (this.suspendValidation) {
+      return { isValid: true };
+    }
     try {
       if (isZodParser(this.schema)) {
         this.schema.parse(value);
@@ -173,10 +212,6 @@ class Store {
           }
         } else if (typeof this.tests === "function") {
           this.#test(this.tests, value);
-        } else {
-          throw new Error(
-            "bad value for tests - must be function or array of functions"
-          );
         }
       }
       return {
@@ -194,24 +229,10 @@ class Store {
   }
   schema;
   tests;
-  // Pending value management
-  setPending(value) {
-    if (this._hasPending) {
-      throw new Error("cannot overwrite a pending value");
-    }
-    this.pending = value;
-    this._hasPending = true;
-  }
-  hasPending() {
-    return this._hasPending;
-  }
-  clearPending() {
-    this.pending = void 0;
-    this._hasPending = false;
-  }
   get value() {
-    if (this._hasPending) {
-      return this.pending;
+    const tsv = this.#transStack.value;
+    if (tsv.length) {
+      return tsv[tsv.length - 1].value;
     }
     if (!this.#subject) {
       throw new Error("Store requires subject or overload of value");

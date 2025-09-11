@@ -86,11 +86,13 @@ export class Forest<
 
     try {
       this.#validatePending(preparedValue);
-    } finally {
       const pending = this.dequeuePendingValue(pendingId);
       if (pending) {
-        super.next(pending.value);
+        super.next(preparedValue);
       }
+    } catch (error) {
+      this.dequeuePendingValue(pendingId);
+      throw error;
     }
   }
 

@@ -61,55 +61,56 @@ describe('Transaction System with observeTransStack', () => {
 
     // Shopping cart store for complex transaction scenarios
     const cartActions: RecordToParams<CartActions, ShoppingCartState> = {
-      addItem (value, productId: string, quantity: number) {
-        const product = value.products[productId];
-        if (!product) {
-          throw new Error(`Product ${productId} not found`);
-        }
+      addItem(_, productId: string, quantity: number) {
+        // Wrap the add item + update total in a suspended transaction
+        this.transact({
+          suspendValidation: true,
+          action() {
+            const product = this.products[productId];
+            if (!product) {
+              throw new Error(`Product ${productId} not found`);
+            }
 
-        const existingIndex = value.cartItems.findIndex(
-          (item) => item.productId === productId,
-        );
+            const existingIndex = this.value.cartItems.findIndex(
+              (item) => item.productId === productId,
+            );
 
-        let newCartItems: CartItem[];
-        if (existingIndex >= 0) {
-          newCartItems = value.cartItems.map((item, i) =>
-            i === existingIndex
-              ? {
-                  ...item,
-                  quantity: item.quantity + quantity,
-                  cost: (item.quantity + quantity) * product.price,
-                }
-              : item,
-          );
-        } else {
-          newCartItems = [
-            ...value.cartItems,
-            {
-              productId,
-              quantity,
-              cost: quantity * product.price,
-            },
-          ];
-        }
+            let newCartItems: CartItem[];
+            if (existingIndex >= 0) {
+              newCartItems = this.cartItems.map((item, i) =>
+                i === existingIndex
+                  ? {
+                      ...item,
+                      quantity: item.quantity + quantity,
+                      cost: (item.quantity + quantity) * product.price,
+                    }
+                  : item,
+              );
+            } else {
+              newCartItems = [
+                ...this.value.cartItems,
+                {
+                  productId,
+                  quantity,
+                  cost: quantity * product.price,
+                },
+              ];
+            }
 
-        return {
-          ...value,
-          cartItems: newCartItems,
-        };
+            // First, add the item (temporarily invalid state)
+            this.set('cartItems', newCartItems);
+
+            // Then update the total to make it valid
+            this.$.updateTotal();
+          },
+        });
       },
 
-      addMultipleItems(value, choices: [string, number][]) {
-        let currentValue = { ...value };
-
+      addMultipleItems(_, choices: [string, number][]) {
         for (const [productId, quantity] of choices) {
           try {
-            // Call the raw addItem action function directly
-            currentValue = cartActions.addItem(
-              currentValue,
-              productId,
-              quantity,
-            );
+            // Use this.$ to call the methodized actions, which will update the store
+            this.$.addItem(productId, quantity);
           } catch (err) {
             // Continue with valid choices, skip invalid ones
             console.warn(`Skipping invalid product: ${productId}`, err);
@@ -117,19 +118,20 @@ describe('Transaction System with observeTransStack', () => {
         }
 
         // Update total at the end
-        const finalValue = cartActions.updateTotal(currentValue);
-        return finalValue;
+        this.$.updateTotal();
       },
 
-      updateTotal (value) {
+      updateTotal(value) {
         const totalCost = value.cartItems.reduce(
           (sum, item) => sum + item.cost,
           0,
         );
-        return {
+        const newValue = {
           ...value,
           totalCost,
         };
+
+        this.next(newValue);
       },
     };
 
@@ -156,8 +158,6 @@ describe('Transaction System with observeTransStack', () => {
             return `Invalid product reference: ${item.productId}`;
           }
         }
-
-        return null;
       },
     });
   });
@@ -273,9 +273,9 @@ describe('Transaction System with observeTransStack', () => {
       try {
         cartStore.transact({
           suspendValidation: false, // Don't suspend validation for now
-          action: function (state) {
+          action: function () {
             // Add item
-            const withItem = this.$.addItem('laptop', 1);
+            this.$.addItem('laptop', 1);
             // Update total immediately to maintain validity
             const withTotal = this.$.updateTotal();
             this.next(withTotal);
@@ -365,26 +365,23 @@ describe('Transaction System with observeTransStack', () => {
         ['keyboard', 2], // Valid
       ];
 
-      const result = cartStore.$.addMultipleItems(choices);
+      cartStore.$.addMultipleItems(choices);
 
-      // Should have added only the valid items
-      expect(result.cartItems).toHaveLength(3);
+      // Should have added only the valid items to the store
+      expect(cartStore.value.cartItems).toHaveLength(3);
       expect(
-        result.cartItems.find((item) => item.productId === 'laptop'),
+        cartStore.value.cartItems.find((item) => item.productId === 'laptop'),
       ).toBeDefined();
       expect(
-        result.cartItems.find((item) => item.productId === 'mouse'),
+        cartStore.value.cartItems.find((item) => item.productId === 'mouse'),
       ).toBeDefined();
       expect(
-        result.cartItems.find((item) => item.productId === 'keyboard'),
+        cartStore.value.cartItems.find((item) => item.productId === 'keyboard'),
       ).toBeDefined();
 
       // Total should be correct
       const expectedTotal = 1200 * 1 + 50 * 3 + 150 * 2; // 1200 + 150 + 300 = 1650
-      expect(result.totalCost).toBe(expectedTotal);
-
-      // Now apply the result to the store
-      cartStore.next(result);
+      expect(cartStore.value.totalCost).toBe(expectedTotal);
 
       // Should have emitted the final valid state
       expect(valueEvents.length).toBeGreaterThanOrEqual(1);
@@ -397,23 +394,88 @@ describe('Transaction System with observeTransStack', () => {
     });
 
     it('should demonstrate basic transaction stack monitoring', () => {
-      const transactionLog: PendingValue<ShoppingCartState>[][] = [];
+      const logger: Array<{
+        type: 'state' | 'stack';
+        timestamp: number;
+        data: any;
+      }> = [];
 
-      const stackSub = cartStore.observeTransStack((stack) => {
-        transactionLog.push([...stack]);
+      // Subscribe to state changes
+      const stateSub = cartStore.subscribe((state) => {
+        logger.push({
+          type: 'state',
+          timestamp: Date.now(),
+          data: {
+            state: JSON.parse(JSON.stringify(state)),
+            suspendValidation: cartStore.suspendValidation,
+          },
+        });
       });
 
-      // Clear initial log
-      transactionLog.length = 0;
+      // Subscribe to transaction stack changes
+      const stackSub = cartStore.observeTransStack((stack) => {
+        logger.push({
+          type: 'stack',
+          timestamp: Date.now(),
+          data: {
+            stack: stack.map((p) => ({
+              id: p.id,
+              suspendValidation: p.suspendValidation,
+              isTransaction: p.isTransaction,
+              hasValue: !!p.value,
+            })),
+            suspendValidation: cartStore.suspendValidation,
+          },
+        });
+      });
 
-      // Perform a simple valid operation
-      // First add the item to the store
-      const laptop = cartStore.$.addItem('laptop', 1);
-      cartStore.next(laptop);
+      // Clear initial logs
+      logger.length = 0;
 
-      // Then update the total
-      const withTotal = cartStore.$.updateTotal();
-      cartStore.next(withTotal);
+      console.log('=== Starting transaction ===');
+
+      // Perform a simple valid operation using a transaction
+      cartStore.transact({
+        suspendValidation: true,
+        action: function () {
+          console.log(
+            'Inside transaction - suspendValidation:',
+            this.suspendValidation,
+          );
+
+          // Add item (this.$.addItem calls this.next internally)
+          this.$.addItem('laptop', 1);
+          console.log(
+            'After addItem - suspendValidation:',
+            this.suspendValidation,
+          );
+
+          // Update total to make state valid (this.$.updateTotal calls this.next internally)
+          this.$.updateTotal();
+          console.log(
+            'After updateTotal - suspendValidation:',
+            this.suspendValidation,
+          );
+        },
+      });
+
+      console.log('=== Transaction completed ===');
+      console.log(
+        'Store value after transaction:',
+        JSON.stringify(cartStore.value, null, 2),
+      );
+      console.log('=== Logger entries ===');
+      logger.forEach((entry, i) => {
+        if (entry.type === 'state') {
+          console.log(
+            `${i}: [${entry.type}] suspendValidation=${entry.data.suspendValidation} | cartItems=${entry.data.state.cartItems.length} | totalCost=${entry.data.state.totalCost}`,
+          );
+        } else {
+          console.log(
+            `${i}: [${entry.type}] suspendValidation=${entry.data.suspendValidation} | stack=[${entry.data.stack.map((s) => `${s.id.split('-')[0]}:${s.suspendValidation ? 'T' : 'F'}`).join(',')}]`,
+          );
+        }
+      });
 
       // Final state should be valid
       expect(cartStore.value.cartItems).toHaveLength(1);
@@ -421,8 +483,9 @@ describe('Transaction System with observeTransStack', () => {
       expect(cartStore.value.totalCost).toBe(1200);
 
       // Should have captured some transaction stack behavior
-      expect(transactionLog.length).toBeGreaterThanOrEqual(0);
+      expect(logger.length).toBeGreaterThan(0);
 
+      stateSub.unsubscribe();
       stackSub.unsubscribe();
     });
   });

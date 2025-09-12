@@ -130,13 +130,25 @@ class Store {
     return this.#transStack.subscribe(listener);
   }
   #commitTransact(id) {
-    const index = this.#transStack.value.findIndex((p) => p.id === id);
-    if (index >= 0) {
-      const trans = this.#transStack.value[index];
-      if (trans) {
-        trans.isTransaction = false;
+    let changed = false;
+    const nextStack = this.#transStack.value.map((p) => {
+      if (p.id === id) {
+        changed = true;
+        return {
+          ...p,
+          isTransaction: false,
+          suspendValidation: false
+        };
+      } else {
+        return p;
       }
+    });
+    if (changed) {
+      this.#transStack.next(nextStack);
     }
+    this.#checkTransComplete();
+  }
+  #checkTransComplete() {
     if (!this.#transStack.value.some((p) => p.isTransaction)) {
       const last = this.#transStack.value.pop();
       this.#transStack.next([]);

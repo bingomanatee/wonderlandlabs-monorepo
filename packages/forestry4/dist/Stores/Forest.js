@@ -1,5 +1,4 @@
 import { Store } from "./Store.js";
-import { Subject } from "rxjs";
 import { pathString } from "../lib/combinePaths.js";
 import { produce } from "immer";
 import { ForestBranch } from "./ForestBranch.js";
@@ -15,15 +14,6 @@ class Forest extends Store {
   get root() {
     return this;
   }
-  broadcast(message, fromRoot) {
-    if (fromRoot || this.isRoot) {
-      this.receiver.next(message);
-    }
-    if (this.parent) {
-      this.parent.broadcast(message);
-    }
-  }
-  receiver = new Subject();
   // Override complete to handle forest-wide completion
   complete() {
     if (!this.isActive) {

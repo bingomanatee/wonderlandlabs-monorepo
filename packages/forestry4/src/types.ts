@@ -96,7 +96,7 @@ export interface StoreIF<
 
   subscribe(listener: Listener<DataType>): Subscription;
 
-  transact(params: TransParams): void;
+  transact(params: TransParams | TransFn<DataType>, suspend?: boolean): void;
 
   acts: Actions;
   $: Actions;
@@ -115,7 +115,7 @@ export interface StoreIF<
   // validators
   schema?: ZodParser;
   tests?: ValueTestFn<DataType> | ValueTestFn<DataType>[];
-  prep?: (input: Partial<DataType>, current: DataType) => DataType;
+  prep(input: Partial<DataType>): DataType;
 
   validate(value: unknown): Validity;
 
@@ -123,8 +123,14 @@ export interface StoreIF<
 
   // Core utility methods
   get(path?: Path): any;
+  set(path: Path, value: unknown): void;
 
   mutate(producerFn: (draft: DataType) => void, path?: Path): DataType;
+
+  root: StoreIF<unknown>;
+  isRoot: boolean;
+  parent?: StoreIF<unknown>;
+  broadcast: (message: unknown, fromRoot?: boolean) => void;
 }
 
 export interface StoreBranch<
@@ -138,7 +144,7 @@ export interface StoreBranch<
   broadcast: (message: unknown, fromRoot?: boolean) => void;
   receiver: Subject<unknown>;
 
-  set(path, value): boolean;
+  set(path: Path, value: unknown): void;
 
   subject: Observable<DataType>;
 

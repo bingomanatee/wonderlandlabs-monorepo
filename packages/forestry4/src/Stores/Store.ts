@@ -5,17 +5,18 @@ import {
   PendingValue,
   StoreIF,
   StoreParams,
+  TransFn,
   TransParams,
   ValueTestFn,
 } from '../types';
-import { BehaviorSubject, Observable, Subscription } from 'rxjs';
+import { BehaviorSubject, Observable, Subject, Subscription } from 'rxjs';
 import { distinctUntilChanged } from 'rxjs/operators';
 import { isEqual } from 'lodash-es';
 import asError from '../lib/asError';
 import { isZodParser, ZodParser } from '../typeguards';
 import { enableMapSet, produce } from 'immer';
 import { methodize, testize } from './helpers';
-import { getPath } from '../lib/path';
+import { getPath, setPath } from '../lib/path';
 import { pathString } from '../lib/combinePaths';
 
 // Enable Immer support for Map and Set
@@ -61,7 +62,7 @@ export class Store<
       this.tests = testize<DataType>(p.tests, self);
     }
     if (p.prep) {
-      this.prep = p.prep.bind(this);
+      this.#prep = p.prep.bind(this);
       if (this.#subject) {
         this.#subject.next(this.prep!(this.value!, this.value!));
       }
@@ -76,7 +77,15 @@ export class Store<
   }
 
   public debug: boolean; // more alerts on validation failures;
-  public prep?: (input: Partial<DataType>, current: DataType) => DataType;
+  #prep?: (input: Partial<DataType>, current: DataType) => DataType;
+
+  prep(value: Partial<DataType>) {
+    if (this.#prep) {
+      return this.#prep.call(this, value, this.value);
+    }
+    return value as DataType;
+  }
+
   public res: Map<string, any> = new Map();
 
   #name?: string;
@@ -109,37 +118,28 @@ export class Store<
     if (!this.isActive) {
       throw new Error('Cannot update completed store');
     }
-
-    // Apply prep function if it exists to transform partial input to complete data
-    const preparedValue = this.prep
-      ? this.prep(value, this.value!)
-      : (value as DataType);
-
-    const { isValid, error } = this.validate(preparedValue);
     if (!this.subject) {
       throw new Error('Store requires subject -- or override of next()');
     }
+
+    const preparedValue = this.prep(value);
+    const { isValid, error } = this.validate(preparedValue);
     if (isValid) {
-      this.#subject!.next(preparedValue);
+      if (this.#hasTrans()) {
+        this.queuePendingValue(preparedValue);
+      } else {
+        this.#subject!.next(preparedValue);
+      }
       return;
     }
     if (this.debug) {
-      console.error(
-        'cannot update ',
-        this.name,
-        'with',
-        value,
-        '(current: ',
-        this.value,
-        ')',
-        error,
-      );
+      this.broadcast({ action: 'next-error', error, value: preparedValue });
     }
     throw asError(error);
   }
 
   #test(fn: ValueTestFn<DataType>, value: unknown) {
-    const result = fn(value, this);
+    const result = fn.call(this, value, this);
     if (result) {
       throw asError(result);
     }
@@ -150,7 +150,15 @@ export class Store<
     return this.#transStack.value.some((p) => p.suspendValidation);
   }
 
-  transact({ action, suspendValidation }: TransParams) {
+  transact(params: TransParams | TransFn, suspend?: boolean) {
+    if (typeof params === 'function') {
+      this.transact({
+        action: params,
+        suspendValidation: !!suspend,
+      });
+      return;
+    }
+    const { action, suspendValidation } = params;
     let transId: string = '';
     try {
       transId = this.#queuePendingTrans(suspendValidation);
@@ -203,6 +211,11 @@ export class Store<
       const last = this.#transStack.value.pop();
       this.#transStack.next([]);
       if (last) {
+        this.broadcast({
+          action: 'checkTransComplete',
+          phase: 'next',
+          value: last.value,
+        });
         this.next(last.value);
       }
     }
@@ -224,8 +237,12 @@ export class Store<
     return id;
   }
 
+  #hasTrans() {
+    return this.#transStack.value.some((p) => p.isTransaction);
+  }
+
   #collapseTransStack = () => {
-    if (this.#transStack.value.some((p) => p.isTransaction)) {
+    if (this.#hasTrans()) {
       return;
     }
 
@@ -266,6 +283,27 @@ export class Store<
       this.#transStack.next(next);
     }
   }
+
+  get root() {
+    return this;
+  }
+
+  get isRoot() {
+    return true;
+  }
+
+  parent: undefined;
+
+  public broadcast(message: unknown, fromRoot?: boolean) {
+    if (fromRoot || !this.parent) {
+      this.receiver.next(message);
+    }
+    if (this.root && this.root !== this) {
+      this.root.broadcast(message);
+    }
+  }
+
+  public receiver = new Subject();
 
   validate(value: unknown) {
     if (this.suspendValidation) {
@@ -326,6 +364,13 @@ export class Store<
     }
     const pathArray = Array.isArray(path) ? path : pathString(path).split('.');
     return getPath(this.value, pathArray);
+  }
+
+  set(path: Path, value: unknown) {
+    const next = produce(this.value, (draft) => {
+      setPath(draft, path, value);
+    });
+    this.next(next);
   }
 
   mutate(producerFn: (draft: any) => void, path?: Path): any {

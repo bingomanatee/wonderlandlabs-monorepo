@@ -55,7 +55,7 @@ class ForestBranch extends Store {
         error: typeof error === "string" ? error : error?.toString() || "Unknown validation error",
         timestamp: Date.now()
       };
-      this.broadcast(failureMessage);
+      this.root.broadcast(failureMessage);
     }
   }
   get root() {
@@ -109,8 +109,8 @@ class ForestBranch extends Store {
   broadcast(message, fromRoot) {
     if (fromRoot || this.isRoot) {
       this.receiver.next(message);
-    } else if (this.parent) {
-      this.parent.broadcast(message);
+    } else if (this.root && this.root !== this) {
+      this.root.broadcast(message);
     } else {
       console.warn(
         "strange broadcast pattern; node that is not root has no parent"

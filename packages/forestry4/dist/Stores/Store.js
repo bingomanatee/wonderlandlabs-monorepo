@@ -1,10 +1,10 @@
-import { BehaviorSubject } from "rxjs";
+import { BehaviorSubject, Subject } from "rxjs";
 import { isEqual } from "lodash-es";
 import asError from "../lib/asError.js";
 import { isZodParser } from "../typeguards.js";
 import { enableMapSet, produce } from "immer";
 import { methodize, testize } from "./helpers.js";
-import { getPath } from "../lib/path.js";
+import { getPath, setPath } from "../lib/path.js";
 import { pathString } from "../lib/combinePaths.js";
 import { distinctUntilChanged } from "../node_modules/rxjs/dist/esm5/internal/operators/distinctUntilChanged.js";
 enableMapSet();
@@ -36,7 +36,7 @@ class Store {
       this.tests = testize(p.tests, self);
     }
     if (p.prep) {
-      this.prep = p.prep.bind(this);
+      this.#prep = p.prep.bind(this);
       if (this.#subject) {
         this.#subject.next(this.prep(this.value, this.value));
       }
@@ -50,7 +50,14 @@ class Store {
   }
   debug;
   // more alerts on validation failures;
-  prep;
+  #prep;
+  // @ts-expect-error TS2416 -- value is not a complete DataType
+  prep(value) {
+    if (this.#prep) {
+      return this.#prep.call(this, value, this.value);
+    }
+    return value;
+  }
   res = /* @__PURE__ */ new Map();
   #name;
   get name() {
@@ -81,7 +88,11 @@ class Store {
       throw new Error("Store requires subject -- or override of next()");
     }
     if (isValid) {
-      this.#subject.next(preparedValue);
+      if (this.#hasTrans()) {
+        this.queuePendingValue(preparedValue);
+      } else {
+        this.#subject.next(preparedValue);
+      }
       return;
     }
     if (this.debug) {
@@ -99,7 +110,7 @@ class Store {
     throw asError(error);
   }
   #test(fn, value) {
-    const result = fn(value, this);
+    const result = fn.call(this, value, this);
     if (result) {
       throw asError(result);
     }
@@ -107,7 +118,15 @@ class Store {
   get suspendValidation() {
     return this.#transStack.value.some((p) => p.suspendValidation);
   }
-  transact({ action, suspendValidation }) {
+  transact(params, suspend) {
+    if (typeof params === "function") {
+      this.transact({
+        action: params,
+        suspendValidation: !!suspend
+      });
+      return;
+    }
+    const { action, suspendValidation } = params;
     let transId = "";
     try {
       let boundFn = function(value) {
@@ -153,6 +172,11 @@ class Store {
       const last = this.#transStack.value.pop();
       this.#transStack.next([]);
       if (last) {
+        this.broadcast({
+          action: "checkTransComplete",
+          phase: "next",
+          value: last.value
+        });
         this.next(last.value);
       }
     }
@@ -171,8 +195,11 @@ class Store {
     this.#transStack.next(next);
     return id;
   }
+  #hasTrans() {
+    return this.#transStack.value.some((p) => p.isTransaction);
+  }
   #collapseTransStack = () => {
-    if (this.#transStack.value.some((p) => p.isTransaction)) {
+    if (this.#hasTrans()) {
       return;
     }
     const last = this.#transStack.value.pop();
@@ -209,6 +236,22 @@ class Store {
       this.#transStack.next(next);
     }
   }
+  get root() {
+    return this;
+  }
+  get isRoot() {
+    return true;
+  }
+  parent;
+  broadcast(message, fromRoot) {
+    if (fromRoot || !this.parent) {
+      this.receiver.next(message);
+    }
+    if (this.root && this.root !== this) {
+      this.root.broadcast(message);
+    }
+  }
+  receiver = new Subject();
   validate(value) {
     if (this.suspendValidation) {
       return { isValid: true };
@@ -262,6 +305,12 @@ class Store {
     }
     const pathArray = Array.isArray(path) ? path : pathString(path).split(".");
     return getPath(this.value, pathArray);
+  }
+  set(path, value) {
+    const next = produce(this.value, (draft) => {
+      setPath(draft, path, value);
+    });
+    this.next(next);
   }
   mutate(producerFn, path) {
     if (!path || Array.isArray(path) && path.length === 0) {

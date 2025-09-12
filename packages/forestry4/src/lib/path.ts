@@ -48,12 +48,12 @@ export function getPath(source: any, pathArray: Path): unknown {
  * Uses Walrus type methods to identify the variation of each node.
  * Supports objects, arrays, Maps, and other complex structures.
  */
-export function setPath(draft: any, pathArray: Path, value: unknown): void {
+export function setPath(draft: any, path: Path, value: unknown): void {
   // Navigate through all but the last element using reduce
-  if (!Array.isArray(pathArray)) {
-    return setPath(draft, pathArray.split('.'), value);
+  if (!Array.isArray(path)) {
+    return setPath(draft, path.split('.'), value);
   }
-  const [target] = pathArray.slice(0, pathArray.length - 1).reduce(
+  const [target] = path.slice(0, path.length - 1).reduce(
     ([current], pathSegment) => {
       const currentType = type.describe(current, true);
 
@@ -94,7 +94,7 @@ export function setPath(draft: any, pathArray: Path, value: unknown): void {
   );
 
   // Final assignment based on target type
-  const finalKey = pathArray[pathArray.length - 1];
+  const finalKey = path[path.length - 1];
   const finalType = type.describe(target, true);
 
   switch (finalType) {

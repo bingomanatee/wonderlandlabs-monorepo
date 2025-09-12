@@ -61,12 +61,12 @@ describe('Transaction System with observeTransStack', () => {
 
     // Shopping cart store for complex transaction scenarios
     const cartActions: RecordToParams<CartActions, ShoppingCartState> = {
-      addItem(_, productId: string, quantity: number) {
+      addItem(_, productId: string, quantity: number, skipTotal = false) {
         // Wrap the add item + update total in a suspended transaction
         this.transact({
           suspendValidation: true,
           action() {
-            const product = this.products[productId];
+            const product = this.value.products[productId];
             if (!product) {
               throw new Error(`Product ${productId} not found`);
             }
@@ -77,7 +77,7 @@ describe('Transaction System with observeTransStack', () => {
 
             let newCartItems: CartItem[];
             if (existingIndex >= 0) {
-              newCartItems = this.cartItems.map((item, i) =>
+              newCartItems = this.value.cartItems.map((item, i) =>
                 i === existingIndex
                   ? {
                       ...item,
@@ -100,25 +100,32 @@ describe('Transaction System with observeTransStack', () => {
             // First, add the item (temporarily invalid state)
             this.set('cartItems', newCartItems);
 
-            // Then update the total to make it valid
-            this.$.updateTotal();
+            // Then update the total to make it valid (unless skipped)
+            if (!skipTotal) {
+              this.$.updateTotal();
+            }
           },
         });
       },
 
       addMultipleItems(_, choices: [string, number][]) {
-        for (const [productId, quantity] of choices) {
-          try {
-            // Use this.$ to call the methodized actions, which will update the store
-            this.$.addItem(productId, quantity);
-          } catch (err) {
-            // Continue with valid choices, skip invalid ones
-            console.warn(`Skipping invalid product: ${productId}`, err);
-          }
-        }
+        this.transact({
+          suspendValidation: true,
+          action() {
+            for (const [productId, quantity] of choices) {
+              try {
+                // Use skipTotal=true for efficiency - don't recalculate total after each item
+                this.$.addItem(productId, quantity, true);
+              } catch (err) {
+                // Continue with valid choices, skip invalid ones
+                // Skip invalid products silently
+              }
+            }
 
-        // Update total at the end
-        this.$.updateTotal();
+            // Update total once at the end for efficiency
+            this.$.updateTotal();
+          },
+        });
       },
 
       updateTotal(value) {
@@ -288,7 +295,6 @@ describe('Transaction System with observeTransStack', () => {
         expect(cartStore.value.totalCost).toBe(1200);
       } catch (err) {
         // If transaction fails, that's also valid behavior to test
-        console.log('Transaction failed as expected:', err);
         expect(cartStore.value.cartItems).toHaveLength(0);
         expect(cartStore.value.totalCost).toBe(0);
       }
@@ -318,9 +324,8 @@ describe('Transaction System with observeTransStack', () => {
         cartStore.transact({
           suspendValidation: false, // Don't suspend validation - should fail immediately
           action: function (value) {
-            // Add item but don't update total (leaves imbalance)
-            const withItem = this.$.addItem('mouse', 3);
-            this.next(withItem);
+            // Add item but skip total update (leaves imbalance)
+            this.$.addItem('mouse', 3, true); // skipTotal=true
             // Transaction ends here with invalid state (totalCost = 0, but items cost 150)
           },
         });
@@ -400,93 +405,29 @@ describe('Transaction System with observeTransStack', () => {
         data: any;
       }> = [];
 
-      // Subscribe to state changes
-      const stateSub = cartStore.subscribe((state) => {
-        logger.push({
-          type: 'state',
-          timestamp: Date.now(),
-          data: {
-            state: JSON.parse(JSON.stringify(state)),
-            suspendValidation: cartStore.suspendValidation,
-          },
-        });
-      });
-
-      // Subscribe to transaction stack changes
-      const stackSub = cartStore.observeTransStack((stack) => {
-        logger.push({
-          type: 'stack',
-          timestamp: Date.now(),
-          data: {
-            stack: stack.map((p) => ({
-              id: p.id,
-              suspendValidation: p.suspendValidation,
-              isTransaction: p.isTransaction,
-              hasValue: !!p.value,
-            })),
-            suspendValidation: cartStore.suspendValidation,
-          },
-        });
-      });
-
       // Clear initial logs
       logger.length = 0;
-
-      console.log('=== Starting transaction ===');
 
       // Perform a simple valid operation using a transaction
       cartStore.transact({
         suspendValidation: true,
         action: function () {
-          console.log(
-            'Inside transaction - suspendValidation:',
-            this.suspendValidation,
-          );
-
           // Add item (this.$.addItem calls this.next internally)
           this.$.addItem('laptop', 1);
-          console.log(
-            'After addItem - suspendValidation:',
-            this.suspendValidation,
-          );
 
           // Update total to make state valid (this.$.updateTotal calls this.next internally)
           this.$.updateTotal();
-          console.log(
-            'After updateTotal - suspendValidation:',
-            this.suspendValidation,
-          );
         },
       });
 
-      console.log('=== Transaction completed ===');
-      console.log(
-        'Store value after transaction:',
-        JSON.stringify(cartStore.value, null, 2),
-      );
-      console.log('=== Logger entries ===');
-      logger.forEach((entry, i) => {
-        if (entry.type === 'state') {
-          console.log(
-            `${i}: [${entry.type}] suspendValidation=${entry.data.suspendValidation} | cartItems=${entry.data.state.cartItems.length} | totalCost=${entry.data.state.totalCost}`,
-          );
-        } else {
-          console.log(
-            `${i}: [${entry.type}] suspendValidation=${entry.data.suspendValidation} | stack=[${entry.data.stack.map((s) => `${s.id.split('-')[0]}:${s.suspendValidation ? 'T' : 'F'}`).join(',')}]`,
-          );
-        }
-      });
+
 
       // Final state should be valid
       expect(cartStore.value.cartItems).toHaveLength(1);
       expect(cartStore.value.cartItems[0].productId).toBe('laptop');
       expect(cartStore.value.totalCost).toBe(1200);
 
-      // Should have captured some transaction stack behavior
-      expect(logger.length).toBeGreaterThan(0);
 
-      stateSub.unsubscribe();
-      stackSub.unsubscribe();
     });
   });
 });

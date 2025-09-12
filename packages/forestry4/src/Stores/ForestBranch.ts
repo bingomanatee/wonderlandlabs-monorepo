@@ -93,7 +93,7 @@ export class ForestBranch<
       };
 
       // Broadcast the failure message upstream (don't use fromRoot=true)
-      this.broadcast(failureMessage);
+      this.root.broadcast(failureMessage);
     }
   }
 
@@ -166,8 +166,8 @@ export class ForestBranch<
   public broadcast(message: unknown, fromRoot?: boolean) {
     if (fromRoot || this.isRoot) {
       this.receiver.next(message);
-    } else if (this.parent) {
-      this.parent.broadcast(message);
+    } else if (this.root && this.root !== this) {
+      this.root.broadcast(message);
     } else {
       console.warn(
         'strange broadcast pattern; node that is not root has no parent',

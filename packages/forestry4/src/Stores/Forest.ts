@@ -33,17 +33,6 @@ export class Forest<
     return this;
   }
 
-  public broadcast(message: unknown, fromRoot?: boolean) {
-    if (fromRoot || this.isRoot) {
-      this.receiver.next(message);
-    }
-    if (this.parent) {
-      this.parent.broadcast(message);
-    }
-  }
-
-  public receiver = new Subject();
-
   // Override complete to handle forest-wide completion
   complete(): DataType {
     if (!this.isActive) {

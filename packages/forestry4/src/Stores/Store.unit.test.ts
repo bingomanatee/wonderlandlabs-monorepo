@@ -40,8 +40,8 @@ describe('Store', () => {
     it('should create a store with tests function', () => {
       const testFn = vi.fn();
       const store = new Store({ value: 42, acts: {}, tests: testFn });
-
-      expect(typeof store.tests).toBe('function');
+      store.test(40);
+      expect(testFn).toHaveBeenCalled();
     });
   });
 

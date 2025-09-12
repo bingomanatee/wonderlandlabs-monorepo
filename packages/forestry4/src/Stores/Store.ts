@@ -27,22 +27,6 @@ export class Store<
   Actions extends ActionExposedRecord = ActionExposedRecord,
 > implements StoreIF<DataType, Actions>
 {
-  /**
-   * note - for consistency with the types subject is a generic subject;
-   * however internally it is a BehaviorSubject.
-   * @private
-   */
-  #subject?: BehaviorSubject<DataType>;
-  get subject(): Observable<DataType> {
-    return this.#subject!;
-  }
-
-  $: Actions;
-
-  get acts(): Actions {
-    return this.$;
-  }
-
   constructor(p: StoreParams<DataType, Actions>, noSubject = false) {
     // Apply prep function to initial value if it exists
     if (!noSubject) {
@@ -57,14 +41,11 @@ export class Store<
 
     const self = this;
     this.$ = methodize<DataType, Actions>(p.actions ?? {}, self);
-
-    if (p.tests) {
-      this.tests = testize<DataType>(p.tests, self);
-    }
+    this.#tests = p.tests ? testize<DataType>(p.tests, self) : undefined;
     if (p.prep) {
       this.#prep = p.prep.bind(this);
       if (this.#subject) {
-        this.#subject.next(this.prep!(this.value!, this.value!));
+        this.#subject.next(this.prep(this.value!));
       }
     }
 
@@ -74,6 +55,22 @@ export class Store<
     if (p.res && p.res instanceof Map) {
       p.res.forEach((value, key) => this.res.set(key, value));
     }
+  }
+
+  /**
+   * note - for consistency with the types subject is a generic subject;
+   * however internally it is a BehaviorSubject.
+   * @private
+   */
+  #subject?: BehaviorSubject<DataType>;
+  get subject(): Observable<DataType> {
+    return this.#subject!;
+  }
+
+  $: Actions;
+
+  get acts(): Actions {
+    return this.$;
   }
 
   public debug: boolean; // more alerts on validation failures;
@@ -305,41 +302,62 @@ export class Store<
 
   public receiver = new Subject();
 
-  validate(value: unknown) {
+  // validate determines if a value can be sent to next
+  // _in the current conteext_
+  // -- i.e., depending on on transactional conditions
+  validate(value: DataType) {
     if (this.suspendValidation) {
       return { isValid: true };
     }
-    try {
-      if (isZodParser(this.schema)) {
+    if (isZodParser(this.schema)) {
+      try {
         this.schema.parse(value); // throws an error if the value is not valid
+      } catch (err) {
+        return {
+          isValid: false,
+          error: asError(err),
+          source: 'schema',
+        };
       }
-      if (this.tests) {
-        if (Array.isArray(this.tests)) {
-          for (const test of this.tests) {
-            this.#test(test, value);
-          }
-        } else if (typeof this.tests === 'function') {
-          this.#test(this.tests, value);
-        }
-      }
-      return {
-        isValid: true,
-      };
-    } catch (e) {
-      return {
-        isValid: false,
-        error: asError(e),
-      };
     }
+
+    return this.test(value);
   }
 
-  isValid(value: unknown): boolean {
+  isValid(value: DataType): boolean {
     return this.validate(value).isValid;
   }
 
   schema?: ZodParser;
 
-  tests?: ValueTestFn<DataType> | ValueTestFn<DataType>[];
+  #tests?: ValueTestFn<DataType> | ValueTestFn<DataType>[];
+
+  test(value: DataType) {
+    let lastFn;
+    if (this.#tests) {
+      try {
+        if (Array.isArray(this.#tests)) {
+          for (const test of this.#tests) {
+            lastFn = test;
+            this.#test(test, value);
+          }
+        } else if (typeof this.#tests === 'function') {
+          lastFn = this.#tests;
+          this.#test(this.#tests, value);
+        }
+      } catch (err) {
+        return {
+          isValid: false,
+          value,
+          error: asError(err),
+          testFn: lastFn,
+        };
+      }
+    }
+    return {
+      isValid: true,
+    };
+  }
 
   get value() {
     const tsv = this.#transStack.value;

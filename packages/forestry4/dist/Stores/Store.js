@@ -9,6 +9,30 @@ import { pathString } from "../lib/combinePaths.js";
 import { distinctUntilChanged } from "../node_modules/rxjs/dist/esm5/internal/operators/distinctUntilChanged.js";
 enableMapSet();
 class Store {
+  constructor(p, noSubject = false) {
+    if (!noSubject) {
+      this.#subject = new BehaviorSubject(p.value);
+    }
+    if ("schema" in p && p.schema) {
+      this.schema = p.schema;
+    }
+    this.debug = !!p.debug;
+    const self = this;
+    this.$ = methodize(p.actions ?? {}, self);
+    this.#tests = p.tests ? testize(p.tests, self) : void 0;
+    if (p.prep) {
+      this.#prep = p.prep.bind(this);
+      if (this.#subject) {
+        this.#subject.next(this.prep(this.value));
+      }
+    }
+    if (p.name && typeof p.name === "string") {
+      this.#name = p.name;
+    }
+    if (p.res && p.res instanceof Map) {
+      p.res.forEach((value, key) => this.res.set(key, value));
+    }
+  }
   /**
    * note - for consistency with the types subject is a generic subject;
    * however internally it is a BehaviorSubject.
@@ -22,36 +46,9 @@ class Store {
   get acts() {
     return this.$;
   }
-  constructor(p, noSubject = false) {
-    if (!noSubject) {
-      this.#subject = new BehaviorSubject(p.value);
-    }
-    if ("schema" in p && p.schema) {
-      this.schema = p.schema;
-    }
-    this.debug = !!p.debug;
-    const self = this;
-    this.$ = methodize(p.actions ?? {}, self);
-    if (p.tests) {
-      this.tests = testize(p.tests, self);
-    }
-    if (p.prep) {
-      this.#prep = p.prep.bind(this);
-      if (this.#subject) {
-        this.#subject.next(this.prep(this.value, this.value));
-      }
-    }
-    if (p.name && typeof p.name === "string") {
-      this.#name = p.name;
-    }
-    if (p.res && p.res instanceof Map) {
-      p.res.forEach((value, key) => this.res.set(key, value));
-    }
-  }
   debug;
   // more alerts on validation failures;
   #prep;
-  // @ts-expect-error TS2416 -- value is not a complete DataType
   prep(value) {
     if (this.#prep) {
       return this.#prep.call(this, value, this.value);
@@ -82,11 +79,11 @@ class Store {
     if (!this.isActive) {
       throw new Error("Cannot update completed store");
     }
-    const preparedValue = this.prep ? this.prep(value, this.value) : value;
-    const { isValid, error } = this.validate(preparedValue);
     if (!this.subject) {
       throw new Error("Store requires subject -- or override of next()");
     }
+    const preparedValue = this.prep(value);
+    const { isValid, error } = this.validate(preparedValue);
     if (isValid) {
       if (this.#hasTrans()) {
         this.queuePendingValue(preparedValue);
@@ -96,16 +93,7 @@ class Store {
       return;
     }
     if (this.debug) {
-      console.error(
-        "cannot update ",
-        this.name,
-        "with",
-        value,
-        "(current: ",
-        this.value,
-        ")",
-        error
-      );
+      this.broadcast({ action: "next-error", error, value: preparedValue });
     }
     throw asError(error);
   }
@@ -252,38 +240,57 @@ class Store {
     }
   }
   receiver = new Subject();
+  // validate determines if a value can be sent to next
+  // _in the current conteext_
+  // -- i.e., depending on on transactional conditions
   validate(value) {
     if (this.suspendValidation) {
       return { isValid: true };
     }
-    try {
-      if (isZodParser(this.schema)) {
+    if (isZodParser(this.schema)) {
+      try {
         this.schema.parse(value);
+      } catch (err) {
+        return {
+          isValid: false,
+          error: asError(err),
+          source: "schema"
+        };
       }
-      if (this.tests) {
-        if (Array.isArray(this.tests)) {
-          for (const test of this.tests) {
-            this.#test(test, value);
-          }
-        } else if (typeof this.tests === "function") {
-          this.#test(this.tests, value);
-        }
-      }
-      return {
-        isValid: true
-      };
-    } catch (e) {
-      return {
-        isValid: false,
-        error: asError(e)
-      };
     }
+    return this.test(value);
   }
   isValid(value) {
     return this.validate(value).isValid;
   }
   schema;
-  tests;
+  #tests;
+  test(value) {
+    let lastFn;
+    if (this.#tests) {
+      try {
+        if (Array.isArray(this.#tests)) {
+          for (const test of this.#tests) {
+            lastFn = test;
+            this.#test(test, value);
+          }
+        } else if (typeof this.#tests === "function") {
+          lastFn = this.#tests;
+          this.#test(this.#tests, value);
+        }
+      } catch (err) {
+        return {
+          isValid: false,
+          value,
+          error: asError(err),
+          testFn: lastFn
+        };
+      }
+    }
+    return {
+      isValid: true
+    };
+  }
   get value() {
     const tsv = this.#transStack.value;
     if (tsv.length) {

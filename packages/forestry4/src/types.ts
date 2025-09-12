@@ -114,7 +114,7 @@ export interface StoreIF<
 
   // validators
   schema?: ZodParser;
-  tests?: ValueTestFn<DataType> | ValueTestFn<DataType>[];
+  test(value: unknown): Validity;
   prep(input: Partial<DataType>): DataType;
 
   validate(value: unknown): Validity;

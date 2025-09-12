@@ -115,8 +115,8 @@ class Store {
       };
       transId = this.#queuePendingTrans(suspendValidation);
       const self = this;
-      this.#commitTransact(transId);
       boundFn(this.value);
+      this.#commitTransact(transId);
     } catch (err) {
       if (transId) {
         this.#revertTransact(transId);

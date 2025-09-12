@@ -160,8 +160,8 @@ export class Store<
         return action.call(self, value);
       }
 
-      this.#commitTransact(transId);
       boundFn(this.value!);
+      this.#commitTransact(transId);
     } catch (err) {
       if (transId) {
         this.#revertTransact(transId);

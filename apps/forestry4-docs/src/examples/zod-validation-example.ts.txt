@@ -1,0 +1,104 @@
+// Zod Validation Examples
+// Structural and type validation using Zod schema library
+
+import { z } from 'zod'
+
+// Shopping Cart Schema
+export const CartItemSchema = z.object({
+  productId: z.string().min(1, 'Product ID cannot be empty'),
+  quantity: z.number().int().positive('Quantity must be a positive integer')
+})
+
+export const ShoppingCartSchema = z.object({
+  items: z.array(CartItemSchema),
+  totalCost: z.number().nonnegative('Total cost cannot be negative')
+})
+
+// Form Field Schema
+export const FormFieldSchema = z.object({
+  value: z.union([z.string(), z.number()]),
+  isValid: z.boolean(),
+  errorString: z.string()
+})
+
+// Advanced Form Schema
+export const AdvancedFormSchema = z.object({
+  username: FormFieldSchema.extend({
+    value: z.string().min(3).max(20)
+  }),
+  email: FormFieldSchema.extend({
+    value: z.string().email()
+  }),
+  age: FormFieldSchema.extend({
+    value: z.number().int().min(0).max(150)
+  }),
+  isSubmitting: z.boolean(),
+  canSubmit: z.boolean(),
+  submitError: z.string()
+})
+
+// Usage in prep functions
+export const validateWithZod = (input: unknown, schema: z.ZodSchema) => {
+  const result = schema.safeParse(input)
+  if (!result.success) {
+    const errors = result.error.errors.map(err => 
+      `${err.path.join('.')}: ${err.message}`
+    ).join(', ')
+    throw new Error(`Validation failed: ${errors}`)
+  }
+  return result.data
+}
+
+// Example prep function with Zod validation
+export const cartPrepWithZod = (input: any, current: any) => {
+  // Layer 1: Structural validation with Zod
+  const validatedInput = validateWithZod(input, ShoppingCartSchema)
+  
+  // Layer 2: Calculate derived state
+  const result = {
+    ...current,
+    ...validatedInput,
+    // Calculate UI state
+    isEmpty: validatedInput.items.length === 0,
+    itemCount: validatedInput.items.reduce((sum, item) => sum + item.quantity, 0),
+    // Recalculate total to ensure accuracy
+    totalCost: validatedInput.items.reduce((sum, item) => {
+      const product = PRODUCTS.find(p => p.id === item.productId)
+      return sum + (product ? product.price * item.quantity : 0)
+    }, 0)
+  }
+  
+  return result
+}
+
+// Example form prep function with Zod validation
+export const formPrepWithZod = (input: any, current: any) => {
+  // Layer 1: Structural validation
+  const validatedInput = validateWithZod(input, AdvancedFormSchema)
+  
+  // Layer 2: Calculate UI state (transient errors)
+  const result = {
+    ...current,
+    ...validatedInput
+  }
+  
+  // Calculate submission state
+  const allFieldsValid = result.username.isValid && result.email.isValid && result.age.isValid
+  const allFieldsFilled = result.username.value.length > 0 && result.email.value.length > 0 && result.age.value > 0
+  
+  if (!allFieldsFilled) {
+    result.canSubmit = false
+    result.submitError = 'Please fill out all fields'
+  } else if (!allFieldsValid) {
+    result.canSubmit = false
+    result.submitError = 'Please fix validation errors before submitting'
+  } else if (result.isSubmitting) {
+    result.canSubmit = false
+    result.submitError = 'Submitting...'
+  } else {
+    result.canSubmit = true
+    result.submitError = ''
+  }
+  
+  return result
+}

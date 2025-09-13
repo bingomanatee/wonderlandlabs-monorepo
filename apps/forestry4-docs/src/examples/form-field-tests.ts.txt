@@ -1,0 +1,82 @@
+// Form Field Validation Tests
+// Critical business rules for form fields
+
+import { FormField } from '../types'
+
+// Username field tests
+export const usernameTests = [
+  // Critical business rule - Username uniqueness (would check database in real app)
+  (field: FormField<string>) => {
+    const reservedUsernames = ['admin', 'root', 'system', 'api', 'null', 'undefined']
+    return reservedUsernames.includes(field.value.toLowerCase()) 
+      ? 'Username is reserved and cannot be used' 
+      : null
+  },
+  // Critical business rule - No profanity or inappropriate content
+  (field: FormField<string>) => {
+    const inappropriateWords = ['spam', 'test123', 'delete', 'hack']
+    return inappropriateWords.some(word => field.value.toLowerCase().includes(word))
+      ? 'Username contains inappropriate content'
+      : null
+  }
+]
+
+// Email field tests
+export const emailTests = [
+  // Critical business rule - No disposable email domains
+  (field: FormField<string>) => {
+    const disposableDomains = ['10minutemail.com', 'tempmail.org', 'guerrillamail.com', 'mailinator.com']
+    const domain = field.value.split('@')[1]?.toLowerCase()
+    return domain && disposableDomains.includes(domain)
+      ? 'Disposable email addresses are not allowed'
+      : null
+  },
+  // Critical business rule - Corporate email restrictions (example business rule)
+  (field: FormField<string>) => {
+    const restrictedDomains = ['competitor.com', 'blocked-company.com']
+    const domain = field.value.split('@')[1]?.toLowerCase()
+    return domain && restrictedDomains.includes(domain)
+      ? 'Email domain is not allowed for registration'
+      : null
+  }
+]
+
+// Age field tests
+export const ageTests = [
+  // Critical business rule - Legal age restrictions
+  (field: FormField<number>) => {
+    return field.value < 13 
+      ? 'Users under 13 cannot create accounts due to COPPA regulations'
+      : null
+  },
+  // Critical business rule - Senior citizen verification (example complex rule)
+  (field: FormField<number>) => {
+    return field.value >= 65 && field.value < 18
+      ? 'Age verification failed - inconsistent age data detected'
+      : null
+  },
+  // Critical business rule - Reasonable age bounds (data integrity)
+  (field: FormField<number>) => {
+    return field.value > 120
+      ? 'Age exceeds reasonable human lifespan - please verify'
+      : null
+  }
+]
+
+// Form-level tests
+export const formTests = [
+  // Critical business rule - Prevent submission during processing
+  (value: AdvancedForm) => {
+    return value.isSubmitting && value.canSubmit
+      ? 'Cannot modify form state while submission is in progress'
+      : null
+  },
+  // Critical business rule - Username/email combination uniqueness
+  (value: AdvancedForm) => {
+    // In real app, this would check database for existing user
+    const testConflict = value.username.value === 'admin' && value.email.value.includes('admin')
+    return testConflict
+      ? 'Username and email combination already exists'
+      : null
+  }
+]

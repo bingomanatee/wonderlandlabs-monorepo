@@ -1,0 +1,38 @@
+import { z } from 'zod';
+
+// Array validation with constraints
+const TodoSchema = z.object({
+  id: z.number().int().positive(),
+  text: z.string().min(1).max(500),
+  completed: z.boolean(),
+  priority: z.enum(['low', 'medium', 'high']),
+  tags: z.array(z.string()).max(10), // Max 10 tags
+  dueDate: z.date().optional()
+});
+
+const TodoListSchema = z.object({
+  todos: z.array(TodoSchema)
+    .min(0)
+    .max(1000) // Business constraint: max 1000 todos
+    .refine(
+      (todos) => todos.filter(t => !t.completed).length <= 100,
+      { message: "Cannot have more than 100 active todos" }
+    ),
+  filter: z.enum(['all', 'active', 'completed']),
+  searchQuery: z.string().max(100),
+  sortBy: z.enum(['created', 'priority', 'dueDate']),
+  categories: z.array(z.string()).min(1), // At least one category
+});
+
+// Validation with custom refinements
+const PlaylistSchema = z.object({
+  name: z.string().min(1).max(100),
+  songs: z.array(z.object({
+    id: z.string(),
+    title: z.string().min(1),
+    duration: z.number().positive() // seconds
+  })).refine(
+    (songs) => songs.reduce((total, song) => total + song.duration, 0) <= 7200,
+    { message: "Playlist cannot exceed 2 hours (7200 seconds)" }
+  )
+});

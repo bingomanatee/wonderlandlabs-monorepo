@@ -1,0 +1,26 @@
+import { useState, useEffect } from 'react';
+
+const useForest = <T>(forest: Forest<T>) => {
+  const [value, setValue] = useState(forest.value);
+
+  useEffect(() => {
+    const subscription = forest.subscribe(setValue);
+    return () => subscription.unsubscribe();
+  }, [forest]);
+
+  return [value, forest.$] as const;
+};
+
+// Usage
+const MyComponent = () => {
+  const [value, actions] = useForest(userForest);
+
+  return (
+    <div>
+      <p>Name: {value.name}</p>
+      <button onClick={() => actions.setName('New Name')}>
+        Update Name
+      </button>
+    </div>
+  );
+};

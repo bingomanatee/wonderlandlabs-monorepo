@@ -1,0 +1,31 @@
+// Slice definition
+const counterSlice = createSlice({
+  name: 'counter',
+  initialState: { count: 0, history: [] },
+  reducers: {
+    increment: (state) => {
+      state.count++;
+      state.history.push(`Incremented to ${state.count}`);
+    }
+  }
+});
+
+// Store setup
+const store = configureStore({
+  reducer: { counter: counterSlice.reducer }
+});
+
+// React component
+function Counter() {
+  const state = useSelector((state) => state.counter);
+  const dispatch = useDispatch();
+  
+  return (
+    <div>
+      <p>Count: {state.count}</p>
+      <button onClick={() => dispatch(counterSlice.actions.increment())}>
+        Increment
+      </button>
+    </div>
+  );
+}

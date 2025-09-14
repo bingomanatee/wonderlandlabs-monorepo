@@ -1,0 +1,328 @@
+// Transaction Examples for Forestry 4 Documentation
+// These examples demonstrate various transaction patterns and use cases
+
+import { Forest } from '@wonderlandlabs/forestry4'
+
+// Example 1: Basic Transaction with Validation Suspension
+export const basicTransactionExample = `
+const bankStore = new Forest({
+  value: { balance: 1000, transactions: [] },
+  
+  actions: {
+    transfer(value, amount: number, description: string) {
+      this.transact({
+        suspendValidation: true,
+        action() {
+          // Step 1: Deduct amount (may temporarily create negative balance)
+          this.next({
+            ...this.value,
+            balance: this.value.balance - amount
+          })
+          
+          // Step 2: Add transaction record
+          const transaction = {
+            id: Date.now().toString(),
+            amount: -amount,
+            description,
+            timestamp: Date.now()
+          }
+          
+          // Step 3: Update with final valid state
+          this.next({
+            balance: this.value.balance,
+            transactions: [...this.value.transactions, transaction]
+          })
+        }
+      })
+    }
+  },
+  
+  tests: (value) => {
+    if (value.balance < 0) {
+      return 'Account balance cannot be negative'
+    }
+    return null
+  }
+})
+`
+
+// Example 2: E-commerce Checkout Process
+export const ecommerceCheckoutExample = `
+interface CartItem {
+  productId: string
+  quantity: number
+  price: number
+}
+
+interface CheckoutState {
+  items: CartItem[]
+  totalAmount: number
+  orderId?: string
+  status: 'cart' | 'processing' | 'completed' | 'failed'
+}
+
+const checkoutStore = new Forest<CheckoutState>({
+  value: {
+    items: [],
+    totalAmount: 0,
+    status: 'cart'
+  },
+  
+  actions: {
+    processCheckout(value, paymentInfo: any, shippingInfo: any) {
+      this.transact({
+        suspendValidation: true,
+        action() {
+          // Step 1: Set processing status
+          this.next({ ...this.value, status: 'processing' })
+          
+          // Step 2: Validate cart
+          if (this.value.items.length === 0) {
+            throw new Error('Cart is empty')
+          }
+          
+          // Step 3: Reserve inventory
+          for (const item of this.value.items) {
+            this.$.reserveInventory(item.productId, item.quantity)
+          }
+          
+          // Step 4: Process payment
+          const paymentResult = this.$.processPayment(
+            this.value.totalAmount,
+            paymentInfo
+          )
+          
+          // Step 5: Create order
+          const orderId = this.$.createOrder({
+            items: this.value.items,
+            paymentId: paymentResult.id,
+            shipping: shippingInfo
+          })
+          
+          // Step 6: Complete checkout
+          this.next({
+            items: [],
+            totalAmount: 0,
+            orderId,
+            status: 'completed'
+          })
+        }
+      })
+    },
+    
+    reserveInventory(value, productId: string, quantity: number) {
+      // Simulate inventory reservation
+      console.log(\`Reserved \${quantity} of \${productId}\`)
+    },
+    
+    processPayment(value, amount: number, paymentInfo: any) {
+      // Simulate payment processing
+      if (amount <= 0) {
+        throw new Error('Invalid payment amount')
+      }
+      return { id: 'payment_' + Date.now() }
+    },
+    
+    createOrder(value, orderData: any) {
+      // Simulate order creation
+      return 'order_' + Date.now()
+    }
+  },
+  
+  tests: (value) => {
+    if (value.status === 'processing' && !value.items.length) {
+      return 'Cannot process empty cart'
+    }
+    return null
+  }
+})
+`
+
+// Example 3: Nested Transactions with Error Recovery
+export const nestedTransactionExample = `
+const batchProcessingStore = new Forest({
+  value: {
+    items: [],
+    processedCount: 0,
+    errorCount: 0,
+    results: []
+  },
+  
+  actions: {
+    processBatch(value, updates: any[]) {
+      this.transact({
+        suspendValidation: true,
+        action() {
+          const results = []
+          let errorCount = 0
+          
+          for (const update of updates) {
+            try {
+              // Inner transaction for each item
+              this.transact({
+                action() {
+                  this.$.validateUpdate(update)
+                  this.$.processUpdate(update)
+                }
+              })
+              results.push({ id: update.id, status: 'success' })
+            } catch (error) {
+              // Catch inner transaction error, continue batch
+              results.push({ 
+                id: update.id, 
+                status: 'error', 
+                error: error.message 
+              })
+              errorCount++
+            }
+          }
+          
+          // Update final state
+          this.next({
+            ...this.value,
+            processedCount: updates.length,
+            errorCount,
+            results
+          })
+          
+          // Fail entire batch if too many errors
+          if (errorCount > updates.length * 0.5) {
+            throw new Error(\`Batch failed: \${errorCount} of \${updates.length} failed\`)
+          }
+        }
+      })
+    },
+    
+    validateUpdate(value, update: any) {
+      if (!update.id) {
+        throw new Error('Update missing ID')
+      }
+    },
+    
+    processUpdate(value, update: any) {
+      // Simulate processing
+      console.log(\`Processing update \${update.id}\`)
+    }
+  }
+})
+`
+
+// Example 4: Transaction Monitoring and Debugging
+export const transactionMonitoringExample = `
+const monitoredStore = new Forest({
+  value: { count: 0, operations: [] },
+  
+  actions: {
+    complexOperation(value) {
+      this.transact({
+        suspendValidation: true,
+        action() {
+          this.$.step1()
+          this.$.step2()
+          this.$.step3()
+        }
+      })
+    },
+    
+    step1(value) {
+      this.next({ ...value, count: value.count + 1 })
+    },
+    
+    step2(value) {
+      this.next({ 
+        ...value, 
+        operations: [...value.operations, 'step2_completed']
+      })
+    },
+    
+    step3(value) {
+      this.next({ ...value, count: value.count * 2 })
+    }
+  }
+})
+
+// Monitor transaction stack
+const stackSubscription = monitoredStore.observeTransStack((stack) => {
+  console.log('Transaction Stack Update:', {
+    stackSize: stack.length,
+    activeTransactions: stack.filter(t => t.isTransaction).length,
+    suspendedValidation: stack.some(t => t.suspendValidation)
+  })
+})
+
+// Execute and monitor
+monitoredStore.$.complexOperation()
+
+// Clean up
+stackSubscription.unsubscribe()
+`
+
+// Example 5: Safe Action Pattern for UI Integration
+export const safeActionPatternExample = `
+function createStoreWithSafeActions(errorHandler?: (error: Error) => void) {
+  return new Forest({
+    value: { data: [], status: 'idle', lastError: null },
+    
+    actions: {
+      // Regular actions that can throw
+      dangerousUpdate(value, newData: any) {
+        this.transact({
+          action() {
+            this.$.validateData(newData)
+            this.$.updateData(newData)
+            this.$.notifySubscribers()
+          }
+        })
+      },
+      
+      validateData(value, data: any) {
+        if (!data || typeof data !== 'object') {
+          throw new Error('Invalid data format')
+        }
+      },
+      
+      updateData(value, data: any) {
+        this.next({
+          ...value,
+          data: [...value.data, data],
+          status: 'updated'
+        })
+      },
+      
+      notifySubscribers(value) {
+        console.log('Data updated, notifying subscribers')
+      },
+      
+      // Safe versions that catch and handle errors
+      ...(errorHandler ? {
+        safeDangerousUpdate(value, newData: any) {
+          try {
+            this.$.dangerousUpdate(newData)
+          } catch (error) {
+            errorHandler(error as Error)
+            this.next({
+              ...value,
+              status: 'error',
+              lastError: (error as Error).message
+            })
+          }
+        }
+      } : {})
+    }
+  })
+}
+
+// Usage in React component
+const MyComponent = () => {
+  const { handleError } = useErrorHandler()
+  const [state, store] = useForestryLocal(() => 
+    createStoreWithSafeActions(handleError)
+  )
+  
+  return (
+    <button onClick={() => store.$.safeDangerousUpdate(newData)}>
+      Update Data Safely
+    </button>
+  )
+}
+`

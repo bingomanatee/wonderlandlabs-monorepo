@@ -1,0 +1,37 @@
+// Object values - most common pattern
+interface UserState {
+  id: string;
+  name: string;
+  email: string;
+  preferences: {
+    theme: 'light' | 'dark';
+    notifications: boolean;
+  };
+  tags: string[];
+}
+
+const userForest = new Forest<UserState>({
+  name: 'user-store',
+  value: {
+    id: '123',
+    name: 'John Doe',
+    email: 'john@example.com',
+    preferences: {
+      theme: 'light',
+      notifications: true
+    },
+    tags: ['developer', 'typescript']
+  },
+  actions: {
+    updatePreferences: function(value, newPrefs: Partial<UserState['preferences']>) {
+      this.mutate(draft => {
+        Object.assign(draft.preferences, newPrefs);
+      });
+    },
+    addTag: function(value, tag: string) {
+      this.mutate(draft => {
+        draft.tags.push(tag);
+      });
+    }
+  }
+});

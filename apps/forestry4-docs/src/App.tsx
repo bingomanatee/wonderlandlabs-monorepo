@@ -11,9 +11,11 @@ import WhyForestry from './pages/WhyForestry'
 import StoreBasics from './pages/StoreBasics'
 import ActionsState from './pages/ActionsState'
 import ReactIntegration from './pages/ReactIntegration'
+import IntegrationHooks from './pages/IntegrationHooks'
 
 // Power Tools
 import ValidationSystem from './pages/ValidationSystem'
+import SchemaValidation from './pages/SchemaValidation'
 import Transactions from './pages/Transactions'
 import RxJSIntegration from './pages/RxJSIntegration'
 import AdvancedPatterns from './pages/AdvancedPatterns'
@@ -39,6 +41,7 @@ function App() {
 
           {/* Power Tools */}
           <Route path="/validation" element={<ValidationSystem />} />
+          <Route path="/schemas" element={<SchemaValidation />} />
           <Route path="/transactions" element={<Transactions />} />
           <Route path="/rxjs" element={<RxJSIntegration />} />
           <Route path="/advanced" element={<AdvancedPatterns />} />

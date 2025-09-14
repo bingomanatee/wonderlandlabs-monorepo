@@ -1,0 +1,22 @@
+// Automatic rollback on errors
+store.transact({
+  suspendValidation: true,
+  action() {
+    this.$.addItem('product1', 5)      // ✅ Success
+    this.$.addItem('product2', 3)      // ✅ Success  
+    this.$.addItem('invalid-id', 1)    // ❌ Throws error
+    // All changes above are automatically rolled back
+  }
+})
+
+// Handling transaction errors
+try {
+  store.transact({
+    action() {
+      this.$.riskyOperation()
+    }
+  })
+} catch (error) {
+  console.log('Transaction failed:', error.message)
+  // Store state is unchanged
+}

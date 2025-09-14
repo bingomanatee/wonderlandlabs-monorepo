@@ -1,0 +1,18 @@
+// Basic transaction with function
+store.transact((value) => {
+  // Multiple operations here
+  this.$.updateUser(userId, newData)
+  this.$.logActivity('user updated')
+  this.$.sendNotification(userId)
+})
+
+// Transaction with parameters object
+store.transact({
+  suspendValidation: true,  // Allow invalid intermediate states
+  action(value) {
+    // Complex multi-step operation
+    this.$.processPayment(amount)
+    this.$.updateInventory(productId, -quantity)
+    this.$.createOrder(orderData)
+  }
+})

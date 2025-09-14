@@ -1,0 +1,14 @@
+// Subscribe to forest changes
+const forest = new Forest({ value: { count: 0 } })
+
+// Subscribe to all changes
+const subscription = forest.subscribe((value) => {
+  console.log('Forest updated:', value)
+})
+
+// Make some changes
+forest.next({ count: 1 }) // Logs: "Forest updated: { count: 1 }"
+forest.set('count', 2) // Logs: "Forest updated: { count: 2 }"
+
+// Clean up subscription when done
+subscription.unsubscribe();

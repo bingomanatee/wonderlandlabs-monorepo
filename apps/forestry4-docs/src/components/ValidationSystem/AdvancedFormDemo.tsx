@@ -275,16 +275,16 @@ export default function useForestBranch<T>(
                   code: `// Advanced form with branches
 const AdvancedFormDemo: React.FC = () => {
   // Main form Forest
-  const [formState, formForest] = useForestryLocal(formStateFactory);
+  const [formValue, formForest] = useForestryLocal(formStateFactory);
 
   // Individual field branches
-  const [usernameState, usernameStore] = useForestBranch(
+  const [usernameValue, usernameStore] = useForestBranch(
     formForest, 'username', usernameBranchConfig
   );
-  const [emailState, emailStore] = useForestBranch(
+  const [emailValue, emailStore] = useForestBranch(
     formForest, 'email', emailBranchConfig
   );
-  const [ageState, ageStore] = useForestBranch(
+  const [ageValue, ageStore] = useForestBranch(
     formForest, 'age', ageBranchConfig
   );
 
@@ -292,13 +292,13 @@ const AdvancedFormDemo: React.FC = () => {
     <VStack spacing={4}>
       <Input
         placeholder="Username"
-        value={usernameState.value}
+        value={usernameValue.value}
         onChange={usernameStore.$.setValueFromEvent}
-        isInvalid={!usernameState.isValid}
+        isInvalid={!usernameValue.isValid}
       />
-      {!usernameState.isValid && (
+      {!usernameValue.isValid && (
         <Text color="red.500" fontSize="sm">
-          {usernameState.errorString}
+          {usernameValue.errorString}
         </Text>
       )}
     </VStack>

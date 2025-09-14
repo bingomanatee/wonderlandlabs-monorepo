@@ -1,11 +1,11 @@
-import { Store } from '@wonderlandlabs/forestry4';
+import { Forest } from '@wonderlandlabs/forestry4';
 import { ShoppingCart, CartItem } from '@/types.ts';
 import { PRODUCTS } from '@/constants.ts';
 
 type ErrorHandler = (error: Error | string, title?: string) => void;
 
-export default function shoppingCartStoreFactory(handleError?: ErrorHandler) {
-  return new Store<ShoppingCart>({
+export default function shoppingCartForestFactory(handleError?: ErrorHandler) {
+  return new Forest<ShoppingCart>({
     name: 'shopping-cart',
     value: { items: [], totalCost: 0 },
     actions: {

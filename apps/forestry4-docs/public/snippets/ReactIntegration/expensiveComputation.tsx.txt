@@ -1,0 +1,3 @@
+const filteredTodos = useMemo(() => {
+  return todos.filter(filterFunction);
+}, [todos, filter]);

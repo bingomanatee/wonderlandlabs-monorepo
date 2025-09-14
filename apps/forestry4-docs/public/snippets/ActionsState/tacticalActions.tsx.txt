@@ -1,0 +1,14 @@
+// Tactical: Specific utility
+addItem: function(item) {
+  this.mutate((draft) => {
+    draft.items.push(item);
+    draft.itemCount++;
+  });
+},
+
+// Returns useful data to caller
+calculateTotal: function() {
+  return this.value.items.reduce(
+    (sum, item) => sum + item.price, 0
+  );
+}

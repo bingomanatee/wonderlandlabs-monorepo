@@ -35,6 +35,7 @@ const Navigation: React.FC = () => {
     ],
     'Power Tools': [
       { label: 'Validation System', path: '/validation' },
+      { label: 'Schema Validation', path: '/schemas' },
       { label: 'Transaction System', path: '/transactions' },
       { label: 'RxJS Integration', path: '/rxjs' },
       { label: 'Advanced Patterns', path: '/advanced' },

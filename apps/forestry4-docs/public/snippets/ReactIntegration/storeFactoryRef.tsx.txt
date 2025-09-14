@@ -1,0 +1,5 @@
+function useTodoForest() {
+  // ✅ Correct - just pass the factory function directly
+  const [value, forest] = useForestryLocal(todoForestFactory);
+  return [value, forest.$] as const;
+}

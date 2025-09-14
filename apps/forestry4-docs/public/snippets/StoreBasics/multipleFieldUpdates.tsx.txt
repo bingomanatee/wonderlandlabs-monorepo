@@ -1,0 +1,12 @@
+// Use next() for multiple field updates
+actions: {
+  updateProfile: function(value, updates: Partial<UserState>) {
+    this.next({ ...value, ...updates });  // Merge multiple fields
+  },
+  reset: function() {
+    this.next({ name: '', age: 0, email: '' }); // Replace entire state
+  },
+  loadUser: function(value, userData: UserState) {
+    this.next(userData); // Replace with new user data
+  }
+}

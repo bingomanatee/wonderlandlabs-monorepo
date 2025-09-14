@@ -1,0 +1,13 @@
+const userForest = new Forest({
+  name: 'user-forest',
+  value: { name: '', age: 0, email: '' },
+  actions: {
+    setName: (value, name: string) => this.set('name', name),
+    setAge: (value, age: number) => this.set('age', age),
+    setEmail: (value, email: string) => this.set('email', email)
+  },
+  tests: [
+    (value) => value.age < 0 ? 'Age cannot be negative' : null,
+    (value) => !value.email.includes('@') ? 'Invalid email' : null
+  ]
+});

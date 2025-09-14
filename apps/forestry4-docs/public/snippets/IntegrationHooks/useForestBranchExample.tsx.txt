@@ -1,0 +1,59 @@
+import React from 'react';
+import { useForestBranch } from '@/hooks/useForestBranch';
+import { Input, Text } from '@chakra-ui/react';
+
+interface FormFieldProps {
+  forest: any; // Forest instance
+  fieldName: string;
+  label: string;
+  placeholder?: string;
+}
+
+const FormField: React.FC<FormFieldProps> = ({ 
+  forest, 
+  fieldName, 
+  label, 
+  placeholder 
+}) => {
+  // Create a branch for this specific field
+  const [fieldValue, fieldBranch] = useForestBranch(forest, fieldName, {
+    actions: {
+      onChange: function(value, event: React.ChangeEvent<HTMLInputElement>) {
+        this.next(event.target.value);
+      },
+      validate: function() {
+        const value = this.value as string;
+        if (!value || value.trim().length === 0) {
+          return 'This field is required';
+        }
+        if (value.length < 3) {
+          return 'Must be at least 3 characters';
+        }
+        return null;
+      }
+    },
+    tests: [
+      (value: string) => {
+        if (typeof value !== 'string') {
+          return 'Field value must be a string';
+        }
+        return null;
+      }
+    ]
+  });
+
+  const error = fieldBranch.$.validate();
+
+  return (
+    <div>
+      <label>{label}</label>
+      <Input
+        value={fieldValue || ''}
+        onChange={fieldBranch.$.onChange}
+        placeholder={placeholder}
+        isInvalid={!!error}
+      />
+      {error && <Text color="red.500" fontSize="sm">{error}</Text>}
+    </div>
+  );
+};

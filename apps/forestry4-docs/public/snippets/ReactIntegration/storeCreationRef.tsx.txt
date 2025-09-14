@@ -1,0 +1,9 @@
+// ✅ Best pattern - let useForestryLocal handle the ref internally
+const [value, forest] = useForestryLocal(() => new Forest({
+  value: initialState,
+  actions: {...},
+  tests: [...]
+}));
+
+// Or even better - use a factory function
+const [value, forest] = useForestryLocal(todoForestFactory);

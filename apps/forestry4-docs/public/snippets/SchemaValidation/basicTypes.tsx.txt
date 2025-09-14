@@ -1,0 +1,30 @@
+import { z } from 'zod';
+
+// Basic primitive types
+const UserSchema = z.object({
+  id: z.number().int().positive(),
+  name: z.string().min(1).max(100),
+  email: z.string().email(),
+  age: z.number().int().min(0).max(150),
+  isActive: z.boolean(),
+  role: z.enum(['admin', 'user', 'guest']),
+  tags: z.array(z.string()),
+  metadata: z.record(z.string(), z.any()).optional()
+});
+
+type UserState = z.infer<typeof UserSchema>;
+
+const userForest = new Forest<UserState>({
+  name: 'user-store',
+  schema: UserSchema,
+  value: {
+    id: 1,
+    name: 'John Doe',
+    email: 'john@example.com',
+    age: 30,
+    isActive: true,
+    role: 'user',
+    tags: ['developer', 'typescript'],
+    metadata: { department: 'engineering' }
+  }
+});

@@ -11,9 +11,9 @@ rarely requires atomic transactions they will only be present on request.
 ## 2. Homogenized structure
 
 Instead of the Forest/Tree/Collection duality which was an unhelpful metaphor
-we will be essentially flattening everything in the system to stores; both Forests (the root)
-and ForestBranches (sub-data) will expose the Store interface of a value, actions and subscriptions
-and most of the interface of Subjects from RxJS
+we have simplified everything to a unified Forest-based system. Forest is the primary class
+that provides reactive state management with branching capabilities. ForestBranches extend
+this functionality for managing nested data structures while maintaining the same interface.
 
 ## 3. if it's good enough for Redux Toolkit: Immer
 
@@ -21,24 +21,24 @@ We wil be encasing all data in Inmer constructs.
 
 ## 4. All mutations are custom
 
-Other than updating the value with next() any sugar you want to put around updating a store
+Other than updating the value with next() any sugar you want to put around updating a forest
 will be a custom action; eg; update, set, get, etc.
 
-# The Store Interface
+# The Forest Interface
 
-The Store interface is a decorated observable;
+The Forest interface is a decorated observable with branching capabilities;
 
 ## A word on values and paths
 
 ### values
 
-absolutely ZERO control is made over the structure or form of the stores' values
+absolutely ZERO control is made over the structure or form of the forest values
 (until you create your own assumptions with schema and validation tests).
 
-**IMPORTANT: Store values are immutable.** You cannot directly modify the `value` property.
-To change the store's state, you must use:
+**IMPORTANT: Forest values are immutable.** You cannot directly modify the `value` property.
+To change the forest's state, you must use:
 - `mutate()` method to transform the entire value or a specific path within it using Immer
-- `set()` method (Forest only) to update a specific path with a new value
+- `set()` method to update a specific path with a new value
 - `next()` method to replace the entire value
 
 values can be scalars, arrays, objects, Set's or Map's . Symbols even. The only
@@ -65,9 +65,9 @@ to do so will throw an error.
 
 ### "self" path
 
-null or [] are considered "self paths" that represent the entire value of a store. they are legitimate though they
-are wierd and potentially expensive; you can 
-for instance create a tree that is a clone of the entire store. 
+null or [] are considered "self paths" that represent the entire value of a forest. they are legitimate though they
+are wierd and potentially expensive; you can
+for instance create a branch that is a clone of the entire forest.
 
 ### unresolvable paths
 
@@ -107,30 +107,30 @@ and a map constraint on the user table to prevent duplicate ssns for all users.
 
 ### Shards
 
-the value that a path "points to" is called a "shard" for short - it is a subvalue (tree) of a larger store.
+the value that a path "points to" is called a "shard" for short - it is a subvalue (branch) of a larger forest.
 
 ## Observable attributes
 
 ### `value: <DataType>`
 
-Value is the latest broadcast state of the store; like BehaviorSubjects the value
-is always present and conforms to the schema and (hopefully) the generator type of the store.
+Value is the latest broadcast state of the forest; like BehaviorSubjects the value
+is always present and conforms to the schema and (hopefully) the generator type of the forest.
 
 **IMPORTANT: The value property is read-only and immutable.** You cannot directly assign to it
-or modify it in place. To change the store's value, you must use `mutate()`, `set()` (Forest only),
+or modify it in place. To change the forest's value, you must use `mutate()`, `set()`,
 or `next()` methods.
 
 ### `subscribe(listener: Listener): Subscription`
 
 Subscribe provides obseverable functionality. Unlike "dumb Subjects" that
 automatically broacast every time next is called, Forestry puts validation criteria
-between a _candidate_ and an observable _change_ to the current value of the store.
+between a _candidate_ and an observable _change_ to the current value of the forest.
 
 Also only _meaningful_ change is broadcast via the distinct filters
 
 ### `next(candidate: DataType)`
 
-submits a candidate for updating the store. After validation, broadcasts update to all
+submits a candidate for updating the forest. After validation, broadcasts update to all
 subscribers.
 
 ### `complete()`
@@ -143,15 +143,15 @@ freeze the state and emit an error to all listeners.
 
 ### isActive: boolean
 
-Useful for finding out if a store has been completed/frozen
+Useful for finding out if a forest has been completed/frozen
 
 ### `get(path?: Path): any`
 
-Retrieves a value from the store. If no path is provided, returns the entire store value.
-If a path is provided, returns the value at that specific path within the store's data structure.
+Retrieves a value from the forest. If no path is provided, returns the entire forest value.
+If a path is provided, returns the value at that specific path within the forest's data structure.
 
 ```javascript
-const userStore = new Store({
+const userForest = new Forest({
   value: {
     name: 'John',
     profile: {
@@ -165,30 +165,30 @@ const userStore = new Store({
 });
 
 // Get entire value
-const fullData = userStore.get();
+const fullData = userForest.get();
 // Returns: { name: 'John', profile: { age: 30, settings: { theme: 'dark' } }, tags: ['developer', 'typescript'] }
 
 // Get nested value using string path
-const theme = userStore.get('profile.settings.theme');
+const theme = userForest.get('profile.settings.theme');
 // Returns: 'dark'
 
 // Get nested value using array path
-const age = userStore.get(['profile', 'age']);
+const age = userForest.get(['profile', 'age']);
 // Returns: 30
 
 // Get array element
-const firstTag = userStore.get(['tags', 0]);
+const firstTag = userForest.get(['tags', 0]);
 // Returns: 'developer'
 ```
 
 ### `mutate(producerFn: (draft: any) => void, path?: Path): any`
 
-Safely mutates the store's value using Immer. The producer function receives a draft that you can modify directly.
-If no path is provided, the producer function operates on the entire store value.
+Safely mutates the forest's value using Immer. The producer function receives a draft that you can modify directly.
+If no path is provided, the producer function operates on the entire forest value.
 If a path is provided, the producer function operates only on the value at that path.
 
 ```javascript
-const userStore = new Store({
+const userForest = new Forest({
   value: {
     name: 'John',
     profile: {
@@ -201,23 +201,23 @@ const userStore = new Store({
   }
 });
 
-// Mutate entire store
-userStore.mutate(draft => {
+// Mutate entire forest
+userForest.mutate(draft => {
   draft.name = 'Jane';
   draft.profile.age = 25;
   draft.tags.push('react');
 });
-// Store value is now: { name: 'Jane', profile: { age: 25, settings: { theme: 'dark' } }, tags: ['developer', 'react'] }
+// Forest value is now: { name: 'Jane', profile: { age: 25, settings: { theme: 'dark' } }, tags: ['developer', 'react'] }
 
 // Mutate specific path - update profile only
-userStore.mutate(draft => {
+userForest.mutate(draft => {
   draft.age = 26;
   draft.settings.theme = 'light';
 }, 'profile');
 // Only the profile object is modified: { age: 26, settings: { theme: 'light' } }
 
 // Mutate array at specific path
-userStore.mutate(draft => {
+userForest.mutate(draft => {
   draft.push('vue');
 }, 'tags');
 // Adds 'vue' to the tags array
@@ -230,18 +230,18 @@ they can return a value, call store methods, neither or both.
 Actions can be sync or async; however async methods cannot achieve
 guaranteed transactional integrity, by definition.
 
-note - the stores' actions methods are functions bound to the store itself so you can use "this" to refer
-to the store and its methods (isActive, etc.);
+note - the forest's actions methods are functions bound to the forest itself so you can use "this" to refer
+to the forest and its methods (isActive, etc.);
 
-### the value - actions's first parameter 
+### the value - actions's first parameter
 
-Stores will inject the current value of the store into the first parameter of each method; 
+Forests will inject the current value of the forest into the first parameter of each method;
 
-if you have a count store:
+if you have a count forest:
 
 ```javascript
 
-const counter = new Store<number> (
+const counter = new Forest<number> (
   {
     schema: z.number(),
     value: 0,
@@ -263,7 +263,7 @@ const counter = new Store<number> (
     },
   }});
 
-counter.$.increment(); // notw - WE DO NOT pass the vavlue into the method it is atomatic
+counter.$.increment(); // note - WE DO NOT pass the value into the method it is automatic
 console.log('value is', counter.value); // 1;
 
 counter.$.add(4);
@@ -279,10 +279,10 @@ the most up to date version of the value.
 In the type system there are two flavors of actions; `ActionExposedFn` (which have 0..? args) and
 `ActionParamsFn`s which DO have a first parameter DataType and optional arguments (eg 1..? args).
 
-the ActionExposedFn is what is _exposed_ on `store.$` and `store.actions` of each store.
+the ActionExposedFn is what is _exposed_ on `forest.$` and `forest.actions` of each forest.
 the ActionParamsFn is what is passed into params in an ActionParamsRecord object.
 
-so the ActionExposedRecord exposed on the generic type Store is the _user facing interface_ (action functions)
+so the ActionExposedRecord exposed on the generic type Forest is the _user facing interface_ (action functions)
 which delegates to the value-prefixed actions defined in the constructor.
 
 that is the _creator_ writes action in long form with a value arg; the user _gets_ the short form
@@ -314,12 +314,12 @@ const exposedActions = previewActionSignatures(inputActions);
 // exposedActions.removeItem: (productId: string) => Cart
 // exposedActions.clearCart: () => Cart
 
-// Use in your store
-const cartStore = forest.branch(['cart'], { actions: inputActions });
-cartStore.$.addItem('prod-123', 2); // No need to pass cart value!
+// Use in your forest
+const cartBranch = forest.branch(['cart'], { actions: inputActions });
+cartBranch.$.addItem('prod-123', 2); // No need to pass cart value!
 ```
 
-This transformation happens automatically when you create stores - the `previewActionSignatures` function
+This transformation happens automatically when you create forests - the `previewActionSignatures` function
 is just for development-time inspection of what your API will look like.
 
 ### Action Return Values
@@ -337,22 +337,22 @@ _not_ terminate the store but will suspend all changes unless an enclosing actio
 
 (more on this later)
 
-### Termination of stores
+### Termination of forests
 
-You can manually cause a store to terminate with an error on a deal-breaking error yourself
-by calling `store.error('failed apis')`;
-this will suspend future changes and make the store _inactive_ (`store.isActive = false);
+You can manually cause a forest to terminate with an error on a deal-breaking error yourself
+by calling `forest.error('failed apis')`;
+this will suspend future changes and make the forest _inactive_ (`forest.isActive = false);
 next() calls will cause an error.
 
-ForestBranches may be terminated without terminating the root store. You can for instance create two branches
-from the same path and terminate one, but the other will still be active, as will the store that created them.
+ForestBranches may be terminated without terminating the root forest. You can for instance create two branches
+from the same path and terminate one, but the other will still be active, as will the forest that created them.
 
 ### Action resolution and subscriptions
 
-Subscriptions only broadcast on the completion of all actions; the values are updated in the store,
+Subscriptions only broadcast on the completion of all actions; the values are updated in the forest,
 but the user only gets an update at the completion of the outermost action. This is to reduce listener
 overload. Also, only unique values are emitted; so in the above code, `counter.$.loop()` doesn't broadcast
-because the ned value is the same and the original counter number.
+because the end value is the same as the original counter number.
 
 ### `actions|$`
 

@@ -1,9 +1,10 @@
 import type { CartItem, ShoppingCart } from '@/types.ts';
 import { PRODUCTS } from '@/constants.ts';
-import { Store } from '@wonderlandlabs/forestry4';
+import { Forest } from '@wonderlandlabs/forestry4';
+import { z } from 'zod';
 
-export default function carStoreFactory() {
-  return new Store<ShoppingCart>({
+export default function carForestFactory() {
+  return new Forest<ShoppingCart>({
     name: 'shopping-cart',
     value: { items: [], totalCost: 0 },
     actions: {

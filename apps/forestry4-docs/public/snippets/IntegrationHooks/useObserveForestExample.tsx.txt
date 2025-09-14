@@ -1,0 +1,46 @@
+import React from 'react';
+import { useObserveForest } from '@/hooks/useObserveForest';
+import { Text, Badge } from '@chakra-ui/react';
+
+interface ForestMonitorProps {
+  forest: any; // Forest instance
+}
+
+const ForestMonitor: React.FC<ForestMonitorProps> = ({ forest }) => {
+  // Observe forest changes without creating branches
+  const forestValue = useObserveForest(forest);
+
+  // Calculate derived state from forest
+  const branchCount = Object.keys(forestValue.branches || {}).length;
+  const hasErrors = Object.values(forestValue.branches || {})
+    .some((branch: any) => branch.errors && branch.errors.length > 0);
+
+  return (
+    <div>
+      <Text fontSize="lg" fontWeight="bold">Forest Status</Text>
+      
+      <div>
+        <Text>Active Branches: {branchCount}</Text>
+        <Badge colorScheme={hasErrors ? 'red' : 'green'}>
+          {hasErrors ? 'Has Errors' : 'All Valid'}
+        </Badge>
+      </div>
+
+      <div>
+        <Text fontSize="md" fontWeight="semibold" mt={4}>Branch Details:</Text>
+        {Object.entries(forestValue.branches || {}).map(([path, branch]: [string, any]) => (
+          <div key={path} style={{ marginLeft: '1rem', marginTop: '0.5rem' }}>
+            <Text fontSize="sm">
+              <strong>{path}:</strong> {JSON.stringify(branch.value)}
+            </Text>
+            {branch.errors && branch.errors.length > 0 && (
+              <Text fontSize="xs" color="red.500">
+                Errors: {branch.errors.join(', ')}
+              </Text>
+            )}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};

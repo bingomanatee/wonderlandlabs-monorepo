@@ -1,0 +1,24 @@
+// ✅ Forestry + Immer ensures referential uniqueness
+const [value, forest] = useForestryLocal(todoForestFactory);
+
+// This ALWAYS works correctly - changed values are referentially different
+useEffect(() => {
+  console.log('Todos changed!');
+}, [value.todos]); // ✅ Reliable dependency
+
+useEffect(() => {
+  console.log('User profile changed!');
+}, [value.user.profile]); // ✅ Even nested objects are referentially unique
+
+useEffect(() => {
+  console.log('Any value change!');
+}, [value]); // ✅ Entire value object is referentially unique when changed
+
+// Compare with manual state management:
+const [manualState, setManualState] = useState(initialState);
+
+// ❌ This will throw an immer error:
+// manualState.todos.push(newTodo); // Same reference!
+
+// ✅ Forestry actions always create new references:
+store.$.addTodo('New task'); // Guaranteed to trigger useEffect

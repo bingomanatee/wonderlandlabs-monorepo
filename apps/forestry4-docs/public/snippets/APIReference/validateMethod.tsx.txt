@@ -1,0 +1,37 @@
+// Basic validation usage
+const result = store.validate(newValue)
+if (result.isValid) {
+  console.log('Value is valid')
+} else {
+  console.log('Validation error:', result.error)
+}
+
+// Validation with schema and tests
+const store = new Store({
+  value: { name: '', age: 0 },
+  schema: z.object({
+    name: z.string().min(1),
+    age: z.number().min(0)
+  }),
+  tests: (value) => {
+    if (value.age > 120) {
+      return 'Age seems unrealistic'
+    }
+    return null
+  }
+})
+
+// Validate different scenarios
+console.log(store.validate({ name: 'John', age: 30 }))  // { isValid: true }
+console.log(store.validate({ name: '', age: 30 }))      // { isValid: false, error: ... }
+console.log(store.validate({ name: 'John', age: 150 })) // { isValid: false, error: 'Age seems unrealistic' }
+
+// During transactions with suspended validation
+store.transact({
+  suspendValidation: true,
+  action() {
+    // This will return { isValid: true } even if value is invalid
+    const result = this.validate({ name: '', age: -5 })
+    console.log('Suspended validation result:', result.isValid) // true
+  }
+})

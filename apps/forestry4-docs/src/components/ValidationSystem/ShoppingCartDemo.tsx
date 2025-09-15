@@ -20,6 +20,7 @@ import useErrorHandler from '@/hooks/useErrorHandler.ts';
 import shoppingCartStoreFactory from '@/storeFactories/ValidationSystem/shoppingCartStore.ts';
 import { PRODUCTS } from '@/constants.ts';
 import CodeTabs from '@/components/CodeTabs';
+import Section from '../Section';
 
 const ShoppingCartDemo: React.FC = () => {
   const { handleError } = useErrorHandler();

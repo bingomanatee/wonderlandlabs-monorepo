@@ -15,6 +15,7 @@ import {
 } from '@chakra-ui/react';
 import SnippetBlock from '../components/SnippetBlock';
 import CodeTabs from '../components/CodeTabs';
+import Section from '../components/Section';
 
 const IntegrationHooks: React.FC = () => {
   return (

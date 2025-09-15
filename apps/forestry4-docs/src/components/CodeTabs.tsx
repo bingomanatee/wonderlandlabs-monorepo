@@ -22,6 +22,7 @@ interface CodeTab {
   snippet?: string;
   folder?: string;
   ts?: boolean;
+  tsx?: boolean;
 }
 
 interface CodeTabsProps {
@@ -41,7 +42,7 @@ const CodeTabs: React.FC<CodeTabsProps> = ({ tabs, defaultIndex = 0 }) => {
             return tab.code;
           } else if (tab.snippet) {
             try {
-              const extension = tab.ts ? '.ts' : (tab.language === 'bash' ? '.sh' : '.tsx.txt');
+              const extension = tab.ts ? '.ts' : (tab.tsx ? '.tsx' : (tab.language === 'bash' ? '.sh' : (tab.language === 'tsx' ? '.tsx' : '.tsx.txt')));
               const path = tab.folder
                 ? `/snippets/${tab.folder}/${tab.snippet}${extension}`
                 : `/snippets/${tab.snippet}${extension}`;

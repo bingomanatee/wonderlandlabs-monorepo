@@ -4,8 +4,6 @@ import {
   Heading,
   Text,
   VStack,
-  Card,
-  CardBody,
   SimpleGrid,
   Alert,
   AlertIcon,
@@ -15,6 +13,7 @@ import {
 } from '@chakra-ui/react'
 import SnippetBlock from '../components/SnippetBlock'
 import CodeTabs from '../components/CodeTabs'
+import Section from '../components/Section'
 
 const SchemaValidation: React.FC = () => {
   return (

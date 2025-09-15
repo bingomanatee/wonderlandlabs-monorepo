@@ -17,6 +17,7 @@ import {
 } from '@chakra-ui/react'
 import { Store } from '@wonderlandlabs/forestry4'
 import CodeTabs from '../components/CodeTabs'
+import Section from '../components/Section'
 
 interface DemoState {
   count: number

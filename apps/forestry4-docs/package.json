@@ -21,7 +21,7 @@
     "@chakra-ui/react": "^2.8.0",
     "@emotion/react": "^11.11.0",
     "@emotion/styled": "^11.11.0",
-    "@wonderlandlabs/forestry4": "file:../../packages/forestry4",
+    "@wonderlandlabs/forestry4": "latest",
     "framer-motion": "^10.16.0",
     "prismjs": "^1.29.0",
     "react": "^18.2.0",

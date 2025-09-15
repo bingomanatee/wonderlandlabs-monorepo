@@ -28,6 +28,7 @@ import SnippetBlock from '@/components/SnippetBlock';
 import useForestryLocal from '@/hooks/useForestryLocal';
 import useErrorHandler from '@/hooks/useErrorHandler';
 import { createTransactionDemoStore } from '@/storeFactories/createTransactionDemoStore.tsx';
+import Section from '../components/Section';
 
 const Transactions: React.FC = () => {
   const { handleError } = useErrorHandler();

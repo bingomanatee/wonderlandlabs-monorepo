@@ -1,21 +1,52 @@
-// React component using the store
-const [count, setCount] = useState(0)
-const [store, setStore] = useState<Store<{ count: number }> | null>(null)
+// Auto-generated snippet from: apps/forestry4-docs/public/snippets/home/demo-react-integration.tsx
+// Description: Demo React integration for home page live demo
+// Last synced: Mon Sep 15 11:35:45 PDT 2025
+// DO NOT EDIT - This file is automatically synced from the source
 
-useEffect(() => {
-  // Subscribe to store changes
-  const subscription = counterStore.subscribe((value) => {
-    setCount(value.count)
-  })
+// Auto-generated snippet from: apps/forestry4-docs/src/snippets/home/demo-react-integration.tsx
+// Description: Demo React integration for home page live demo
+// Last synced: Mon Sep 15 11:30:49 PDT 2025
+// DO NOT EDIT - This file is automatically synced from the source
 
-  setStore(counterStore)
+// Auto-generated snippet from: apps/forestry4-docs/src/snippets/home/demo-react-integration.tsx
+// Description: Demo React integration for home page live demo
+// Last synced: Mon Sep 15 11:28:25 PDT 2025
+// DO NOT EDIT - This file is automatically synced from the source
 
-  return () => {
-    subscription.unsubscribe()
+// Auto-generated snippet from: apps/forestry4-docs/src/snippets/home/demo-react-integration.tsx
+// Description: Demo React integration for home page live demo
+// Last synced: Mon Sep 15 11:24:39 PDT 2025
+// DO NOT EDIT - This file is automatically synced from the source
+
+// Auto-generated snippet from: apps/forestry4-docs/src/snippets/home/demo-react-integration.tsx
+// Description: Demo React integration for home page live demo
+// Last synced: Sun Sep 14 22:42:19 PDT 2025
+// DO NOT EDIT - This file is automatically synced from the source
+
+// Store factory (defined in Store Definition tab)
+const counterStoreFactory = () => new Store({
+  name: 'counter',
+  value: { count: 0 },
+  actions: {
+    increment(value) {
+      this.mutate(draft => {
+        draft.count += 1;
+      });
+    },
+    decrement(value) {
+      this.mutate(draft => {
+        draft.count -= 1;
+      });
+    },
+    reset(value) {
+      this.mutate(draft => {
+        draft.count = 0;
+      });
+    }
   }
-}, [])
+});
 
-// Button handlers
-const handleIncrement = () => store?.$.increment()
-const handleDecrement = () => store?.$.decrement()
-const handleReset = () => store?.$.reset()
+// React component using useForestryLocal hook
+const { value: { count }, store } = useForestryLocal(counterStoreFactory)
+
+// Actions can be called directly in JSX - no wrapper functions needed!

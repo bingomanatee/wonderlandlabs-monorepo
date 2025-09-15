@@ -26,6 +26,7 @@ import { emailBranchConfig } from '@/storeFactories/ValidationSystem/emailBranch
 import { ageBranchConfig } from '@/storeFactories/ValidationSystem/ageBranch.ts';
 import CodeTabs from '@/components/CodeTabs';
 import ErrorField from '@/components/ErrorField';
+import Section from '../Section';
 
 const AdvancedFormDemo: React.FC = () => {
   const { handleSuccess } = useErrorHandler();

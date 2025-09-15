@@ -241,7 +241,7 @@ class Store {
   }
   receiver = new Subject();
   // validate determines if a value can be sent to next
-  // _in the current conteext_
+  // _in the current context_
   // -- i.e., depending on on transactional conditions
   validate(value) {
     if (this.suspendValidation) {

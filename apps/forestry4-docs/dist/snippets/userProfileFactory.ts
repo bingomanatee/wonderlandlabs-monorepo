@@ -1,6 +1,6 @@
 // Auto-generated snippet from: apps/forestry4-docs/src/storeFactories/userProfileFactory.ts
 // Description: User profile store factory
-// Last synced: Mon Sep 15 11:35:44 PDT 2025
+// Last synced: Mon Sep 15 12:00:11 PDT 2025
 // DO NOT EDIT - This file is automatically synced from the source
 
 import { Forest } from '@wonderlandlabs/forestry4';

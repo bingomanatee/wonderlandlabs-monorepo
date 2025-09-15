@@ -1,0 +1,3796 @@
+{
+  "apps/forestry-docs": {
+    "root": [
+      "apps/forestry-docs/project.json",
+      "nx/core/project-json"
+    ],
+    "name": [
+      "apps/forestry-docs/project.json",
+      "nx/core/project-json"
+    ],
+    "tags": [
+      "apps/forestry-docs/package.json",
+      "nx/core/package-json"
+    ],
+    "tags.npm:private": [
+      "apps/forestry-docs/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups": [
+      "apps/forestry-docs/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups.NPM Scripts": [
+      "apps/forestry-docs/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups.NPM Scripts.0": [
+      "apps/forestry-docs/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups.NPM Scripts.1": [
+      "apps/forestry-docs/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups.NPM Scripts.2": [
+      "apps/forestry-docs/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups.NPM Scripts.3": [
+      "apps/forestry-docs/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.js": [
+      "apps/forestry-docs/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.js.packageName": [
+      "apps/forestry-docs/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.js.isInPackageManagerWorkspaces": [
+      "apps/forestry-docs/package.json",
+      "nx/core/package-json"
+    ],
+    "targets": [
+      "apps/forestry-docs/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.dev": [
+      "apps/forestry-docs/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.dev.executor": [
+      "apps/forestry-docs/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.dev.options": [
+      "apps/forestry-docs/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.dev.metadata": [
+      "apps/forestry-docs/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.dev.options.script": [
+      "apps/forestry-docs/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.dev.metadata.scriptContent": [
+      "apps/forestry-docs/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.dev.metadata.runCommand": [
+      "apps/forestry-docs/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.lint": [
+      "apps/forestry-docs/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.lint.executor": [
+      "apps/forestry-docs/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.lint.options": [
+      "apps/forestry-docs/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.lint.metadata": [
+      "apps/forestry-docs/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.lint.options.script": [
+      "apps/forestry-docs/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.lint.metadata.scriptContent": [
+      "apps/forestry-docs/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.lint.metadata.runCommand": [
+      "apps/forestry-docs/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.lint:fix": [
+      "apps/forestry-docs/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.lint:fix.executor": [
+      "apps/forestry-docs/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.lint:fix.options": [
+      "apps/forestry-docs/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.lint:fix.metadata": [
+      "apps/forestry-docs/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.lint:fix.options.script": [
+      "apps/forestry-docs/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.lint:fix.metadata.scriptContent": [
+      "apps/forestry-docs/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.lint:fix.metadata.runCommand": [
+      "apps/forestry-docs/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.preview": [
+      "apps/forestry-docs/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.preview.executor": [
+      "apps/forestry-docs/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.preview.options": [
+      "apps/forestry-docs/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.preview.metadata": [
+      "apps/forestry-docs/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.preview.options.script": [
+      "apps/forestry-docs/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.preview.metadata.scriptContent": [
+      "apps/forestry-docs/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.preview.metadata.runCommand": [
+      "apps/forestry-docs/package.json",
+      "nx/core/package-json"
+    ],
+    "$schema": [
+      "apps/forestry-docs/project.json",
+      "nx/core/project-json"
+    ],
+    "sourceRoot": [
+      "apps/forestry-docs/project.json",
+      "nx/core/project-json"
+    ],
+    "projectType": [
+      "apps/forestry-docs/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.serve": [
+      "apps/forestry-docs/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.serve.executor": [
+      "apps/forestry-docs/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.serve.options": [
+      "apps/forestry-docs/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.serve.options.configFile": [
+      "apps/forestry-docs/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.build": [
+      "apps/forestry-docs/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.build.executor": [
+      "apps/forestry-docs/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.build.outputs": [
+      "apps/forestry-docs/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.build.options": [
+      "apps/forestry-docs/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.build.options.configFile": [
+      "apps/forestry-docs/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.lint:fix.dependsOn": [
+      "nx.json",
+      "nx/target-defaults"
+    ],
+    "targets.lint:fix.parallelism": [
+      "nx.json",
+      "nx/target-defaults"
+    ],
+    "targets.build.dependsOn": [
+      "nx.json",
+      "nx/target-defaults"
+    ],
+    "targets.build.parallelism": [
+      "nx.json",
+      "nx/target-defaults"
+    ]
+  },
+  "apps/forestry-docs-backend": {
+    "root": [
+      "apps/forestry-docs-backend/package.json",
+      "nx/core/package-json"
+    ],
+    "name": [
+      "apps/forestry-docs-backend/package.json",
+      "nx/core/package-json"
+    ],
+    "tags": [
+      "apps/forestry-docs-backend/package.json",
+      "nx/core/package-json"
+    ],
+    "tags.npm:private": [
+      "apps/forestry-docs-backend/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups": [
+      "apps/forestry-docs-backend/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups.NPM Scripts": [
+      "apps/forestry-docs-backend/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups.NPM Scripts.0": [
+      "apps/forestry-docs-backend/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups.NPM Scripts.1": [
+      "apps/forestry-docs-backend/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups.NPM Scripts.2": [
+      "apps/forestry-docs-backend/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups.NPM Scripts.3": [
+      "apps/forestry-docs-backend/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups.NPM Scripts.4": [
+      "apps/forestry-docs-backend/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups.NPM Scripts.5": [
+      "apps/forestry-docs-backend/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups.NPM Scripts.6": [
+      "apps/forestry-docs-backend/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups.NPM Scripts.7": [
+      "apps/forestry-docs-backend/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups.NPM Scripts.8": [
+      "apps/forestry-docs-backend/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups.NPM Scripts.9": [
+      "apps/forestry-docs-backend/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups.NPM Scripts.10": [
+      "apps/forestry-docs-backend/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups.NPM Scripts.11": [
+      "apps/forestry-docs-backend/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.description": [
+      "apps/forestry-docs-backend/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.js": [
+      "apps/forestry-docs-backend/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.js.packageName": [
+      "apps/forestry-docs-backend/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.js.isInPackageManagerWorkspaces": [
+      "apps/forestry-docs-backend/package.json",
+      "nx/core/package-json"
+    ],
+    "targets": [
+      "apps/forestry-docs-backend/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.build": [
+      "apps/forestry-docs-backend/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.build.executor": [
+      "apps/forestry-docs-backend/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.build.options": [
+      "apps/forestry-docs-backend/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.build.metadata": [
+      "apps/forestry-docs-backend/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.build.options.script": [
+      "apps/forestry-docs-backend/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.build.metadata.scriptContent": [
+      "apps/forestry-docs-backend/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.build.metadata.runCommand": [
+      "apps/forestry-docs-backend/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.format": [
+      "apps/forestry-docs-backend/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.format.executor": [
+      "apps/forestry-docs-backend/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.format.options": [
+      "apps/forestry-docs-backend/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.format.metadata": [
+      "apps/forestry-docs-backend/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.format.options.script": [
+      "apps/forestry-docs-backend/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.format.metadata.scriptContent": [
+      "apps/forestry-docs-backend/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.format.metadata.runCommand": [
+      "apps/forestry-docs-backend/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.start": [
+      "apps/forestry-docs-backend/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.start.executor": [
+      "apps/forestry-docs-backend/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.start.options": [
+      "apps/forestry-docs-backend/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.start.metadata": [
+      "apps/forestry-docs-backend/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.start.options.script": [
+      "apps/forestry-docs-backend/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.start.metadata.scriptContent": [
+      "apps/forestry-docs-backend/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.start.metadata.runCommand": [
+      "apps/forestry-docs-backend/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.start:dev": [
+      "apps/forestry-docs-backend/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.start:dev.executor": [
+      "apps/forestry-docs-backend/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.start:dev.options": [
+      "apps/forestry-docs-backend/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.start:dev.metadata": [
+      "apps/forestry-docs-backend/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.start:dev.options.script": [
+      "apps/forestry-docs-backend/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.start:dev.metadata.scriptContent": [
+      "apps/forestry-docs-backend/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.start:dev.metadata.runCommand": [
+      "apps/forestry-docs-backend/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.start:debug": [
+      "apps/forestry-docs-backend/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.start:debug.executor": [
+      "apps/forestry-docs-backend/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.start:debug.options": [
+      "apps/forestry-docs-backend/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.start:debug.metadata": [
+      "apps/forestry-docs-backend/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.start:debug.options.script": [
+      "apps/forestry-docs-backend/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.start:debug.metadata.scriptContent": [
+      "apps/forestry-docs-backend/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.start:debug.metadata.runCommand": [
+      "apps/forestry-docs-backend/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.start:prod": [
+      "apps/forestry-docs-backend/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.start:prod.executor": [
+      "apps/forestry-docs-backend/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.start:prod.options": [
+      "apps/forestry-docs-backend/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.start:prod.metadata": [
+      "apps/forestry-docs-backend/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.start:prod.options.script": [
+      "apps/forestry-docs-backend/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.start:prod.metadata.scriptContent": [
+      "apps/forestry-docs-backend/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.start:prod.metadata.runCommand": [
+      "apps/forestry-docs-backend/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.lint": [
+      "apps/forestry-docs-backend/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.lint.executor": [
+      "apps/forestry-docs-backend/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.lint.options": [
+      "apps/forestry-docs-backend/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.lint.metadata": [
+      "apps/forestry-docs-backend/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.lint.options.script": [
+      "apps/forestry-docs-backend/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.lint.metadata.scriptContent": [
+      "apps/forestry-docs-backend/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.lint.metadata.runCommand": [
+      "apps/forestry-docs-backend/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test": [
+      "apps/forestry-docs-backend/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test.executor": [
+      "apps/forestry-docs-backend/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test.options": [
+      "apps/forestry-docs-backend/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test.metadata": [
+      "apps/forestry-docs-backend/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test.options.script": [
+      "apps/forestry-docs-backend/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test.metadata.scriptContent": [
+      "apps/forestry-docs-backend/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test.metadata.runCommand": [
+      "apps/forestry-docs-backend/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test:watch": [
+      "apps/forestry-docs-backend/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test:watch.executor": [
+      "apps/forestry-docs-backend/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test:watch.options": [
+      "apps/forestry-docs-backend/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test:watch.metadata": [
+      "apps/forestry-docs-backend/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test:watch.options.script": [
+      "apps/forestry-docs-backend/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test:watch.metadata.scriptContent": [
+      "apps/forestry-docs-backend/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test:watch.metadata.runCommand": [
+      "apps/forestry-docs-backend/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test:cov": [
+      "apps/forestry-docs-backend/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test:cov.executor": [
+      "apps/forestry-docs-backend/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test:cov.options": [
+      "apps/forestry-docs-backend/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test:cov.metadata": [
+      "apps/forestry-docs-backend/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test:cov.options.script": [
+      "apps/forestry-docs-backend/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test:cov.metadata.scriptContent": [
+      "apps/forestry-docs-backend/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test:cov.metadata.runCommand": [
+      "apps/forestry-docs-backend/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test:debug": [
+      "apps/forestry-docs-backend/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test:debug.executor": [
+      "apps/forestry-docs-backend/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test:debug.options": [
+      "apps/forestry-docs-backend/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test:debug.metadata": [
+      "apps/forestry-docs-backend/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test:debug.options.script": [
+      "apps/forestry-docs-backend/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test:debug.metadata.scriptContent": [
+      "apps/forestry-docs-backend/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test:debug.metadata.runCommand": [
+      "apps/forestry-docs-backend/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test:e2e": [
+      "apps/forestry-docs-backend/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test:e2e.executor": [
+      "apps/forestry-docs-backend/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test:e2e.options": [
+      "apps/forestry-docs-backend/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test:e2e.metadata": [
+      "apps/forestry-docs-backend/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test:e2e.options.script": [
+      "apps/forestry-docs-backend/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test:e2e.metadata.scriptContent": [
+      "apps/forestry-docs-backend/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test:e2e.metadata.runCommand": [
+      "apps/forestry-docs-backend/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.build.dependsOn": [
+      "nx.json",
+      "nx/target-defaults"
+    ],
+    "targets.build.outputs": [
+      "nx.json",
+      "nx/target-defaults"
+    ],
+    "targets.build.parallelism": [
+      "nx.json",
+      "nx/target-defaults"
+    ],
+    "targets.test.dependsOn": [
+      "nx.json",
+      "nx/target-defaults"
+    ],
+    "targets.test.parallelism": [
+      "nx.json",
+      "nx/target-defaults"
+    ]
+  },
+  "apps/forestry4-docs": {
+    "root": [
+      "apps/forestry4-docs/package.json",
+      "nx/core/package-json"
+    ],
+    "name": [
+      "apps/forestry4-docs/package.json",
+      "nx/core/package-json"
+    ],
+    "tags": [
+      "apps/forestry4-docs/package.json",
+      "nx/core/package-json"
+    ],
+    "tags.npm:private": [
+      "apps/forestry4-docs/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups": [
+      "apps/forestry4-docs/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups.NPM Scripts": [
+      "apps/forestry4-docs/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups.NPM Scripts.0": [
+      "apps/forestry4-docs/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups.NPM Scripts.1": [
+      "apps/forestry4-docs/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups.NPM Scripts.2": [
+      "apps/forestry4-docs/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups.NPM Scripts.3": [
+      "apps/forestry4-docs/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups.NPM Scripts.4": [
+      "apps/forestry4-docs/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups.NPM Scripts.5": [
+      "apps/forestry4-docs/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups.NPM Scripts.6": [
+      "apps/forestry4-docs/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups.NPM Scripts.7": [
+      "apps/forestry4-docs/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups.NPM Scripts.8": [
+      "apps/forestry4-docs/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups.NPM Scripts.9": [
+      "apps/forestry4-docs/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.description": [
+      "apps/forestry4-docs/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.js": [
+      "apps/forestry4-docs/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.js.packageName": [
+      "apps/forestry4-docs/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.js.isInPackageManagerWorkspaces": [
+      "apps/forestry4-docs/package.json",
+      "nx/core/package-json"
+    ],
+    "targets": [
+      "apps/forestry4-docs/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.dev": [
+      "apps/forestry4-docs/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.dev.executor": [
+      "apps/forestry4-docs/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.dev.options": [
+      "apps/forestry4-docs/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.dev.metadata": [
+      "apps/forestry4-docs/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.dev.options.script": [
+      "apps/forestry4-docs/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.dev.metadata.scriptContent": [
+      "apps/forestry4-docs/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.dev.metadata.runCommand": [
+      "apps/forestry4-docs/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.build": [
+      "apps/forestry4-docs/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.build.executor": [
+      "apps/forestry4-docs/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.build.options": [
+      "apps/forestry4-docs/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.build.metadata": [
+      "apps/forestry4-docs/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.build.options.script": [
+      "apps/forestry4-docs/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.build.metadata.scriptContent": [
+      "apps/forestry4-docs/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.build.metadata.runCommand": [
+      "apps/forestry4-docs/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.build:check": [
+      "apps/forestry4-docs/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.build:check.executor": [
+      "apps/forestry4-docs/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.build:check.options": [
+      "apps/forestry4-docs/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.build:check.metadata": [
+      "apps/forestry4-docs/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.build:check.options.script": [
+      "apps/forestry4-docs/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.build:check.metadata.scriptContent": [
+      "apps/forestry4-docs/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.build:check.metadata.runCommand": [
+      "apps/forestry4-docs/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.preview": [
+      "apps/forestry4-docs/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.preview.executor": [
+      "apps/forestry4-docs/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.preview.options": [
+      "apps/forestry4-docs/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.preview.metadata": [
+      "apps/forestry4-docs/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.preview.options.script": [
+      "apps/forestry4-docs/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.preview.metadata.scriptContent": [
+      "apps/forestry4-docs/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.preview.metadata.runCommand": [
+      "apps/forestry4-docs/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.lint": [
+      "apps/forestry4-docs/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.lint.executor": [
+      "apps/forestry4-docs/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.lint.options": [
+      "apps/forestry4-docs/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.lint.metadata": [
+      "apps/forestry4-docs/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.lint.options.script": [
+      "apps/forestry4-docs/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.lint.metadata.scriptContent": [
+      "apps/forestry4-docs/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.lint.metadata.runCommand": [
+      "apps/forestry4-docs/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test": [
+      "apps/forestry4-docs/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test.executor": [
+      "apps/forestry4-docs/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test.options": [
+      "apps/forestry4-docs/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test.metadata": [
+      "apps/forestry4-docs/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test.options.script": [
+      "apps/forestry4-docs/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test.metadata.scriptContent": [
+      "apps/forestry4-docs/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test.metadata.runCommand": [
+      "apps/forestry4-docs/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test:ui": [
+      "apps/forestry4-docs/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test:ui.executor": [
+      "apps/forestry4-docs/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test:ui.options": [
+      "apps/forestry4-docs/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test:ui.metadata": [
+      "apps/forestry4-docs/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test:ui.options.script": [
+      "apps/forestry4-docs/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test:ui.metadata.scriptContent": [
+      "apps/forestry4-docs/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test:ui.metadata.runCommand": [
+      "apps/forestry4-docs/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test:run": [
+      "apps/forestry4-docs/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test:run.executor": [
+      "apps/forestry4-docs/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test:run.options": [
+      "apps/forestry4-docs/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test:run.metadata": [
+      "apps/forestry4-docs/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test:run.options.script": [
+      "apps/forestry4-docs/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test:run.metadata.scriptContent": [
+      "apps/forestry4-docs/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test:run.metadata.runCommand": [
+      "apps/forestry4-docs/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.sync-snippets": [
+      "apps/forestry4-docs/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.sync-snippets.executor": [
+      "apps/forestry4-docs/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.sync-snippets.options": [
+      "apps/forestry4-docs/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.sync-snippets.metadata": [
+      "apps/forestry4-docs/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.sync-snippets.options.script": [
+      "apps/forestry4-docs/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.sync-snippets.metadata.scriptContent": [
+      "apps/forestry4-docs/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.sync-snippets.metadata.runCommand": [
+      "apps/forestry4-docs/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.build:with-sync": [
+      "apps/forestry4-docs/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.build:with-sync.executor": [
+      "apps/forestry4-docs/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.build:with-sync.options": [
+      "apps/forestry4-docs/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.build:with-sync.metadata": [
+      "apps/forestry4-docs/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.build:with-sync.options.script": [
+      "apps/forestry4-docs/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.build:with-sync.metadata.scriptContent": [
+      "apps/forestry4-docs/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.build:with-sync.metadata.runCommand": [
+      "apps/forestry4-docs/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.build.dependsOn": [
+      "nx.json",
+      "nx/target-defaults"
+    ],
+    "targets.build.outputs": [
+      "nx.json",
+      "nx/target-defaults"
+    ],
+    "targets.build.parallelism": [
+      "nx.json",
+      "nx/target-defaults"
+    ],
+    "targets.test.dependsOn": [
+      "nx.json",
+      "nx/target-defaults"
+    ],
+    "targets.test.parallelism": [
+      "nx.json",
+      "nx/target-defaults"
+    ]
+  },
+  "demos/forest-matter-tree-demo": {
+    "root": [
+      "demos/forest-matter-tree-demo/package.json",
+      "nx/core/package-json"
+    ],
+    "name": [
+      "demos/forest-matter-tree-demo/package.json",
+      "nx/core/package-json"
+    ],
+    "tags": [
+      "demos/forest-matter-tree-demo/package.json",
+      "nx/core/package-json"
+    ],
+    "tags.npm:private": [
+      "demos/forest-matter-tree-demo/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups": [
+      "demos/forest-matter-tree-demo/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups.NPM Scripts": [
+      "demos/forest-matter-tree-demo/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups.NPM Scripts.0": [
+      "demos/forest-matter-tree-demo/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups.NPM Scripts.1": [
+      "demos/forest-matter-tree-demo/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups.NPM Scripts.2": [
+      "demos/forest-matter-tree-demo/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups.NPM Scripts.3": [
+      "demos/forest-matter-tree-demo/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups.NPM Scripts.4": [
+      "demos/forest-matter-tree-demo/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.js": [
+      "demos/forest-matter-tree-demo/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.js.packageName": [
+      "demos/forest-matter-tree-demo/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.js.isInPackageManagerWorkspaces": [
+      "demos/forest-matter-tree-demo/package.json",
+      "nx/core/package-json"
+    ],
+    "targets": [
+      "demos/forest-matter-tree-demo/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.dev": [
+      "demos/forest-matter-tree-demo/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.dev.executor": [
+      "demos/forest-matter-tree-demo/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.dev.options": [
+      "demos/forest-matter-tree-demo/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.dev.metadata": [
+      "demos/forest-matter-tree-demo/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.dev.options.script": [
+      "demos/forest-matter-tree-demo/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.dev.metadata.scriptContent": [
+      "demos/forest-matter-tree-demo/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.dev.metadata.runCommand": [
+      "demos/forest-matter-tree-demo/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.build": [
+      "demos/forest-matter-tree-demo/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.build.executor": [
+      "demos/forest-matter-tree-demo/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.build.options": [
+      "demos/forest-matter-tree-demo/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.build.metadata": [
+      "demos/forest-matter-tree-demo/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.build.options.script": [
+      "demos/forest-matter-tree-demo/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.build.metadata.scriptContent": [
+      "demos/forest-matter-tree-demo/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.build.metadata.runCommand": [
+      "demos/forest-matter-tree-demo/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.lint": [
+      "demos/forest-matter-tree-demo/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.lint.executor": [
+      "demos/forest-matter-tree-demo/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.lint.options": [
+      "demos/forest-matter-tree-demo/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.lint.metadata": [
+      "demos/forest-matter-tree-demo/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.lint.options.script": [
+      "demos/forest-matter-tree-demo/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.lint.metadata.scriptContent": [
+      "demos/forest-matter-tree-demo/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.lint.metadata.runCommand": [
+      "demos/forest-matter-tree-demo/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.preview": [
+      "demos/forest-matter-tree-demo/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.preview.executor": [
+      "demos/forest-matter-tree-demo/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.preview.options": [
+      "demos/forest-matter-tree-demo/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.preview.metadata": [
+      "demos/forest-matter-tree-demo/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.preview.options.script": [
+      "demos/forest-matter-tree-demo/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.preview.metadata.scriptContent": [
+      "demos/forest-matter-tree-demo/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.preview.metadata.runCommand": [
+      "demos/forest-matter-tree-demo/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test": [
+      "demos/forest-matter-tree-demo/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test.executor": [
+      "demos/forest-matter-tree-demo/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test.options": [
+      "demos/forest-matter-tree-demo/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test.metadata": [
+      "demos/forest-matter-tree-demo/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test.options.script": [
+      "demos/forest-matter-tree-demo/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test.metadata.scriptContent": [
+      "demos/forest-matter-tree-demo/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test.metadata.runCommand": [
+      "demos/forest-matter-tree-demo/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.build.dependsOn": [
+      "nx.json",
+      "nx/target-defaults"
+    ],
+    "targets.build.outputs": [
+      "nx.json",
+      "nx/target-defaults"
+    ],
+    "targets.build.parallelism": [
+      "nx.json",
+      "nx/target-defaults"
+    ],
+    "targets.test.dependsOn": [
+      "nx.json",
+      "nx/target-defaults"
+    ],
+    "targets.test.parallelism": [
+      "nx.json",
+      "nx/target-defaults"
+    ]
+  },
+  "packages/can-di-land": {
+    "root": [
+      "packages/can-di-land/package.json",
+      "nx/core/package-json"
+    ],
+    "name": [
+      "packages/can-di-land/package.json",
+      "nx/core/package-json"
+    ],
+    "tags": [
+      "packages/can-di-land/package.json",
+      "nx/core/package-json"
+    ],
+    "tags.npm:public": [
+      "packages/can-di-land/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups": [
+      "packages/can-di-land/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups.NPM Scripts": [
+      "packages/can-di-land/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups.NPM Scripts.0": [
+      "packages/can-di-land/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups.NPM Scripts.1": [
+      "packages/can-di-land/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups.NPM Scripts.2": [
+      "packages/can-di-land/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups.NPM Scripts.3": [
+      "packages/can-di-land/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups.NPM Scripts.4": [
+      "packages/can-di-land/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups.NPM Scripts.5": [
+      "packages/can-di-land/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups.NPM Scripts.6": [
+      "packages/can-di-land/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups.NPM Scripts.7": [
+      "packages/can-di-land/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups.NPM Scripts.8": [
+      "packages/can-di-land/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups.NPM Scripts.9": [
+      "packages/can-di-land/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups.NPM Scripts.10": [
+      "packages/can-di-land/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups.NPM Scripts.11": [
+      "packages/can-di-land/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.description": [
+      "packages/can-di-land/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.js": [
+      "packages/can-di-land/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.js.packageName": [
+      "packages/can-di-land/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.js.packageMain": [
+      "packages/can-di-land/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.js.isInPackageManagerWorkspaces": [
+      "packages/can-di-land/package.json",
+      "nx/core/package-json"
+    ],
+    "targets": [
+      "packages/can-di-land/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.build": [
+      "packages/can-di-land/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.build.executor": [
+      "packages/can-di-land/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.build.options": [
+      "packages/can-di-land/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.build.metadata": [
+      "packages/can-di-land/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.build.options.script": [
+      "packages/can-di-land/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.build.metadata.scriptContent": [
+      "packages/can-di-land/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.build.metadata.runCommand": [
+      "packages/can-di-land/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.uglify": [
+      "packages/can-di-land/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.uglify.executor": [
+      "packages/can-di-land/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.uglify.options": [
+      "packages/can-di-land/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.uglify.metadata": [
+      "packages/can-di-land/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.uglify.options.script": [
+      "packages/can-di-land/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.uglify.metadata.scriptContent": [
+      "packages/can-di-land/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.uglify.metadata.runCommand": [
+      "packages/can-di-land/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.format": [
+      "packages/can-di-land/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.format.executor": [
+      "packages/can-di-land/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.format.options": [
+      "packages/can-di-land/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.format.metadata": [
+      "packages/can-di-land/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.format.options.script": [
+      "packages/can-di-land/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.format.metadata.scriptContent": [
+      "packages/can-di-land/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.format.metadata.runCommand": [
+      "packages/can-di-land/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.lint": [
+      "packages/can-di-land/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.lint.executor": [
+      "packages/can-di-land/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.lint.options": [
+      "packages/can-di-land/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.lint.metadata": [
+      "packages/can-di-land/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.lint.options.script": [
+      "packages/can-di-land/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.lint.metadata.scriptContent": [
+      "packages/can-di-land/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.lint.metadata.runCommand": [
+      "packages/can-di-land/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.lint:fix": [
+      "packages/can-di-land/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.lint:fix.executor": [
+      "packages/can-di-land/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.lint:fix.options": [
+      "packages/can-di-land/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.lint:fix.metadata": [
+      "packages/can-di-land/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.lint:fix.options.script": [
+      "packages/can-di-land/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.lint:fix.metadata.scriptContent": [
+      "packages/can-di-land/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.lint:fix.metadata.runCommand": [
+      "packages/can-di-land/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test": [
+      "packages/can-di-land/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test.executor": [
+      "packages/can-di-land/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test.options": [
+      "packages/can-di-land/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test.metadata": [
+      "packages/can-di-land/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test.options.script": [
+      "packages/can-di-land/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test.metadata.scriptContent": [
+      "packages/can-di-land/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test.metadata.runCommand": [
+      "packages/can-di-land/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.bt": [
+      "packages/can-di-land/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.bt.executor": [
+      "packages/can-di-land/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.bt.options": [
+      "packages/can-di-land/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.bt.metadata": [
+      "packages/can-di-land/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.bt.options.script": [
+      "packages/can-di-land/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.bt.metadata.scriptContent": [
+      "packages/can-di-land/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.bt.metadata.runCommand": [
+      "packages/can-di-land/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.prepare": [
+      "packages/can-di-land/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.prepare.executor": [
+      "packages/can-di-land/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.prepare.options": [
+      "packages/can-di-land/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.prepare.metadata": [
+      "packages/can-di-land/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.prepare.options.script": [
+      "packages/can-di-land/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.prepare.metadata.scriptContent": [
+      "packages/can-di-land/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.prepare.metadata.runCommand": [
+      "packages/can-di-land/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.prepublishOnly": [
+      "packages/can-di-land/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.prepublishOnly.executor": [
+      "packages/can-di-land/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.prepublishOnly.options": [
+      "packages/can-di-land/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.prepublishOnly.metadata": [
+      "packages/can-di-land/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.prepublishOnly.options.script": [
+      "packages/can-di-land/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.prepublishOnly.metadata.scriptContent": [
+      "packages/can-di-land/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.prepublishOnly.metadata.runCommand": [
+      "packages/can-di-land/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.preversion": [
+      "packages/can-di-land/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.preversion.executor": [
+      "packages/can-di-land/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.preversion.options": [
+      "packages/can-di-land/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.preversion.metadata": [
+      "packages/can-di-land/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.preversion.options.script": [
+      "packages/can-di-land/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.preversion.metadata.scriptContent": [
+      "packages/can-di-land/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.preversion.metadata.runCommand": [
+      "packages/can-di-land/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.version": [
+      "packages/can-di-land/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.version.executor": [
+      "packages/can-di-land/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.version.options": [
+      "packages/can-di-land/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.version.metadata": [
+      "packages/can-di-land/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.version.options.script": [
+      "packages/can-di-land/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.version.metadata.scriptContent": [
+      "packages/can-di-land/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.version.metadata.runCommand": [
+      "packages/can-di-land/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.postversion": [
+      "packages/can-di-land/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.postversion.executor": [
+      "packages/can-di-land/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.postversion.options": [
+      "packages/can-di-land/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.postversion.metadata": [
+      "packages/can-di-land/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.postversion.options.script": [
+      "packages/can-di-land/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.postversion.metadata.scriptContent": [
+      "packages/can-di-land/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.postversion.metadata.runCommand": [
+      "packages/can-di-land/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.nx-release-publish": [
+      "packages/can-di-land/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.nx-release-publish.executor": [
+      "packages/can-di-land/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.nx-release-publish.dependsOn": [
+      "packages/can-di-land/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.nx-release-publish.options": [
+      "packages/can-di-land/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.build.dependsOn": [
+      "nx.json",
+      "nx/target-defaults"
+    ],
+    "targets.build.outputs": [
+      "nx.json",
+      "nx/target-defaults"
+    ],
+    "targets.build.parallelism": [
+      "nx.json",
+      "nx/target-defaults"
+    ],
+    "targets.lint:fix.dependsOn": [
+      "nx.json",
+      "nx/target-defaults"
+    ],
+    "targets.lint:fix.parallelism": [
+      "nx.json",
+      "nx/target-defaults"
+    ],
+    "targets.test.dependsOn": [
+      "nx.json",
+      "nx/target-defaults"
+    ],
+    "targets.test.parallelism": [
+      "nx.json",
+      "nx/target-defaults"
+    ]
+  },
+  "packages/forest": {
+    "root": [
+      "packages/forest/package.json",
+      "nx/core/package-json"
+    ],
+    "name": [
+      "packages/forest/package.json",
+      "nx/core/package-json"
+    ],
+    "tags": [
+      "packages/forest/package.json",
+      "nx/core/package-json"
+    ],
+    "tags.npm:public": [
+      "packages/forest/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups": [
+      "packages/forest/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups.NPM Scripts": [
+      "packages/forest/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups.NPM Scripts.0": [
+      "packages/forest/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups.NPM Scripts.1": [
+      "packages/forest/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups.NPM Scripts.2": [
+      "packages/forest/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups.NPM Scripts.3": [
+      "packages/forest/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups.NPM Scripts.4": [
+      "packages/forest/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups.NPM Scripts.5": [
+      "packages/forest/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups.NPM Scripts.6": [
+      "packages/forest/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups.NPM Scripts.7": [
+      "packages/forest/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups.NPM Scripts.8": [
+      "packages/forest/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups.NPM Scripts.9": [
+      "packages/forest/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups.NPM Scripts.10": [
+      "packages/forest/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups.NPM Scripts.11": [
+      "packages/forest/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.description": [
+      "packages/forest/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.js": [
+      "packages/forest/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.js.packageName": [
+      "packages/forest/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.js.packageMain": [
+      "packages/forest/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.js.isInPackageManagerWorkspaces": [
+      "packages/forest/package.json",
+      "nx/core/package-json"
+    ],
+    "targets": [
+      "packages/forest/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.build": [
+      "packages/forest/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.build.executor": [
+      "packages/forest/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.build.options": [
+      "packages/forest/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.build.metadata": [
+      "packages/forest/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.build.options.script": [
+      "packages/forest/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.build.metadata.scriptContent": [
+      "packages/forest/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.build.metadata.runCommand": [
+      "packages/forest/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.uglify": [
+      "packages/forest/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.uglify.executor": [
+      "packages/forest/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.uglify.options": [
+      "packages/forest/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.uglify.metadata": [
+      "packages/forest/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.uglify.options.script": [
+      "packages/forest/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.uglify.metadata.scriptContent": [
+      "packages/forest/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.uglify.metadata.runCommand": [
+      "packages/forest/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.format": [
+      "packages/forest/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.format.executor": [
+      "packages/forest/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.format.options": [
+      "packages/forest/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.format.metadata": [
+      "packages/forest/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.format.options.script": [
+      "packages/forest/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.format.metadata.scriptContent": [
+      "packages/forest/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.format.metadata.runCommand": [
+      "packages/forest/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.lint": [
+      "packages/forest/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.lint.executor": [
+      "packages/forest/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.lint.options": [
+      "packages/forest/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.lint.metadata": [
+      "packages/forest/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.lint.options.script": [
+      "packages/forest/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.lint.metadata.scriptContent": [
+      "packages/forest/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.lint.metadata.runCommand": [
+      "packages/forest/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.lint:fix": [
+      "packages/forest/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.lint:fix.executor": [
+      "packages/forest/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.lint:fix.options": [
+      "packages/forest/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.lint:fix.metadata": [
+      "packages/forest/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.lint:fix.options.script": [
+      "packages/forest/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.lint:fix.metadata.scriptContent": [
+      "packages/forest/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.lint:fix.metadata.runCommand": [
+      "packages/forest/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test": [
+      "packages/forest/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test.executor": [
+      "packages/forest/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test.options": [
+      "packages/forest/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test.metadata": [
+      "packages/forest/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test.options.script": [
+      "packages/forest/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test.metadata.scriptContent": [
+      "packages/forest/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test.metadata.runCommand": [
+      "packages/forest/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.bt": [
+      "packages/forest/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.bt.executor": [
+      "packages/forest/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.bt.options": [
+      "packages/forest/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.bt.metadata": [
+      "packages/forest/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.bt.options.script": [
+      "packages/forest/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.bt.metadata.scriptContent": [
+      "packages/forest/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.bt.metadata.runCommand": [
+      "packages/forest/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.prepare": [
+      "packages/forest/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.prepare.executor": [
+      "packages/forest/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.prepare.options": [
+      "packages/forest/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.prepare.metadata": [
+      "packages/forest/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.prepare.options.script": [
+      "packages/forest/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.prepare.metadata.scriptContent": [
+      "packages/forest/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.prepare.metadata.runCommand": [
+      "packages/forest/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.prepublishOnly": [
+      "packages/forest/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.prepublishOnly.executor": [
+      "packages/forest/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.prepublishOnly.options": [
+      "packages/forest/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.prepublishOnly.metadata": [
+      "packages/forest/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.prepublishOnly.options.script": [
+      "packages/forest/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.prepublishOnly.metadata.scriptContent": [
+      "packages/forest/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.prepublishOnly.metadata.runCommand": [
+      "packages/forest/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.preversion": [
+      "packages/forest/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.preversion.executor": [
+      "packages/forest/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.preversion.options": [
+      "packages/forest/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.preversion.metadata": [
+      "packages/forest/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.preversion.options.script": [
+      "packages/forest/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.preversion.metadata.scriptContent": [
+      "packages/forest/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.preversion.metadata.runCommand": [
+      "packages/forest/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.version": [
+      "packages/forest/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.version.executor": [
+      "packages/forest/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.version.options": [
+      "packages/forest/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.version.metadata": [
+      "packages/forest/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.version.options.script": [
+      "packages/forest/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.version.metadata.scriptContent": [
+      "packages/forest/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.version.metadata.runCommand": [
+      "packages/forest/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.postversion": [
+      "packages/forest/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.postversion.executor": [
+      "packages/forest/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.postversion.options": [
+      "packages/forest/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.postversion.metadata": [
+      "packages/forest/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.postversion.options.script": [
+      "packages/forest/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.postversion.metadata.scriptContent": [
+      "packages/forest/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.postversion.metadata.runCommand": [
+      "packages/forest/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.nx-release-publish": [
+      "packages/forest/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.nx-release-publish.executor": [
+      "packages/forest/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.nx-release-publish.dependsOn": [
+      "packages/forest/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.nx-release-publish.options": [
+      "packages/forest/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.build.dependsOn": [
+      "nx.json",
+      "nx/target-defaults"
+    ],
+    "targets.build.outputs": [
+      "nx.json",
+      "nx/target-defaults"
+    ],
+    "targets.build.parallelism": [
+      "nx.json",
+      "nx/target-defaults"
+    ],
+    "targets.lint:fix.dependsOn": [
+      "nx.json",
+      "nx/target-defaults"
+    ],
+    "targets.lint:fix.parallelism": [
+      "nx.json",
+      "nx/target-defaults"
+    ],
+    "targets.test.dependsOn": [
+      "nx.json",
+      "nx/target-defaults"
+    ],
+    "targets.test.parallelism": [
+      "nx.json",
+      "nx/target-defaults"
+    ]
+  },
+  "packages/forestry": {
+    "root": [
+      "packages/forestry/package.json",
+      "nx/core/package-json"
+    ],
+    "name": [
+      "packages/forestry/package.json",
+      "nx/core/package-json"
+    ],
+    "tags": [
+      "packages/forestry/package.json",
+      "nx/core/package-json"
+    ],
+    "tags.npm:public": [
+      "packages/forestry/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups": [
+      "packages/forestry/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups.NPM Scripts": [
+      "packages/forestry/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups.NPM Scripts.0": [
+      "packages/forestry/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups.NPM Scripts.1": [
+      "packages/forestry/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups.NPM Scripts.2": [
+      "packages/forestry/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups.NPM Scripts.3": [
+      "packages/forestry/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups.NPM Scripts.4": [
+      "packages/forestry/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups.NPM Scripts.5": [
+      "packages/forestry/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups.NPM Scripts.6": [
+      "packages/forestry/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups.NPM Scripts.7": [
+      "packages/forestry/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups.NPM Scripts.8": [
+      "packages/forestry/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups.NPM Scripts.9": [
+      "packages/forestry/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups.NPM Scripts.10": [
+      "packages/forestry/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups.NPM Scripts.11": [
+      "packages/forestry/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups.NPM Scripts.12": [
+      "packages/forestry/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.description": [
+      "packages/forestry/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.js": [
+      "packages/forestry/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.js.packageName": [
+      "packages/forestry/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.js.packageMain": [
+      "packages/forestry/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.js.isInPackageManagerWorkspaces": [
+      "packages/forestry/package.json",
+      "nx/core/package-json"
+    ],
+    "targets": [
+      "packages/forestry/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.start": [
+      "packages/forestry/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.start.executor": [
+      "packages/forestry/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.start.options": [
+      "packages/forestry/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.start.metadata": [
+      "packages/forestry/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.start.options.script": [
+      "packages/forestry/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.start.metadata.scriptContent": [
+      "packages/forestry/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.start.metadata.runCommand": [
+      "packages/forestry/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.clean": [
+      "packages/forestry/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.clean.executor": [
+      "packages/forestry/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.clean.options": [
+      "packages/forestry/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.clean.metadata": [
+      "packages/forestry/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.clean.options.script": [
+      "packages/forestry/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.clean.metadata.scriptContent": [
+      "packages/forestry/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.clean.metadata.runCommand": [
+      "packages/forestry/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.prebuild": [
+      "packages/forestry/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.prebuild.executor": [
+      "packages/forestry/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.prebuild.options": [
+      "packages/forestry/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.prebuild.metadata": [
+      "packages/forestry/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.prebuild.options.script": [
+      "packages/forestry/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.prebuild.metadata.scriptContent": [
+      "packages/forestry/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.prebuild.metadata.runCommand": [
+      "packages/forestry/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.build": [
+      "packages/forestry/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.build.executor": [
+      "packages/forestry/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.build.options": [
+      "packages/forestry/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.build.metadata": [
+      "packages/forestry/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.build.options.script": [
+      "packages/forestry/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.build.metadata.scriptContent": [
+      "packages/forestry/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.build.metadata.runCommand": [
+      "packages/forestry/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.build:watch": [
+      "packages/forestry/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.build:watch.executor": [
+      "packages/forestry/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.build:watch.options": [
+      "packages/forestry/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.build:watch.metadata": [
+      "packages/forestry/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.build:watch.options.script": [
+      "packages/forestry/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.build:watch.metadata.scriptContent": [
+      "packages/forestry/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.build:watch.metadata.runCommand": [
+      "packages/forestry/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.build:release": [
+      "packages/forestry/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.build:release.executor": [
+      "packages/forestry/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.build:release.options": [
+      "packages/forestry/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.build:release.metadata": [
+      "packages/forestry/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.build:release.options.script": [
+      "packages/forestry/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.build:release.metadata.scriptContent": [
+      "packages/forestry/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.build:release.metadata.runCommand": [
+      "packages/forestry/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.lint": [
+      "packages/forestry/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.lint.executor": [
+      "packages/forestry/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.lint.options": [
+      "packages/forestry/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.lint.metadata": [
+      "packages/forestry/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.lint.options.script": [
+      "packages/forestry/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.lint.metadata.scriptContent": [
+      "packages/forestry/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.lint.metadata.runCommand": [
+      "packages/forestry/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.lint:fix": [
+      "packages/forestry/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.lint:fix.executor": [
+      "packages/forestry/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.lint:fix.options": [
+      "packages/forestry/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.lint:fix.metadata": [
+      "packages/forestry/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.lint:fix.options.script": [
+      "packages/forestry/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.lint:fix.metadata.scriptContent": [
+      "packages/forestry/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.lint:fix.metadata.runCommand": [
+      "packages/forestry/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test": [
+      "packages/forestry/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test.executor": [
+      "packages/forestry/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test.options": [
+      "packages/forestry/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test.metadata": [
+      "packages/forestry/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test.options.script": [
+      "packages/forestry/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test.metadata.scriptContent": [
+      "packages/forestry/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test.metadata.runCommand": [
+      "packages/forestry/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test:coverage": [
+      "packages/forestry/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test:coverage.executor": [
+      "packages/forestry/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test:coverage.options": [
+      "packages/forestry/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test:coverage.metadata": [
+      "packages/forestry/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test:coverage.options.script": [
+      "packages/forestry/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test:coverage.metadata.scriptContent": [
+      "packages/forestry/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test:coverage.metadata.runCommand": [
+      "packages/forestry/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.prettier": [
+      "packages/forestry/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.prettier.executor": [
+      "packages/forestry/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.prettier.options": [
+      "packages/forestry/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.prettier.metadata": [
+      "packages/forestry/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.prettier.options.script": [
+      "packages/forestry/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.prettier.metadata.scriptContent": [
+      "packages/forestry/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.prettier.metadata.runCommand": [
+      "packages/forestry/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.prettier:check": [
+      "packages/forestry/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.prettier:check.executor": [
+      "packages/forestry/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.prettier:check.options": [
+      "packages/forestry/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.prettier:check.metadata": [
+      "packages/forestry/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.prettier:check.options.script": [
+      "packages/forestry/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.prettier:check.metadata.scriptContent": [
+      "packages/forestry/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.prettier:check.metadata.runCommand": [
+      "packages/forestry/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test:watch": [
+      "packages/forestry/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test:watch.executor": [
+      "packages/forestry/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test:watch.options": [
+      "packages/forestry/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test:watch.metadata": [
+      "packages/forestry/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test:watch.options.script": [
+      "packages/forestry/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test:watch.metadata.scriptContent": [
+      "packages/forestry/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test:watch.metadata.runCommand": [
+      "packages/forestry/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.nx-release-publish": [
+      "packages/forestry/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.nx-release-publish.executor": [
+      "packages/forestry/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.nx-release-publish.dependsOn": [
+      "packages/forestry/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.nx-release-publish.options": [
+      "packages/forestry/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.build.dependsOn": [
+      "nx.json",
+      "nx/target-defaults"
+    ],
+    "targets.build.outputs": [
+      "nx.json",
+      "nx/target-defaults"
+    ],
+    "targets.build.parallelism": [
+      "nx.json",
+      "nx/target-defaults"
+    ],
+    "targets.lint:fix.dependsOn": [
+      "nx.json",
+      "nx/target-defaults"
+    ],
+    "targets.lint:fix.parallelism": [
+      "nx.json",
+      "nx/target-defaults"
+    ],
+    "targets.test.dependsOn": [
+      "nx.json",
+      "nx/target-defaults"
+    ],
+    "targets.test.parallelism": [
+      "nx.json",
+      "nx/target-defaults"
+    ]
+  },
+  "packages/forestry4": {
+    "root": [
+      "packages/forestry4/package.json",
+      "nx/core/package-json"
+    ],
+    "name": [
+      "packages/forestry4/package.json",
+      "nx/core/package-json"
+    ],
+    "tags": [
+      "packages/forestry4/package.json",
+      "nx/core/package-json"
+    ],
+    "tags.npm:public": [
+      "packages/forestry4/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups": [
+      "packages/forestry4/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups.NPM Scripts": [
+      "packages/forestry4/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups.NPM Scripts.0": [
+      "packages/forestry4/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups.NPM Scripts.1": [
+      "packages/forestry4/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups.NPM Scripts.2": [
+      "packages/forestry4/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups.NPM Scripts.3": [
+      "packages/forestry4/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups.NPM Scripts.4": [
+      "packages/forestry4/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups.NPM Scripts.5": [
+      "packages/forestry4/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups.NPM Scripts.6": [
+      "packages/forestry4/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups.NPM Scripts.7": [
+      "packages/forestry4/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups.NPM Scripts.8": [
+      "packages/forestry4/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups.NPM Scripts.9": [
+      "packages/forestry4/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups.NPM Scripts.10": [
+      "packages/forestry4/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups.NPM Scripts.11": [
+      "packages/forestry4/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups.NPM Scripts.12": [
+      "packages/forestry4/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.description": [
+      "packages/forestry4/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.js": [
+      "packages/forestry4/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.js.packageName": [
+      "packages/forestry4/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.js.packageMain": [
+      "packages/forestry4/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.js.isInPackageManagerWorkspaces": [
+      "packages/forestry4/package.json",
+      "nx/core/package-json"
+    ],
+    "targets": [
+      "packages/forestry4/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.start": [
+      "packages/forestry4/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.start.executor": [
+      "packages/forestry4/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.start.options": [
+      "packages/forestry4/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.start.metadata": [
+      "packages/forestry4/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.start.options.script": [
+      "packages/forestry4/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.start.metadata.scriptContent": [
+      "packages/forestry4/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.start.metadata.runCommand": [
+      "packages/forestry4/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.clean": [
+      "packages/forestry4/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.clean.executor": [
+      "packages/forestry4/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.clean.options": [
+      "packages/forestry4/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.clean.metadata": [
+      "packages/forestry4/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.clean.options.script": [
+      "packages/forestry4/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.clean.metadata.scriptContent": [
+      "packages/forestry4/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.clean.metadata.runCommand": [
+      "packages/forestry4/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.prebuild": [
+      "packages/forestry4/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.prebuild.executor": [
+      "packages/forestry4/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.prebuild.options": [
+      "packages/forestry4/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.prebuild.metadata": [
+      "packages/forestry4/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.prebuild.options.script": [
+      "packages/forestry4/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.prebuild.metadata.scriptContent": [
+      "packages/forestry4/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.prebuild.metadata.runCommand": [
+      "packages/forestry4/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.build": [
+      "packages/forestry4/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.build.executor": [
+      "packages/forestry4/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.build.options": [
+      "packages/forestry4/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.build.metadata": [
+      "packages/forestry4/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.build.options.script": [
+      "packages/forestry4/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.build.metadata.scriptContent": [
+      "packages/forestry4/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.build.metadata.runCommand": [
+      "packages/forestry4/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.build:watch": [
+      "packages/forestry4/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.build:watch.executor": [
+      "packages/forestry4/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.build:watch.options": [
+      "packages/forestry4/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.build:watch.metadata": [
+      "packages/forestry4/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.build:watch.options.script": [
+      "packages/forestry4/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.build:watch.metadata.scriptContent": [
+      "packages/forestry4/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.build:watch.metadata.runCommand": [
+      "packages/forestry4/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.lint": [
+      "packages/forestry4/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.lint.executor": [
+      "packages/forestry4/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.lint.options": [
+      "packages/forestry4/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.lint.metadata": [
+      "packages/forestry4/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.lint.options.script": [
+      "packages/forestry4/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.lint.metadata.scriptContent": [
+      "packages/forestry4/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.lint.metadata.runCommand": [
+      "packages/forestry4/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.lint:fix": [
+      "packages/forestry4/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.lint:fix.executor": [
+      "packages/forestry4/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.lint:fix.options": [
+      "packages/forestry4/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.lint:fix.metadata": [
+      "packages/forestry4/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.lint:fix.options.script": [
+      "packages/forestry4/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.lint:fix.metadata.scriptContent": [
+      "packages/forestry4/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.lint:fix.metadata.runCommand": [
+      "packages/forestry4/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test": [
+      "packages/forestry4/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test.executor": [
+      "packages/forestry4/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test.options": [
+      "packages/forestry4/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test.metadata": [
+      "packages/forestry4/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test.options.script": [
+      "packages/forestry4/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test.metadata.scriptContent": [
+      "packages/forestry4/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test.metadata.runCommand": [
+      "packages/forestry4/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test:coverage": [
+      "packages/forestry4/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test:coverage.executor": [
+      "packages/forestry4/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test:coverage.options": [
+      "packages/forestry4/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test:coverage.metadata": [
+      "packages/forestry4/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test:coverage.options.script": [
+      "packages/forestry4/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test:coverage.metadata.scriptContent": [
+      "packages/forestry4/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test:coverage.metadata.runCommand": [
+      "packages/forestry4/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.prettier": [
+      "packages/forestry4/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.prettier.executor": [
+      "packages/forestry4/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.prettier.options": [
+      "packages/forestry4/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.prettier.metadata": [
+      "packages/forestry4/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.prettier.options.script": [
+      "packages/forestry4/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.prettier.metadata.scriptContent": [
+      "packages/forestry4/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.prettier.metadata.runCommand": [
+      "packages/forestry4/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.prettier:check": [
+      "packages/forestry4/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.prettier:check.executor": [
+      "packages/forestry4/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.prettier:check.options": [
+      "packages/forestry4/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.prettier:check.metadata": [
+      "packages/forestry4/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.prettier:check.options.script": [
+      "packages/forestry4/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.prettier:check.metadata.scriptContent": [
+      "packages/forestry4/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.prettier:check.metadata.runCommand": [
+      "packages/forestry4/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test:watch": [
+      "packages/forestry4/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test:watch.executor": [
+      "packages/forestry4/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test:watch.options": [
+      "packages/forestry4/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test:watch.metadata": [
+      "packages/forestry4/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test:watch.options.script": [
+      "packages/forestry4/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test:watch.metadata.scriptContent": [
+      "packages/forestry4/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test:watch.metadata.runCommand": [
+      "packages/forestry4/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.prepublishOnly": [
+      "packages/forestry4/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.prepublishOnly.executor": [
+      "packages/forestry4/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.prepublishOnly.options": [
+      "packages/forestry4/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.prepublishOnly.metadata": [
+      "packages/forestry4/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.prepublishOnly.options.script": [
+      "packages/forestry4/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.prepublishOnly.metadata.scriptContent": [
+      "packages/forestry4/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.prepublishOnly.metadata.runCommand": [
+      "packages/forestry4/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.nx-release-publish": [
+      "packages/forestry4/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.nx-release-publish.executor": [
+      "packages/forestry4/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.nx-release-publish.dependsOn": [
+      "packages/forestry4/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.nx-release-publish.options": [
+      "packages/forestry4/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.build.dependsOn": [
+      "nx.json",
+      "nx/target-defaults"
+    ],
+    "targets.build.outputs": [
+      "nx.json",
+      "nx/target-defaults"
+    ],
+    "targets.build.parallelism": [
+      "nx.json",
+      "nx/target-defaults"
+    ],
+    "targets.lint:fix.dependsOn": [
+      "nx.json",
+      "nx/target-defaults"
+    ],
+    "targets.lint:fix.parallelism": [
+      "nx.json",
+      "nx/target-defaults"
+    ],
+    "targets.test.dependsOn": [
+      "nx.json",
+      "nx/target-defaults"
+    ],
+    "targets.test.parallelism": [
+      "nx.json",
+      "nx/target-defaults"
+    ]
+  },
+  "packages/walrus": {
+    "root": [
+      "packages/walrus/package.json",
+      "nx/core/package-json"
+    ],
+    "name": [
+      "packages/walrus/package.json",
+      "nx/core/package-json"
+    ],
+    "tags": [
+      "packages/walrus/package.json",
+      "nx/core/package-json"
+    ],
+    "tags.npm:public": [
+      "packages/walrus/package.json",
+      "nx/core/package-json"
+    ],
+    "tags.npm:type": [
+      "packages/walrus/package.json",
+      "nx/core/package-json"
+    ],
+    "tags.npm:checking": [
+      "packages/walrus/package.json",
+      "nx/core/package-json"
+    ],
+    "tags.npm:text": [
+      "packages/walrus/package.json",
+      "nx/core/package-json"
+    ],
+    "tags.npm:utilities": [
+      "packages/walrus/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups": [
+      "packages/walrus/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups.NPM Scripts": [
+      "packages/walrus/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups.NPM Scripts.0": [
+      "packages/walrus/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups.NPM Scripts.1": [
+      "packages/walrus/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups.NPM Scripts.2": [
+      "packages/walrus/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups.NPM Scripts.3": [
+      "packages/walrus/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups.NPM Scripts.4": [
+      "packages/walrus/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups.NPM Scripts.5": [
+      "packages/walrus/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups.NPM Scripts.6": [
+      "packages/walrus/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups.NPM Scripts.7": [
+      "packages/walrus/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups.NPM Scripts.8": [
+      "packages/walrus/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups.NPM Scripts.9": [
+      "packages/walrus/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups.NPM Scripts.10": [
+      "packages/walrus/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups.NPM Scripts.11": [
+      "packages/walrus/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups.NPM Scripts.12": [
+      "packages/walrus/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.description": [
+      "packages/walrus/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.js": [
+      "packages/walrus/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.js.packageName": [
+      "packages/walrus/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.js.packageMain": [
+      "packages/walrus/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.js.isInPackageManagerWorkspaces": [
+      "packages/walrus/package.json",
+      "nx/core/package-json"
+    ],
+    "targets": [
+      "packages/walrus/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.start": [
+      "packages/walrus/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.start.executor": [
+      "packages/walrus/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.start.options": [
+      "packages/walrus/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.start.metadata": [
+      "packages/walrus/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.start.options.script": [
+      "packages/walrus/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.start.metadata.scriptContent": [
+      "packages/walrus/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.start.metadata.runCommand": [
+      "packages/walrus/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.clean": [
+      "packages/walrus/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.clean.executor": [
+      "packages/walrus/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.clean.options": [
+      "packages/walrus/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.clean.metadata": [
+      "packages/walrus/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.clean.options.script": [
+      "packages/walrus/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.clean.metadata.scriptContent": [
+      "packages/walrus/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.clean.metadata.runCommand": [
+      "packages/walrus/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.prebuild": [
+      "packages/walrus/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.prebuild.executor": [
+      "packages/walrus/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.prebuild.options": [
+      "packages/walrus/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.prebuild.metadata": [
+      "packages/walrus/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.prebuild.options.script": [
+      "packages/walrus/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.prebuild.metadata.scriptContent": [
+      "packages/walrus/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.prebuild.metadata.runCommand": [
+      "packages/walrus/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.build": [
+      "packages/walrus/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.build.executor": [
+      "packages/walrus/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.build.options": [
+      "packages/walrus/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.build.metadata": [
+      "packages/walrus/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.build.options.script": [
+      "packages/walrus/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.build.metadata.scriptContent": [
+      "packages/walrus/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.build.metadata.runCommand": [
+      "packages/walrus/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.build:watch": [
+      "packages/walrus/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.build:watch.executor": [
+      "packages/walrus/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.build:watch.options": [
+      "packages/walrus/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.build:watch.metadata": [
+      "packages/walrus/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.build:watch.options.script": [
+      "packages/walrus/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.build:watch.metadata.scriptContent": [
+      "packages/walrus/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.build:watch.metadata.runCommand": [
+      "packages/walrus/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.lint": [
+      "packages/walrus/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.lint.executor": [
+      "packages/walrus/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.lint.options": [
+      "packages/walrus/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.lint.metadata": [
+      "packages/walrus/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.lint.options.script": [
+      "packages/walrus/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.lint.metadata.scriptContent": [
+      "packages/walrus/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.lint.metadata.runCommand": [
+      "packages/walrus/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.lint:fix": [
+      "packages/walrus/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.lint:fix.executor": [
+      "packages/walrus/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.lint:fix.options": [
+      "packages/walrus/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.lint:fix.metadata": [
+      "packages/walrus/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.lint:fix.options.script": [
+      "packages/walrus/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.lint:fix.metadata.scriptContent": [
+      "packages/walrus/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.lint:fix.metadata.runCommand": [
+      "packages/walrus/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test": [
+      "packages/walrus/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test.executor": [
+      "packages/walrus/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test.options": [
+      "packages/walrus/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test.metadata": [
+      "packages/walrus/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test.options.script": [
+      "packages/walrus/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test.metadata.scriptContent": [
+      "packages/walrus/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test.metadata.runCommand": [
+      "packages/walrus/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test:coverage": [
+      "packages/walrus/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test:coverage.executor": [
+      "packages/walrus/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test:coverage.options": [
+      "packages/walrus/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test:coverage.metadata": [
+      "packages/walrus/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test:coverage.options.script": [
+      "packages/walrus/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test:coverage.metadata.scriptContent": [
+      "packages/walrus/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test:coverage.metadata.runCommand": [
+      "packages/walrus/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.prettier": [
+      "packages/walrus/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.prettier.executor": [
+      "packages/walrus/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.prettier.options": [
+      "packages/walrus/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.prettier.metadata": [
+      "packages/walrus/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.prettier.options.script": [
+      "packages/walrus/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.prettier.metadata.scriptContent": [
+      "packages/walrus/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.prettier.metadata.runCommand": [
+      "packages/walrus/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.prettier:check": [
+      "packages/walrus/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.prettier:check.executor": [
+      "packages/walrus/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.prettier:check.options": [
+      "packages/walrus/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.prettier:check.metadata": [
+      "packages/walrus/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.prettier:check.options.script": [
+      "packages/walrus/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.prettier:check.metadata.scriptContent": [
+      "packages/walrus/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.prettier:check.metadata.runCommand": [
+      "packages/walrus/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test:watch": [
+      "packages/walrus/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test:watch.executor": [
+      "packages/walrus/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test:watch.options": [
+      "packages/walrus/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test:watch.metadata": [
+      "packages/walrus/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test:watch.options.script": [
+      "packages/walrus/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test:watch.metadata.scriptContent": [
+      "packages/walrus/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.test:watch.metadata.runCommand": [
+      "packages/walrus/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.prepublishOnly": [
+      "packages/walrus/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.prepublishOnly.executor": [
+      "packages/walrus/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.prepublishOnly.options": [
+      "packages/walrus/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.prepublishOnly.metadata": [
+      "packages/walrus/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.prepublishOnly.options.script": [
+      "packages/walrus/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.prepublishOnly.metadata.scriptContent": [
+      "packages/walrus/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.prepublishOnly.metadata.runCommand": [
+      "packages/walrus/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.nx-release-publish": [
+      "packages/walrus/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.nx-release-publish.executor": [
+      "packages/walrus/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.nx-release-publish.dependsOn": [
+      "packages/walrus/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.nx-release-publish.options": [
+      "packages/walrus/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.build.dependsOn": [
+      "nx.json",
+      "nx/target-defaults"
+    ],
+    "targets.build.outputs": [
+      "nx.json",
+      "nx/target-defaults"
+    ],
+    "targets.build.parallelism": [
+      "nx.json",
+      "nx/target-defaults"
+    ],
+    "targets.lint:fix.dependsOn": [
+      "nx.json",
+      "nx/target-defaults"
+    ],
+    "targets.lint:fix.parallelism": [
+      "nx.json",
+      "nx/target-defaults"
+    ],
+    "targets.test.dependsOn": [
+      "nx.json",
+      "nx/target-defaults"
+    ],
+    "targets.test.parallelism": [
+      "nx.json",
+      "nx/target-defaults"
+    ]
+  }
+}

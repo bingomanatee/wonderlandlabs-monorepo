@@ -1,0 +1,12 @@
+[NX v20.8.2 Daemon Server] - 2025-09-15T20:00:45.383Z - Started listening on: /private/var/folders/yd/1m3wrpl11lq100m4pwl8lpw00000gn/T/0fd29bc59ea6daad732c/d.sock
+[NX v20.8.2 Daemon Server] - 2025-09-15T20:00:45.386Z - [WATCHER]: Subscribed to changes within: /Users/davidedelhart/Documents/repos/wonderlandlabs-monorepo (native)
+[NX v20.8.2 Daemon Server] - 2025-09-15T20:00:45.387Z - Established a connection. Number of open connections: 1
+[NX v20.8.2 Daemon Server] - 2025-09-15T20:00:45.387Z - Established a connection. Number of open connections: 2
+[NX v20.8.2 Daemon Server] - 2025-09-15T20:00:45.388Z - Closed a connection. Number of open connections: 1
+[NX v20.8.2 Daemon Server] - 2025-09-15T20:00:45.388Z - [REQUEST]: Responding to the client. Shutdown initiated
+[NX v20.8.2 Daemon Server] - 2025-09-15T20:00:45.388Z - Done responding to the client Shutdown initiated
+[NX v20.8.2 Daemon Server] - 2025-09-15T20:00:45.388Z - Handled FORCE_SHUTDOWN. Handling time: 0. Response time: 0.
+[NX v20.8.2 Daemon Server] - 2025-09-15T20:00:45.389Z - Closed a connection. Number of open connections: 0
+[NX v20.8.2 Daemon Server] - 2025-09-15T20:00:45.389Z - [WATCHER]: Stopping the watcher for /Users/davidedelhart/Documents/repos/wonderlandlabs-monorepo (sources)
+[NX v20.8.2 Daemon Server] - 2025-09-15T20:00:45.389Z - [WATCHER]: Stopping the watcher for /Users/davidedelhart/Documents/repos/wonderlandlabs-monorepo (outputs)
+[NX v20.8.2 Daemon Server] - 2025-09-15T20:00:45.389Z - Server stopped because: "Request to shutdown"

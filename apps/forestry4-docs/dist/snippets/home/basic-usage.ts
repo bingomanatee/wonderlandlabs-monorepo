@@ -1,6 +1,6 @@
 // Auto-generated snippet from: apps/forestry4-docs/src/examples/home/basic-usage.ts
 // Description: Basic usage example for Forestry 4
-// Last synced: Mon Sep 15 12:00:11 PDT 2025
+// Last synced: Mon Sep 15 14:19:17 PDT 2025
 // DO NOT EDIT - This file is automatically synced from the source
 
 import { Forest } from '@wonderlandlabs/forestry4';

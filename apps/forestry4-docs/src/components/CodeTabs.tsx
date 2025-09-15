@@ -42,7 +42,15 @@ const CodeTabs: React.FC<CodeTabsProps> = ({ tabs, defaultIndex = 0 }) => {
             return tab.code;
           } else if (tab.snippet) {
             try {
-              const extension = tab.ts ? '.ts' : (tab.tsx ? '.tsx' : (tab.language === 'bash' ? '.sh' : (tab.language === 'tsx' ? '.tsx' : '.tsx.txt')));
+              const extension = tab.ts
+                ? '.ts.txt'
+                : tab.tsx
+                  ? '.tsx.txt'
+                  : tab.language === 'bash'
+                    ? '.sh'
+                    : tab.language === 'tsx'
+                      ? '.tsx.txt'
+                      : '.tsx.txt';
               const path = tab.folder
                 ? `/snippets/${tab.folder}/${tab.snippet}${extension}`
                 : `/snippets/${tab.snippet}${extension}`;
@@ -51,14 +59,16 @@ const CodeTabs: React.FC<CodeTabsProps> = ({ tabs, defaultIndex = 0 }) => {
                 throw new Error(`Failed to load snippet: ${tab.snippet}`);
               }
               const text = await response.text();
-
+              console.log('config:', tab);
+              console.log('path: ', path);
+              console.log('  .... text = ', text.substring(0, 100).replace('\n', ''));
               // Filter out sync headers from auto-generated snippets
               const cleanText = text
                 .split('\n')
-                .filter(line => !line.startsWith('// Auto-generated snippet from:'))
-                .filter(line => !line.startsWith('// Description:'))
-                .filter(line => !line.startsWith('// Last synced:'))
-                .filter(line => !line.startsWith('// DO NOT EDIT'))
+                .filter((line) => !line.startsWith('// Auto-generated snippet from:'))
+                .filter((line) => !line.startsWith('// Description:'))
+                .filter((line) => !line.startsWith('// Last synced:'))
+                .filter((line) => !line.startsWith('// DO NOT EDIT'))
                 .join('\n')
                 .replace(/^\n+/, ''); // Remove leading empty lines
 

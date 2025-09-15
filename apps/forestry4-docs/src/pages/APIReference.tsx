@@ -130,6 +130,11 @@ const APIReference: React.FC = () => {
                 <HStack mb={4}>
                   <Heading size="lg">Forest</Heading>
                   <Badge colorScheme="green">Class</Badge>
+                  <Link to="/store" style={{ marginLeft: '12px' }}>
+                    <Badge colorScheme="teal" fontSize="xs">
+                      See Store Basics →
+                    </Badge>
+                  </Link>
                 </HStack>
                 <Text textStyle="body">
                   The primary reactive state management class that supports branching and
@@ -268,6 +273,11 @@ const APIReference: React.FC = () => {
               <Box id="forest-transactions" layerStyle="methodCard">
                 <Heading size="md" mb={4}>
                   Transaction Methods
+                  <Link to="/transactions" style={{ marginLeft: '12px' }}>
+                    <Badge colorScheme="blue" fontSize="xs">
+                      See detailed guide →
+                    </Badge>
+                  </Link>
                 </Heading>
 
                 <VStack spacing={6} align="stretch">
@@ -294,6 +304,11 @@ const APIReference: React.FC = () => {
               <Box id="forest-validation" layerStyle="methodCard">
                 <Heading size="md" mb={4}>
                   Validation Methods
+                  <Link to="/validation" style={{ marginLeft: '12px' }}>
+                    <Badge colorScheme="green" fontSize="xs">
+                      See detailed guide →
+                    </Badge>
+                  </Link>
                 </Heading>
 
                 <VStack spacing={6} align="stretch">
@@ -416,6 +431,11 @@ const APIReference: React.FC = () => {
               <Box id="types-actions" layerStyle="methodCard">
                 <Heading size="md" mb={4}>
                   Action Types
+                  <Link to="/actions" style={{ marginLeft: '12px' }}>
+                    <Badge colorScheme="orange" fontSize="xs">
+                      See Actions guide →
+                    </Badge>
+                  </Link>
                 </Heading>
 
                 <VStack spacing={6} align="stretch">
@@ -433,6 +453,11 @@ const APIReference: React.FC = () => {
               <Box id="types-validation" layerStyle="methodCard">
                 <Heading size="md" mb={4}>
                   Validation Types
+                  <Link to="/schemas" style={{ marginLeft: '12px' }}>
+                    <Badge colorScheme="purple" fontSize="xs">
+                      See Schema guide →
+                    </Badge>
+                  </Link>
                 </Heading>
 
                 <VStack spacing={6} align="stretch">

@@ -1,6 +1,6 @@
 // Auto-generated snippet from: apps/forestry4-docs/src/pages/examples/ShoppingCart.tsx
 // Description: Shopping cart example page
-// Last synced: Mon Sep 15 12:00:11 PDT 2025
+// Last synced: Mon Sep 15 14:19:16 PDT 2025
 // DO NOT EDIT - This file is automatically synced from the source
 
 import React from 'react';

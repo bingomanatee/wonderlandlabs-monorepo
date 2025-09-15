@@ -14,7 +14,10 @@ import {
   useColorModeValue,
 } from '@chakra-ui/react';
 import { Link as RouterLink, useLocation } from 'react-router-dom';
-import { ChevronDownIcon } from '@chakra-ui/icons';
+import { ChevronDownIcon, ExternalLinkIcon } from '@chakra-ui/icons';
+import { FaGithub } from 'react-icons/fa';
+import useForestryLocal from '../hooks/useForestryLocal';
+import { navigationStoreFactory } from '../storeFactories/navigationStoreFactory';
 
 interface MenuItem {
   label: string;
@@ -26,6 +29,10 @@ const Navigation: React.FC = () => {
   const location = useLocation();
   const bg = useColorModeValue('white', 'gray.800');
   const borderColor = useColorModeValue('gray.200', 'gray.700');
+
+  // Navigation state management with Forestry
+  const [navState, navStore] = useForestryLocal(navigationStoreFactory);
+  const { openMenu, hoveredMenu } = navState;
 
   const isActive = (path: string) => location.pathname === path;
 
@@ -53,13 +60,19 @@ const Navigation: React.FC = () => {
       { label: 'Form Validation', path: '/examples/form-validation' },
       { label: 'Transaction Demo', path: '/examples/transaction-demo' },
     ],
-    Reference: [
-      { label: 'API', path: '/api' },
-      {
-        label: 'GitHub Source',
-        path: 'https://github.com/bingomanatee/wonderlandlabs-monorepo',
-        external: true,
-      },
+    'API Reference': [
+      { label: 'Overview', path: '/api' },
+      { label: 'Forest Class', path: '/api#forest' },
+      { label: 'Constructor & Properties', path: '/api#forest-constructor' },
+      { label: 'Core Methods', path: '/api#forest-core' },
+      { label: 'Branching Methods', path: '/api#forest-branching' },
+      { label: 'Transactions', path: '/api#forest-transactions' },
+      { label: 'Validation', path: '/api#forest-validation' },
+      { label: 'ForestBranch', path: '/api#forestbranch' },
+      { label: 'Configuration Types', path: '/api#types-config' },
+      { label: 'Action Types', path: '/api#types-actions' },
+      { label: 'Validation Types', path: '/api#types-validation' },
+      { label: 'Utility Types', path: '/api#types-utility' },
     ],
   };
 
@@ -90,9 +103,13 @@ const Navigation: React.FC = () => {
           </Link>
 
           {/* Navigation Menu */}
-          <HStack spacing={8}>
+          <HStack spacing={6}>
             {Object.entries(menuItems).map(([category, items]) => (
-              <Menu key={category} trigger="hover">
+              <Menu
+                key={category}
+                isOpen={openMenu === category}
+                onClose={() => navStore.$.closeMenu()}
+              >
                 <MenuButton
                   as={Button}
                   variant="ghost"
@@ -100,10 +117,21 @@ const Navigation: React.FC = () => {
                   _hover={{ bg: 'green.100' }}
                   _active={{ bg: 'green.200' }}
                   rightIcon={<ChevronDownIcon />}
+                  onMouseEnter={() => navStore.$.handleMenuEnter(category)}
+                  onClick={() => {
+                    if (openMenu === category) {
+                      navStore.$.closeMenu();
+                    } else {
+                      navStore.$.openMenu(category);
+                    }
+                  }}
                 >
                   {category}
                 </MenuButton>
-                <MenuList>
+                <MenuList
+                  onMouseLeave={() => navStore.$.handleMenuLeave()}
+                  onMouseEnter={() => navStore.$.setHoveredMenu(category)}
+                >
                   {items.map((item) => (
                     <MenuItem
                       key={item.path}
@@ -117,6 +145,7 @@ const Navigation: React.FC = () => {
                       _hover={{
                         bg: !item.external && isActive(item.path) ? 'forest.100' : 'gray.50',
                       }}
+                      onClick={() => navStore.$.handleItemClick()}
                     >
                       {item.label}
                     </MenuItem>
@@ -124,6 +153,21 @@ const Navigation: React.FC = () => {
                 </MenuList>
               </Menu>
             ))}
+
+            {/* GitHub Source Button */}
+            <Button
+              as={Link}
+              href="https://github.com/bingomanatee/wonderlandlabs-monorepo"
+              isExternal
+              variant="ghost"
+              colorScheme="gray"
+              size="sm"
+              _hover={{ bg: 'gray.100' }}
+              leftIcon={<FaGithub />}
+              aria-label="View source on GitHub"
+            >
+              <ExternalLinkIcon ml={1} boxSize={3} />
+            </Button>
           </HStack>
         </Flex>
       </Container>

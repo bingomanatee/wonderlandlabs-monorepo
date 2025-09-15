@@ -4,6 +4,9 @@
   "private": true,
   "type": "module",
   "description": "documentation for the alpha release of Forestry 4",
+  "engines": {
+    "node": ">=22.0.0"
+  },
   "scripts": {
     "dev": "vite",
     "build": "vite build",

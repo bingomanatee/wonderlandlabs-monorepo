@@ -92,11 +92,11 @@ const Navigation: React.FC = () => {
         <Flex alignItems="center" justifyContent="space-between">
           {/* Logo */}
           <Link as={RouterLink} to="/" _hover={{ textDecoration: 'none' }}>
-            <HStack spacing={2}>
+            <HStack spacing={2} mr={2}>
               <Text fontSize="2xl" fontWeight="bold" color="forest.600">
                 🌲
               </Text>
-              <Text fontSize="xl" fontWeight="bold" color="gray.800">
+              <Text fontSize="xl" fontWeight="bold" color="gray.800" whiteSpace="nowrap">
                 Forestry 4.0
               </Text>
             </HStack>

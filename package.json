@@ -6,7 +6,7 @@
   "author": "davidedelhart",
   "license": "MIT",
   "workspaces": [
-    "apps/*",
+    "apps/forestry-docs",
     "packages/*",
     "demos/*"
   ],

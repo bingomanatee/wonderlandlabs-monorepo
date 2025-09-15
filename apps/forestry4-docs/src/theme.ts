@@ -28,8 +28,8 @@ const theme = extendTheme({
     },
   },
   fonts: {
-    heading: `'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif`,
-    body: `'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif`,
+    heading: `'Poppins', -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif`,
+    body: `'Poppins', -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif`,
     mono: `'JetBrains Mono', 'Monaco', 'Menlo', 'Ubuntu Mono', monospace`,
   },
   layerStyles: {

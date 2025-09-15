@@ -4,6 +4,8 @@ code {
     white-space: nowrap;
     font-weight: 600;
     display: inline-block;
+    font-family: 'Fira Code', 'JetBrains Mono', 'Monaco', 'Menlo', 'Ubuntu Mono', monospace !important;
+    font-feature-settings: "liga" 1, "calt" 1;
 }
 code, i, b, strong, a {
     margin: 0 0.25em;
@@ -20,4 +22,22 @@ li {
 
 a, p > a {
     color: blue;
+}
+
+/* Force Fira Code for all code elements and enable ligatures */
+pre, code, .language-typescript, .language-tsx, .language-javascript, .language-jsx,
+pre[class*="language-"], code[class*="language-"],
+.token, .prism-code, [data-language],
+/* Chakra UI code components */
+.chakra-code,
+/* Any other potential code containers */
+tt, kbd, samp {
+    font-family: 'Fira Code', 'JetBrains Mono', 'Monaco', 'Menlo', 'Ubuntu Mono', monospace !important;
+    font-feature-settings: "liga" 1, "calt" 1;
+    font-variant-ligatures: normal;
+}
+
+/* Ensure all nested elements inherit Fira Code */
+pre *, code *, [class*="language-"] * {
+    font-family: inherit !important;
 }

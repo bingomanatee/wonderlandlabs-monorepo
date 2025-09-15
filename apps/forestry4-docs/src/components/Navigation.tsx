@@ -76,7 +76,7 @@ const Navigation: React.FC = () => {
       shadow="sm"
     >
       <Container maxW="container.xl">
-        <Flex h="80px" alignItems="center" justifyContent="space-between">
+        <Flex alignItems="center" justifyContent="space-between">
           {/* Logo */}
           <Link as={RouterLink} to="/" _hover={{ textDecoration: 'none' }}>
             <HStack spacing={2}>
@@ -84,7 +84,7 @@ const Navigation: React.FC = () => {
                 🌲
               </Text>
               <Text fontSize="xl" fontWeight="bold" color="gray.800">
-                Forestry 4
+                Forestry 4.0
               </Text>
             </HStack>
           </Link>
@@ -92,13 +92,14 @@ const Navigation: React.FC = () => {
           {/* Navigation Menu */}
           <HStack spacing={8}>
             {Object.entries(menuItems).map(([category, items]) => (
-              <Menu key={category}>
+              <Menu key={category} trigger="hover">
                 <MenuButton
                   as={Button}
                   variant="ghost"
+                  colorScheme="green"
+                  _hover={{ bg: 'green.100' }}
+                  _active={{ bg: 'green.200' }}
                   rightIcon={<ChevronDownIcon />}
-                  _hover={{ bg: 'gray.100' }}
-                  _active={{ bg: 'gray.200' }}
                 >
                   {category}
                 </MenuButton>

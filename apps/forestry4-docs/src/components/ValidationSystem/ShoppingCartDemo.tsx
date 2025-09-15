@@ -27,8 +27,8 @@ const ShoppingCartDemo: React.FC = () => {
   const [cartErrors, setCartErrors] = useState<string[]>([]);
 
   return (
-    <Card>
-      <CardBody>
+    <Section>
+      
         <VStack spacing={6} align="stretch">
           <Heading size="lg">Shopping Cart - Critical Business Rules</Heading>
           <Text color="gray.600">
@@ -313,8 +313,8 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
             />
           </Box>
         </VStack>
-      </CardBody>
-    </Card>
+      
+    </Section>
   );
 };
 

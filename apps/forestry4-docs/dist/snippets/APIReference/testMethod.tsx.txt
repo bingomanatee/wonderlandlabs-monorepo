@@ -1,0 +1,47 @@
+// Basic test function usage
+const store = new Store({
+  value: { count: 0, name: 'test' },
+  tests: (value) => {
+    if (value.count < 0) {
+      return 'Count cannot be negative'
+    }
+    if (value.name.length === 0) {
+      return 'Name cannot be empty'
+    }
+    return null // Valid
+  }
+})
+
+// Test different values
+console.log(store.test({ count: 5, name: 'valid' }))    // { isValid: true }
+console.log(store.test({ count: -1, name: 'test' }))    // { isValid: false, error: 'Count cannot be negative' }
+console.log(store.test({ count: 5, name: '' }))         // { isValid: false, error: 'Name cannot be empty' }
+
+// Multiple test functions
+const storeWithMultipleTests = new Store({
+  value: { email: '', password: '' },
+  tests: [
+    (value) => {
+      if (!value.email.includes('@')) {
+        return 'Invalid email format'
+      }
+      return null
+    },
+    (value) => {
+      if (value.password.length < 8) {
+        return 'Password must be at least 8 characters'
+      }
+      return null
+    }
+  ]
+})
+
+// Test ignores transaction suspension (unlike validate)
+store.transact({
+  suspendValidation: true,
+  action() {
+    // test() still runs validation even when suspended
+    const result = this.test({ count: -5, name: '' })
+    console.log('Test result during transaction:', result.isValid) // false
+  }
+})

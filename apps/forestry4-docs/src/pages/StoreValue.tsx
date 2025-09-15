@@ -30,8 +30,8 @@ const StoreValue: React.FC = () => {
         </Box>
 
         {/* Store Value Fundamentals */}
-        <Card>
-          <CardBody>
+        <Section>
+          
             <VStack spacing={6} align="stretch">
               <Heading size="lg">Store Value Fundamentals</Heading>
               
@@ -80,12 +80,12 @@ const StoreValue: React.FC = () => {
                 </Box>
               </SimpleGrid>
             </VStack>
-          </CardBody>
-        </Card>
+          
+        </Section>
 
         {/* Value Type Examples */}
-        <Card>
-          <CardBody>
+        <Section>
+          
             <VStack spacing={6} align="stretch">
               <Heading size="lg">Value Type Examples</Heading>
               <Text color="gray.600">
@@ -121,12 +121,12 @@ const StoreValue: React.FC = () => {
                 ]}
               />
             </VStack>
-          </CardBody>
-        </Card>
+          
+        </Section>
 
         {/* Value Limitations */}
-        <Card>
-          <CardBody>
+        <Section>
+          
             <VStack spacing={6} align="stretch">
               <Heading size="lg">Value Limitations & Gotchas</Heading>
               
@@ -145,12 +145,12 @@ const StoreValue: React.FC = () => {
               
               <SnippetBlock snippetName="valueLimitations" folder="StoreValue" />
             </VStack>
-          </CardBody>
-        </Card>
+          
+        </Section>
 
         {/* Res Map */}
-        <Card>
-          <CardBody>
+        <Section>
+          
             <VStack spacing={6} align="stretch">
               <Heading size="lg">The Res Map - Non-Serializable Storage</Heading>
               
@@ -179,12 +179,12 @@ const StoreValue: React.FC = () => {
               
               <SnippetBlock snippetName="resMapUsage" folder="StoreValue" />
             </VStack>
-          </CardBody>
-        </Card>
+          
+        </Section>
 
         {/* Best Practices */}
-        <Card>
-          <CardBody>
+        <Section>
+          
             <VStack spacing={6} align="stretch">
               <Heading size="lg">Best Practices</Heading>
               
@@ -238,8 +238,8 @@ const StoreValue: React.FC = () => {
                 </Box>
               </SimpleGrid>
             </VStack>
-          </CardBody>
-        </Card>
+          
+        </Section>
       </VStack>
     </Box>
   )

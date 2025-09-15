@@ -2,6 +2,9 @@ import { Forest } from '@wonderlandlabs/forestry4';
 
 // Demo store for transaction examples
 export const createTransactionDemoStore = (handleError?: (error: Error) => void) => {
+  if (!handleError) {
+    throw new Error('handleError absent');
+  }
   return new Forest({
     value: {
       balance: 1000,
@@ -14,6 +17,7 @@ export const createTransactionDemoStore = (handleError?: (error: Error) => void)
       pendingOperations: 0,
       isProcessing: false,
     },
+    res: new Map([['handleError', handleError]]),
     actions: {
       // Basic transfer that can fail validation
       transfer(value, amount: number, description: string) {
@@ -106,68 +110,74 @@ export const createTransactionDemoStore = (handleError?: (error: Error) => void)
       },
 
       // Safe version that catches errors
-      ...(handleError
-        ? {
-            safeTransfer(value, amount: number, description: string) {
-              try {
-                this.$.transfer(amount, description);
-              } catch (error) {
-                handleError(error as Error);
-              }
-            },
 
-            safeProcessPayroll(value, employees: Array<{ name: string; salary: number }>) {
-              try {
-                this.$.processPayroll(employees);
-              } catch (error) {
-                handleError(error as Error);
-              }
-            },
+      safeTransfer(value, amount: number, description: string) {
+        try {
+          this.$.transfer(amount, description);
+        } catch (error) {
+          this.res.get('handleError')(error as Error);
+        }
+      },
 
-            // Demo payroll action with processing state
-            handlePayrollDemo(value) {
-              this.next({ ...value, isProcessing: true });
+      safeDeposit(_, amount: number, description: string) {
+        try {
+          this.$.deposit(amount, description);
+        } catch (error) {
+          this.res.get('handleError')(error as Error);
+        }
+      },
 
-              const employees = [
-                { name: 'Alice Johnson', salary: 300 },
-                { name: 'Bob Smith', salary: 250 },
-                { name: 'Carol Davis', salary: 400 },
-              ];
+      safeProcessPayroll(value, employees: Array<{ name: string; salary: number }>) {
+        try {
+          this.$.processPayroll(employees);
+        } catch (error) {
+          this.res.get('handleError')(error as Error);
+        }
+      },
 
-              // Simulate processing delay
-              setTimeout(() => {
-                try {
-                  this.$.processPayroll(employees);
-                } catch (error) {
-                  handleError(error as Error);
-                } finally {
-                  this.next({ ...this.value, isProcessing: false });
-                }
-              }, 1000);
-            },
+      // Demo payroll action with processing state
+      handlePayrollDemo(value) {
+        this.next({ ...value, isProcessing: true });
 
-            // Failed payroll demo
-            handleFailedPayroll(value) {
-              const employees = [
-                { name: 'Alice Johnson', salary: 500 },
-                { name: 'Bob Smith', salary: 600 },
-                { name: 'Carol Davis', salary: 700 },
-              ];
-              this.$.safeProcessPayroll(employees); // This will fail due to insufficient funds
-            },
+        const employees = [
+          { name: 'Alice Johnson', salary: 300 },
+          { name: 'Bob Smith', salary: 250 },
+          { name: 'Carol Davis', salary: 400 },
+        ];
+
+        // Simulate processing delay
+        setTimeout(() => {
+          try {
+            this.$.processPayroll(employees);
+          } catch (error) {
+            this.res.get('handleError')(error as Error);
+          } finally {
+            this.set('isProcessing', false);
           }
-        : {}),
+        }, 1000);
+      },
 
-      reset() {
-        this.next({
-          balance: 1000,
-          transactions: [],
-          pendingOperations: 0,
-          isProcessing: false,
-        });
+      // Failed payroll demo
+      handleFailedPayroll() {
+        const employees = [
+          { name: 'Alice Johnson', salary: 500 },
+          { name: 'Bob Smith', salary: 600 },
+          { name: 'Carol Davis', salary: 700 },
+        ];
+        this.$.safeProcessPayroll(employees); // This will fail due to insufficient funds
       },
     },
-    tests: (value) => {
+
+    reset() {
+      this.next({
+        balance: 1000,
+        transactions: [],
+        pendingOperations: 0,
+        isProcessing: false,
+      });
+    },
+
+    tests(value) {
       if (value.balance < 0) {
         return 'Account balance cannot be negative';
       }

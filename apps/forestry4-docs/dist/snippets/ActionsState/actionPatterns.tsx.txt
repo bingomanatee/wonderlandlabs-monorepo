@@ -1,0 +1,27 @@
+// ✅ Single field update - most efficient
+setMultiplier: function(value, multiplier: number) {
+  this.set('multiplier', multiplier);
+}
+
+// ✅ Multiple field update - atomic operation
+increment: function() {
+  this.mutate((draft) => {
+    draft.count += draft.multiplier;
+    draft.history.push('Incremented');
+  });
+}
+
+// ✅ Nested actions - composition
+incrementTwice: function(value) {
+  this.$.increment();  // Call other actions
+  this.$.increment();
+}
+
+// ✅ Complex transformation - business logic
+doubleAndLog: function() {
+  this.mutate((draft) => {
+    const originalCount = draft.count;
+    draft.count = originalCount * 2;
+    draft.history.push(`Doubled from ${originalCount} to ${draft.count}`);
+  });
+}

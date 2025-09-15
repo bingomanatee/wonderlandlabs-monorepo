@@ -1,0 +1,27 @@
+// Forest factory
+const counterForestFactory = () => new Forest({
+  name: 'counter',
+  value: { count: 0, history: [] },
+  actions: {
+    increment: function() {
+      this.mutate(draft => {
+        draft.count++;
+        draft.history.push(`Incremented to ${draft.count}`);
+      });
+    }
+  }
+});
+
+// React component
+function Counter() {
+  const [value, forest] = useForestryLocal(counterForestFactory);
+
+  return (
+    <div>
+      <p>Count: {value.count}</p>
+      <button onClick={forest.$.increment}>
+        Increment
+      </button>
+    </div>
+  );
+}

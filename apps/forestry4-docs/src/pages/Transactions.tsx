@@ -31,7 +31,8 @@ import { createTransactionDemoStore } from '@/storeFactories/createTransactionDe
 
 const Transactions: React.FC = () => {
   const { handleError } = useErrorHandler();
-  const [demoState, demoStore] = useForestryLocal(() => createTransactionDemoStore(handleError));
+
+  const [demoState, demoStore] = useForestryLocal(createTransactionDemoStore, handleError);
 
   const cardBg = useColorModeValue('white', 'gray.800');
   const borderColor = useColorModeValue('gray.200', 'gray.600');
@@ -68,11 +69,7 @@ const Transactions: React.FC = () => {
         </Box>
 
         {/* Core Concepts */}
-        <Card bg={cardBg} borderColor={borderColor}>
-          <CardBody>
-            <Heading size="lg" mb={4}>
-              Core Transaction Concepts
-            </Heading>
+        <Section title="Core Transaction Concepts">
 
             <SimpleGrid columns={{ base: 1, md: 2 }} spacing={6}>
               <Box>
@@ -151,15 +148,11 @@ const Transactions: React.FC = () => {
                 </ListItem>
               </List>
             </Box>
-          </CardBody>
-        </Card>
+          
+        </Section>
 
         {/* Live Demo */}
-        <Card bg={cardBg} borderColor={borderColor}>
-          <CardBody>
-            <Heading size="lg" mb={4}>
-              Live Transaction Demo
-            </Heading>
+        <Section title="Live Transaction Demo">
             <Text color="gray.600" mb={6}>
               This banking demo shows atomic transactions in action. Try the payroll processing to
               see how multiple operations are grouped together.
@@ -287,15 +280,11 @@ const Transactions: React.FC = () => {
                 </Box>
               </Box>
             </SimpleGrid>
-          </CardBody>
-        </Card>
+          
+        </Section>
 
         {/* API Reference */}
-        <Card bg={cardBg} borderColor={borderColor}>
-          <CardBody>
-            <Heading size="lg" mb={4}>
-              Transaction API
-            </Heading>
+        <Section title="Transaction API">
 
             <VStack spacing={6} align="stretch">
               <Box>
@@ -355,15 +344,11 @@ const Transactions: React.FC = () => {
                 />
               </Box>
             </VStack>
-          </CardBody>
-        </Card>
+          
+        </Section>
 
         {/* Advanced Examples */}
-        <Card bg={cardBg} borderColor={borderColor}>
-          <CardBody>
-            <Heading size="lg" mb={4}>
-              Advanced Transaction Patterns
-            </Heading>
+        <Section title="Advanced Transaction Patterns">
 
             <CodeTabs
               tabs={[
@@ -534,21 +519,17 @@ const store = createStoreWithSafeActions(handleError)
                 },
               ]}
             />
-          </CardBody>
-        </Card>
+          
+        </Section>
 
         {/* Best Practices */}
-        <Card bg={cardBg} borderColor={borderColor}>
-          <CardBody>
-            <Heading size="lg" mb={4}>
-              Best Practices
-            </Heading>
+        <Section title="Best Practices">
 
             <SimpleGrid columns={{ base: 1, md: 2 }} spacing={6}>
               <VStack spacing={4} align="stretch">
                 <Box>
                   <Heading size="sm" color="green.600" mb={2}>
-                    ✅ Do This
+                    ✅ Best Practices
                   </Heading>
                   <List spacing={2} fontSize="sm">
                     <ListItem>
@@ -571,10 +552,6 @@ const store = createStoreWithSafeActions(handleError)
                       <ListIcon as={CheckCircleIcon} color="green.500" />
                       Handle transaction errors gracefully with try/catch
                     </ListItem>
-                    <ListItem>
-                      <ListIcon as={CheckCircleIcon} color="green.500" />
-                      Create safe action wrappers for UI interactions
-                    </ListItem>
                   </List>
                 </Box>
               </VStack>
@@ -595,67 +572,22 @@ const store = createStoreWithSafeActions(handleError)
                     </ListItem>
                     <ListItem>
                       <ListIcon as={WarningIcon} color="red.500" />
-                      Don't rely on suspended validation to bypass important business rules
+                      Don't expect suspended transactions to permanently sidestep validation. the
+                      suspendValidation only is in effect until the close of the function.
                     </ListItem>
                     <ListItem>
                       <ListIcon as={WarningIcon} color="red.500" />
                       Don't perform async operations inside transaction functions
                     </ListItem>
-                    <ListItem>
-                      <ListIcon as={WarningIcon} color="red.500" />
-                      Don't ignore transaction errors in production code
-                    </ListItem>
-                    <ListItem>
-                      <ListIcon as={WarningIcon} color="red.500" />
-                      Don't use transactions as a substitute for proper validation design
-                    </ListItem>
                   </List>
                 </Box>
               </VStack>
             </SimpleGrid>
-
-            <Divider my={6} />
-
-            <Box>
-              <Heading size="md" mb={3}>
-                Performance Considerations
-              </Heading>
-              <Alert status="info" mb={4}>
-                <AlertIcon />
-                <Box>
-                  <Text fontWeight="semibold">Transaction Overhead</Text>
-                  <Text fontSize="sm">
-                    Transactions add minimal overhead but should be used judiciously. For
-                    high-frequency updates, consider batching operations or using regular actions.
-                  </Text>
-                </Box>
-              </Alert>
-
-              <CodeBlock language="typescript" title="Efficient Batch Processing">
-                {`// Good: Batch multiple items in one transaction
-store.transact({
-  suspendValidation: true,
-  action() {
-    items.forEach(item => this.$.addItem(item))
-    this.$.updateTotals() // Calculate once at the end
-  }
-})
-
-// Avoid: Multiple separate transactions
-items.forEach(item => {
-  store.transact(() => this.$.addItem(item)) // Inefficient
-})`}
-              </CodeBlock>
-            </Box>
-          </CardBody>
-        </Card>
+          
+        </Section>
 
         {/* Troubleshooting */}
-        <Card bg={cardBg} borderColor={borderColor}>
-          <CardBody>
-            <Heading size="lg" mb={4}>
-              Troubleshooting
-            </Heading>
+        <Section title="Troubleshooting">
 
             <VStack spacing={6} align="stretch">
               <Box>
@@ -777,8 +709,8 @@ debugSub.unsubscribe()`}
                 </CodeBlock>
               </Box>
             </VStack>
-          </CardBody>
-        </Card>
+          
+        </Section>
       </VStack>
     </Container>
   );

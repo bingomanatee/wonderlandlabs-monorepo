@@ -1,0 +1,207 @@
+{
+  "snippets": [
+    {
+      "name": "demoStoreFactory",
+      "description": "Demo store factory for LiveDemo component with universal input handlers",
+      "source": "apps/forestry4-docs/src/storeFactories/demoStoreFactory.ts",
+      "target": "apps/forestry4-docs/src/snippets/demoStoreFactory.ts",
+      "extractMode": "full",
+      "language": "typescript"
+    },
+    {
+      "name": "useForestryLocal-hook",
+      "description": "useForestryLocal hook implementation for React integration",
+      "source": "apps/forestry4-docs/src/hooks/useForestryLocal.ts",
+      "target": "apps/forestry4-docs/src/snippets/useForestryLocal.ts",
+      "extractMode": "full",
+      "language": "typescript"
+    },
+    {
+      "name": "createTodoStore",
+      "description": "Todo store factory from createTodoStore",
+      "source": "apps/forestry4-docs/src/storeFactories/createTodoStore.tsx",
+      "target": "apps/forestry4-docs/src/snippets/createTodoStore.tsx",
+      "extractMode": "full",
+      "language": "typescript"
+    },
+    {
+      "name": "createTransactionDemoStore",
+      "description": "Transaction demo store factory",
+      "source": "apps/forestry4-docs/src/storeFactories/createTransactionDemoStore.tsx",
+      "target": "apps/forestry4-docs/src/snippets/createTransactionDemoStore.tsx",
+      "extractMode": "full",
+      "language": "typescript"
+    },
+    {
+      "name": "TodoApp-page",
+      "description": "TodoApp example page component",
+      "source": "apps/forestry4-docs/src/pages/examples/TodoApp.tsx",
+      "target": "apps/forestry4-docs/src/snippets/TodoApp-page.tsx",
+      "extractMode": "full",
+      "language": "typescript"
+    },
+    {
+      "name": "LiveDemo-component",
+      "description": "LiveDemo component showing universal input handlers",
+      "source": "apps/forestry4-docs/src/components/WhyForestry/LiveDemo.tsx",
+      "target": "apps/forestry4-docs/src/snippets/LiveDemo.tsx",
+      "extractMode": "function",
+      "functionName": "LiveDemo",
+      "language": "typescript"
+    },
+    {
+      "name": "universal-input-handler",
+      "description": "Universal input handler with type detection",
+      "source": "apps/forestry4-docs/src/storeFactories/demoStoreFactory.ts",
+      "target": "apps/forestry4-docs/src/snippets/universal-input-handler.ts",
+      "extractMode": "section",
+      "startMarker": "handleInputChange: function",
+      "endMarker": "      },",
+      "language": "typescript"
+    },
+    {
+      "name": "counterStoreFactory",
+      "description": "Counter store factory example",
+      "source": "apps/forestry4-docs/src/storeFactories/counterStoreFactory.ts",
+      "target": "apps/forestry4-docs/src/snippets/counterStoreFactory.ts",
+      "extractMode": "full",
+      "language": "typescript"
+    },
+    {
+      "name": "userProfileFactory",
+      "description": "User profile store factory",
+      "source": "apps/forestry4-docs/src/storeFactories/userProfileFactory.ts",
+      "target": "apps/forestry4-docs/src/snippets/userProfileFactory.ts",
+      "extractMode": "full",
+      "language": "typescript"
+    },
+    {
+      "name": "ShoppingCart-page",
+      "description": "Shopping cart example page",
+      "source": "apps/forestry4-docs/src/pages/examples/ShoppingCart.tsx",
+      "target": "apps/forestry4-docs/src/snippets/ShoppingCart-page.tsx",
+      "extractMode": "full",
+      "language": "typescript"
+    },
+    {
+      "name": "FormValidation-page",
+      "description": "Form validation example page",
+      "source": "apps/forestry4-docs/src/pages/examples/FormValidation.tsx",
+      "target": "apps/forestry4-docs/src/snippets/FormValidation-page.tsx",
+      "extractMode": "full",
+      "language": "typescript"
+    },
+    {
+      "name": "TransactionDemo-page",
+      "description": "Transaction demo example page",
+      "source": "apps/forestry4-docs/src/pages/examples/TransactionDemo.tsx",
+      "target": "apps/forestry4-docs/src/snippets/TransactionDemo-page.tsx",
+      "extractMode": "full",
+      "language": "typescript"
+    },
+    {
+      "name": "demoStoreFactory-tests",
+      "description": "Complete test suite for demoStoreFactory",
+      "source": "apps/forestry4-docs/src/storeFactories/__tests__/demoStoreFactory.test.ts",
+      "target": "apps/forestry4-docs/src/snippets/demoStoreFactory-tests.ts",
+      "extractMode": "full",
+      "language": "typescript"
+    },
+    {
+      "name": "InteractiveDemo",
+      "description": "Interactive demo component showing Forestry in action",
+      "source": "apps/forestry4-docs/src/components/WhyForestry/InteractiveDemo.tsx",
+      "target": "apps/forestry4-docs/src/snippets/InteractiveDemo.tsx",
+      "extractMode": "full",
+      "language": "typescript"
+    },
+    {
+      "name": "counter-example",
+      "description": "Counter store example showing action parameters",
+      "source": "apps/forestry4-docs/src/snippets/actions-state/counter-example.ts",
+      "target": "apps/forestry4-docs/src/snippets/actions-state/counter-example.ts",
+      "extractMode": "full",
+      "language": "typescript"
+    },
+    {
+      "name": "set-examples",
+      "description": "Examples of using the set method for state updates",
+      "source": "apps/forestry4-docs/src/snippets/actions-state/set-examples.ts",
+      "target": "apps/forestry4-docs/src/snippets/actions-state/set-examples.ts",
+      "extractMode": "full",
+      "language": "typescript"
+    },
+    {
+      "name": "mutate-examples",
+      "description": "Examples of using the mutate method with Immer",
+      "source": "apps/forestry4-docs/src/snippets/actions-state/mutate-examples.ts",
+      "target": "apps/forestry4-docs/src/snippets/actions-state/mutate-examples.ts",
+      "extractMode": "full",
+      "language": "typescript"
+    },
+    {
+      "name": "next-examples",
+      "description": "Examples of using the next method for complete state replacement",
+      "source": "apps/forestry4-docs/src/snippets/actions-state/next-examples.ts",
+      "target": "apps/forestry4-docs/src/snippets/actions-state/next-examples.ts",
+      "extractMode": "full",
+      "language": "typescript"
+    },
+    {
+      "name": "arrow-function-antipattern",
+      "description": "Example showing why arrow functions don't work as actions",
+      "source": "apps/forestry4-docs/src/snippets/actions-state/arrow-function-antipattern.ts",
+      "target": "apps/forestry4-docs/src/snippets/actions-state/arrow-function-antipattern.ts",
+      "extractMode": "full",
+      "language": "typescript"
+    },
+    {
+      "name": "home-installation",
+      "description": "Installation instructions for Forestry 4",
+      "source": "apps/forestry4-docs/src/snippets/home/installation.sh",
+      "target": "apps/forestry4-docs/src/snippets/home/installation.sh",
+      "extractMode": "full",
+      "language": "bash"
+    },
+    {
+      "name": "home-basic-usage",
+      "description": "Basic usage example for Forestry 4",
+      "source": "apps/forestry4-docs/src/snippets/home/basic-usage.ts",
+      "target": "apps/forestry4-docs/src/snippets/home/basic-usage.ts",
+      "extractMode": "full",
+      "language": "typescript"
+    },
+    {
+      "name": "home-react-integration",
+      "description": "React integration example for Forestry 4",
+      "source": "apps/forestry4-docs/src/snippets/home/react-integration.tsx",
+      "target": "apps/forestry4-docs/src/snippets/home/react-integration.tsx",
+      "extractMode": "full",
+      "language": "tsx"
+    },
+    {
+      "name": "home-demo-store-definition",
+      "description": "Demo store definition for home page live demo",
+      "source": "apps/forestry4-docs/src/snippets/home/demo-store-definition.ts",
+      "target": "apps/forestry4-docs/src/snippets/home/demo-store-definition.ts",
+      "extractMode": "full",
+      "language": "typescript"
+    },
+    {
+      "name": "home-demo-react-integration",
+      "description": "Demo React integration for home page live demo",
+      "source": "apps/forestry4-docs/src/snippets/home/demo-react-integration.tsx",
+      "target": "apps/forestry4-docs/src/snippets/home/demo-react-integration.tsx",
+      "extractMode": "full",
+      "language": "tsx"
+    },
+    {
+      "name": "home-demo-jsx-template",
+      "description": "Demo JSX template for home page live demo",
+      "source": "apps/forestry4-docs/src/snippets/home/demo-jsx-template.tsx",
+      "target": "apps/forestry4-docs/src/snippets/home/demo-jsx-template.tsx",
+      "extractMode": "full",
+      "language": "tsx"
+    }
+  ]
+}

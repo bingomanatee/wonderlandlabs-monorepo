@@ -1,0 +1,64 @@
+// Array values - lists and collections
+interface TodoItem {
+  id: string;
+  text: string;
+  completed: boolean;
+}
+
+const todoListForest = new Forest<TodoItem[]>({
+  name: 'todo-list',
+  value: [
+    { id: '1', text: 'Learn Forestry', completed: true },
+    { id: '2', text: 'Build app', completed: false }
+  ],
+  actions: {
+    addTodo: function(value, text: string) {
+      this.mutate(draft => {
+        draft.push({
+          id: crypto.randomUUID(),
+          text,
+          completed: false
+        });
+      });
+    },
+    toggleTodo: function(value, id: string) {
+      this.mutate(draft => {
+        const todo = draft.find(t => t.id === id);
+        if (todo) {
+          todo.completed = !todo.completed;
+        }
+      });
+    },
+    removeTodo: function(value, id: string) {
+      this.mutate(draft => {
+        const index = draft.findIndex(t => t.id === id);
+        if (index >= 0) {
+          draft.splice(index, 1);
+        }
+      });
+    }
+  }
+});
+
+// Simple array of primitives
+const tagsForest = new Forest<string[]>({
+  name: 'tags',
+  value: ['react', 'typescript', 'forestry'],
+  actions: {
+    addTag: function(value, tag: string) {
+      this.mutate(draft => {
+        if (!draft.includes(tag)) {
+          draft.push(tag);
+        }
+      });
+    },
+    removeTag: function(value, tag: string) {
+      this.mutate(draft => {
+        const index = draft.indexOf(tag);
+        if (index >= 0) {
+          draft.splice(index, 1);
+        }
+      });
+    }
+  }
+});

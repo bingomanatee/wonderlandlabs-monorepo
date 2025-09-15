@@ -1,0 +1,32 @@
+// Reusable hook for any Forestry 4 forest
+function useForest<T>(forest: Forest<T>) {
+  const [value, setValue] = useState<T>(forest.value);
+
+  useEffect(() => {
+    const subscription = forest.subscribe((newValue) => {
+      setValue(newValue);
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [forest]);
+
+  return [value, forest.$] as const;
+}
+
+// Usage in component
+const TodoApp: React.FC = () => {
+  const todoForest = useMemo(() => new Forest({ /* ... */ }), []);
+  const [todoValue, actions] = useForest(todoForest);
+
+  return (
+    <div>
+      <Input
+        value={todoValue.newTodoText}
+        onChange={actions.onChange}
+      />
+      <Button onClick={actions.addTodo}>Add</Button>
+    </div>
+  );
+};

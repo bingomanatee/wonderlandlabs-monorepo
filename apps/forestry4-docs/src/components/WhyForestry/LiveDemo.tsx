@@ -12,139 +12,230 @@ import {
   FormControl,
   FormLabel,
   Select,
-  Divider
+  Divider,
+  SimpleGrid,
+  Heading,
+  Tabs,
+  TabList,
+  TabPanels,
+  Tab,
+  TabPanel,
 } from '@chakra-ui/react';
-import useForestryLocal from '../../hooks/useForestryLocal';
-import demoStoreFactory, { type UserProfile } from '../../storeFactories/demoStoreFactory';
+import CodeBlock from '../CodeBlock';
+import SnippetBlock from '../SnippetBlock';
+import InteractiveDemo from './InteractiveDemo';
 
 const LiveDemo: React.FC = () => {
-  const [state, store] = useForestryLocal(demoStoreFactory);
-  const [testResults, setTestResults] = useState<string[]>([]);
-
-  const runTests = () => {
-    const results: string[] = [];
-
-    // Each test uses a fresh store - proper testing pattern
-    results.push(demoStoreFactory().tap(s => s.$.updateProfile({ name: 'John Doe', age: 30 })) ? '✅ Profile update' : '❌ Profile failed');
-    results.push(demoStoreFactory().tap(s => s.$.updatePreferences({ theme: 'dark' })) ? '✅ Preferences update' : '❌ Preferences failed');
-    results.push(demoStoreFactory().tap(s => s.$.setupUser({
-      profile: { name: 'Jane Smith', email: 'jane@example.com' },
-      preferences: { theme: 'light' }
-    })) ? '✅ Nested action' : '❌ Nested failed');
-
-    setTestResults(results);
-  };
-
-  const resetDemo = () => {
-    store.$.updateProfile({ name: '', age: 0, email: '' });
-    store.$.updatePreferences({ theme: 'light' });
-    setTestResults([]);
-  };
 
   return (
-    <Box>
+    <Box layerStyle="card" bg="blue.50">
       <VStack spacing={6} align="stretch">
-        {/* Interactive Form */}
-        <Box layerStyle="card" bg="blue.50">
-          <Text fontSize="lg" fontWeight="bold" mb={4}>Interactive Demo</Text>
-          
-          <VStack spacing={4} align="stretch">
-            <HStack spacing={4}>
-              <FormControl>
-                <FormLabel>Name</FormLabel>
-                <Input
-                  value={state.name}
-                  onChange={(e) => store.$.updateProfile({ name: e.target.value })}
-                  placeholder="Enter name"
-                />
-              </FormControl>
-              
-              <FormControl>
-                <FormLabel>Age</FormLabel>
-                <Input
-                  type="number"
-                  value={state.age || ''}
-                  onChange={(e) => {
-                    try {
-                      store.$.setAge(parseInt(e.target.value) || 0);
-                    } catch (error) {
-                      console.error('Age validation error:', error);
-                    }
-                  }}
-                  placeholder="Enter age"
-                />
-              </FormControl>
-            </HStack>
+        <Box>
+          <Heading size="lg" mb={2}>
+            Try Forestry Live
+          </Heading>
+          <Text color="gray.600">
+            Interact with a real Forestry store. See the source code and try the live demo side by side.
+          </Text>
+        </Box>
 
-            <FormControl>
-              <FormLabel>Email</FormLabel>
-              <Input
-                value={state.email}
-                onChange={(e) => store.$.updateProfile({ email: e.target.value })}
-                placeholder="Enter email"
+        <Tabs variant="enclosed" colorScheme="blue">
+          <TabList>
+            <Tab>Live Demo</Tab>
+            <Tab>Store Factory</Tab>
+            <Tab>Component Code</Tab>
+            <Tab>VITest Tests</Tab>
+          </TabList>
+
+          <TabPanels>
+            {/* Live Demo Tab */}
+            <TabPanel>
+              <InteractiveDemo />
+            </TabPanel>
+
+            {/* Store Factory Tab */}
+            <TabPanel>
+              <CodeBlock language="typescript" title="Store Factory (demoStoreFactory.ts)">
+{`import { Forest } from '@wonderlandlabs/forestry4';
+
+interface UserProfile {
+  name: string;
+  age: number;
+  email: string;
+  preferences: {
+    theme: 'light' | 'dark';
+  };
+  errors: Record<string, string | null>;
+}
+
+export default function demoStoreFactory() {
+  return new Forest<UserProfile>({
+    name: 'user-profile-demo',
+    value: {
+      name: '',
+      age: 0,
+      email: '',
+      preferences: { theme: 'light' },
+      errors: {}
+    },
+    actions: {
+      // Universal input handler - just handles input conversion
+      handleInputChange: function(value, event: React.ChangeEvent<HTMLInputElement>) {
+        const { name, value: fieldValue, type } = event.target;
+
+        if (type === 'number') {
+          const numValue = parseInt(fieldValue) || 0;
+          this.set(name, numValue);
+        } else {
+          this.set(name, fieldValue);
+        }
+      },
+
+      handleThemeChange: function(value, event: React.ChangeEvent<HTMLSelectElement>) {
+        const theme = event.target.value as 'light' | 'dark';
+        // Deep set for nested property
+        this.set('preferences.theme', theme);
+      },
+
+      // Update profile fields
+      updateProfile: function(value, updates: Partial<UserProfile>) {
+        this.mutate(draft => {
+          Object.assign(draft, updates);
+        });
+      },
+
+      // Update preferences
+      updatePreferences: function(value, prefs: Partial<UserProfile['preferences']>) {
+        this.mutate(draft => {
+          Object.assign(draft.preferences, prefs);
+        });
+      },
+
+      // Nested action that calls other actions
+      setupUser: function(value, userData: {
+        profile: Partial<UserProfile>,
+        preferences: Partial<UserProfile['preferences']>
+      }) {
+        this.$.updateProfile(userData.profile);
+        this.$.updatePreferences(userData.preferences);
+      },
+
+      // Action with validation
+      setAge: function(value, age: number) {
+        if (age < 0 || age > 150) {
+          throw new Error('Age must be between 0 and 150');
+        }
+        this.mutate(draft => {
+          draft.age = age;
+        });
+      },
+
+      // Complex validation example
+      validateAndSave: function(value) {
+        const errors: string[] = [];
+
+        if (!value.name.trim()) {
+          errors.push('Name is required');
+        }
+        if (!value.email.includes('@')) {
+          errors.push('Valid email is required');
+        }
+        if (value.age < 13) {
+          errors.push('Must be at least 13 years old');
+        }
+
+        if (errors.length > 0) {
+          throw new Error(\`Validation failed: \${errors.join(', ')}\`);
+        }
+
+        return 'Profile saved successfully!';
+      }
+    },
+    tests: [
+      (value: UserProfile) => {
+        if (typeof value.name !== 'string') {
+          return 'Name must be a string';
+        }
+        return null;
+      },
+      (value: UserProfile) => {
+        if (typeof value.age !== 'number') {
+          return 'Age must be a number';
+        }
+        return null;
+      }
+    ],
+    prep: [
+      // Validation prep function - runs after any state change
+      function(value: UserProfile) {
+        const errors: Record<string, string | null> = {};
+
+        // Validate name
+        if (!value.name.trim()) {
+          errors.name = 'Name is required';
+        } else if (value.name.trim().length < 2) {
+          errors.name = 'Name must be at least 2 characters';
+        } else {
+          errors.name = null;
+        }
+
+        // Validate age
+        if (value.age < 0) {
+          errors.age = 'Age cannot be negative';
+        } else if (value.age > 150) {
+          errors.age = 'Age cannot exceed 150 years';
+        } else if (value.age > 0 && value.age < 13) {
+          errors.age = 'Must be at least 13 years old';
+        } else {
+          errors.age = null;
+        }
+
+        // Validate email
+        if (value.email && !value.email.includes('@')) {
+          errors.email = 'Please enter a valid email address';
+        } else {
+          errors.email = null;
+        }
+
+        // Update errors object using mutate to avoid recursion
+        this.mutate(draft => {
+          draft.errors = errors;
+        });
+      }
+    ]
+  });
+}`}
+              </CodeBlock>
+            </TabPanel>
+
+            {/* Component Code Tab */}
+            <TabPanel>
+              <SnippetBlock
+                snippetName="InteractiveDemo"
+                language="typescript"
+                title="InteractiveDemo Component Source"
               />
-            </FormControl>
+            </TabPanel>
+            
 
-            <FormControl>
-              <FormLabel>Theme</FormLabel>
-              <Select
-                value={state.preferences.theme}
-                onChange={(e) => store.$.updatePreferences({ theme: e.target.value as 'light' | 'dark' })}
-              >
-                <option value="light">Light</option>
-                <option value="dark">Dark</option>
-              </Select>
-            </FormControl>
-          </VStack>
-        </Box>
+            {/* Jest Tests Tab */}
+            <TabPanel>
+              <SnippetBlock
+                snippetName="demoStoreFactory-tests"
+                language="typescript"
+                ts={true}
+              />
+            </TabPanel>
+          </TabPanels>
+        </Tabs>
 
-        {/* Current State Display */}
-        <Box layerStyle="card" bg="green.50">
-          <Text fontSize="lg" fontWeight="bold" mb={4}>Current State</Text>
-          <Box as="pre" fontSize="sm" fontFamily="mono" bg="white" p={3} borderRadius="md">
-            {JSON.stringify(state, null, 2)}
-          </Box>
-        </Box>
-
-        {/* Test Controls */}
-        <HStack spacing={4}>
-          <Button colorScheme="blue" onClick={runTests}>
-            Run Live Tests
-          </Button>
-          <Button variant="outline" onClick={resetDemo}>
-            Reset Demo
-          </Button>
-        </HStack>
-
-        {/* Test Results */}
-        {testResults.length > 0 && (
-          <Box layerStyle="card" bg="gray.50">
-            <Text fontSize="lg" fontWeight="bold" mb={4}>Test Results</Text>
-            <VStack spacing={2} align="stretch">
-              {testResults.map((result, index) => (
-                <Box key={index}>
-                  <Badge
-                    colorScheme={result.startsWith('✅') ? 'green' : 'red'}
-                    mr={2}
-                  >
-                    {result.startsWith('✅') ? 'PASS' : 'FAIL'}
-                  </Badge>
-                  <Text as="span" fontSize="sm">
-                    {result.substring(2)}
-                  </Text>
-                </Box>
-              ))}
-            </VStack>
-          </Box>
-        )}
-
-        <Alert status="info">
+        <Alert status="info" mt={4}>
           <AlertIcon />
           <Box>
             <Text fontWeight="semibold">Live Forestry Store in Action</Text>
             <Text fontSize="sm" mt={1}>
-              This demo uses useForestryLocal hook for reactive updates. 
-              Try changing values above and running tests to see Forestry's capabilities.
+              This demo uses useForestryLocal hook for reactive updates.
+              Switch between tabs to see the source code and try the interactive demo.
             </Text>
           </Box>
         </Alert>

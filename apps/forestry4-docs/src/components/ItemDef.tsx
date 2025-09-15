@@ -24,6 +24,8 @@ interface ItemDefProps {
   titleAsCode?: boolean;
   /** Code color scheme when titleAsCode is true */
   codeColorScheme?: string;
+  /** Whether the snippet file has .ts extension instead of .tsx.txt */
+  ts?: boolean;
 }
 
 const ItemDef: React.FC<ItemDefProps> = ({
@@ -36,7 +38,8 @@ const ItemDef: React.FC<ItemDefProps> = ({
   codeTitle,
   titleSize = 'sm',
   titleAsCode = false,
-  codeColorScheme = 'blue',
+  codeColorScheme = '',
+  ts = false,
 }) => {
   // Determine if we should show code (either inline or from snippet)
   const hasCode = code || snippetName;
@@ -82,7 +85,12 @@ const ItemDef: React.FC<ItemDefProps> = ({
                   {codeTitle}
                 </Text>
               )}
-              <SnippetBlock snippetName={snippetName} folder={snippetFolder} language={language} />
+              <SnippetBlock
+                snippetName={snippetName}
+                folder={snippetFolder}
+                language={language}
+                ts={ts}
+              />
             </Box>
           ) : (
             // Use inline CodeBlock

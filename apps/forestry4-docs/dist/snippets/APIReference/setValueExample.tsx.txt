@@ -1,0 +1,10 @@
+// Set nested values immutably
+const forest = new Forest({ value: { user: { name: 'John', age: 30 } } })
+
+// Update nested property
+forest.set(['user', 'name'], 'Jane')
+console.log(forest.value.user.name) // 'Jane'
+
+// Set entire object
+forest.set(['user'], { name: 'Bob', age: 25 })
+console.log(forest.value.user) // { name: 'Bob', age: 25 }

@@ -1,0 +1,47 @@
+{/* Add Todo Form */}
+<HStack>
+  <Input
+    name="newTodoText"
+    placeholder="What needs to be done?"
+    value={todoValue.newTodoText}
+    onChange={forest.$.onChange}
+    onKeyPress={(e) => e.key === 'Enter' && forest.$.addTodo()}
+  />
+  <Button
+    colorScheme="forest"
+    onClick={forest.$.addTodo}
+    isDisabled={!todoValue.newTodoText.trim()}
+  >
+    Add
+  </Button>
+</HStack>
+
+{/* Filter Buttons */}
+<HStack>
+  <Button
+    variant={todoValue.filter === 'all' ? 'solid' : 'outline'}
+    onClick={() => forest.$.setFilter('all')}
+  >
+    All ({todoValue.todos.length})
+  </Button>
+  <Button
+    variant={todoValue.filter === 'active' ? 'solid' : 'outline'}
+    onClick={() => forest.$.setFilter('active')}
+  >
+    Active ({activeCount})
+  </Button>
+</HStack>
+
+{/* Todo Items */}
+{filteredTodos.map((todo) => (
+  <HStack key={todo.id}>
+    <Checkbox
+      isChecked={todo.completed}
+      onChange={() => forest.$.toggleTodo(todo.id)}
+    />
+    <Text>{todo.text}</Text>
+    <Button onClick={() => forest.$.removeTodo(todo.id)}>
+      Remove
+    </Button>
+  </HStack>
+))}

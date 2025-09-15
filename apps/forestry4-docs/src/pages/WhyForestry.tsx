@@ -8,7 +8,6 @@ const WhyForestry: React.FC = () => {
   return (
     <Container maxW="6xl" py={8}>
       <VStack spacing={12} align="stretch">
-        {/* Hero Section */}
         <Box textAlign="center">
           <Heading size="3xl" mb={6}>
             Why Forestry?
@@ -18,6 +17,9 @@ const WhyForestry: React.FC = () => {
             reactivity with TypeScript safety and an intuitive developer experience.
           </Text>
         </Box>
+        {/* Comparison Section */}
+        <ComparisonSection />
+        {/* Hero Section */}
 
         <Divider />
 
@@ -47,9 +49,6 @@ const WhyForestry: React.FC = () => {
         </Box>
 
         <Divider />
-
-        {/* Comparison Section */}
-        <ComparisonSection />
       </VStack>
     </Container>
   );

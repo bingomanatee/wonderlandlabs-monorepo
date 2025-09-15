@@ -5,8 +5,6 @@ import {
   Text,
   Box,
   SimpleGrid,
-  Card,
-  CardBody,
   Button,
   VStack,
   HStack,
@@ -19,10 +17,11 @@ import {
   Image,
 } from '@chakra-ui/react';
 import CodeTabs from '../components/CodeTabs';
-import CodeBlock from '@/components/CodeBlock.tsx';
+import CodeBlock from '../components/CodeBlock';
 import { Link } from 'react-router-dom';
 import useForestryLocal from '../hooks/useForestryLocal';
 import userProfileFactory from '../storeFactories/userProfileFactory';
+import Section from '../components/Section';
 
 const constructorTabs = [
   {
@@ -64,10 +63,7 @@ const StoreBasics: React.FC = () => {
         </Box>
 
         {/* Constructor Section */}
-        <Card>
-          <CardBody>
-            <VStack spacing={6} align="stretch">
-              <Heading size="lg">Store Constructor</Heading>
+        <Section title="Store Constructor">
               <Text color="gray.600">
                 Create a new Store instance with configuration options. They are all optional except
                 for value
@@ -141,11 +137,9 @@ const StoreBasics: React.FC = () => {
                 See <Link to="/validation">Validation</Link> for more details on Vaidation
                 parameters
               </Text>
-            </VStack>
-          </CardBody>
-        </Card>
+        </Section>
 
-        <Card>
+        <Section>
           <Heading>The Forestry Lifecycle</Heading>
           <Image src="/flowchart.svg" width="full" mx={8} maxHeight="80vh" />
           <Text>
@@ -153,23 +147,16 @@ const StoreBasics: React.FC = () => {
             values are curated and validated is important to recognize why Forestry is more than a
             repackaged Redux or a RxJS decorator.
           </Text>
-        </Card>
+        </Section>
 
         {/* Code Examples */}
-        <Card>
-          <CardBody>
-            <VStack spacing={6} align="stretch">
-              <Heading size="lg">Code Examples</Heading>
+        <Section title="Code Examples">
               <CodeTabs tabs={constructorTabs} />
-            </VStack>
-          </CardBody>
-        </Card>
+          
+        </Section>
 
         {/* Live Example */}
-        <Card>
-          <CardBody>
-            <VStack spacing={6} align="stretch">
-              <Heading size="lg">Live Example</Heading>
+        <Section title="Live Example">
               <Text color="gray.600">
                 Try updating the user profile below to see validation in action:
               </Text>
@@ -251,15 +238,10 @@ const StoreBasics: React.FC = () => {
                   </Box>
                 </VStack>
               </SimpleGrid>
-            </VStack>
-          </CardBody>
-        </Card>
+        </Section>
 
         {/* Update Patterns */}
-        <Card>
-          <CardBody>
-            <VStack spacing={6} align="stretch">
-              <Heading size="lg">Update Patterns</Heading>
+        <Section title="Update Patterns">
               <Text color="gray.600">
                 Forestry 4 provides different methods for updating store values efficiently:
               </Text>
@@ -346,15 +328,10 @@ tests: [
                   },
                 ]}
               />
-            </VStack>
-          </CardBody>
-        </Card>
+        </Section>
 
         {/* Source Code for Live Example */}
-        <Card>
-          <CardBody>
-            <VStack spacing={6} align="stretch">
-              <Heading size="lg">Live Example Source Code</Heading>
+        <Section title="Live Example Source Code">
               <Text color="gray.600">
                 Here's the complete source code for the user profile demo above:
               </Text>
@@ -469,9 +446,7 @@ useEffect(() => {
                   },
                 ]}
               />
-            </VStack>
-          </CardBody>
-        </Card>
+        </Section>
       </VStack>
     </Container>
   );

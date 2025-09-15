@@ -1,0 +1,27 @@
+// Validate values against schema and tests
+const forest = new Forest({
+  value: { name: 'John', age: 30, email: 'john@example.com' },
+  schema: z.object({
+    name: z.string().min(1),
+    age: z.number().min(0),
+    email: z.string().email()
+  }),
+  tests: (value) => {
+    if (value.age < 18 && value.name.length < 2) {
+      return 'Minors must have a full name'
+    }
+    return null
+  }
+})
+
+// Validate current value
+const result1 = forest.validate(forest.value)
+console.log(result1.isValid) // true
+
+// Validate invalid data
+const result2 = forest.validate({ name: '', age: -5, email: 'invalid' })
+console.log(result2.isValid) // false
+console.log(result2.error) // Validation error details
+
+// Check if value is valid (shorthand)
+console.log(forest.isValid({ name: 'Jane', age: 25, email: 'jane@example.com' })) // true

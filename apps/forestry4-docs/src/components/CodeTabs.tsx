@@ -21,6 +21,7 @@ interface CodeTab {
   code?: string;
   snippet?: string;
   folder?: string;
+  ts?: boolean;
 }
 
 interface CodeTabsProps {
@@ -40,14 +41,27 @@ const CodeTabs: React.FC<CodeTabsProps> = ({ tabs, defaultIndex = 0 }) => {
             return tab.code;
           } else if (tab.snippet) {
             try {
+              const extension = tab.ts ? '.ts' : (tab.language === 'bash' ? '.sh' : '.tsx.txt');
               const path = tab.folder
-                ? `/snippets/${tab.folder}/${tab.snippet}.tsx.txt`
-                : `/snippets/${tab.snippet}.tsx.txt`;
+                ? `/snippets/${tab.folder}/${tab.snippet}${extension}`
+                : `/snippets/${tab.snippet}${extension}`;
               const response = await fetch(path);
               if (!response.ok) {
                 throw new Error(`Failed to load snippet: ${tab.snippet}`);
               }
-              return await response.text();
+              const text = await response.text();
+
+              // Filter out sync headers from auto-generated snippets
+              const cleanText = text
+                .split('\n')
+                .filter(line => !line.startsWith('// Auto-generated snippet from:'))
+                .filter(line => !line.startsWith('// Description:'))
+                .filter(line => !line.startsWith('// Last synced:'))
+                .filter(line => !line.startsWith('// DO NOT EDIT'))
+                .join('\n')
+                .replace(/^\n+/, ''); // Remove leading empty lines
+
+              return cleanText;
             } catch (err) {
               return `// Error loading snippet: ${tab.snippet}`;
             }

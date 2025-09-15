@@ -1,10 +1,10 @@
 import React from 'react';
-import { Card, CardBody, VStack, Heading, Text, SimpleGrid, Box } from '@chakra-ui/react';
-
+import {   VStack, Heading, Text, SimpleGrid, Box } from '@chakra-ui/react';
+import Section from '../Section';
 const BestPracticesCard: React.FC = () => {
   return (
-    <Card width="full">
-      <CardBody>
+    <Section>
+      
         <VStack layerStyle="section">
           <Heading size="lg">React Integration Best Practices</Heading>
           <Text>
@@ -75,8 +75,8 @@ const BestPracticesCard: React.FC = () => {
             </Box>
           </SimpleGrid>
         </VStack>
-      </CardBody>
-    </Card>
+      
+    </Section>
   );
 };
 

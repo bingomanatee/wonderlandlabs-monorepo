@@ -15,7 +15,9 @@
     "lint": "eslint .",
     "tsc": "tsc",
     "type-check": "tsc --noEmit",
-    "test": "jest"
+    "test": "jest",
+    "sync-snippets": "./scripts/sync-snippets.sh",
+    "docs:sync": "./scripts/sync-snippets.sh && cd apps/forestry4-docs && npm run build"
   },
   "devDependencies": {
     "@nrwl/web": "^19.8.4",

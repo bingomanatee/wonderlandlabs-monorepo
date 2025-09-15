@@ -7,6 +7,7 @@ interface SnippetBlockProps {
   snippetName: string;
   language?: string;
   folder?: string;
+  ts?: boolean; // Use .ts extension instead of .tsx.txt
 }
 
 interface SnippetState {
@@ -15,7 +16,7 @@ interface SnippetState {
   error: string | null;
 }
 
-const createSnippetStore = (snippetName: string, folder?: string) =>
+const createSnippetStore = (snippetName: string, folder?: string, ts?: boolean) =>
   new Store<SnippetState>({
     name: `snippet-${folder ? `${folder}-` : ''}${snippetName}`,
     value: {
@@ -31,9 +32,10 @@ const createSnippetStore = (snippetName: string, folder?: string) =>
         });
 
         try {
+          const extension = ts ? '.ts' : '.tsx.txt';
           const path = folder
-            ? `/snippets/${folder}/${snippetName}.tsx.txt`
-            : `/snippets/${snippetName}.tsx.txt`;
+            ? `/snippets/${folder}/${snippetName}${extension}`
+            : `/snippets/${snippetName}${extension}`;
 
           const response = await fetch(path);
           if (!response.ok) {
@@ -42,8 +44,18 @@ const createSnippetStore = (snippetName: string, folder?: string) =>
 
           const text = await response.text();
 
+          // Filter out sync headers from auto-generated snippets
+          const cleanText = text
+            .split('\n')
+            .filter(line => !line.startsWith('// Auto-generated snippet from:'))
+            .filter(line => !line.startsWith('// Description:'))
+            .filter(line => !line.startsWith('// Last synced:'))
+            .filter(line => !line.startsWith('// DO NOT EDIT'))
+            .join('\n')
+            .replace(/^\n+/, ''); // Remove leading empty lines
+
           this.mutate((draft) => {
-            draft.code = text;
+            draft.code = cleanText;
             draft.loading = false;
           });
         } catch (err) {
@@ -64,8 +76,9 @@ const SnippetBlock: React.FC<SnippetBlockProps> = ({
   snippetName,
   language = 'typescript',
   folder,
+  ts,
 }) => {
-  const [state, store] = useForestryLocal(createSnippetStore, snippetName, folder);
+  const [state, store] = useForestryLocal(createSnippetStore, snippetName, folder, ts);
 
   // Load snippet on mount
   React.useEffect(() => {

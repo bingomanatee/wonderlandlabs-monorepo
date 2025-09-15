@@ -19,8 +19,8 @@ import SnippetBlock from '@/components/SnippetBlock';
 
 const ValidationGuide: React.FC = () => {
   return (
-    <Card>
-      <CardBody>
+    <Section>
+      
         <VStack spacing={6} align="stretch">
           <Heading size="lg">Deeper Thoughts - Validation Troubleshooting Guide</Heading>
           <Text>
@@ -116,8 +116,8 @@ const ValidationGuide: React.FC = () => {
             </Text>
           </Box>
         </VStack>
-      </CardBody>
-    </Card>
+      
+    </Section>
   );
 };
 

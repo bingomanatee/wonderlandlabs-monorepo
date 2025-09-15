@@ -1,0 +1,17 @@
+// Update forest with new values
+const forest = new Forest({ 
+  value: { name: 'John', age: 30, active: true },
+  actions: {
+    updateProfile(value, updates) {
+      // Use this.next() to update the forest
+      this.next({ ...value, ...updates })
+    }
+  }
+})
+
+// Direct updates
+forest.next({ name: 'Jane', age: 25, active: true })
+console.log(forest.value) // { name: 'Jane', age: 25, active: true }
+
+// Using actions
+forest.$.updateProfile({ name: 'Bob', age: 35, active: false })

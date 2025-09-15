@@ -1,0 +1,25 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "apps/forestry4-docs/package.json",
+      "use": "@vercel/static-build",
+      "config": {
+        "distDir": "apps/forestry4-docs/dist"
+      }
+    }
+  ],
+  "routes": [
+    {
+      "handle": "filesystem"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/apps/forestry4-docs/dist/index.html"
+    }
+  ],
+  "installCommand": "yarn install",
+  "buildCommand": "cd apps/forestry4-docs && yarn sync-snippets && yarn build",
+  "outputDirectory": "apps/forestry4-docs/dist",
+  "framework": "vite"
+}

@@ -1,0 +1,5 @@
+const completedCount = useMemo(() => {
+  return value.todos.filter(t => t.completed).length;
+}, [value.todos]);
+
+const hasActiveTodos = value.todos.some(t => !t.completed);

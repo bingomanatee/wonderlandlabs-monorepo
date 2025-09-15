@@ -33,8 +33,8 @@ const IntegrationHooks: React.FC = () => {
         </Box>
 
         {/* useForestryLocal Hook */}
-        <Card>
-          <CardBody>
+        <Section>
+          
             <VStack spacing={6} align="stretch">
               <Heading size="lg">useForestryLocal Hook</Heading>
 
@@ -84,12 +84,12 @@ const IntegrationHooks: React.FC = () => {
                 </Box>
               </SimpleGrid>
             </VStack>
-          </CardBody>
-        </Card>
+          
+        </Section>
 
         {/* useObserveForest Hook */}
-        <Card>
-          <CardBody>
+        <Section>
+          
             <VStack spacing={6} align="stretch">
               <Heading size="lg">useObserveForest Hook</Heading>
 
@@ -126,12 +126,12 @@ const IntegrationHooks: React.FC = () => {
                 ]}
               />
             </VStack>
-          </CardBody>
-        </Card>
+          
+        </Section>
 
         {/* Hook Comparison */}
-        <Card>
-          <CardBody>
+        <Section>
+          
             <VStack spacing={6} align="stretch">
               <Heading size="lg">Hook Comparison</Heading>
 
@@ -173,12 +173,12 @@ const IntegrationHooks: React.FC = () => {
                 </Box>
               </SimpleGrid>
             </VStack>
-          </CardBody>
-        </Card>
+          
+        </Section>
 
         {/* Best Practices */}
-        <Card>
-          <CardBody>
+        <Section>
+          
             <VStack spacing={6} align="stretch">
               <Heading size="lg">Integration Hook Best Practices</Heading>
 
@@ -236,13 +236,13 @@ const IntegrationHooks: React.FC = () => {
                 </Box>
               </SimpleGrid>
             </VStack>
-          </CardBody>
-        </Card>
+          
+        </Section>
       </VStack>
 
       {/* useForestBranch Hook */}
-      <Card>
-        <CardBody>
+      <Section>
+        
           <VStack spacing={6} align="stretch">
             <Heading size="lg">useForestBranch Hook</Heading>
 
@@ -290,8 +290,8 @@ const IntegrationHooks: React.FC = () => {
               ]}
             />
           </VStack>
-        </CardBody>
-      </Card>
+        
+      </Section>
     </Box>
   );
 };

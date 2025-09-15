@@ -172,8 +172,8 @@ const MyComponent = () => {
         </Box>
 
         {/* Core Properties */}
-        <Card>
-          <CardBody>
+        <Section>
+          
             <VStack spacing={6} align="stretch">
               <Heading size="lg">Core Properties</Heading>
 
@@ -278,22 +278,22 @@ const MyComponent = () => {
                 </Box>
               </SimpleGrid>
             </VStack>
-          </CardBody>
-        </Card>
+          
+        </Section>
 
         {/* Code Examples */}
-        <Card>
-          <CardBody>
+        <Section>
+          
             <VStack spacing={6} align="stretch">
               <Heading size="lg">Property Usage Examples</Heading>
               <CodeTabs tabs={propertyTabs} />
             </VStack>
-          </CardBody>
-        </Card>
+          
+        </Section>
 
         {/* Observable Properties */}
-        <Card>
-          <CardBody>
+        <Section>
+          
             <VStack spacing={6} align="stretch">
               <Heading size="lg">Observable Properties</Heading>
               <Text color="gray.600">
@@ -331,12 +331,12 @@ const MyComponent = () => {
 
               <CodeTabs tabs={observableTabs} />
             </VStack>
-          </CardBody>
-        </Card>
+          
+        </Section>
 
         {/* Live Demo */}
-        <Card>
-          <CardBody>
+        <Section>
+          
             <VStack spacing={6} align="stretch">
               <Heading size="lg">Interactive Property Demo</Heading>
 
@@ -389,8 +389,8 @@ const MyComponent = () => {
                 </VStack>
               </SimpleGrid>
             </VStack>
-          </CardBody>
-        </Card>
+          
+        </Section>
       </VStack>
     </Container>
   )

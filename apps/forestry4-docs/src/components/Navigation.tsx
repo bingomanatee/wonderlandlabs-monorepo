@@ -1,4 +1,4 @@
-import React from 'react'
+import React from 'react';
 import {
   Box,
   Flex,
@@ -12,39 +12,56 @@ import {
   Text,
   Container,
   useColorModeValue,
-} from '@chakra-ui/react'
-import { Link as RouterLink, useLocation } from 'react-router-dom'
-import { ChevronDownIcon } from '@chakra-ui/icons'
+} from '@chakra-ui/react';
+import { Link as RouterLink, useLocation } from 'react-router-dom';
+import { ChevronDownIcon } from '@chakra-ui/icons';
+
+interface MenuItem {
+  label: string;
+  path: string;
+  external?: boolean;
+}
 
 const Navigation: React.FC = () => {
-  const location = useLocation()
-  const bg = useColorModeValue('white', 'gray.800')
-  const borderColor = useColorModeValue('gray.200', 'gray.700')
+  const location = useLocation();
+  const bg = useColorModeValue('white', 'gray.800');
+  const borderColor = useColorModeValue('gray.200', 'gray.700');
 
-  const isActive = (path: string) => location.pathname === path
+  const isActive = (path: string) => location.pathname === path;
 
-  const menuItems = {
+  const menuItems: Record<string, MenuItem[]> = {
     'Getting Started': [
       { label: 'Quick Start', path: '/' },
       { label: 'Why Forestry?', path: '/why' },
     ],
     'Essential Features': [
-      { label: 'Store Basics', path: '/store' },
-      { label: 'Actions & State', path: '/actions' },
-      { label: 'React Integration', path: '/react' },
+      { label: 'Basics', path: '/store' },
+      { label: 'Actions', path: '/actions' },
+      { label: 'With React', path: '/react' },
     ],
     'Power Tools': [
-      { label: 'Validation System', path: '/validation' },
-      { label: 'Schema Validation', path: '/schemas' },
-      { label: 'Transaction System', path: '/transactions' },
-      { label: 'RxJS Integration', path: '/rxjs' },
-      { label: 'Advanced Patterns', path: '/advanced' },
+      { label: 'Validation', path: '/validation' },
+      { label: 'Schema', path: '/schemas' },
+      { label: 'Transactions', path: '/transactions' },
+      { label: 'RxJS / Immer', path: '/rxjs' },
+      /*    { label: 'Advanced Patterns', path: '/advanced' },*/
     ],
-    'Reference': [
-      { label: 'API Reference', path: '/api' },
-      { label: 'Examples', path: '/examples' },
+    'Practical Examples': [
+      { label: 'Overview', path: '/examples' },
+      { label: 'Todo App', path: '/examples/todo-app' },
+      { label: 'Shopping Cart', path: '/examples/shopping-cart' },
+      { label: 'Form Validation', path: '/examples/form-validation' },
+      { label: 'Transaction Demo', path: '/examples/transaction-demo' },
     ],
-  }
+    Reference: [
+      { label: 'API', path: '/api' },
+      {
+        label: 'GitHub Source',
+        path: 'https://github.com/bingomanatee/wonderlandlabs-monorepo',
+        external: true,
+      },
+    ],
+  };
 
   return (
     <Box
@@ -89,13 +106,15 @@ const Navigation: React.FC = () => {
                   {items.map((item) => (
                     <MenuItem
                       key={item.path}
-                      as={RouterLink}
-                      to={item.path}
-                      bg={isActive(item.path) ? 'forest.50' : 'transparent'}
-                      color={isActive(item.path) ? 'forest.600' : 'gray.700'}
-                      fontWeight={isActive(item.path) ? 'semibold' : 'normal'}
+                      as={item.external ? Link : RouterLink}
+                      to={item.external ? undefined : item.path}
+                      href={item.external ? item.path : undefined}
+                      isExternal={item.external}
+                      bg={!item.external && isActive(item.path) ? 'forest.50' : 'transparent'}
+                      color={!item.external && isActive(item.path) ? 'forest.600' : 'gray.700'}
+                      fontWeight={!item.external && isActive(item.path) ? 'semibold' : 'normal'}
                       _hover={{
-                        bg: isActive(item.path) ? 'forest.100' : 'gray.50',
+                        bg: !item.external && isActive(item.path) ? 'forest.100' : 'gray.50',
                       }}
                     >
                       {item.label}
@@ -104,21 +123,11 @@ const Navigation: React.FC = () => {
                 </MenuList>
               </Menu>
             ))}
-
-            {/* GitHub Link */}
-            <Link
-              href="https://github.com/bingomanatee/wonderlandlabs-monorepo"
-              isExternal
-              color="gray.600"
-              _hover={{ color: 'gray.800' }}
-            >
-              GitHub
-            </Link>
           </HStack>
         </Flex>
       </Container>
     </Box>
-  )
-}
+  );
+};
 
-export default Navigation
+export default Navigation;

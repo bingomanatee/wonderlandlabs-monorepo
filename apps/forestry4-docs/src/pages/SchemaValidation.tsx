@@ -30,8 +30,8 @@ const SchemaValidation: React.FC = () => {
         </Box>
 
         {/* Key Benefits */}
-        <Card>
-          <CardBody>
+        <Section>
+          
             <VStack spacing={6} align="stretch">
               <Heading size="lg">Why Use Zod Schemas?</Heading>
               
@@ -69,12 +69,12 @@ const SchemaValidation: React.FC = () => {
                 </Box>
               </SimpleGrid>
             </VStack>
-          </CardBody>
-        </Card>
+          
+        </Section>
 
         {/* Basic Schema Setup */}
-        <Card>
-          <CardBody>
+        <Section>
+          
             <VStack spacing={6} align="stretch">
               <Heading size="lg">Basic Schema Setup</Heading>
               <Text color="gray.600">
@@ -84,12 +84,12 @@ const SchemaValidation: React.FC = () => {
               
               <SnippetBlock snippetName="zodSchemaValidation" folder="ActionsState" />
             </VStack>
-          </CardBody>
-        </Card>
+          
+        </Section>
 
         {/* Schema Patterns */}
-        <Card>
-          <CardBody>
+        <Section>
+          
             <VStack spacing={6} align="stretch">
               <Heading size="lg">Common Schema Patterns</Heading>
               
@@ -122,12 +122,12 @@ const SchemaValidation: React.FC = () => {
                 ]}
               />
             </VStack>
-          </CardBody>
-        </Card>
+          
+        </Section>
 
         {/* Integration with Prep Functions */}
-        <Card>
-          <CardBody>
+        <Section>
+          
             <VStack spacing={6} align="stretch">
               <Heading size="lg">Integration with Prep Functions</Heading>
               <Text color="gray.600">
@@ -148,12 +148,12 @@ const SchemaValidation: React.FC = () => {
               
               <SnippetBlock snippetName="schemaPrepIntegration" folder="SchemaValidation" />
             </VStack>
-          </CardBody>
-        </Card>
+          
+        </Section>
 
         {/* Best Practices */}
-        <Card>
-          <CardBody>
+        <Section>
+          
             <VStack spacing={6} align="stretch">
               <Heading size="lg">Schema Best Practices</Heading>
               
@@ -207,8 +207,8 @@ const SchemaValidation: React.FC = () => {
                 </Box>
               </SimpleGrid>
             </VStack>
-          </CardBody>
-        </Card>
+          
+        </Section>
       </VStack>
     </Box>
   )

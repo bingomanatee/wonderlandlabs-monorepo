@@ -1,0 +1,10 @@
+const StateSchema = z.object({
+  count: z.number().int(),
+  multiplier: z.number().min(1)
+});
+
+new Forest({
+  value: { count: 0, multiplier: 1 },
+  schema: StateSchema,
+  // ... actions, prep, tests
+});

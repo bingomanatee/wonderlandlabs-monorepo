@@ -43,8 +43,8 @@ const AdvancedFormDemo: React.FC = () => {
   const [ageField, ageBranch] = useForestBranch(formForest, 'age', ageBranchConfig());
 
   return (
-    <Card>
-      <CardBody>
+    <Section>
+      
         <VStack spacing={6} align="stretch">
           <Heading size="lg">Advanced Form - Using Forest with Branches</Heading>
           <Text color="gray.600">
@@ -391,8 +391,8 @@ export default function formStateFactory() {
             />
           </Box>
         </VStack>
-      </CardBody>
-    </Card>
+      
+    </Section>
   );
 };
 

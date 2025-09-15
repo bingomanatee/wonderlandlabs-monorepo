@@ -1,11 +1,11 @@
 import React from 'react';
-import { Card, CardBody, VStack, Heading, Text, SimpleGrid, Box } from '@chakra-ui/react';
-import SnippetBlock from '../SnippetBlock';
+import {   VStack, Heading, Text, SimpleGrid, Box } from '@chakra-ui/react';
+import Section from '../Section';import SnippetBlock from '../SnippetBlock';
 
 const IntegrationPatternsCard: React.FC = () => {
   return (
-    <Card width="full">
-      <CardBody>
+    <Section>
+      
         <VStack layerStyle="section">
           <Heading size="lg">Integration Patterns</Heading>
           <Text textStyle="body">
@@ -19,8 +19,8 @@ const IntegrationPatternsCard: React.FC = () => {
             <SnippetBlock snippetName="forestryHooks" folder="ReactIntegration" />
           </Box>
         </VStack>
-      </CardBody>
-    </Card>
+      
+    </Section>
   );
 };
 

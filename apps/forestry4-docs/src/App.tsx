@@ -24,6 +24,12 @@ import AdvancedPatterns from './pages/AdvancedPatterns'
 import APIReference from './pages/APIReference'
 import Examples from './pages/Examples'
 
+// Practical Examples
+import TodoApp from './pages/examples/TodoApp'
+import ShoppingCart from './pages/examples/ShoppingCart'
+import FormValidation from './pages/examples/FormValidation'
+import TransactionDemo from './pages/examples/TransactionDemo'
+
 function App() {
   return (
     <Box minH="100vh" bg="gray.50">
@@ -45,6 +51,12 @@ function App() {
           <Route path="/transactions" element={<Transactions />} />
           <Route path="/rxjs" element={<RxJSIntegration />} />
           <Route path="/advanced" element={<AdvancedPatterns />} />
+
+          {/* Practical Examples */}
+          <Route path="/examples/todo-app" element={<TodoApp />} />
+          <Route path="/examples/shopping-cart" element={<ShoppingCart />} />
+          <Route path="/examples/form-validation" element={<FormValidation />} />
+          <Route path="/examples/transaction-demo" element={<TransactionDemo />} />
 
           {/* Reference */}
           <Route path="/api" element={<APIReference />} />

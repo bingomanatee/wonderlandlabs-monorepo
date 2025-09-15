@@ -218,7 +218,7 @@ export default function demoStoreFactory() {
             </TabPanel>
             
 
-            {/* Jest Tests Tab */}
+            {/* Vitest Tests Tab */}
             <TabPanel>
               <SnippetBlock
                 snippetName="demoStoreFactory-tests"

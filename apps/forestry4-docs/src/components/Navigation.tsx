@@ -3,6 +3,7 @@ import {
   Box,
   Flex,
   HStack,
+  Image,
   Link,
   Menu,
   MenuButton,
@@ -91,16 +92,13 @@ const Navigation: React.FC = () => {
       <Container maxW="container.xl">
         <Flex alignItems="center" justifyContent="space-between">
           {/* Logo */}
-          <Link as={RouterLink} to="/" _hover={{ textDecoration: 'none' }}>
-            <HStack spacing={2} mr={2}>
-              <Text fontSize="2xl" fontWeight="bold" color="forest.600">
-                🌲
-              </Text>
-              <Text fontSize="xl" fontWeight="bold" color="gray.800" whiteSpace="nowrap">
-                Forestry 4.0
-              </Text>
-            </HStack>
-          </Link>
+          <HStack as={Link} spacing={2} mr={2} to="/" mr={10}>
+            <Image w="32px" h="32px" src="/logo.png" />
+
+            <Text fontSize="xl" fontWeight="bold" color="gray.800" whiteSpace="nowrap">
+              Forestry 4.0
+            </Text>
+          </HStack>
 
           {/* Navigation Menu */}
           <HStack spacing={6}>

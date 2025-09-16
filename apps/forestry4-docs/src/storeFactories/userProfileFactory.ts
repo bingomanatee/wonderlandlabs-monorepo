@@ -1,10 +1,18 @@
 import { Forest } from '@wonderlandlabs/forestry4';
+import { z } from 'zod';
 
 export interface UserState {
   name: string;
   age: number;
   email: string;
 }
+import { z } from 'zod';
+
+const User = z.object({
+  name: z.string(),
+  age: z.number,
+  email: z.email(),
+});
 
 export default function userProfileFactory() {
   return new Forest<UserState>({
@@ -14,24 +22,21 @@ export default function userProfileFactory() {
       age: 30,
       email: 'john@example.com',
     },
+    schema: User,
     actions: {
       // Tactical form handler using event target name
-      onChange: function (
-        this: Forest<UserState>,
-        value: UserState,
-        event: React.ChangeEvent<HTMLInputElement>
-      ) {
+      onChange(value: UserState, event: React.ChangeEvent<HTMLInputElement>) {
         const { name, value: fieldValue, type } = event.target;
         const processedValue = type === 'number' ? parseInt(fieldValue) || 0 : fieldValue;
         this.set(name, processedValue);
       },
-      setName: function (this: Forest<UserState>, value: UserState, name: string) {
+      setName(value: UserState, name: string) {
         this.set('name', name);
       },
-      setAge: function (this: Forest<UserState>, value: UserState, age: number) {
+      setAge(value: UserState, age: number) {
         this.set('age', age);
       },
-      setEmail: function (this: Forest<UserState>, value: UserState, email: string) {
+      setEmail(value: UserState, email: string) {
         this.set('email', email);
       },
       updateProfile: function (
@@ -41,7 +46,7 @@ export default function userProfileFactory() {
       ) {
         this.next({ ...value, ...profile });
       },
-      reset: function (this: Forest<UserState>) {
+      reset: function () {
         this.next({
           name: 'John Doe',
           age: 30,

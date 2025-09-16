@@ -6,6 +6,7 @@ import {
   Divider,
   Heading,
   HStack,
+  Image,
   SimpleGrid,
   Text,
   VStack,
@@ -40,9 +41,13 @@ const Home: React.FC = () => {
           Why Forestry?
         </Button>
         <VStack spacing={2} textAlign="center" mb={6}>
-          <Heading size="2xl" color="gray.800">
-            🌲 Forestry 4.0
-          </Heading>
+          <HStack>
+            <Image w="64px" h="64px" src="/logo.png" />
+            <Heading size="2xl" color="gray.800">
+              Forestry 4.0
+            </Heading>
+          </HStack>
+
           <Text fontSize="xl" color="gray.600" maxW="2xl">
             A simple, powerful state management library for React. Start with the essentials, then
             unlock advanced features when you need them.

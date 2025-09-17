@@ -1,6 +1,6 @@
 {
   "name": "@wonderlandlabs/forestry4",
-  "version": "4.0.3",
+  "version": "4.1.0",
   "description": "State Management System in Javascript",
   "type": "module",
   "main": "dist/index.js",
@@ -18,7 +18,7 @@
   "files": [
     "dist/**/*"
   ],
-  "homepage": "https://github.com/bingomanatee/wonderlandlabs-monorepo/tree/main/packages/forestry",
+  "homepage": "https://forestry-4-docs.netlify.app/",
   "devDependencies": {
     "@eslint/js": "~9.10",
     "@types/eslint__js": "~8.42",

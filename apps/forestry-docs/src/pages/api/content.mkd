@@ -4,7 +4,7 @@
 There is a basic hierarchy of `Forest` ... `Tree` ... `Collection`.
 
 * `Forests` coordinate updates between multiple `Tree` instances. They maintain a single map of
-  trees, indexed by name.
+  trees, indexed by $name.
 * A `Tree` is a single atomic value manager.
 * `Collections` decorate Trees, adding change actions
 
@@ -19,7 +19,7 @@ Collections give you the ability to attach change functions to your tree.
 
 * `next(nextValue)` simply sets the next value to a concrete replacement.
 * `update((value, seed) => nextValue, seed)` updates the state with a function (and optional argument).
-* `mutate(({value, branch, seed}) => nextValue, seed)` is like update but gives you access to the Tree
+* `mutate(({value, $branch, seed}) => nextValue, seed)` is like update but gives you access to the Tree
   (and by extension the forest and other trees in it) if you need more insight into the overall application
 
 ## Getting information from `Collection` and `Tree` instances

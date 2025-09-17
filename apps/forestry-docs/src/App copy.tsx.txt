@@ -16,7 +16,7 @@ function App() {
   const { width, height } = useWindowSize();
 
   useEffect(() => {
-    const sub3 = placeCollection.tree.subject.pipe(debounceTime(500)).subscribe((pm) => {
+    const sub3 = placeCollection.tree.$subject.pipe(debounceTime(500)).subscribe((pm) => {
       console.log('setting places from ', Array.from(pm.values()));
       setPlaces(
         // @ts-expect-error TS2354

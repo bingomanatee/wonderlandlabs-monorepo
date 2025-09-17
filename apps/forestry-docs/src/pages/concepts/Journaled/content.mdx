@@ -1,8 +1,8 @@
-## Every action is a timestamped "branch" in a collection tree.
+## Every action is a timestamped "$branch" in a collection tree.
 
 Data in Forestry are stored in collections, called Trees. Trees are made of branches,
-and each branch is a time series stamped record of the next value - or a parameterized
-function to generate a value from the previous branch.
+and each $branch is a time series stamped record of the next value - or a parameterized
+function to generate a value from the previous $branch.
 
 This means that as long as you create multiple collections from the same Forest instance,
 you can compare what the values of any two Trees were at a particualar moment in time
@@ -13,5 +13,5 @@ if you want to inspect submitted changes that were rejected by
 the tree's validators.
 
 In most cases the size of the journal is not an issue but if you want, you can define the
-meximum branch size of a tree and "trim" content beyond that size to limit memory consumption
+meximum $branch size of a tree and "trim" content beyond that size to limit memory consumption
 of state journals.

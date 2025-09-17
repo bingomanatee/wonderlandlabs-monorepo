@@ -9,7 +9,7 @@ export function Base() {
   const goHome = useCallback(() => navigate('/'), [navigate]);
 
   return (
-    <Box layerStyle="root">
+    <Box layerStyle="$root">
       <Box layerStyle="logo" onClick={goHome}>
         <Image src="/img/logo_light.png" width={`${LOGO_SIZE}px`} height={`${LOGO_SIZE}px`} />
         <Text textStyle="logoText">Home</Text>

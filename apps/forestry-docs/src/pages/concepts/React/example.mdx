@@ -61,11 +61,11 @@ export class ConceptsState extends Collection<ConceptInfo> {
           }
 
           const currentIndex = this.value.concepts.findIndex(
-            (c) => c.name === this.value.target
+            (c) => c.$name === this.value.target
           );
           const next = this.value.concepts[currentIndex + 1] || this.value.concepts[0];
           if (!next) return;
-          this.update((value) => ({ ...value, target: next.name }));
+          this.update((value) => ({ ...value, target: next.$name }));
           this.delay(() => this.rotate(), SHORT_DELAY);
         },
       },
@@ -73,8 +73,8 @@ export class ConceptsState extends Collection<ConceptInfo> {
     );
   }
 
-  getConcept(name: string) {
-    return this.value.concepts.find((c) => c.name === name);
+  getConcept($name: string) {
+    return this.value.concepts.find((c) => c.$name === $name);
   }
 
   focus(target: string) {
@@ -115,18 +115,18 @@ export class ConceptsState extends Collection<ConceptInfo> {
   }
 
   goBack(current: string, navigate: (target: string) => void) {
-    const index = this.value.concepts.findIndex((c) => c.name === current);
+    const index = this.value.concepts.findIndex((c) => c.$name === current);
     const prev = this.value.concepts[index - 1];
     this.go(prev, navigate);
   }
   goNext(current: string, navigate: (target: string) => void) {
-    const index = this.value.concepts.findIndex((c) => c.name === current);
+    const index = this.value.concepts.findIndex((c) => c.$name === current);
     const prev = this.value.concepts[index + 1];
     this.go(prev, navigate);
   }
   private go(target: Concept | undefined, navigate: (target: string) => void) {
     if (target) {
-      navigate(ConceptsState.fullUrl(target.name));
+      navigate(ConceptsState.fullUrl(target.$name));
     } else {
       navigate('/');
     }
@@ -136,7 +136,7 @@ export class ConceptsState extends Collection<ConceptInfo> {
 export const conceptsState = new ConceptsState(f);
 
 conceptsState.addConcept({
-  name: 'transactional',
+  $name: 'transactional',
   title: 'Transactional',
   blurb: `Actions are either fully executed, 
   or revert to the previous state`,
@@ -144,7 +144,7 @@ conceptsState.addConcept({
 });
 
 conceptsState.addConcept({
-  name: 'journaled',
+  $name: 'journaled',
   title: 'Journaled',
   blurb: `Every change and action is logged and timestamped, 
   even across multiple state collections,
@@ -153,7 +153,7 @@ conceptsState.addConcept({
 });
 
 conceptsState.addConcept({
-  name: 'observable',
+  $name: 'observable',
   title: 'Observable',
   blurb: `Built on RxJS, Forestry allows for observation 
   of changes system wide as well as piping to all
@@ -162,22 +162,22 @@ conceptsState.addConcept({
 });
 
 conceptsState.addConcept({
-  name: 'synchronous',
+  $name: 'synchronous',
   title: 'Synchronous',
   blurb: `Changes occur in real time.`,
   art: '/pictures/synchronous.png',
 });
 
 conceptsState.addConcept({
-  name: 'transportable',
+  $name: 'transportable',
   title: 'Transportable',
   blurb: ` State value and actions are contained 
-  within single instances, for ease of test and global access.`,
+  within single instances, for ease of $test and global access.`,
   art: '/pictures/transportable.png',
 });
 
 conceptsState.addConcept({
-  name: 'typescript',
+  $name: 'typescript',
   title: 'Typescript Friendly',
   blurb: `Forestry classes and methods can be keyed to define 
   the type of value managed by the state.`,
@@ -185,7 +185,7 @@ conceptsState.addConcept({
 });
 
 conceptsState.addConcept({
-  name: 'react',
+  $name: 'react',
   title: 'React Friendly',
   blurb: `Designed for global or local state, 
   Forestry allows a single-system

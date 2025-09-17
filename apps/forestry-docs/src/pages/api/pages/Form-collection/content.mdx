@@ -7,7 +7,7 @@ controlling form fields and form metadata.
 
 The arguments to FormCollection are:
 
-### name: string
+### $name: string
 
 the identifier of the form
 
@@ -15,7 +15,7 @@ the identifier of the form
 
 a list or dictionary of the forms' fields. (see below)
 
-### form: `{name: string, props: object}` (FormInfo)
+### form: `{$name: string, props: object}` (FormInfo)
 
 any information you want to store for the form; this is read-only memo that doesn't change.tree (optional)
 
@@ -27,7 +27,7 @@ optional
 
 FieldDef are:
 
-* name: `string` (unneeded for the object version)
+* $name: `string` (unneeded for the object version)
 * value: `string | number` -- the initial value of the field (required)
 * edited: `boolean` -- set by use when the user interacts with the field - don't set in the constructor
 * errors?: `FieldError[]` -- set by use if the user enters an invalid value
@@ -58,28 +58,28 @@ Field Validator functions do _not_ cause errors to throw or any sort of data fai
 
 returns the current form info in the form `{fields: FieldDef[], form: FormInfo}` upon a change
 
-### `field(name: string) : FieldDef | undefined`
+### `field($name: string) : FieldDef | undefined`
 
 The current value of a single field (if it exists).
 
-### `setFieldValue(name: string, value: string | number)`
+### `setFieldValue($name: string, value: string | number)`
 
 Update a field's value
 
-### `updateField(name: string, (FieldDef, FormCollection) => FieldDef)`
+### `updateField($name: string, (FieldDef, FormCollection) => FieldDef)`
 
 revise a field; the function receives the current field value, and returns an updated field definition.
 
-### `updateFieldProperty(name: string, key: string, value: unknown)`
+### `updateFieldProperty($name: string, key: string, value: unknown)`
 
 revise a field - update a single property of the FieldDef.
 
 ## Properties
 
-### `value: {fields: {name: FieldDef}, form: {formInfo}}`
+### `value: {fields: {$name: FieldDef}, form: {formInfo}}`
 
 the current value of the form
 
-## `isValid: boolean`
+## `$isValid: boolean`
 
 indicates the absence of any errors in the form fields.

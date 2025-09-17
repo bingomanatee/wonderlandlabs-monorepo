@@ -1,4 +1,7 @@
-import { Forest, MapCollection } from '@wonderlandlabs/forestry';
+import {
+  Forest,
+  MapCollection,
+} from '@wonderlandlabs/forestry';
 import { TreeIF } from '@wonderlandlabs/forestry/build/src/types';
 import { upperFirst } from 'lodash-es';
 
@@ -15,7 +18,10 @@ export type PageDef = {
 
 const f = new Forest();
 
-class PageCollection extends MapCollection<string, PageDef> {
+class PageCollection extends MapCollection<
+  string,
+  PageDef
+> {
   constructor() {
     super(
       'pageManager',
@@ -23,9 +29,11 @@ class PageCollection extends MapCollection<string, PageDef> {
         initial: new Map(),
       },
       {},
-      f
+      f,
     );
-    this.currentUrl = f.addTree('currentUrl', { initial: '' });
+    this.currentUrl = f.addTree('currentUrl', {
+      initial: '',
+    });
   }
 
   currentUrl: TreeIF<string>;
@@ -33,8 +41,13 @@ class PageCollection extends MapCollection<string, PageDef> {
   pageKey(page: PageDef): string {
     if (page.parent) {
       const parent = this.value.get(page.parent);
-      if (!parent) throw new Error('cannot find parent ' + parent);
-      return this.pageKey(parent) + '/' + page.name;
+      if (!parent)
+        throw new Error(
+          'cannot find $parent ' + parent,
+        );
+      return (
+        this.pageKey(parent) + '/' + page.name
+      );
     }
     return page.name;
   }
@@ -45,11 +58,18 @@ class PageCollection extends MapCollection<string, PageDef> {
   }
 
   fileFor(page: PageDef) {
-    let parentNode = page.parent ? this.pageWithName(page.parent) : undefined;
-    const out = [upperFirst(page.name), upperFirst(page.name)];
+    let parentNode = page.parent
+      ? this.pageWithName(page.parent)
+      : undefined;
+    const out = [
+      upperFirst(page.name),
+      upperFirst(page.name),
+    ];
     while (page.parent && parentNode) {
       out.unshift(parentNode.name, 'pages');
-      parentNode = parentNode.parent ? this.pageWithName(parentNode.parent) : undefined;
+      parentNode = parentNode.parent
+        ? this.pageWithName(parentNode.parent)
+        : undefined;
     }
     return './pages/' + out.join('/');
   }
@@ -60,18 +80,29 @@ class PageCollection extends MapCollection<string, PageDef> {
       .join('/');
   }
 
-  pageHeritage(page?: PageDef | string): PageDef[] {
+  pageHeritage(
+    page?: PageDef | string,
+  ): PageDef[] {
     if (!page) return [];
-    if (typeof page === 'string') return this.pageHeritage(this.pageWithName(page));
+    if (typeof page === 'string')
+      return this.pageHeritage(
+        this.pageWithName(page),
+      );
     if (!page) return [];
     if (page.parent) {
-      return [...this.pageHeritage(page.parent), page];
+      return [
+        ...this.pageHeritage(page.parent),
+        page,
+      ];
     }
     return [page];
   }
 
   formatUrl(s: string, relative = false) {
-    return (relative ? '' : '/') + s.replace(/^\//, '').replace(/\/$/, '');
+    return (
+      (relative ? '' : '/') +
+      s.replace(/^\//, '').replace(/\/$/, '')
+    );
   }
 
   addPage(p: PageDef) {
@@ -81,27 +112,51 @@ class PageCollection extends MapCollection<string, PageDef> {
   }
 
   rootPages() {
-    return this.pages().filter((p: PageDef) => !p.parent);
+    return this.pages().filter(
+      (p: PageDef) => !p.parent,
+    );
   }
 
   pageWithName(name: string) {
-    return this.pages().find((p) => p.name === name);
+    return this.pages().find(
+      (p) => p.name === name,
+    );
   }
   pageWithUrl(url: string) {
-    const out = this.pages().find((p: PageDef) => this.pageUrl(p) === url);
+    const out = this.pages().find(
+      (p: PageDef) => this.pageUrl(p) === url,
+    );
     if (!out) {
-      console.log('cannot find page with url ' + url);
-      console.log(this.pages().map((p) => [p, this.pageUrl(p)]));
+      console.log(
+        'cannot find page with url ' + url,
+      );
+      console.log(
+        this.pages().map((p) => [
+          p,
+          this.pageUrl(p),
+        ]),
+      );
     }
     return out;
   }
 
-  pagesFor(url: string, relativeUrl: boolean = true) {
+  pagesFor(
+    url: string,
+    relativeUrl: boolean = true,
+  ) {
     const pages = [...this.value.values()];
-    const active = pages.filter((p) => p.url.slice(0, url.length) === url);
+    const active = pages.filter(
+      (p) => p.url.slice(0, url.length) === url,
+    );
     if (!relativeUrl) return active;
     return active.map((p) => {
-      return { ...p, url: this.formatUrl(p.url!.slice(url.length), true) };
+      return {
+        ...p,
+        url: this.formatUrl(
+          p.url!.slice(url.length),
+          true,
+        ),
+      };
     });
   }
 }
@@ -121,7 +176,8 @@ pageState.addPage({
   title: 'Forest',
   name: 'forest',
   parent: 'api',
-  blurb: 'the "Data Context" of a set of related trees',
+  blurb:
+    'the "Data Context" of a set of related trees',
 });
 
 pageState.addPage({

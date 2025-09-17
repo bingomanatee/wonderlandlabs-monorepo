@@ -52,7 +52,7 @@ of branches retained will be longer than your desired maxBranches; however ultim
 will be kept at or near to trimTo past items stored (branches)
 -- or rather a number between maxBranches and TimTo.
 
-### serializer: `({ branch: BranchIF<ValueType>; tree: TreeIF<ValueType>; value: Value;  }) => value: ValueType`
+### serializer: `({ $branch: BranchIF<ValueType>; tree: TreeIF<ValueType>; value: Value;  }) => value: ValueType`
 
 reduces the value (which in some cases may be a nested proxy) to a simple value, functionally identical
 to the proxy. This is necessary for MapCollection or any custom update function that produces a proxy.

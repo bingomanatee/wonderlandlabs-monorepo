@@ -27,13 +27,13 @@ import style from './eggStyle.module.css';
 import EggInfo from './EggInfo.tsx';
 
 function makeNumberState(
-  name: string,
+  $name: string,
   amount: number,
   forest: ForestIF,
 ) {
-  return forest.hasTree(name)
-    ? forest.tree<number>(name)!
-    : forest.addTree<number>(name, {
+  return forest.hasTree($name)
+    ? forest.tree<number>($name)!
+    : forest.addTree<number>($name, {
         initial: amount,
       });
 }

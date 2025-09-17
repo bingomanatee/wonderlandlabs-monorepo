@@ -23,12 +23,12 @@ function MyComponent() {
       <div>
         <div>
           <label>Username</label>
-          <input name="username" value={value.username}
+          <input $name="username" value={value.username}
           onChange={(e) => state.next({...state.value, username: e.target.value}))} />
         </div>
         <div>
           <label>Password</label>
-          <input name="password" type="password" value={value.password}
+          <input $name="password" type="password" value={value.password}
           onChange={(e) => state.next({...state.value, password: e.target.value}))} />
         </div>
 
@@ -83,12 +83,12 @@ import {state, inputToUsername, type StateValue} from '/lib/state';
         <div>
           <div>
             <label>Username</label>
-            <input name="username" value={value.username}
+            <input $name="username" value={value.username}
             onChange={inputToUsername} />
           </div>
           <div>
             <label>Password</label>
-            <input name="password" type="password" value={value.password}
+            <input $name="password" type="password" value={value.password}
             onChange={inputToPassword} />
           </div>
 

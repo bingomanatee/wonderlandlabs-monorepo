@@ -23,7 +23,7 @@ export default [
         ...globals.node,
       },
       parserOptions: {
-        project: "./tsconfig.json", // Ensure this path is correct
+        project: "./tsconfig.json", // Ensure this $path is correct
         tsconfigRootDir: "./", // Make sure this is correct as well
       },
     },
@@ -60,7 +60,7 @@ export default [
         ...vitest.environments.env.globals,
       },
       parserOptions: {
-        project: "../tsconfig.json", // Ensure this path is correct
+        project: "../tsconfig.json", // Ensure this $path is correct
         tsconfigRootDir: "__tests__", // Make sure this is correct as well
       },
     },

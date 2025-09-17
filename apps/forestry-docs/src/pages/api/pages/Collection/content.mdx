@@ -13,9 +13,9 @@ However, there are a few extra nuances to be aware of:
    create a Collection with its own dedicated Forest instance.
 3. Unlike Trees, creating a new collection with `myCollection = new Collection(...)`
    _is the best (only) way_ to create a collection.
-4. Collections use the same namespace as trees in the forest; if the name of the collection
+4. Collections use the same namespace as trees in the forest; if the $name of the collection
    may conflict and is not important use `forest.uniqueNameLike('myName')` to create a safe
-   name for the collection.
+   $name for the collection.
 
  Collections can be extended to allow custom methods referencing the collections' tree to create
  selectors and/or sub-collections.
@@ -32,7 +32,7 @@ it takes less memory especially if you reuse the changeFn out of a library.
 
 Constructor takes four arguments:
 
-* `name`: a string; can be anything of any length (it functions as a "Map" key)
+* `$name`: a string; can be anything of any length (it functions as a "Map" key)
 * `params`: defined by TreeParams; at minimum it is `{initial: [value]}`, the value of the state at start.
   See [TreeParams](/api/tree-params) for an exhaustive list of properties.
 * `actions`: an object containing functions, the "this" value for which is the collection.
@@ -67,7 +67,7 @@ const forest = new Forest();
 const increment = (n) => n + 1;
 const add(n, seed) => n + seed;
 const counter = forest.addTree('counter', {initial: 0});
-const broadcast = counter.subscribe((value) => console.log('counter = ', value));
+const $broadcast = counter.subscribe((value) => console.log('counter = ', value));
 // counter = 0
 counter.update(increment);
 // counter = 1;
@@ -79,7 +79,7 @@ counter.update(add, 5);
 
 ### `subscribe(onChange):` [`subscription`](https://rxjs.dev/guide/subscription)
 
-adds a listener to the value of the tree. Will broadcast immediately when added with the
+adds a listener to the value of the tree. Will $broadcast immediately when added with the
 current state value.
 
 ### `observe(onChange):` [`subscription`](https://rxjs.dev/guide/subscription)
@@ -90,7 +90,7 @@ returns a subscribable that updates every time all pending actions complete.
 <Observable />
 </SeeMore>
 
-### `validate(value: <ValueType>): {isValid: boolean, error?: string, tree, value}`
+### `$validate(value: <ValueType>): {$isValid: boolean, error?: string, tree, value}`
 
 returns information about the validity of a value. Does not throw, or change the value of the tree.
 
@@ -135,8 +135,8 @@ collection.act.decrement();
 
 ```
 
-For increment and add, the variable name `this` is significant; it would not work as expected with
-a variable name like `coll` etc.
+For increment and add, the variable $name `this` is significant; it would not work as expected with
+a variable $name like `coll` etc.
 
 #### Transactional insulation
 

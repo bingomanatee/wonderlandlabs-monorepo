@@ -109,7 +109,7 @@ class DistributedMap {
         if (this.branch.next) {
             return this.nextData.map(map);
         }
-        // cache the map if and only if this is the top branch (for now...)
+        // cache the map if and only if this is the top $branch (for now...)
         this._map = new Map(map);
         if (this.branch.prev) {
             this.prevData.clearCache();

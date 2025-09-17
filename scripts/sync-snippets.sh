@@ -176,7 +176,7 @@ extract_function() {
 sync_snippet() {
     local config="$1"
     
-    local name=$(echo "$config" | jq -r '.name')
+    local $name=$(echo "$config" | jq -r '.$name')
     local description=$(echo "$config" | jq -r '.description')
     local source=$(echo "$config" | jq -r '.source')
     local target=$(echo "$config" | jq -r '.target')

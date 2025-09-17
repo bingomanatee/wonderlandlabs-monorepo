@@ -54,7 +54,7 @@ export function Tree() {
     // Generate and build complete tree using TreeController
     const rootId = dataStore.acts.generateTree(canvas.width, canvas.height);
 
-    // Create root pin to anchor the tree
+    // Create $root pin to anchor the tree
     scene.createRootPin(rootId);
 
     // Return cleanup function

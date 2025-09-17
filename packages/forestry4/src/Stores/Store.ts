@@ -1,5 +1,4 @@
 import {
-  ActionExposedRecord,
   Listener,
   Path,
   PendingValue,
@@ -15,33 +14,28 @@ import { isEqual } from 'lodash-es';
 import asError from '../lib/asError';
 import { isZodParser, ZodParser } from '../typeguards';
 import { enableMapSet, produce } from 'immer';
-import { methodize, testize } from './helpers';
+import { testize } from './helpers';
 import { getPath, setPath } from '../lib/path';
 import { pathString } from '../lib/combinePaths';
 
 // Enable Immer support for Map and Set
 enableMapSet();
 
-export class Store<
-  DataType,
-  Actions extends ActionExposedRecord = ActionExposedRecord,
-> implements StoreIF<DataType, Actions>
+export class Store<DataType> implements StoreIF<DataType>
 {
-  constructor(p: StoreParams<DataType, Actions>, noSubject = false) {
+  constructor(p: StoreParams<DataType>, noSubject = false) {
     // Apply prep function to initial value if it exists
     if (!noSubject) {
       this.#subject = new BehaviorSubject(p.value);
     }
 
-    if ('schema' in p && p.schema) {
-      this.schema = p.schema;
+    if (p.schema) {
+      this.$schema = p.schema;
     }
 
     this.debug = !!p.debug;
 
-    const self = this;
-    this.$ = methodize<DataType, Actions>(p.actions ?? {}, self);
-    this.#tests = p.tests ? testize<DataType>(p.tests, self) : undefined;
+    this.#tests = p.tests ? testize<DataType>(p.tests, this) : undefined;
     if (p.prep) {
       this.#prep = p.prep.bind(this);
       if (this.#subject) {
@@ -53,25 +47,21 @@ export class Store<
       this.#name = p.name;
     }
     if (p.res && p.res instanceof Map) {
-      p.res.forEach((value, key) => this.res.set(key, value));
+      p.res.forEach((value, key) => this.$res.set(key, value));
     }
   }
 
   /**
-   * note - for consistency with the types subject is a generic subject;
+   * note - for consistency with the types $subject is a generic $subject;
    * however internally it is a BehaviorSubject.
    * @private
    */
   #subject?: BehaviorSubject<DataType>;
-  get subject(): Observable<DataType> {
+  get $subject(): Observable<DataType> {
     return this.#subject!;
   }
 
-  $: Actions;
 
-  get acts(): Actions {
-    return this.$;
-  }
 
   public debug: boolean; // more alerts on validation failures;
   #prep?: (input: Partial<DataType>, current: DataType) => DataType;
@@ -83,10 +73,10 @@ export class Store<
     return value as DataType;
   }
 
-  public res: Map<string, any> = new Map();
+  public $res: Map<string, any> = new Map();
 
   #name?: string;
-  get name(): string {
+  get $name(): string {
     if (!this.#name) {
       this.#name = 'forestry-store:' + `${Math.random()}`.split('.').pop();
     }
@@ -101,7 +91,7 @@ export class Store<
     const finalValue = this.value;
     this.isActive = false;
 
-    // Complete the RxJS subject
+    // Complete the RxJS $subject
     if (this.#subject) {
       this.#subject.complete();
     }
@@ -115,12 +105,12 @@ export class Store<
     if (!this.isActive) {
       throw new Error('Cannot update completed store');
     }
-    if (!this.subject) {
-      throw new Error('Store requires subject -- or override of next()');
+    if (!this.#subject) {
+      throw new Error('Store requires $subject -- or override of next()');
     }
 
     const preparedValue = this.prep(value);
-    const { isValid, error } = this.validate(preparedValue);
+    const { isValid, error } = this.$validate(preparedValue);
     if (isValid) {
       if (this.#hasTrans()) {
         this.queuePendingValue(preparedValue);
@@ -130,7 +120,7 @@ export class Store<
       return;
     }
     if (this.debug) {
-      this.broadcast({ action: 'next-error', error, value: preparedValue });
+      this.$broadcast({ action: 'next-error', error, value: preparedValue });
     }
     throw asError(error);
   }
@@ -147,9 +137,9 @@ export class Store<
     return this.#transStack.value.some((p) => p.suspendValidation);
   }
 
-  transact(params: TransParams | TransFn, suspend?: boolean) {
+  $transact(params: TransParams | TransFn, suspend?: boolean) {
     if (typeof params === 'function') {
-      this.transact({
+      this.$transact({
         action: params,
         suspendValidation: !!suspend,
       });
@@ -208,7 +198,7 @@ export class Store<
       const last = this.#transStack.value.pop();
       this.#transStack.next([]);
       if (last) {
-        this.broadcast({
+        this.$broadcast({
           action: 'checkTransComplete',
           phase: 'next',
           value: last.value,
@@ -281,58 +271,58 @@ export class Store<
     }
   }
 
-  get root() {
+  get $root() {
     return this;
   }
 
-  get isRoot() {
+  get $isRoot() {
     return true;
   }
 
-  parent: undefined;
+  $parent: undefined;
 
-  public broadcast(message: unknown, fromRoot?: boolean) {
-    if (fromRoot || !this.parent) {
+  public $broadcast(message: unknown, fromRoot?: boolean) {
+    if (fromRoot || !this.$parent) {
       this.receiver.next(message);
     }
-    if (this.root && this.root !== this) {
-      this.root.broadcast(message);
+    if (this.$root && this.$root !== this) {
+      this.$root.$broadcast(message);
     }
   }
 
   public receiver = new Subject();
 
-  // validate determines if a value can be sent to next
+  // $validate determines if a value can be sent to next
   // _in the current context_
   // -- i.e., depending on on transactional conditions
-  validate(value: DataType) {
+  $validate(value: DataType) {
     if (this.suspendValidation) {
       return { isValid: true };
     }
-    if (isZodParser(this.schema)) {
+    if (isZodParser(this.$schema)) {
       try {
-        this.schema.parse(value); // throws an error if the value is not valid
+        this.$schema.parse(value); // throws an error if the value is not valid
       } catch (err) {
         return {
           isValid: false,
           error: asError(err),
-          source: 'schema',
+          source: '$schema',
         };
       }
     }
 
-    return this.test(value);
+    return this.$test(value);
   }
 
-  isValid(value: DataType): boolean {
-    return this.validate(value).isValid;
+  $isValid(value: DataType): boolean {
+    return this.$validate(value).isValid;
   }
 
-  schema?: ZodParser;
+  $schema?: ZodParser;
 
   #tests?: ValueTestFn<DataType> | ValueTestFn<DataType>[];
 
-  test(value: DataType) {
+  $test(value: DataType) {
     let lastFn;
     if (this.#tests) {
       try {
@@ -365,13 +355,13 @@ export class Store<
       return tsv[tsv.length - 1].value;
     }
     if (!this.#subject) {
-      throw new Error('Store requires subject or overload of value');
+      throw new Error('Store requires $subject or overload of value');
     }
     return this.#subject.value as DataType;
   }
 
   subscribe(listener: Listener<DataType>): Subscription {
-    return this.subject!.pipe(distinctUntilChanged(isEqual)).subscribe(
+    return this.$subject!.pipe(distinctUntilChanged(isEqual)).subscribe(
       listener,
     );
   }
@@ -398,12 +388,12 @@ export class Store<
       this.next(newValue);
       return this.value;
     } else {
-      // Mutate a specific path within the state
+      // Mutate a specific $path within the state
       const pathArray = Array.isArray(path)
         ? path
         : pathString(path).split('.');
       const newValue = produce(this.value, (draft) => {
-        // Get the target object at the specified path
+        // Get the target object at the specified $path
         const target = getPath(draft, pathArray);
         if (target !== undefined) {
           // Apply the producer function to the target

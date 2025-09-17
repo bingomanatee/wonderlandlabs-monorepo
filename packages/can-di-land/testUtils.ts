@@ -1,18 +1,18 @@
-import { GenFunction, Key, ResourceType, Value } from "./src/types";
-import { ResDef, ResDefMutator } from "./src/types";
-import { CanDI } from "./src";
-import { c } from "@wonderlandlabs/collect";
+import { GenFunction, Key, ResourceType, Value } from './src/types';
+import { ResDef, ResDefMutator } from './src/types';
+import { CanDI } from './src';
+import { c } from '@wonderlandlabs/collect';
 
 /**
- * this is a general utility to prepare a CanDI instance with a constructor and a test body. It injects a new CanDI
- * into the test method passed.
- * returns a function that is a decorated version of the input test case,
+ * this is a general utility to prepare a CanDI instance with a constructor and a $test body. It injects a new CanDI
+ * into the $test method passed.
+ * returns a function that is a decorated version of the input $test case,
  * passing a new CanDI instance to it with the constructor passed through.
  */
 export function subject(
   initParams: ResDef[],
   test: (can: CanDI) => Promise<any> | void,
-  alert?: string,
+  alert?: string
 ): () => any {
   const can = new CanDI(initParams);
   return () => {
@@ -29,10 +29,7 @@ export function subject(
  * Constructor tests --- value
  */
 
-export function async_value_is_eventually_present(
-  key: Key,
-  pending: Promise<any>,
-) {
+export function async_value_is_eventually_present(key: Key, pending: Promise<any>) {
   return async (can: CanDI) => {
     expect(can.has(key)).toBeFalsy();
     await pending;
@@ -74,9 +71,9 @@ export function delay(value: any, time: number) {
 
 export function cannot_redefine_async(key: Key, promise: Promise<any>) {
   return async (can: CanDI) => {
-    console.log("cannot_redefine_async: can entries are...");
+    console.log('cannot_redefine_async: can entries are...');
     can.entries.forEach((entry, key) => {
-      console.log(key, ":", entry);
+      console.log(key, ':', entry);
     });
     // cannot redefine value BEFORE it resolves...
     expect(() => can.set(key, 100)).toThrow();

@@ -21,7 +21,7 @@ describe('extendField', () => {
     expect(ex.label).toBeUndefined();
   });
 
-  it('should reflect inherited properties of the static props of the parent', () => {
+  it('should reflect inherited properties of the static props of the $parent', () => {
     const testField = {
       name: 'comme',
       value: 'foo',

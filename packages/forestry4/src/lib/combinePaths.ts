@@ -10,8 +10,8 @@ function toPathArray(p) {
   if (p instanceof RegExp) {
     return [p];
   }
-  console.log('unparsable path: ', p);
-  throw new Error('cannot parse path');
+  console.log('unparsable $path: ', p);
+  throw new Error('cannot parse $path');
 }
 
 export function pathString(path: Path): string {

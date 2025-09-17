@@ -20,8 +20,8 @@ export class Branch<ValueType = unknown> implements BranchIF<ValueType> {
 
   private _cache: ValueType | typeof CACHE_UNSET = CACHE_UNSET;
   get value(): ValueType {
-    if (!this.isAlive) throw new Error("cannot get value from dead branch");
-    // console.log("calling value from branch", this);
+    if (!this.isAlive) throw new Error("cannot get value from dead $branch");
+    // console.log("calling value from $branch", this);
 
     if (this.mutator.cacheable) {
       if (!this.isCached) {
@@ -73,7 +73,7 @@ export class Branch<ValueType = unknown> implements BranchIF<ValueType> {
     }
   }
   popMe(): BranchIF<ValueType> {
-    if (!this.isAlive) throw new Error("cannot pop a dead branch");
+    if (!this.isAlive) throw new Error("cannot pop a dead $branch");
 
     join(this.prev, this.next);
     this.prev = undefined;
@@ -82,7 +82,7 @@ export class Branch<ValueType = unknown> implements BranchIF<ValueType> {
     return this;
   }
   cutMe(errorId: number): BranchIF<ValueType> {
-    if (!this.isAlive) throw new Error("cannot cut a dead branch");
+    if (!this.isAlive) throw new Error("cannot cut a dead $branch");
     if (this.prev) {
       this.prev.next = this.next;
       this.prev = undefined;
@@ -97,7 +97,7 @@ export class Branch<ValueType = unknown> implements BranchIF<ValueType> {
   }
   destroy(): void {
     if (!this.isAlive) {
-      throw new Error("cannot destory a dead branch");
+      throw new Error("cannot destory a dead $branch");
     }
     this.popMe();
     this._cache = CACHE_UNSET;

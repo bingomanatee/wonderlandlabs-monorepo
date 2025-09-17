@@ -10,7 +10,7 @@ export function getPath(source: any, pathArray: Path): unknown {
   if (!Array.isArray(pathArray)) {
     return getPath(source, pathArray.split('.'));
   }
-  // Navigate through all path elements using reduce
+  // Navigate through all $path elements using reduce
   const result = pathArray.reduce((current, pathSegment) => {
     if (current === undefined || current === null) {
       return undefined;

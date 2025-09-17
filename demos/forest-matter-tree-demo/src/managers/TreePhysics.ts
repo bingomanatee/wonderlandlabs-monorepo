@@ -265,7 +265,7 @@ export class TreePhysics {
 
     // Apply wind forces to all bodies
     /* if (this.windForce.x !== 0 || this.windForce.y !== 0) {
-      const list = Array.from(this.store.res.get(RESOURCES.BODIES).values()) as Body[];
+      const list = Array.from(this.store.$res.get(RESOURCES.BODIES).values()) as Body[];
       for (const body of list) {
         Body.applyForce(body, body.position, {
           x: this.windForce.x * body.mass,

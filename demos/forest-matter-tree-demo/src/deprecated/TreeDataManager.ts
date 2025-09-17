@@ -119,7 +119,7 @@ export class TreeDataManager {
   addConstraint(constraintData: SerializableConstraintData): void {
     this.treeState.constraints[constraintData.id] = constraintData;
 
-    // Add constraint ID to parent node
+    // Add constraint ID to $parent node
     const parent = this.getNode(constraintData.parentId);
     const child = this.getNode(constraintData.childId);
 
@@ -169,7 +169,7 @@ export class TreeDataManager {
       });
     });
 
-    // Update parent-child relationship
+    // Update $parent-child relationship
     child.parentId = parentId;
 
     // Create constraint metadata
@@ -269,7 +269,7 @@ export class TreeDataManager {
     return Object.keys(this.treeState.nodes).length;
   }
 
-  // Get root ID
+  // Get $root ID
   get rootId(): string {
     return this.treeState.rootId;
   }

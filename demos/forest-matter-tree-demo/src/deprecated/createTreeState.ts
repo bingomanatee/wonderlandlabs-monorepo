@@ -11,7 +11,7 @@ export function makeTree(canvas: HTMLCanvasElement) {
   // Generate and build complete tree using TreeController
   const rootId = treeController.generateTree(canvas.width, canvas.height);
 
-  // Create root pin to anchor the tree
+  // Create $root pin to anchor the tree
   scene.createRootPin(rootId);
 
   console.log(`✅ Tree created with root: ${rootId}`);
@@ -74,11 +74,11 @@ export function createTreeState() {
         console.log('Canvas style:', render.canvas.style.cssText);
 
         // Store Matter.js objects in resources
-        state.res.set('engine', engine);
-        state.res.set('render', render);
-        state.res.set('world', engine.world);
-        state.res.set('container', container);
-        state.res.set('config', defaultTreeConfig);
+        state.$res.set('engine', engine);
+        state.$res.set('render', render);
+        state.$res.set('world', engine.world);
+        state.$res.set('container', container);
+        state.$res.set('config', defaultTreeConfig);
 
         // Update canvas dimensions in state
         state.mutate((draft) => {
@@ -86,7 +86,7 @@ export function createTreeState() {
           draft.canvasHeight = containerHeight;
         });
 
-        // Add a large test body to verify rendering works
+        // Add a large $test body to verify rendering works
         const testBody = Bodies.rectangle(containerWidth / 2, containerHeight / 2, 100, 100, {
           render: {
             fillStyle: '#ff0000',
@@ -117,7 +117,7 @@ export function createTreeState() {
       // Initialize the tree structure
       initializeTree(value: TreeState) {
         const state = this as unknown as Forest<TreeState, TreeActions>;
-        const container = state.res.get('container') as HTMLDivElement;
+        const container = state.$res.get('container') as HTMLDivElement;
 
         if (!container) {
           console.error('Container not found in resources');
@@ -141,15 +141,15 @@ export function createTreeState() {
       // Generate tree recursively
       generateTree(value: TreeState, rootX: number, rootY: number, depth: number) {
         const state = this as unknown as Forest<TreeState, TreeActions>;
-        const config = state.res.get('config') as TreeConfig;
+        const config = state.$res.get('config') as TreeConfig;
 
         if (depth >= config.maxDepth) {
           return;
         }
 
-        // Create root node if this is the first call
+        // Create $root node if this is the first call
         if (depth === 0) {
-          const rootId = state.acts.addNode('', 'branch', { x: rootX, y: rootY });
+          const rootId = state.acts.addNode('', '$branch', { x: rootX, y: rootY });
           state.mutate((draft) => {
             draft.rootId = rootId;
           });
@@ -158,11 +158,11 @@ export function createTreeState() {
         // Get current nodes at this depth (use state.value to get the latest state)
         const currentNodes = Array.from(state.value.nodes.values()).filter((node) => {
           if (depth === 0) {
-            // For depth 0, we want the root node
+            // For depth 0, we want the $root node
             return node.id === 'root';
           } else {
             // For other depths, count the dashes to determine depth
-            // depth 1: "root-0", depth 2: "root-0-1", etc.
+            // depth 1: "$root-0", depth 2: "$root-0-1", etc.
             return node.id.split('-').length === depth + 1;
           }
         });
@@ -201,12 +201,12 @@ export function createTreeState() {
 
           // Determine node type
           const isLeaf = depth === config.maxDepth - 1 || Math.random() < config.leafProbability;
-          const nodeType = isLeaf ? 'leaf' : 'branch';
+          const nodeType = isLeaf ? 'leaf' : '$branch';
 
           // Add child node
           const childId = state.acts.addNode(node.id, nodeType, { x: childX, y: childY });
 
-          // Add constraint between parent and child
+          // Add constraint between $parent and child
           const springSettings: SpringSettings = {
             length: length,
             stiffness: config.springStiffness,
@@ -228,8 +228,8 @@ export function createTreeState() {
         }
       ): string {
         const state = this as unknown as Forest<TreeState, TreeActions>;
-        const config = state.res.get('config') as TreeConfig;
-        const engine = state.res.get('engine') as MatterEngine;
+        const config = state.$res.get('config') as TreeConfig;
+        const engine = state.$res.get('engine') as MatterEngine;
 
         console.log(`=== addNode called ===`);
         console.log(`parentId: ${parentId}, nodeType: ${nodeType}, position:`, position);
@@ -260,7 +260,7 @@ export function createTreeState() {
         World.add(engine.world, body);
 
         // Create DOM element for visualization
-        const container = state.res.get('container') as HTMLDivElement;
+        const container = state.$res.get('container') as HTMLDivElement;
         console.log(`Container for DOM element:`, container);
         if (container) {
           console.log(
@@ -289,7 +289,7 @@ export function createTreeState() {
           );
 
           // Store DOM element reference
-          state.res.set(`dom-${nodeId}`, domElement);
+          state.$res.set(`dom-${nodeId}`, domElement);
 
           console.log(
             `✅ Successfully created DOM element for ${nodeId} at (${position.x}, ${position.y})`
@@ -313,7 +313,7 @@ export function createTreeState() {
         };
 
         // Store body reference
-        state.res.set(`body-${nodeId}`, body);
+        state.$res.set(`body-${nodeId}`, body);
 
         // Add node to state
         state.mutate((draft) => {
@@ -332,13 +332,13 @@ export function createTreeState() {
         isLeaf = false
       ): string {
         const state = this as unknown as Forest<TreeState, TreeActions>;
-        const engine = state.res.get('engine') as MatterEngine;
+        const engine = state.$res.get('engine') as MatterEngine;
 
         const constraintId = `${parentId}-${childId}`;
 
         // Get Matter.js bodies
-        const parentBody = state.res.get(`body-${parentId}`) as Body;
-        const childBody = state.res.get(`body-${childId}`) as Body;
+        const parentBody = state.$res.get(`body-${parentId}`) as Body;
+        const childBody = state.$res.get(`body-${childId}`) as Body;
 
         if (!parentBody || !childBody) {
           console.error('Bodies not found for constraint', parentId, childId);
@@ -362,7 +362,7 @@ export function createTreeState() {
         World.add(engine.world, constraint);
 
         // Create DOM line element for visualization
-        const container = state.res.get('container') as HTMLDivElement;
+        const container = state.$res.get('container') as HTMLDivElement;
         if (container && parentBody && childBody) {
           const line = document.createElement('div');
           const dx = childBody.position.x - parentBody.position.x;
@@ -384,7 +384,7 @@ export function createTreeState() {
           container.appendChild(line);
 
           // Store DOM line reference
-          state.res.set(`dom-constraint-${constraintId}`, line);
+          state.$res.set(`dom-constraint-${constraintId}`, line);
 
           console.log(`Created DOM line for constraint ${constraintId}`);
         }
@@ -401,7 +401,7 @@ export function createTreeState() {
         };
 
         // Store constraint reference
-        state.res.set(`constraint-${constraintId}`, constraint);
+        state.$res.set(`constraint-${constraintId}`, constraint);
 
         // Add constraint to state and update node references
         state.mutate((draft) => {
@@ -422,7 +422,7 @@ export function createTreeState() {
       // Update physics simulation
       updatePhysics(value: TreeState) {
         const state = this as unknown as Forest<TreeState, TreeActions>;
-        const engine = state.res.get('engine') as MatterEngine;
+        const engine = state.$res.get('engine') as MatterEngine;
 
         if (!engine) {
           return;
@@ -432,7 +432,7 @@ export function createTreeState() {
         const windForce = state.value.windForce;
         if (windForce.x !== 0 || windForce.y !== 0) {
           state.value.nodes.forEach((node, nodeId) => {
-            const body = state.res.get(`body-${nodeId}`) as Body;
+            const body = state.$res.get(`body-${nodeId}`) as Body;
             if (body) {
               Body.applyForce(body, body.position, {
                 x: windForce.x * 0.001,
@@ -448,7 +448,7 @@ export function createTreeState() {
         // Sync positions back to state
         state.mutate((draft) => {
           draft.nodes.forEach((node, nodeId) => {
-            const body = state.res.get(`body-${nodeId}`) as Body;
+            const body = state.$res.get(`body-${nodeId}`) as Body;
             if (body) {
               const updatedNode = draft.nodes.get(nodeId);
               if (updatedNode) {
@@ -473,8 +473,8 @@ export function createTreeState() {
         // Matter.js renderer runs automatically, no need to manually render each frame
         // This method is kept for compatibility but doesn't need to do anything
         const state = this as unknown as Forest<TreeState, TreeActions>;
-        const engine = state.res.get('engine') as MatterEngine;
-        const render = state.res.get('render') as MatterRender;
+        const engine = state.$res.get('engine') as MatterEngine;
+        const render = state.$res.get('render') as MatterRender;
 
         if (engine && render) {
           console.log('Render method called, bodies in world:', engine.world.bodies.length);
@@ -485,15 +485,15 @@ export function createTreeState() {
       // Cleanup resources
       cleanup(value: TreeState) {
         const state = this as unknown as Forest<TreeState, TreeActions>;
-        const render = state.res.get('render') as MatterRender;
-        const engine = state.res.get('engine') as MatterEngine;
-        const container = state.res.get('container') as HTMLDivElement;
+        const render = state.$res.get('render') as MatterRender;
+        const engine = state.$res.get('engine') as MatterEngine;
+        const container = state.$res.get('container') as HTMLDivElement;
 
         // Clean up DOM elements
         if (container) {
           // Remove all DOM node elements
           value.nodes.forEach((node, nodeId) => {
-            const domElement = state.res.get(`dom-${nodeId}`) as HTMLElement;
+            const domElement = state.$res.get(`dom-${nodeId}`) as HTMLElement;
             if (domElement && domElement.parentNode) {
               domElement.parentNode.removeChild(domElement);
             }
@@ -501,7 +501,7 @@ export function createTreeState() {
 
           // Remove all DOM constraint elements
           value.constraints.forEach((constraint, constraintId) => {
-            const domLine = state.res.get(`dom-constraint-${constraintId}`) as HTMLElement;
+            const domLine = state.$res.get(`dom-constraint-${constraintId}`) as HTMLElement;
             if (domLine && domLine.parentNode) {
               domLine.parentNode.removeChild(domLine);
             }
@@ -517,7 +517,7 @@ export function createTreeState() {
         }
 
         // Clear all resources
-        state.res.clear();
+        state.$res.clear();
       },
     },
   });

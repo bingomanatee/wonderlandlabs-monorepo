@@ -81,7 +81,7 @@ export class Tree implements TreeIF<ValueType = unknown> {
   }
 
   mutate(name: MutatorName, ...input: unknown[]) {
-    // mutation validators validate input - so they execute before a new branch is created.
+    // mutation validators $validate input - so they execute before a new $branch is created.
     this.mutValidators.forEach((val: MutationValidatorIF) => {
       try {
         if (val.onlyFor) {

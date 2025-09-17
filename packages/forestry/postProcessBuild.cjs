@@ -21,7 +21,7 @@ function processFiles(directory) {
       content = content.replace(
         /((?:import|export).*?['"])(\.{1,2}\/.*?)(['"])/g,
         (match, prefix, importPath, suffix) => {
-          // Only add .js if the path has no extension
+          // Only add .js if the $path has no extension
           if (!extRegex.test(importPath)) {
             const newPath = `${importPath}.js`;
             return `${prefix}${newPath}${suffix}`;

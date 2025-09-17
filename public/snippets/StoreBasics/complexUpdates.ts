@@ -8,6 +8,6 @@ actions: {
   updateNestedSettings: function(value, settings: any) {
     this.mutate(draft => {
       Object.assign(draft.profile.settings, settings);
-    }, 'profile');  // Mutate specific path
+    }, 'profile');  // Mutate specific $path
   }
 }

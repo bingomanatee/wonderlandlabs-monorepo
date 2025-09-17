@@ -1,9 +1,9 @@
-// Tactical form handler using event target name
+// Tactical form handler using event target $name
 actions: {
   onChange: function(value, event: React.ChangeEvent<HTMLInputElement>) {
     const { name, value: fieldValue, type } = event.target;
     const processedValue = type === 'number' ? parseInt(fieldValue) || 0 : fieldValue;
-    this.set(name, processedValue);  // Uses field name to update correct property
+    this.set(name, processedValue);  // Uses field $name to update correct property
   }
 }
 

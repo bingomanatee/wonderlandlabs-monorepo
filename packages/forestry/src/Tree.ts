@@ -296,7 +296,7 @@ export class Tree<ValueType> implements TreeIF<ValueType> {
   /**
    *
    * returns the size of the $tree (number of branches)
-   * because _in theory_ a branch $tree can be enormous, we provide an upTo
+   * because _in theory_ a $branch $tree can be enormous, we provide an upTo
    * value - past which branches are not counted. For instance if upTo = 50
    * then the return value is going to be 0...50.
    *

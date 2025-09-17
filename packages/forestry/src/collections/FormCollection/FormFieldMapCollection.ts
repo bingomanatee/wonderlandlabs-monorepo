@@ -14,7 +14,7 @@ import type { CollectionIF } from './../../types/types.collections';
  * to track the field properties of FormCollection's fields.
  *
  * As it encases all values in a FieldExtended instance,
- * its designed to augment the subject by a "mapped map" of its sourced
+ * its designed to augment the $subject by a "mapped map" of its sourced
  * values, allowing for the initial statics and validators to
  * provide defaults for the transient properties.
  */

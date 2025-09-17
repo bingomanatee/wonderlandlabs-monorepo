@@ -13,7 +13,7 @@ describe('caching', () => {
       const f = new Forest();
 
       const MAX_BRANCHES = 10;
-      const doubler = f.addTree<number>('beaver-test', {
+      const doubler = f.addTree<number>('beaver-$test', {
         maxBranches: MAX_BRANCHES,
         initial: 100,
         trimTo: 5,
@@ -42,7 +42,7 @@ describe('caching', () => {
           if (!branchValues.has(branch.time)) {
             branchValues.set(branch.time, branch.value);
           } else if (branchValues.get(branch.time) !== branch.value) {
-            throw new Error('trimming should not change branch values');
+            throw new Error('trimming should not change $branch values');
           }
           branch = branch.prev;
         }
@@ -129,7 +129,7 @@ describe('caching', () => {
   });
 
   describe('Ittermittent Caching', () => {
-    it('should preserve branch structure', () => {
+    it('should preserve $branch structure', () => {
       const f = new Forest();
 
       const t = f.addTree<number>('fib', {

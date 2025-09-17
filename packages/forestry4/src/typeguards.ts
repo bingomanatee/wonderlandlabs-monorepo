@@ -17,7 +17,6 @@ export function isStore(maybe: unknown): maybe is StoreIF<unknown> {
     isObj(maybe) &&
     'value' in maybe &&
     typeof (maybe as any).next === 'function' &&
-    isObj(maybe?.acts) &&
-    isObj(maybe?.$)
+    typeof (maybe as any).subscribe === 'function'
   );
 }

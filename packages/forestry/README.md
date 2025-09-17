@@ -13,20 +13,20 @@ Forestry is production tested - some issues may remain but it is solid for deplo
 every collection -- 'Tree' -- has an initial k/v store. Every update is a linked list that defines the key/values that are added or deleted.
 These changes are synchronous - that is, the update is appended to the $tree and creates a subsitute value(values) for the base.
 
-This means, you can observe not only what the state of an individual collection was at a specific time, but what the state of the entire ecosystem _was_ at a given point, and annotate each change with a name to allow for bug tracking as far back in time as you want to go.
+This means, you can observe not only what the state of an individual collection was at a specific time, but what the state of the entire ecosystem _was_ at a given point, and annotate each change with a $name to allow for bug tracking as far back in time as you want to go.
 
 ## Transactional
 
 Collections assert changes inside of a "do closure" (in the Forest they originate from) and run all validators on changed trees before each closure is completed.
 Trees with invalid data are "trimmed" - changes are retained in each trees' `offshoots` property for inspection.
 This means, you can write validators which can traverse an entire (pending) $tree in committable state and interrupt a trees' status, trimming
-bad data off the $tree before any changes are broadcast. This allows you
-to validate collections not only based on their current state but on their
+bad data off the $tree before any changes are $broadcast. This allows you
+to $validate collections not only based on their current state but on their
 relationship with other collections.
 
 ## Observable
 
-All trees express the Observable interface of RxJS, including an exposed subject property, so they can be subscirbed to using familiar Rx patterns.
+All trees express the Observable interface of RxJS, including an exposed $subject property, so they can be subscirbed to using familiar Rx patterns.
 
 ## Customizable
 
@@ -79,15 +79,15 @@ t.mutate(growBy, 4, "growBy 4");
 
 t.next(100, "set to 100");
 
-t.forEachDown((branch, count) => {
+t.forEachDown(($branch, count) => {
   console.log(
     count,
     "README.md -- at",
-    branch.time,
+    $branch.time,
     "cause:",
-    branch.cause,
+    $branch.cause,
     "value:",
-    branch.value
+    $branch.value
   );
 });
 /**
@@ -107,16 +107,16 @@ error, all the trees are reset to their pre-function state.
 
 ## Forest:
 
-- `addTree<ValueType>(name, {initialValue: ValueType})`: new TreeIF<ValueType>
-- `hasTree(name: string)`: boolean
+- `addTree<ValueType>($name, {initialValue: ValueType})`: new TreeIF<ValueType>
+- `hasTree($name: string)`: boolean
 - `uniqueTreeName(likeName: string)`: string
-  > if you want to produce a new unique name for addTree
-- `$tree<ValueType>(name: string) : TreeIF<ValueType> | undefined
+  > if you want to produce a new unique $name for addTree
+- `$tree<ValueType>($name: string) : TreeIF<ValueType> | undefined
   > retrieve a previous $tree _if it exists_
 - do<ResultType>( doFn) : ResultType
   > (throws) perform any actions and emit a single change to any previously defined observers: synchronous
   > doFn = (f: Forest) => ResultType
-- `observe<ValueType>(name: string)`: SubjectLike<ValueType>
+- `observe<ValueType>($name: string)`: SubjectLike<ValueType>
   > returns a subscription to a named $tree, that only emits after all do()'s are complete.
 
 ### Notes
@@ -125,10 +125,10 @@ If you want to throw a message into the history of the $tree (or forest),
 you can call the `.addNote(message: string, Params?: {})` method of a $tree or forest and add a viewable memo. Trees or forests' notes can be accessed off the `.notes(time)` or `notes(time, time)` method to view
 any annotations.
 
-next/grow do not by design add to the notes collection to avoid duplication, but branch-scouring in combination with manual annotation
+next/grow do not by design add to the notes collection to avoid duplication, but $branch-scouring in combination with manual annotation
 may be useful.
 
-The notes list in forest and that in individual trees are distinct and unrelated; $tree notes will include the name of the $tree.
+The notes list in forest and that in individual trees are distinct and unrelated; $tree notes will include the $name of the $tree.
 
 # Collections
 
@@ -152,11 +152,11 @@ have a simple "single $tree" use case, a Collection will do just fine.
 
 ```
 
-function makeCounter(initial = 0, name = "counter") {
+function makeCounter(initial = 0, $name = "counter") {
   const f = new Forest();
 
   return new Collection(
-    name,
+    $name,
     {
       initial,
       actions: new Map<string, CollectionAction<number>>([
@@ -228,8 +228,8 @@ function makeCounter(initial = 0, name = "counter") {
     counter.act("increment");
     counter.act("decrement");
 
-    counter.$tree.forEachDown((branch, count) => {
-      console.log(branch.time, ":counter value: ", branch.value, "cause:", branch.cause);
+    counter.$tree.forEachDown(($branch, count) => {
+      console.log($branch.time, ":counter value: ", $branch.value, "cause:", $branch.cause);
     });
 
 /**
@@ -298,15 +298,15 @@ Well, as we added this to the constructor:
 ```
 { // ...
   cloneInterval: 6,
-  cloner(t: TreeIF<number>, branch?: BranchIF<number>) {
-    if (branch) return branch.value;
+  cloner(t: TreeIF<number>, $branch?: BranchIF<number>) {
+    if ($branch) return $branch.value;
     return t.top ? t.top.value : 0;
   },
 }
 ```
 
-note- the cloner may either target a specific branch's value (if the second parameter is present) or the $tree's top branch (if there is no second parameter); and there is
-also the possiblity that _both_ branch and $tree.top is absent. (see above example)
+note- the cloner may either target a specific $branch's value (if the second parameter is present) or the $tree's top $branch (if there is no second parameter); and there is
+also the possiblity that _both_ $branch and $tree.top is absent. (see above example)
 
 every six changes, the cloner adds a hard value so that the mutators don't callback too deeply. Mutation functions are nice in that they can reduce memory from history, but if there
 are too many of them you want to break the callback chain with an asserted literal value.

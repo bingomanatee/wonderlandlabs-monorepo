@@ -83,7 +83,7 @@ export class PhysicsUtils {
       return null;
     }
 
-    // Calculate thickness based on depth - thicker at root, thinner at leaves
+    // Calculate thickness based on depth - thicker at $root, thinner at leaves
     const depthFactor = maxDepth > 0 ? (maxDepth - depth) / maxDepth : 1;
     const baseThickness = constraintData.isLeaf ? 1 : 8; // Start with thicker base
     const lineWidth = Math.max(1, Math.round(baseThickness * depthFactor));
@@ -157,7 +157,7 @@ export class PhysicsUtils {
 
     const nodeData: SerializableNodeData = {
       id,
-      nodeType: 'branch',
+      nodeType: '$branch',
       constraintIds: [],
       depth: d,
     };

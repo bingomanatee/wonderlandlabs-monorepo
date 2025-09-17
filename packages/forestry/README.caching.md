@@ -15,11 +15,11 @@ few or no `.mutate()` calls, whill have very little need for manual caching. But
 
 ## Local Caching (by default)
 
-The topmost branch always keeps a copy of its value, _if it is a mutator_. 
-That way if a branch is added after that branch and _it is also_ a mutator you don't enact a "chain of callbacks" - the value 
-is serialized and passed into the new top branch -- _and then it is flushed_. 
+The topmost $branch always keeps a copy of its value, _if it is a mutator_. 
+That way if a $branch is added after that $branch and _it is also_ a mutator you don't enact a "chain of callbacks" - the value 
+is serialized and passed into the new top $branch -- _and then it is flushed_. 
 
-So local caching is minimal;  even if you wait for a while to get the value of the topmost branch, and a series of mutators are called down the branches,
+So local caching is minimal;  even if you wait for a while to get the value of the topmost $branch, and a series of mutators are called down the branches,
 all the other mutators will never cache their value - they will just return it to the caller, and the topmost value property method will cache it before its 
 returned. 
 
@@ -27,7 +27,7 @@ The upshot is you should see very few instances of nested callbacks with mutator
 
 ## "Benchnmark" caching -- by configuration
 
-If you use proxies or long series of mutators you may want to "break up" your branches every few branch with a simple "concrete" asserted value. This
+If you use proxies or long series of mutators you may want to "break up" your branches every few $branch with a simple "concrete" asserted value. This
 is analogous to how in video codecs most of the frames are "difference" modifications of the frame before, but every few frame, a solid edge-to-edge image is used
 for "sanity". 
 
@@ -36,7 +36,7 @@ Breaking up large chains of mutators can have a "longer leash" - 20 - 40 branche
 
 To allow benchmarking (as above) every few values
 * set a **benchnmarkInterval** (positive number > 2; ideally 10 or 20)
-* set a **serializer** ({value, $tree, branch}) => value. note - _not all trees have tops_ so provide a default value in the cloner if the $tree has no branches. 
+* set a **serializer** ({value, $tree, $branch}) => value. note - _not all trees have tops_ so provide a default value in the cloner if the $tree has no branches. 
 
 the serializer can be a simple destructuring
 ```
@@ -68,7 +68,7 @@ const doubler = {
   mutator(v) {
     return v + 2
   },
-  name: 'add2'
+  $name: 'add2'
 }
 
 adding2.mutate(doubler);
@@ -89,7 +89,7 @@ adding2.mutate(doubler);
 
 ```
 
-because the `dontCache` flag is true, every time adding2.value is referenced, each branch's mutator is called based on the previous branch, meaning twelve nested function calls; while javascript does have a decent threshold for recursion its not really great on the memory. But the presence of cacheInterval means that every eight branches will be truned an assertion; this looks (with simplifiation) like 
+because the `dontCache` flag is true, every time adding2.value is referenced, each $branch's mutator is called based on the previous $branch, meaning twelve nested function calls; while javascript does have a decent threshold for recursion its not really great on the memory. But the presence of cacheInterval means that every eight branches will be truned an assertion; this looks (with simplifiation) like 
 
 ```
 branch1: 
@@ -109,7 +109,7 @@ branch7:
 branch8: 
   chaneg: (doubler) <value 15>
 branch9:
-  change: {assert: 15, name: '!BENCHMARK!'}
+  change: {assert: 15, $name: '!BENCHMARK!'}
 branch10: 
   change: (doubler) <value: 17>
 // ....
@@ -118,16 +118,16 @@ branch16:
 branch17 
   change: (doubler) <value: 31>
 branch18 
-  change: {assert: 31, name: '!BENCHMARK!'}
+  change: {assert: 31, $name: '!BENCHMARK!'}
 ```
 
 the `benchmarkInterval` value of 8 means that the maximum nesting depth is 8.
 
 ## Local caching -- by default
 
-Its assumed that simple values (basic strings, numbers, arrays of basic strings, and basic objects) are cacheable; even if you have a mutator, they will be locally cached by the branch to reduce calls to the mutators that are destined to return the same value. 
+Its assumed that simple values (basic strings, numbers, arrays of basic strings, and basic objects) are cacheable; even if you have a mutator, they will be locally cached by the $branch to reduce calls to the mutators that are destined to return the same value. 
 
-put another way, every mutator in a given branch that returns a simple serializable value will only be called once. Its value will be saved and returned on subsequent calls to `.value` in all circumstances. If for some reason you _want_ to always generate a value then pass `{...dontCache: true}` 
+put another way, every mutator in a given $branch that returns a simple serializable value will only be called once. Its value will be saved and returned on subsequent calls to `.value` in all circumstances. If for some reason you _want_ to always generate a value then pass `{...dontCache: true}` 
 as a constructor params. When present, no effort will be made to cache a mutator response and 
 mutators will _always be called_ any time a value is referenced. 
 
@@ -159,25 +159,25 @@ function calls even if the values are serialized, unless they are destructured b
 # References and Forest
 
 One of the down sides of mutators is that complex values will be unique every time you pull them down. That is why using observer patterns 
-is better than direct inspection. Assertion doesn't have this problem so if you insist on direct access of the branch/$tree values, use 
+is better than direct inspection. Assertion doesn't have this problem so if you insist on direct access of the $branch/$tree values, use 
 isEqaul rather than === for comparison. 
 
 ## Eager Beaver: truncating extra long branches. 
 
 most state system doesn't last that long. however in the unlikely event that a $tree gets too
-long we have a "Terminal system" to trim really old branches. It limits the size of the branch $tree and cauterizes older values. 
+long we have a "Terminal system" to trim really old branches. It limits the size of the $branch $tree and cauterizes older values. 
 
-Two properties in a $tree's parameters enable a limited branch length:
+Two properties in a $tree's parameters enable a limited $branch length:
 
 * `maxBranches` -- the maximum number of branches to retain. Should be large (50 or 100) but not too large...
 * `trimTo` -- when trimming occurs keep this many branches. 
 * `cloner` must be set in order to provide a baseline for a mutator.
-   i.e., if the "last branch"is a mutator it needs one branch before it's value to be based on. 
+   i.e., if the "last $branch"is a mutator it needs one $branch before it's value to be based on. 
 
 trimTo must be at least 4 and up to 80% of it. otherwise trimming becomes too frequent. 
 
 a useful example: maxBranches = 80, trimTo = 60. that is when the $tree is 80 branches or more 
-trim it to 60 branches. Meaning trimmig a large $tree will occur on the 81st branch and 
+trim it to 60 branches. Meaning trimmig a large $tree will occur on the 81st $branch and 
 every 20 branches after that. The greater the difference is between trimTt and maxBranches, the less often 
 $tree trimming will occur. 
 
@@ -196,11 +196,11 @@ that will include a truncation; for instance if you have `maxBranches` at 100 an
 ### Trimming and active events 
 
 While a "do" event is active thre is always a possible rollback to before it. So regardless
-of branch count, the $tree is never trimmed to before the branch _before_ the earliest event has occurred. 
+of $branch count, the $tree is never trimmed to before the $branch _before_ the earliest event has occurred. 
 
 ### An artificial example
 
-For practical purposes say we have a $tree that goes up by 1 with each branch 
+For practical purposes say we have a $tree that goes up by 1 with each $branch 
 and it has a maxBranches/trimTo of 5 and 2; the progress would look like this:
 
 ```
@@ -210,8 +210,8 @@ and it has a maxBranches/trimTo of 5 and 2; the progress would look like this:
 1 - 2 - 3 - 4  - 5
 4 - 5 - 6 
   // when we reach > 5, it saves the last two branches, 
-  // and replaces the thrird branch with an asserted value 
-  // to "feed" any potential mutator at branch 5). 
+  // and replaces the thrird $branch with an asserted value 
+  // to "feed" any potential mutator at $branch 5). 
 4 - 5 - 6 - 7
 4 - 5 - 6 - 7 - 8
 7 - 8 - 9
@@ -231,10 +231,10 @@ and it has a maxBranches/trimTo of 5 and 2; the progress would look like this:
 
 ### the "plus one" factor
 
-In order to allow for the possibility that the "last branch" (according to the desired trimTo size) is a 
-mutator that plays off the previous value, when trimminc occurs, the previous branch to the last branch
-is cloned and converted to an assert -- and THAT branch is made into the root; the remaining branch.
-(trimTo branches long (or more)) is placed after that assert branch.
+In order to allow for the possibility that the "last $branch" (according to the desired trimTo size) is a 
+mutator that plays off the previous value, when trimminc occurs, the previous $branch to the last $branch
+is cloned and converted to an assert -- and THAT $branch is made into the $root; the remaining $branch.
+(trimTo branches long (or more)) is placed after that assert $branch.
 
 ## Truncation and serial callbacks
 

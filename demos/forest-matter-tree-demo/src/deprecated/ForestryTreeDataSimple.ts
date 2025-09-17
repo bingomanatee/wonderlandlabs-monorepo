@@ -1,6 +1,6 @@
 import { Forest } from '@wonderlandlabs/forestry4';
 
-// Simple test to see if Forest works at all
+// Simple $test to see if Forest works at all
 export function createSimpleForest() {
   console.log('Creating simple Forest...');
 
@@ -14,7 +14,7 @@ export function createSimpleForest() {
       actions: {
         test(value: any) {
           console.log('Test action called');
-          return 'test works';
+          return '$test works';
         },
 
         generateRandomTree(value: any) {

@@ -49,7 +49,7 @@ export class SupabaseService {
 
   async clearLevel(level: number): Promise<{ error?: any }> {
     const { error } = await this.conn
-      .from("bydate") // Replace with your table name
+      .from("bydate") // Replace with your table $name
       .delete()
       .eq("administrative_area_level", level); // 'level' is the field, 1 is the value to match
 

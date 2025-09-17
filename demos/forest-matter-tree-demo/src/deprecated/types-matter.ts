@@ -18,7 +18,7 @@ export interface SpringSettings {
 export interface SerializableNodeData {
   id: string;
   parentId?: string;
-  nodeType: 'branch' | 'leaf' | 'terminal_leaf';
+  nodeType: '$branch' | 'leaf' | 'terminal_leaf';
   constraintIds: string[];
 }
 
@@ -48,5 +48,5 @@ export interface TreeNodeData {
   parentId?: string;
   body: MatterBody;
   constraintIds: string[];
-  nodeType: 'branch' | 'leaf' | 'terminal_leaf';
+  nodeType: '$branch' | 'leaf' | 'terminal_leaf';
 }

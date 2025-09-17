@@ -2,11 +2,6 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { Forest } from './Forest';
 import { Store } from './Store';
 import { combineLatest } from 'rxjs';
-import type {
-  ActionExposedRecord,
-  RecordToParams,
-  PendingValue,
-} from '../types';
 
 // Test data types for shopping cart scenario
 interface Product {
@@ -27,48 +22,69 @@ interface ShoppingCartState {
   totalCost: number;
 }
 
-interface CartActions extends ActionExposedRecord {
-  addItem: (productId: string, quantity: number) => ShoppingCartState;
-  addMultipleItems: (choices: [string, number][]) => ShoppingCartState;
-  updateTotal: () => ShoppingCartState;
-}
-
-describe('Transaction System with observeTransStack', () => {
-  let store: Store<{ count: number; name: string }>;
-  let cartStore: Store<ShoppingCartState, CartActions>;
-
-  const sampleProducts: Record<string, Product> = {
-    laptop: { id: 'laptop', name: 'Gaming Laptop', price: 1200 },
-    mouse: { id: 'mouse', name: 'Wireless Mouse', price: 50 },
-    keyboard: { id: 'keyboard', name: 'Mechanical Keyboard', price: 150 },
-  };
-
-  beforeEach(() => {
-    // Simple store for basic transaction tests
-    store = new Store({
-      value: { count: 0, name: 'test' },
-      actions: {},
-      tests: (value: { count: number; name: string }) => {
-        if (value.count < 0) {
-          return 'Count cannot be negative';
+// Shopping cart Forest subclass with methods instead of actions
+class ShoppingCartForest extends Forest<ShoppingCartState> {
+  addItem(productId: string, quantity: number, skipTotal = false) {
+    // Wrap the add item + update total in a suspended transaction
+    return this.$transact({
+      suspendValidation: true,
+      action: () => {
+        const product = this.value.products[productId];
+        if (!product) {
+          throw new Error(`Product ${productId} not found`);
         }
-        if (value.name.length === 0) {
-          return 'Name cannot be empty';
+
+        const existingIndex = this.value.cartItems.findIndex(
+          (item) => item.productId === productId,
+        );
+
+        let newCartItems: CartItem[];
+        if (existingIndex >= 0) {
+          newCartItems = this.value.cartItems.map((item, i) =>
+            i === existingIndex
+              ? {
+                  ...item,
+                  quantity: item.quantity + quantity,
+                  cost: (item.quantity + quantity) * product.price,
+                }
+              : item,
+          );
+        } else {
+          newCartItems = [
+            ...this.value.cartItems,
+            {
+              productId,
+              quantity,
+              cost: quantity * product.price,
+            },
+          ];
         }
-        return null;
+
+        // First, add the item (temporarily invalid state)
+        this.next({
+          ...this.value,
+          cartItems: newCartItems,
+        });
+
+        // Then update total if not skipped
+        if (!skipTotal) {
+          this.updateTotal();
+        }
       },
     });
+  }
 
-    // Shopping cart store for complex transaction scenarios
-    const cartActions: RecordToParams<CartActions, ShoppingCartState> = {
-      addItem(_, productId: string, quantity: number, skipTotal = false) {
-        // Wrap the add item + update total in a suspended transaction
-        this.transact({
-          suspendValidation: true,
-          action() {
+  addMultipleItems(choices: [string, number][]) {
+    return this.$transact({
+      suspendValidation: true,
+      action: () => {
+        // Process each item directly within this transaction to avoid nested transactions
+        for (const [productId, quantity] of choices) {
+          try {
             const product = this.value.products[productId];
             if (!product) {
-              throw new Error(`Product ${productId} not found`);
+              // Skip invalid products silently - this is expected behavior
+              continue;
             }
 
             const existingIndex = this.value.cartItems.findIndex(
@@ -97,58 +113,65 @@ describe('Transaction System with observeTransStack', () => {
               ];
             }
 
-            // First, add the item (temporarily invalid state)
-            this.set('cartItems', newCartItems);
-
-            // Then update the total to make it valid (unless skipped)
-            if (!skipTotal) {
-              this.$.updateTotal();
-            }
-          },
-        });
+            // Update the cart items
+            this.next({
+              ...this.value,
+              cartItems: newCartItems,
+            });
+          } catch (error) {
+            // Skip invalid products - this provides proper transaction containment
+            continue;
+          }
+        }
+        this.updateTotal(); // Update total once at the end
       },
+    });
+  }
 
-      addMultipleItems(_, choices: [string, number][]) {
-        this.transact({
-          suspendValidation: true,
-          action() {
-            for (const [productId, quantity] of choices) {
-              try {
-                // Use skipTotal=true for efficiency - don't recalculate total after each item
-                this.$.addItem(productId, quantity, true);
-              } catch (err) {
-                // Continue with valid choices, skip invalid ones
-                // Skip invalid products silently
-              }
-            }
+  updateTotal() {
+    const totalCost = this.value.cartItems.reduce(
+      (sum, item) => sum + item.cost,
+      0,
+    );
+    return this.next({
+      ...this.value,
+      totalCost,
+    });
+  }
+}
 
-            // Update total once at the end for efficiency
-            this.$.updateTotal();
-          },
-        });
+describe('Transaction System with observeTransStack', () => {
+  let store: Store<{ count: number; name: string }>;
+  let cartStore: ShoppingCartForest;
+
+  const sampleProducts: Record<string, Product> = {
+    laptop: { id: 'laptop', name: 'Gaming Laptop', price: 1200 },
+    mouse: { id: 'mouse', name: 'Wireless Mouse', price: 50 },
+    keyboard: { id: 'keyboard', name: 'Mechanical Keyboard', price: 150 },
+  };
+
+  beforeEach(() => {
+    // Simple store for basic transaction tests
+    store = new Store({
+      value: { count: 0, name: 'test' },
+      tests: (value: { count: number; name: string }) => {
+        if (value.count < 0) {
+          return 'Count cannot be negative';
+        }
+        if (value.name.length === 0) {
+          return 'Name cannot be empty';
+        }
+        return null;
       },
+    });
 
-      updateTotal(value) {
-        const totalCost = value.cartItems.reduce(
-          (sum, item) => sum + item.cost,
-          0,
-        );
-        const newValue = {
-          ...value,
-          totalCost,
-        };
-
-        this.next(newValue);
-      },
-    };
-
-    cartStore = new Store({
+    // Shopping cart store for complex transaction scenarios
+    cartStore = new ShoppingCartForest({
       value: {
         products: sampleProducts,
         cartItems: [],
         totalCost: 0,
       },
-      actions: cartActions,
       tests: (value: ShoppingCartState) => {
         // Validate that totalCost matches sum of item costs
         const calculatedTotal = value.cartItems.reduce(
@@ -165,6 +188,7 @@ describe('Transaction System with observeTransStack', () => {
             return `Invalid product reference: ${item.productId}`;
           }
         }
+        return null;
       },
     });
   });
@@ -195,7 +219,7 @@ describe('Transaction System with observeTransStack', () => {
       expect(emittedValues).toHaveLength(1);
       expect(emittedValues[0]).toEqual({ count: 5, name: 'valid' });
 
-      // Clear events for next test
+      // Clear events for next $test
       emittedValues.length = 0;
       stackEvents.length = 0;
 
@@ -276,16 +300,13 @@ describe('Transaction System with observeTransStack', () => {
       stackEvents.length = 0;
       valueEvents.length = 0;
 
-      // Simple transaction test - just add an item and update total
+      // Simple transaction $test - just add an item and update total
       try {
-        cartStore.transact({
+        cartStore.$transact({
           suspendValidation: false, // Don't suspend validation for now
           action: function () {
             // Add item
-            this.$.addItem('laptop', 1);
-            // Update total immediately to maintain validity
-            const withTotal = this.$.updateTotal();
-            this.next(withTotal);
+            this.addItem('laptop', 1);
           },
         });
 
@@ -294,7 +315,7 @@ describe('Transaction System with observeTransStack', () => {
         expect(cartStore.value.cartItems[0].productId).toBe('laptop');
         expect(cartStore.value.totalCost).toBe(1200);
       } catch (err) {
-        // If transaction fails, that's also valid behavior to test
+        // If transaction fails, that's also valid behavior to $test
         expect(cartStore.value.cartItems).toHaveLength(0);
         expect(cartStore.value.totalCost).toBe(0);
       }
@@ -321,11 +342,11 @@ describe('Transaction System with observeTransStack', () => {
 
       // Transaction that ends in invalid state
       expect(() => {
-        cartStore.transact({
+        cartStore.$transact({
           suspendValidation: false, // Don't suspend validation - should fail immediately
-          action: function (value) {
+          action: function () {
             // Add item but skip total update (leaves imbalance)
-            this.$.addItem('mouse', 3, true); // skipTotal=true
+            this.addItem('mouse', 3, true); // skipTotal=true
             // Transaction ends here with invalid state (totalCost = 0, but items cost 150)
           },
         });
@@ -370,7 +391,7 @@ describe('Transaction System with observeTransStack', () => {
         ['keyboard', 2], // Valid
       ];
 
-      cartStore.$.addMultipleItems(choices);
+      cartStore.addMultipleItems(choices);
 
       // Should have added only the valid items to the store
       expect(cartStore.value.cartItems).toHaveLength(3);
@@ -409,25 +430,18 @@ describe('Transaction System with observeTransStack', () => {
       logger.length = 0;
 
       // Perform a simple valid operation using a transaction
-      cartStore.transact({
+      cartStore.$transact({
         suspendValidation: true,
         action: function () {
-          // Add item (this.$.addItem calls this.next internally)
-          this.$.addItem('laptop', 1);
-
-          // Update total to make state valid (this.$.updateTotal calls this.next internally)
-          this.$.updateTotal();
+          // Add item (this.addItem calls this.next internally)
+          this.addItem('laptop', 1);
         },
       });
-
-
 
       // Final state should be valid
       expect(cartStore.value.cartItems).toHaveLength(1);
       expect(cartStore.value.cartItems[0].productId).toBe('laptop');
       expect(cartStore.value.totalCost).toBe(1200);
-
-
     });
   });
 });

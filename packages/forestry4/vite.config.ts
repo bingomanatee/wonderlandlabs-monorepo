@@ -8,7 +8,7 @@ export default defineConfig({
     // dts({
     //   insertTypesEntry: true,
     //   include: ['src/**/*'],
-    //   exclude: ['src/**/*.test.ts', 'src/**/*.spec.ts'],
+    //   exclude: ['src/**/*.$test.ts', 'src/**/*.spec.ts'],
     // }),
   ],
   build: {
@@ -27,9 +27,9 @@ export default defineConfig({
         preserveModulesRoot: 'src',
         // Ensure proper ES module format with .js extensions
         format: 'es',
-        entryFileNames: '[name].js',
-        chunkFileNames: '[name].js',
-        assetFileNames: '[name].[ext]',
+        entryFileNames: '[$name].js',
+        chunkFileNames: '[$name].js',
+        assetFileNames: '[$name].[ext]',
         // This should add .js extensions to imports
         interop: 'auto',
       },

@@ -1,66 +1,47 @@
 import { describe, it, expect, vi } from 'vitest';
 import { z } from 'zod';
 import { Store } from './Store';
-import type {
-  ActionParamsRecord,
-  ActionExposedRecord,
-  StoreIF,
-} from '../types';
+import type { StoreIF } from '../types';
 import { isStore, isObj } from '../typeguards';
 
 describe('Store', () => {
   describe('constructor', () => {
     it('should create a store with initial value', () => {
-      const store = new Store({ value: 42, acts: {} });
+      const store = new Store({ value: 42 });
       expect(store.value).toBe(42);
-    });
-
-    it('should create a store with actions', () => {
-      const acts: ActionParamsRecord = {
-        increment: (value: number, store: StoreIF<number>) =>
-          store.next(value + 1),
-        add: (value: number, store: StoreIF<number>, amount: number) =>
-          store.next(value + amount),
-      };
-      const store = new Store({ value: 0, actions: acts });
-
-      expect(typeof store.acts.increment).toBe('function');
-      expect(typeof store.acts.add).toBe('function');
-      expect(typeof store.$.increment).toBe('function');
-      expect(typeof store.$.add).toBe('function');
     });
 
     it('should create a store with schema validation', () => {
       const schema = z.number().min(0);
-      const store = new Store({ value: 42, acts: {}, schema });
+      const store = new Store({ value: 42, schema });
 
-      expect(store.schema).toBe(schema);
+      expect(store.$schema).toBe(schema);
     });
 
     it('should create a store with tests function', () => {
       const testFn = vi.fn();
-      const store = new Store({ value: 42, acts: {}, tests: testFn });
-      store.test(40);
+      const store = new Store({ value: 42, tests: testFn });
+      store.$test(40);
       expect(testFn).toHaveBeenCalled();
     });
   });
 
   describe('value management', () => {
     it('should update value with next()', () => {
-      const store = new Store({ value: 10, acts: {} });
+      const store = new Store({ value: 10 });
       store.next(20);
       expect(store.value).toBe(20);
     });
 
     it('should be active by default', () => {
-      const store = new Store({ value: 42, acts: {} });
+      const store = new Store({ value: 42 });
       expect(store.isActive).toBe(true);
     });
   });
 
   describe('subscription', () => {
     it('should allow subscription to value changes', () => {
-      const store = new Store({ value: 0, acts: {} });
+      const store = new Store({ value: 0 });
       const mockListener = vi.fn();
 
       const subscription = store.subscribe(mockListener);
@@ -74,7 +55,7 @@ describe('Store', () => {
     });
 
     it('should handle multiple subscribers', () => {
-      const store = new Store({ value: 'initial', acts: {} });
+      const store = new Store({ value: 'initial' });
       const listener1 = vi.fn();
       const listener2 = vi.fn();
 
@@ -88,59 +69,11 @@ describe('Store', () => {
     });
   });
 
-  describe('actions', () => {
-    it('should execute actions and update store state', () => {
-      const acts: ActionParamsRecord = {
-        increment: function (this: Store<number>, value: number) {
-          this.next(value + 1);
-        },
-        add: function (this: Store<number>, value: number, amount: number) {
-          this.next(value + amount);
-        },
-      };
-      const store = new Store({ value: 5, actions: acts });
 
-      store.acts.increment();
-      expect(store.value).toBe(6);
-
-      store.acts.add(4);
-      expect(store.value).toBe(10);
-    });
-
-    it('should bind actions to store instance', () => {
-      const mockAction = vi.fn(function (this: Store<number>, value: number) {
-        this.next(value + 1);
-      });
-      const acts: ActionParamsRecord = { test: mockAction };
-      const store = new Store({ value: 10, actions: acts });
-
-      store.acts.test();
-
-      expect(mockAction).toHaveBeenCalledWith(10);
-      expect(store.value).toBe(11);
-    });
-
-    it('should pass additional arguments to actions', () => {
-      const mockAction = vi.fn(function (
-        this: StoreIF<string>,
-        value: string,
-        suffix: string,
-      ) {
-        this.next(value + suffix);
-      });
-      const acts: ActionParamsRecord = { append: mockAction };
-      const store = new Store({ value: 'hello', actions: acts });
-
-      store.acts.append(' world');
-
-      expect(mockAction).toHaveBeenCalledWith('hello', ' world');
-      expect(store.value).toBe('hello world');
-    });
-  });
 
   describe('complete', () => {
     it('should return final value and mark store as inactive', () => {
-      const store = new Store({ value: 'test', actions: {} });
+      const store = new Store({ value: 'test' });
 
       // Initially active
       expect(store.isActive).toBe(true);
@@ -165,7 +98,7 @@ describe('Store', () => {
   describe('schema validation', () => {
     it('should throw error when next() receives invalid data', () => {
       const schema = z.number().min(0);
-      const store = new Store({ value: 5, acts: {}, schema });
+      const store = new Store({ value: 5, schema });
 
       expect(() => store.next(-1)).toThrowError();
       expect(store.value).toBe(5); // value should remain unchanged
@@ -173,7 +106,7 @@ describe('Store', () => {
 
     it('should not broadcast when validation fails', () => {
       const schema = z.string().min(3);
-      const store = new Store({ value: 'hello', acts: {}, schema });
+      const store = new Store({ value: 'hello', schema });
       const listener = vi.fn();
 
       store.subscribe(listener);
@@ -192,7 +125,6 @@ describe('Store', () => {
 
       const store = new Store({
         value: { name: 'John', age: 30 },
-        acts: {},
         schema,
       });
 
@@ -218,7 +150,7 @@ describe('Store', () => {
         return null;
       };
 
-      const store = new Store({ value: 10, acts: {}, tests: testFn });
+      const store = new Store({ value: 10, tests: testFn });
 
       expect(() => store.next(15)).not.toThrowError(); // valid: 15 < 20
       expect(() => store.next(35)).toThrowError(TOO_BIG); // invalid: 35 > 30 (15 * 2)
@@ -241,7 +173,7 @@ describe('Store', () => {
         },
       ];
 
-      const store = new Store({ value: 'hello', acts: {}, tests });
+      const store = new Store({ value: 'hello', tests });
 
       expect(() => store.next('hello world')).not.toThrowError(); // valid: longer
       expect(() => store.next('hi')).toThrowError(); // invalid: shorter
@@ -251,39 +183,23 @@ describe('Store', () => {
   });
 
   describe('type safety', () => {
-    it('should work with typed data and actions', () => {
+    it('should work with typed data', () => {
       interface UserData {
         name: string;
         age: number;
       }
 
-      interface UserActions extends ActionExposedRecord {
-        setName: (name: string) => void;
-        incrementAge: () => void;
-      }
-
-      const acts: ActionParamsRecord = {
-        setName: function (
-          this: Store<UserData>,
-          user: UserData,
-          name: string,
-        ) {
-          this.next({ ...user, name });
-        },
-        incrementAge: function (this: Store<UserData>, user: UserData) {
-          this.next({ ...user, age: user.age + 1 });
-        },
-      };
-
-      const store = new Store<UserData, UserActions>({
+      const store = new Store<UserData>({
         value: { name: 'John', age: 30 },
-        actions: acts,
       });
 
       expect(store.value.name).toBe('John');
       expect(store.value.age).toBe(30);
-      expect(typeof store.acts.setName).toBe('function');
-      expect(typeof store.acts.incrementAge).toBe('function');
+
+      // TypeScript should enforce the correct type
+      store.next({ name: 'Jane', age: 25 });
+      expect(store.value.name).toBe('Jane');
+      expect(store.value.age).toBe(25);
     });
   });
 
@@ -301,7 +217,7 @@ describe('Store', () => {
     });
 
     it('should identify Store instances with isStore', () => {
-      const store = new Store({ value: 42, acts: {} });
+      const store = new Store({ value: 42 });
       expect(isStore(store)).toBe(true);
 
       expect(isStore(null)).toBe(false);

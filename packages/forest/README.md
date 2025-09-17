@@ -37,7 +37,7 @@ This is analogous to a Database with Tables and indexed rows.
 ## Type definitions of Trees
 
 Trees are formally defined as having a single type of key and value. (<$K,$V>); however given the fact that Forests contain many trees and its impossible
-to know what the key / value type of a tree is given its name, the k/v type retuned by `tree(name)` is unknown; you must use `as` to enforece a more specifically typed tree.
+to know what the key / value type of a tree is given its $name, the k/v type retuned by `tree($name)` is unknown; you must use `as` to enforece a more specifically typed tree.
 
 ## Transactional Integrity
 
@@ -61,7 +61,7 @@ is a different beast and has a different place in the ecosystem.
 * Forest is Memory Only - RxDB is multi-store
 * Forest is sync; RxDB is Async
 * Forest embraces transactions - RxDB does not
-* Forest doesn't have a locked in schema (yet) - RxDB does
+* Forest doesn't have a locked in $schema (yet) - RxDB does
 * Forest hopes to embrace multi-table nested queries - RXDB are flat key-value stores
 * Forest strongly embraces journal-driven data integrity, in part because of its transactional aims. 
 
@@ -89,9 +89,9 @@ But the payout here is that the code required to drive Forest 3.0 is vastly smal
 Forest uses a key/value/map driven heirarchy, 
 
 * Every data graph requires a Forest to be created for it. 
-* Forests have 0+ __Trees__ each identified by a name (string). 
+* Forests have 0+ __Trees__ each identified by a $name (string). 
 * Each tree has 0+ __Values__ iedntified by a __Key__ in the data map. No assumption for type is made for either,
-  but trees can bey identified/as'ed into a Generic pattern.. `myTree: TreeIF<keyType, valueType> = myForest.tree('name') as TreeIF<keyType, valueType>`. 
+  but trees can bey identified/as'ed into a Generic pattern.. `myTree: TreeIF<keyType, valueType> = myForest.tree('$name') as TreeIF<keyType, valueType>`. 
 * Values can be basic property values (heterogeneus) or records (homogenous). No assumption is made about the depth of a tree. 
 
 Another common structure is a _Leaf_. Leaves are "annotated records" of a value with props `{keyName, key, val}`. 
@@ -125,8 +125,8 @@ console.log(myForest.tree('sales').top.get('2016/01/01'));
 // output --- {tree: 'sales', key: '2016/01/01', val: {sales: 10000, returns: 50}}
 ```
 
-note - while setting _any_ branch will automaticlally append a new branch to the end of top, calling `get(key)` on 
-a branch will only look at its own values and any in previous branches - it won't look forward for values. 
+note - while setting _any_ $branch will automaticlally append a new $branch to the end of top, calling `get(key)` on 
+a $branch will only look at its own values and any in previous branches - it won't look forward for values. 
 
 ## TMI (1) Referntial integrity 
 
@@ -145,7 +145,7 @@ While there are many methods you _can_ call on Forests and Trees, here are the o
 ```
 // a key/value collection
 export interface TreeIF<$K = unknown, $V = unknown> extends Data<$K, $V> {
-  name: TreeName;
+  $name: TreeName;
   forest: ForestIF;
   status: Status;
   values(): Map<$K, $V>;
@@ -164,7 +164,7 @@ export interface ForestIF {
   addTree(params: TreeFactoryParams): TreeIF; // creates a new tree; throws if existing unless upsert is true.
   // an existing tree ignores the second argument (map).
   get(treeNameOrLeaf: TreeName | LeafIdentityIF, key?: unknown): LeafIF;
-  set( // accepts name, key, value OR {tableName, key, val}
+  set( // accepts $name, key, value OR {tableName, key, val}
     treeNameOrLeaf: TreeName | LeafIF,
     key?: unknown,
     val?: unknown
@@ -174,35 +174,35 @@ export interface ForestIF {
   has(r: LeafIdentityIF<unknown>): boolean;
   hasAll(r: LeafIdentityIF<unknown>[]): boolean;
   hasTree(t: TreeName): boolean;
-  transact(fn: ScopeFn, params?: ScopeParams, ...args: never): unknown; // performs an "all or nothing" set of operations; 
+  $transact(fn: ScopeFn, params?: ScopeParams, ...args: never): unknown; // performs an "all or nothing" set of operations; 
   // any thrown (uncaught) errors resets the tree(s) to the state they were at before the transaction stared. 
 }
 ```
 
 ## TMI(2): caching and garbage collection
 
-Internally tree data is maintained in a Branch. Each branch has a data map which overrides/annotates the previous one. thus, each `myTree.set(k, v)` call creates a branch which journals that action. 
+Internally tree data is maintained in a Branch. Each $branch has a data map which overrides/annotates the previous one. thus, each `myTree.set(k, v)` call creates a $branch which journals that action. 
 
 When you call `myTree.get(k)`, the journal is traversed most recent to last recent until a value is found for that key. 
-For efficiency a cache can be asserted at any branch contaiing all previous values, to impprove retrieval time. Once a branch
-with a cache is found, the cache is trusted and no further parent branches are polled. 
+For efficiency a cache can be asserted at any $branch contaiing all previous values, to impprove retrieval time. Once a $branch
+with a cache is found, the cache is trusted and no further $parent branches are polled. 
 
 Forest by default will cache every eight branches. You can manually lower the cacheInterval when you configure forest by passing it as a constructor parameter. (todo: tree-level config for cacheInterval). You can even set it to 0 to create rolling
-caches for each branch, 
+caches for each $branch, 
 
 Caches can of course get pretty heavy after a while. However, every time you create a cache, it will clear out caches above it, 
-so a tree will never have more than one cached branch -- unless it has a transaction(scope); cache-clearing is blocked by a scope, so that you're not constantly destroying/recreatig caches when scopes are active. But clearing out the last transaction should garbage-collect caches below the last one. 
+so a tree will never have more than one cached $branch -- unless it has a transaction(scope); cache-clearing is blocked by a scope, so that you're not constantly destroying/recreatig caches when scopes are active. But clearing out the last transaction should garbage-collect caches below the last one. 
 
 ### The Tradeoffs
 
-If you don't cache, writing becomes MUCH faster - you never transport values from the root to any branches' cache. The 
-cost for that is every _get_ (read) becomes a loop through the data. If the data is distributed eqsully along all branches it will be `On/2`, with n being the numver of branches. If most of the data is in the root it will be nearly `On`. 
+If you don't cache, writing becomes MUCH faster - you never transport values from the $root to any branches' cache. The 
+cost for that is every _get_ (read) becomes a loop through the data. If the data is distributed eqsully along all branches it will be `On/2`, with n being the numver of branches. If most of the data is in the $root it will be nearly `On`. 
 
 You can manually cache at any point by calling `myTree.top?.cache = myTree.top?.mergedData()`. You can even clear out all branches by calling 
 ```
 const data = myTree.top?.mergedData() || new Map(); 
-myTree,root.prune();
- myTree.root = new Branch({
+myTree,$root.prune();
+ myTree.$root = new Branch({
     data
 })
 ```
@@ -213,14 +213,14 @@ data is likely to get set and get a lot, which will make it retrieve relatively 
 
 ## TMI (3) - atomic actions 
 
-Each branch is atomic. If it is inside a scope (transaction) the transaction is considered atomic, 
+Each $branch is atomic. If it is inside a scope (transaction) the transaction is considered atomic, 
 effectively containing the set of all changes that follow it (including those in sub-scopes). 
 
-There is no limit to the number of key/values that can be changed, deleted or added by a branch; you can replace _one_, _all_ or _none_ 
+There is no limit to the number of key/values that can be changed, deleted or added by a $branch; you can replace _one_, _all_ or _none_ 
 of the keys within the branches' data. 
 
 * If the action type is `Action_s.replace` then _all_ the data in the tree is replaced by the branches' data; 
-* If the action type is `Action_s.clear` then _all_ the data in the tree is _erased_ by the branch. 
+* If the action type is `Action_s.clear` then _all_ the data in the tree is _erased_ by the $branch. 
 
 (the "replace" functionality has not been implemented yet). 
 
@@ -242,7 +242,7 @@ of the data maps is guaranteed to make things ... really wierd.
 ## Power Features
 4. Graph queries / indexing
 5. "Active record" ORM system
-6. schema
+6. $schema
 7. Object based trees
 8. Single-tree "Basic mode"
 11. Selector subscription

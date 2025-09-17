@@ -11,7 +11,7 @@ export class Branch<ValueType> implements BranchIF<ValueType> {
     public readonly change: ChangeIF<ValueType>
   ) {
     if (!tree || !change) {
-      throw new Error('unparameterized branch');
+      throw new Error('unparameterized $branch');
     }
 
     this.time = change && 'time' in change ? change.time : tree.forest.nextTime;
@@ -104,7 +104,7 @@ export class Branch<ValueType> implements BranchIF<ValueType> {
 
   get value(): ValueType {
     if (!this.change) {
-      throw new Error('cannot get value of branch without change');
+      throw new Error('cannot get value of $branch without change');
     }
     if (this._hasBeenCached) {
       if (this !== this.tree.top) {

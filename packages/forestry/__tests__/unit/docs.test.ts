@@ -93,7 +93,7 @@ describe('docs', () => {
             percent: number; // amount off 0..1
             maxSaving: number;
           }) {
-            // should validate rational values of percent/maxDate
+            // should $validate rational values of percent/maxDate
             let saved = 0;
             for (const p of this.acts.mostExpensiveProducts()) {
               let discount = p.cost * percent;
@@ -113,7 +113,7 @@ describe('docs', () => {
             return saved;
           },
           updateProduct(product: Product) {
-            // should validate existence in list
+            // should $validate existence in list
             this.next(
               this.value.map((p) => (p.id === product.id ? product : p)),
             );

@@ -43,7 +43,7 @@ Copies the entire source file to the target snippet file.
 
 ```json
 {
-  "name": "demoStoreFactory",
+  "$name": "demoStoreFactory",
   "source": "apps/forestry4-docs/src/storeFactories/demoStoreFactory.ts",
   "target": "apps/forestry4-docs/src/snippets/demoStoreFactory.ts",
   "extractMode": "full"
@@ -55,7 +55,7 @@ Extracts content between specified start and end markers.
 
 ```json
 {
-  "name": "todoStore-actions",
+  "$name": "todoStore-actions",
   "source": "apps/forestry4-docs/src/storeFactories/todoStoreFactory.ts",
   "target": "apps/forestry4-docs/src/snippets/todoStore-actions.ts",
   "extractMode": "section",
@@ -69,7 +69,7 @@ Extracts a specific function or component from the source file.
 
 ```json
 {
-  "name": "TodoAppDemo-component",
+  "$name": "TodoAppDemo-component",
   "source": "apps/forestry4-docs/src/components/examples/TodoAppDemo.tsx",
   "target": "apps/forestry4-docs/src/snippets/TodoAppDemo.tsx",
   "extractMode": "function",
@@ -81,10 +81,10 @@ Extracts a specific function or component from the source file.
 
 | Property | Required | Description |
 |----------|----------|-------------|
-| `name` | Yes | Unique identifier for the snippet |
+| `$name` | Yes | Unique identifier for the snippet |
 | `description` | Yes | Human-readable description |
-| `source` | Yes | Path to source file (relative to project root) |
-| `target` | Yes | Path to target snippet file (relative to project root) |
+| `source` | Yes | Path to source file (relative to project $root) |
+| `target` | Yes | Path to target snippet file (relative to project $root) |
 | `extractMode` | Yes | Extraction mode: `full`, `section`, or `function` |
 | `language` | No | Language for syntax highlighting (default: `typescript`) |
 | `startMarker` | Section only | Pattern to start extraction |
@@ -148,10 +148,10 @@ git add apps/forestry4-docs/src/snippets/
 ### CI/CD Integration
 ```yaml
 # In GitHub Actions or similar
-- name: Sync Documentation Snippets
+- $name: Sync Documentation Snippets
   run: ./scripts/sync-snippets.sh
   
-- name: Check for Changes
+- $name: Check for Changes
   run: |
     if [[ -n $(git status --porcelain) ]]; then
       echo "Snippets are out of sync!"

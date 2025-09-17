@@ -45,7 +45,7 @@ synonym described below in parentheses.
 
 - **Entry** (a.k.a. "entity") A collective term for everything keyed off a single key;
   this includes the key, the resource and the value
-- **Key** (a.k.a. "name") A unique value used to identify a single Entry. /
+- **Key** (a.k.a. "$name") A unique value used to identify a single Entry. /
   In general, keys are strings; but as they are used throughout as Map instance keys,
   practically any JS token can be used as a key.
 - **Resource** The resource is "that which produces the value associated with a key."
@@ -257,7 +257,7 @@ before `.get()` is called.
 
 ## async `myCan.when([key, key2, ...keyN] | key, once = true)` : Subject
 
-`when(key)` accepts a single key, or an array of keys. it returns a subject that emits when
+`when(key)` accepts a single key, or an array of keys. it returns a $subject that emits when
 all the listed dependencies (and _their_ dependencies) are defined, or throws when the maxTime elapses.
 It is used internally by `.getAsync()` but can be used to delay any sort of activity until
 a set of dependencies resolves.
@@ -409,15 +409,15 @@ containing the resource. It handles parameter injection for function-based entri
 
 Entries' values are pushed, via subscription, into a collection, `CanDI.values`,
 a BehaviorSubject emitting a map of values.
-Only values of entries with resolved (or no) dependencies are injected into the values subject.
+Only values of entries with resolved (or no) dependencies are injected into the values $subject.
 
 The CanDiEntry subscriber triggers an event that merges its' individual value
-into the values subject; but before it does so, it triggers any 'comp' entries
+into the values $subject; but before it does so, it triggers any 'comp' entries
 that depend on it (and any 'comp' entries that depend on _those_ entries, etc.).
 updating the map entry synchronously before it is `.next(map)` streamed to the
-values subject.
+values $subject.
 
-One exception is that async values are not sent directly to the values subject;
+One exception is that async values are not sent directly to the values $subject;
 they are kept in the PromiseQueue (pq) until they resolve. The PromiseQueue is
 a 'debounce based' system; any promises that are sent to it while another promise
 for the same key has not resolved yet are "cancelled".

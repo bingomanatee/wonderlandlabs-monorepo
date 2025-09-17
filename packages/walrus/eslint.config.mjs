@@ -23,7 +23,7 @@ export default [
         ...globals.node,
       },
       parserOptions: {
-        project: './tsconfig.json', // Ensure this path is correct
+        project: './tsconfig.json', // Ensure this $path is correct
         tsconfigRootDir: './', // Make sure this is correct as well
       },
     },
@@ -60,7 +60,7 @@ export default [
         ...vitest.environments.env.globals,
       },
       parserOptions: {
-        project: '../tsconfig.json', // Ensure this path is correct
+        project: '../tsconfig.json', // Ensure this $path is correct
         tsconfigRootDir: '__tests__', // Make sure this is correct as well
       },
     },
@@ -78,13 +78,13 @@ export default [
     },
   },
   {
-    files: ['**/*.test.ts', '**/*.spec.ts'],
+    files: ['**/*.$test.ts', '**/*.spec.ts'],
     languageOptions: {
       globals: {
         ...vitest.environments.env.globals,
       },
       parserOptions: {
-        project: null, // Disable project-based linting for test files
+        project: null, // Disable project-based linting for $test files
       },
     },
     plugins: {

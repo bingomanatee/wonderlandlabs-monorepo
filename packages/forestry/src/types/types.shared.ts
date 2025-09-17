@@ -19,7 +19,7 @@ export interface Assertion<ValueType> {
 }
 
 /**
- * a "dynamic mutator" that computes off the previous branch
+ * a "dynamic mutator" that computes off the previous $branch
  */
 export interface Mutator<ValueType> {
   mutator: MutationValueProviderFN<ValueType>;
@@ -109,19 +109,19 @@ export type ValueProviderParams<Value = unknown, ParamType = unknown> =
 
 /**
  * ValueProviders are used:
- * . to cache a value for truncation - which will be the "new root" transforming into an assertion.
+ * . to cache a value for truncation - which will be the "new $root" transforming into an assertion.
  * . to cache a value for ittermittent caching - which will inject an assertion node in the $tree
  *    to limit callback depth
  * . local Caching - to eliminate the necessity for repetitive calls to a mutation provider.
  *
- * Mutators are defiend in the changer of the branch; the other providers are embedded in the $tree definition.
+ * Mutators are defiend in the changer of the $branch; the other providers are embedded in the $tree definition.
  *  They will often produce a dynamic (proxy) of the previous value, to limit memory bloat.
  *
  * Truncation and Ittermittent caching should be a "hard serialization" - if the original value was a proxy, for instance, you want to produce
  * a less dynamic object, object or whatever. Especially with Truncation, as you want to limit the reference to the previous
- * branch which is destroyed in the process.
+ * $branch which is destroyed in the process.
  *
- * Local caching will be done on nearly every branch, so you in general will just want to produce the value that comes
+ * Local caching will be done on nearly every $branch, so you in general will just want to produce the value that comes
  * out of the branches mutatorProvider unchanged.
  *
  *

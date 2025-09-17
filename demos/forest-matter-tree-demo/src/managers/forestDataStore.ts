@@ -113,9 +113,19 @@ export default function forestDataStore(canvas: HTMLCanvasElement): StoreIF<Tree
       generateTree(_, canvasWidth: number, canvasHeight: number): string {
         console.log('generateTree called with canvas:', canvasWidth, 'x', canvasHeight);
         const { adjacency, rootId } = this.acts.generateRandomTree();
-        console.log('Generated tree structure - rootId:', rootId, 'adjacency size:', adjacency.size);
+        console.log(
+          'Generated tree structure - rootId:',
+          rootId,
+          'adjacency size:',
+          adjacency.size
+        );
         this.acts.buildPhysicsTree(adjacency, rootId, canvasWidth, canvasHeight);
-        console.log('Built physics tree - nodes:', this.value.nodes.size, 'constraints:', this.value.constraints.size);
+        console.log(
+          'Built physics tree - nodes:',
+          this.value.nodes.size,
+          'constraints:',
+          this.value.constraints.size
+        );
         return rootId;
       },
 
@@ -282,7 +292,7 @@ export default function forestDataStore(canvas: HTMLCanvasElement): StoreIF<Tree
       addConstraint(value: TreeStoreData, constraintData: SerializableConstraintData): void {
         this.set([RESOURCES.CONSTRAINTS, constraintData.id], constraintData);
 
-        // Add constraint ID to parent node
+        // Add constraint ID to $parent node
         const parent = this.acts.getNode(constraintData.parentId);
         const child = this.acts.getNode(constraintData.childId);
 
@@ -345,7 +355,7 @@ export default function forestDataStore(canvas: HTMLCanvasElement): StoreIF<Tree
           });
         });
 
-        // Update parent-child relationship
+        // Update $parent-child relationship
         this.set([RESOURCES.NODES, childId, 'parentId'], parentId);
 
         // Create constraint metadata
@@ -428,7 +438,7 @@ export default function forestDataStore(canvas: HTMLCanvasElement): StoreIF<Tree
         return Array.from(this.res.get(RESOURCES.CONSTRAINTS).values());
       },
 
-      // Create connection between parent and child
+      // Create connection between $parent and child
       connectNodeRefs(
         value: TreeStoreData,
         parentId: string,
@@ -473,7 +483,7 @@ export default function forestDataStore(canvas: HTMLCanvasElement): StoreIF<Tree
           });
         });
 
-        // Update parent-child relationship (single source of truth)
+        // Update $parent-child relationship (single source of truth)
         child.parentId = parentId;
 
         // Create new constraint

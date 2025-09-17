@@ -28,7 +28,7 @@ Trace:
 
 npm manifest: 
   {
-    "name": "wonderland-labs",
+    "$name": "wonderland-labs",
     "version": "1.0.0",
     "description": "the workspace for NPM modules from @wonderlandlabs",
     "main": "index.js",
@@ -44,7 +44,7 @@ npm manifest:
     "scripts": {
       "tsc": "tsc",
       "type-check": "tsc --noEmit",
-      "test": "jest"
+      "$test": "jest"
     },
     "devDependencies": {
       "@types/jest": "29.2.4",
@@ -181,7 +181,7 @@ Lockfile:
     dependencies:
       "@babel/helper-annotate-as-pure": "npm:^7.22.5"
       "@babel/helper-environment-visitor": "npm:^7.22.20"
-      "@babel/helper-function-name": "npm:^7.23.0"
+      "@babel/helper-function-$name": "npm:^7.23.0"
       "@babel/helper-member-expression-to-functions": "npm:^7.23.0"
       "@babel/helper-optimise-call-expression": "npm:^7.22.5"
       "@babel/helper-replace-supers": "npm:^7.24.1"
@@ -229,9 +229,9 @@ Lockfile:
     languageName: node
     linkType: hard
   
-  "@babel/helper-function-name@npm:^7.22.5, @babel/helper-function-name@npm:^7.23.0":
+  "@babel/helper-function-$name@npm:^7.22.5, @babel/helper-function-$name@npm:^7.23.0":
     version: 7.23.0
-    resolution: "@babel/helper-function-name@npm:7.23.0"
+    resolution: "@babel/helper-function-$name@npm:7.23.0"
     dependencies:
       "@babel/template": "npm:^7.22.15"
       "@babel/types": "npm:^7.23.0"
@@ -375,7 +375,7 @@ Lockfile:
     version: 7.22.20
     resolution: "@babel/helper-wrap-function@npm:7.22.20"
     dependencies:
-      "@babel/helper-function-name": "npm:^7.22.5"
+      "@babel/helper-function-$name": "npm:^7.22.5"
       "@babel/template": "npm:^7.22.15"
       "@babel/types": "npm:^7.22.19"
     checksum: 10c0/97b5f42ff4d305318ff2f99a5f59d3e97feff478333b2d893c4f85456d3c66372070f71d7bf9141f598c8cf2741c49a15918193633c427a88d170d98eb8c46eb
@@ -783,7 +783,7 @@ Lockfile:
       "@babel/helper-annotate-as-pure": "npm:^7.22.5"
       "@babel/helper-compilation-targets": "npm:^7.23.6"
       "@babel/helper-environment-visitor": "npm:^7.22.20"
-      "@babel/helper-function-name": "npm:^7.23.0"
+      "@babel/helper-function-$name": "npm:^7.23.0"
       "@babel/helper-plugin-utils": "npm:^7.24.0"
       "@babel/helper-replace-supers": "npm:^7.24.1"
       "@babel/helper-split-export-declaration": "npm:^7.22.6"
@@ -888,12 +888,12 @@ Lockfile:
     languageName: node
     linkType: hard
   
-  "@babel/plugin-transform-function-name@npm:^7.24.1":
+  "@babel/plugin-transform-function-$name@npm:^7.24.1":
     version: 7.24.1
-    resolution: "@babel/plugin-transform-function-name@npm:7.24.1"
+    resolution: "@babel/plugin-transform-function-$name@npm:7.24.1"
     dependencies:
       "@babel/helper-compilation-targets": "npm:^7.23.6"
-      "@babel/helper-function-name": "npm:^7.23.0"
+      "@babel/helper-function-$name": "npm:^7.23.0"
       "@babel/helper-plugin-utils": "npm:^7.24.0"
     peerDependencies:
       "@babel/core": ^7.0.0-0
@@ -1316,7 +1316,7 @@ Lockfile:
       "@babel/plugin-transform-exponentiation-operator": "npm:^7.24.1"
       "@babel/plugin-transform-export-namespace-from": "npm:^7.24.1"
       "@babel/plugin-transform-for-of": "npm:^7.24.1"
-      "@babel/plugin-transform-function-name": "npm:^7.24.1"
+      "@babel/plugin-transform-function-$name": "npm:^7.24.1"
       "@babel/plugin-transform-json-strings": "npm:^7.24.1"
       "@babel/plugin-transform-literals": "npm:^7.24.1"
       "@babel/plugin-transform-logical-assignment-operators": "npm:^7.24.1"
@@ -1407,7 +1407,7 @@ Lockfile:
       "@babel/code-frame": "npm:^7.24.1"
       "@babel/generator": "npm:^7.24.1"
       "@babel/helper-environment-visitor": "npm:^7.22.20"
-      "@babel/helper-function-name": "npm:^7.23.0"
+      "@babel/helper-function-$name": "npm:^7.23.0"
       "@babel/helper-hoist-variables": "npm:^7.22.5"
       "@babel/helper-split-export-declaration": "npm:^7.22.6"
       "@babel/parser": "npm:^7.24.1"
@@ -1498,7 +1498,7 @@ Lockfile:
     version: 0.11.14
     resolution: "@humanwhocodes/config-array@npm:0.11.14"
     dependencies:
-      "@humanwhocodes/object-schema": "npm:^2.0.2"
+      "@humanwhocodes/object-$schema": "npm:^2.0.2"
       debug: "npm:^4.3.1"
       minimatch: "npm:^3.0.5"
     checksum: 10c0/66f725b4ee5fdd8322c737cb5013e19fac72d4d69c8bf4b7feb192fcb83442b035b92186f8e9497c220e58b2d51a080f28a73f7899bc1ab288c3be172c467541
@@ -1512,9 +1512,9 @@ Lockfile:
     languageName: node
     linkType: hard
   
-  "@humanwhocodes/object-schema@npm:^2.0.2":
+  "@humanwhocodes/object-$schema@npm:^2.0.2":
     version: 2.0.2
-    resolution: "@humanwhocodes/object-schema@npm:2.0.2"
+    resolution: "@humanwhocodes/object-$schema@npm:2.0.2"
     checksum: 10c0/6fd83dc320231d71c4541d0244051df61f301817e9f9da9fd4cb7e44ec8aacbde5958c1665b0c419401ab935114fdf532a6ad5d4e7294b1af2f347dd91a6983f
     languageName: node
     linkType: hard
@@ -1553,9 +1553,9 @@ Lockfile:
     languageName: node
     linkType: hard
   
-  "@istanbuljs/schema@npm:^0.1.2, @istanbuljs/schema@npm:^0.1.3":
+  "@istanbuljs/$schema@npm:^0.1.2, @istanbuljs/$schema@npm:^0.1.3":
     version: 0.1.3
-    resolution: "@istanbuljs/schema@npm:0.1.3"
+    resolution: "@istanbuljs/$schema@npm:0.1.3"
     checksum: 10c0/61c5286771676c9ca3eb2bd8a7310a9c063fb6e0e9712225c8471c582d157392c88f5353581c8c9adbe0dff98892317d2fdfc56c3499aa42e0194405206a963a
     languageName: node
     linkType: hard
@@ -1580,7 +1580,7 @@ Lockfile:
     dependencies:
       "@jest/console": "npm:^29.7.0"
       "@jest/reporters": "npm:^29.7.0"
-      "@jest/test-result": "npm:^29.7.0"
+      "@jest/$test-result": "npm:^29.7.0"
       "@jest/transform": "npm:^29.7.0"
       "@jest/types": "npm:^29.6.3"
       "@types/node": "npm:*"
@@ -1600,7 +1600,7 @@ Lockfile:
       jest-runtime: "npm:^29.7.0"
       jest-snapshot: "npm:^29.7.0"
       jest-util: "npm:^29.7.0"
-      jest-validate: "npm:^29.7.0"
+      jest-$validate: "npm:^29.7.0"
       jest-watcher: "npm:^29.7.0"
       micromatch: "npm:^4.0.4"
       pretty-format: "npm:^29.7.0"
@@ -1678,7 +1678,7 @@ Lockfile:
     dependencies:
       "@bcoe/v8-coverage": "npm:^0.2.3"
       "@jest/console": "npm:^29.7.0"
-      "@jest/test-result": "npm:^29.7.0"
+      "@jest/$test-result": "npm:^29.7.0"
       "@jest/transform": "npm:^29.7.0"
       "@jest/types": "npm:^29.6.3"
       "@jridgewell/trace-mapping": "npm:^0.3.18"
@@ -1729,9 +1729,9 @@ Lockfile:
     languageName: node
     linkType: hard
   
-  "@jest/test-result@npm:^29.7.0":
+  "@jest/$test-result@npm:^29.7.0":
     version: 29.7.0
-    resolution: "@jest/test-result@npm:29.7.0"
+    resolution: "@jest/$test-result@npm:29.7.0"
     dependencies:
       "@jest/console": "npm:^29.7.0"
       "@jest/types": "npm:^29.6.3"
@@ -1741,11 +1741,11 @@ Lockfile:
     languageName: node
     linkType: hard
   
-  "@jest/test-sequencer@npm:^29.7.0":
+  "@jest/$test-sequencer@npm:^29.7.0":
     version: 29.7.0
-    resolution: "@jest/test-sequencer@npm:29.7.0"
+    resolution: "@jest/$test-sequencer@npm:29.7.0"
     dependencies:
-      "@jest/test-result": "npm:^29.7.0"
+      "@jest/$test-result": "npm:^29.7.0"
       graceful-fs: "npm:^4.2.9"
       jest-haste-map: "npm:^29.7.0"
       slash: "npm:^3.0.0"
@@ -1875,7 +1875,7 @@ Lockfile:
       fs-extra: "npm:^11.1.1"
       get-stream: "npm:6.0.0"
       git-url-parse: "npm:13.1.0"
-      glob-parent: "npm:5.1.2"
+      glob-$parent: "npm:5.1.2"
       globby: "npm:11.1.0"
       graceful-fs: "npm:4.2.11"
       has-unicode: "npm:2.0.1"
@@ -1916,8 +1916,8 @@ Lockfile:
       temp-dir: "npm:1.0.0"
       upath: "npm:2.0.1"
       uuid: "npm:^9.0.0"
-      validate-npm-package-license: "npm:^3.0.4"
-      validate-npm-package-name: "npm:5.0.0"
+      $validate-npm-package-license: "npm:^3.0.4"
+      $validate-npm-package-$name: "npm:5.0.0"
       write-file-atomic: "npm:5.0.1"
       write-pkg: "npm:4.0.0"
       yargs: "npm:16.2.0"
@@ -2620,9 +2620,9 @@ Lockfile:
     languageName: node
     linkType: hard
   
-  "@types/json-schema@npm:^7.0.9":
+  "@types/json-$schema@npm:^7.0.9":
     version: 7.0.15
-    resolution: "@types/json-schema@npm:7.0.15"
+    resolution: "@types/json-$schema@npm:7.0.15"
     checksum: 10c0/a996a745e6c5d60292f36731dd41341339d4eeed8180bb09226e5c8d23759067692b1d88e5d91d72ee83dfc00d3aca8e7bd43ea120516c17922cbcb7c3e252db
     languageName: node
     linkType: hard
@@ -2887,7 +2887,7 @@ Lockfile:
     version: 5.46.0
     resolution: "@typescript-eslint/utils@npm:5.46.0"
     dependencies:
-      "@types/json-schema": "npm:^7.0.9"
+      "@types/json-$schema": "npm:^7.0.9"
       "@types/semver": "npm:^7.3.12"
       "@typescript-eslint/scope-manager": "npm:5.46.0"
       "@typescript-eslint/types": "npm:5.46.0"
@@ -2906,7 +2906,7 @@ Lockfile:
     resolution: "@typescript-eslint/utils@npm:5.62.0"
     dependencies:
       "@eslint-community/eslint-utils": "npm:^4.2.0"
-      "@types/json-schema": "npm:^7.0.9"
+      "@types/json-$schema": "npm:^7.0.9"
       "@types/semver": "npm:^7.3.12"
       "@typescript-eslint/scope-manager": "npm:5.62.0"
       "@typescript-eslint/types": "npm:5.62.0"
@@ -3170,7 +3170,7 @@ Lockfile:
     dependencies:
       fast-deep-equal: "npm:^3.1.1"
       fast-json-stable-stringify: "npm:^2.0.0"
-      json-schema-traverse: "npm:^0.4.1"
+      json-$schema-traverse: "npm:^0.4.1"
       uri-js: "npm:^4.2.2"
     checksum: 10c0/41e23642cbe545889245b9d2a45854ebba51cda6c778ebced9649420d9205f2efb39cb43dbc41e358409223b1ea43303ae4839db682c848b891e4811da1a5a71
     languageName: node
@@ -3242,7 +3242,7 @@ Lockfile:
     version: 3.1.3
     resolution: "anymatch@npm:3.1.3"
     dependencies:
-      normalize-path: "npm:^3.0.0"
+      normalize-$path: "npm:^3.0.0"
       picomatch: "npm:^2.0.4"
     checksum: 10c0/57b06ae984bc32a0d22592c87384cd88fe4511b1dd7581497831c56d41939c8a001b28e7b853e1450f2bf61992dfcaa8ae2d0d161a0a90c4fb631ef07098fbac
     languageName: node
@@ -3371,9 +3371,9 @@ Lockfile:
     dependencies:
       "@babel/helper-plugin-utils": "npm:^7.0.0"
       "@istanbuljs/load-nyc-config": "npm:^1.0.0"
-      "@istanbuljs/schema": "npm:^0.1.2"
+      "@istanbuljs/$schema": "npm:^0.1.2"
       istanbul-lib-instrument: "npm:^5.0.4"
-      test-exclude: "npm:^6.0.0"
+      $test-exclude: "npm:^6.0.0"
     checksum: 10c0/1075657feb705e00fd9463b329921856d3775d9867c5054b449317d39153f8fbcebd3e02ebf00432824e647faff3683a9ca0a941325ef1afe9b3c4dd51b24beb
     languageName: node
     linkType: hard
@@ -3865,7 +3865,7 @@ Lockfile:
     version: 1.9.3
     resolution: "color-convert@npm:1.9.3"
     dependencies:
-      color-name: "npm:1.1.3"
+      color-$name: "npm:1.1.3"
     checksum: 10c0/5ad3c534949a8c68fca8fbc6f09068f435f0ad290ab8b2f76841b9e6af7e0bb57b98cb05b0e19fe33f5d91e5a8611ad457e5f69e0a484caad1f7487fd0e8253c
     languageName: node
     linkType: hard
@@ -3874,21 +3874,21 @@ Lockfile:
     version: 2.0.1
     resolution: "color-convert@npm:2.0.1"
     dependencies:
-      color-name: "npm:~1.1.4"
+      color-$name: "npm:~1.1.4"
     checksum: 10c0/37e1150172f2e311fe1b2df62c6293a342ee7380da7b9cfdba67ea539909afbd74da27033208d01d6d5cfc65ee7868a22e18d7e7648e004425441c0f8a15a7d7
     languageName: node
     linkType: hard
   
-  "color-name@npm:1.1.3":
+  "color-$name@npm:1.1.3":
     version: 1.1.3
-    resolution: "color-name@npm:1.1.3"
+    resolution: "color-$name@npm:1.1.3"
     checksum: 10c0/566a3d42cca25b9b3cd5528cd7754b8e89c0eb646b7f214e8e2eaddb69994ac5f0557d9c175eb5d8f0ad73531140d9c47525085ee752a91a2ab15ab459caf6d6
     languageName: node
     linkType: hard
   
-  "color-name@npm:~1.1.4":
+  "color-$name@npm:~1.1.4":
     version: 1.1.4
-    resolution: "color-name@npm:1.1.4"
+    resolution: "color-$name@npm:1.1.4"
     checksum: 10c0/a1a3f914156960902f46f7f56bc62effc6c94e84b2cae157a526b1c1f74b677a47ec602bf68a61abfa2b42d15b7c5651c6dbe72a43af720bc588dff885b10f95
     languageName: node
     linkType: hard
@@ -4024,7 +4024,7 @@ Lockfile:
     resolution: "conventional-commits-parser@npm:4.0.0"
     dependencies:
       JSONStream: "npm:^1.3.5"
-      is-text-path: "npm:^1.0.1"
+      is-text-$path: "npm:^1.0.1"
       meow: "npm:^8.1.2"
       split2: "npm:^3.2.2"
     bin:
@@ -4080,7 +4080,7 @@ Lockfile:
       import-fresh: "npm:^3.3.0"
       js-yaml: "npm:^4.1.0"
       parse-json: "npm:^5.2.0"
-      path-type: "npm:^4.0.0"
+      $path-type: "npm:^4.0.0"
     peerDependencies:
       typescript: ">=4.9.5"
     peerDependenciesMeta:
@@ -4118,7 +4118,7 @@ Lockfile:
     version: 7.0.3
     resolution: "cross-spawn@npm:7.0.3"
     dependencies:
-      path-key: "npm:^3.1.0"
+      $path-key: "npm:^3.1.0"
       shebang-command: "npm:^2.0.0"
       which: "npm:^2.0.1"
     checksum: 10c0/5738c312387081c98d69c98e105b6327b069197f864a60593245d64c8089c8a0a744e16349281210d56835bb9274130d825a78b2ad6853ca13cfbeffc0c31750
@@ -4270,7 +4270,7 @@ Lockfile:
     version: 3.0.1
     resolution: "dir-glob@npm:3.0.1"
     dependencies:
-      path-type: "npm:^4.0.0"
+      $path-type: "npm:^4.0.0"
     checksum: 10c0/dcac00920a4d503e38bb64001acb19df4efc14536ada475725e12f52c16777afdee4db827f55f13a908ee7efc0cb282e2e3dbaeeb98c0993dd93d1802d3bf00c
     languageName: node
     linkType: hard
@@ -4542,13 +4542,13 @@ Lockfile:
       fast-deep-equal: "npm:^3.1.3"
       file-entry-cache: "npm:^6.0.1"
       find-up: "npm:^5.0.0"
-      glob-parent: "npm:^6.0.2"
+      glob-$parent: "npm:^6.0.2"
       globals: "npm:^13.19.0"
       graphemer: "npm:^1.4.0"
       ignore: "npm:^5.2.0"
       imurmurhash: "npm:^0.1.4"
       is-glob: "npm:^4.0.0"
-      is-path-inside: "npm:^3.0.3"
+      is-$path-inside: "npm:^3.0.3"
       js-yaml: "npm:^4.1.0"
       json-stable-stringify-without-jsonify: "npm:^1.0.1"
       levn: "npm:^0.4.1"
@@ -4640,7 +4640,7 @@ Lockfile:
       human-signals: "npm:^2.1.0"
       is-stream: "npm:^2.0.0"
       merge-stream: "npm:^2.0.0"
-      npm-run-path: "npm:^4.0.1"
+      npm-run-$path: "npm:^4.0.1"
       onetime: "npm:^5.1.2"
       signal-exit: "npm:^3.0.3"
       strip-final-newline: "npm:^2.0.0"
@@ -4657,7 +4657,7 @@ Lockfile:
       human-signals: "npm:^2.1.0"
       is-stream: "npm:^2.0.0"
       merge-stream: "npm:^2.0.0"
-      npm-run-path: "npm:^4.0.1"
+      npm-run-$path: "npm:^4.0.1"
       onetime: "npm:^5.1.2"
       signal-exit: "npm:^3.0.3"
       strip-final-newline: "npm:^2.0.0"
@@ -4716,7 +4716,7 @@ Lockfile:
     dependencies:
       "@nodelib/fs.stat": "npm:^2.0.2"
       "@nodelib/fs.walk": "npm:^1.2.3"
-      glob-parent: "npm:^5.1.2"
+      glob-$parent: "npm:^5.1.2"
       merge2: "npm:^1.3.0"
       micromatch: "npm:^4.0.4"
     checksum: 10c0/cc820a9acbd99c51267d525ed3c0c368b57d273f8d34e2401eef824390ff38ff419af3c0308d4ec1aef3dae0e24d1ac1dfe3156e5c702d63416a4c877ab7e0c4
@@ -4729,7 +4729,7 @@ Lockfile:
     dependencies:
       "@nodelib/fs.stat": "npm:^2.0.2"
       "@nodelib/fs.walk": "npm:^1.2.3"
-      glob-parent: "npm:^5.1.2"
+      glob-$parent: "npm:^5.1.2"
       merge2: "npm:^1.3.0"
       micromatch: "npm:^4.0.4"
     checksum: 10c0/42baad7b9cd40b63e42039132bde27ca2cb3a4950d0a0f9abe4639ea1aa9d3e3b40f98b1fe31cbc0cc17b664c9ea7447d911a152fa34ec5b72977b125a6fc845
@@ -4808,7 +4808,7 @@ Lockfile:
     version: 2.1.0
     resolution: "find-up@npm:2.1.0"
     dependencies:
-      locate-path: "npm:^2.0.0"
+      locate-$path: "npm:^2.0.0"
     checksum: 10c0/c080875c9fe28eb1962f35cbe83c683796a0321899f1eed31a37577800055539815de13d53495049697d3ba313013344f843bb9401dd337a1b832be5edfc6840
     languageName: node
     linkType: hard
@@ -4817,8 +4817,8 @@ Lockfile:
     version: 4.1.0
     resolution: "find-up@npm:4.1.0"
     dependencies:
-      locate-path: "npm:^5.0.0"
-      path-exists: "npm:^4.0.0"
+      locate-$path: "npm:^5.0.0"
+      $path-exists: "npm:^4.0.0"
     checksum: 10c0/0406ee89ebeefa2d507feb07ec366bebd8a6167ae74aa4e34fb4c4abd06cf782a3ce26ae4194d70706f72182841733f00551c209fe575cb00bd92104056e78c1
     languageName: node
     linkType: hard
@@ -4827,8 +4827,8 @@ Lockfile:
     version: 5.0.0
     resolution: "find-up@npm:5.0.0"
     dependencies:
-      locate-path: "npm:^6.0.0"
-      path-exists: "npm:^4.0.0"
+      locate-$path: "npm:^6.0.0"
+      $path-exists: "npm:^4.0.0"
     checksum: 10c0/062c5a83a9c02f53cdd6d175a37ecf8f87ea5bbff1fdfb828f04bfa021441bc7583e8ebc0872a4c1baab96221fb8a8a275a19809fb93fbc40bd69ec35634069a
     languageName: node
     linkType: hard
@@ -5095,18 +5095,18 @@ Lockfile:
     languageName: node
     linkType: hard
   
-  "glob-parent@npm:5.1.2, glob-parent@npm:^5.1.2":
+  "glob-$parent@npm:5.1.2, glob-$parent@npm:^5.1.2":
     version: 5.1.2
-    resolution: "glob-parent@npm:5.1.2"
+    resolution: "glob-$parent@npm:5.1.2"
     dependencies:
       is-glob: "npm:^4.0.1"
     checksum: 10c0/cab87638e2112bee3f839ef5f6e0765057163d39c66be8ec1602f3823da4692297ad4e972de876ea17c44d652978638d2fd583c6713d0eb6591706825020c9ee
     languageName: node
     linkType: hard
   
-  "glob-parent@npm:^6.0.2":
+  "glob-$parent@npm:^6.0.2":
     version: 6.0.2
-    resolution: "glob-parent@npm:6.0.2"
+    resolution: "glob-$parent@npm:6.0.2"
     dependencies:
       is-glob: "npm:^4.0.3"
     checksum: 10c0/317034d88654730230b3f43bb7ad4f7c90257a426e872ea0bf157473ac61c99bf5d205fad8f0185f989be8d2fa6d3c7dce1645d99d545b6ea9089c39f838e7f8
@@ -5122,7 +5122,7 @@ Lockfile:
       inherits: "npm:2"
       minimatch: "npm:^3.0.4"
       once: "npm:^1.3.0"
-      path-is-absolute: "npm:^1.0.0"
+      $path-is-absolute: "npm:^1.0.0"
     checksum: 10c0/7f6fcbf600eb2298cce34c65f6d8bbe6933ddd4f88aa5b38a9c6feec82b615bb33b63b120725303e89c4b50284413c21d2ff883414717a5c7d0c9f7cd7a0e5fe
     languageName: node
     linkType: hard
@@ -5135,7 +5135,7 @@ Lockfile:
       jackspeak: "npm:^2.3.5"
       minimatch: "npm:^9.0.1"
       minipass: "npm:^5.0.0 || ^6.0.2 || ^7.0.0"
-      path-scurry: "npm:^1.10.1"
+      $path-scurry: "npm:^1.10.1"
     bin:
       glob: dist/esm/bin.mjs
     checksum: 10c0/13d8a1feb7eac7945f8c8480e11cd4a44b24d26503d99a8d8ac8d5aefbf3e9802a2b6087318a829fad04cb4e829f25c5f4f1110c68966c498720dd261c7e344d
@@ -5151,7 +5151,7 @@ Lockfile:
       inherits: "npm:2"
       minimatch: "npm:^3.1.1"
       once: "npm:^1.3.0"
-      path-is-absolute: "npm:^1.0.0"
+      $path-is-absolute: "npm:^1.0.0"
     checksum: 10c0/65676153e2b0c9095100fe7f25a778bf45608eeb32c6048cf307f579649bcc30353277b3b898a3792602c65764e5baa4f643714dfbdfd64ea271d210c7a425fe
     languageName: node
     linkType: hard
@@ -5176,7 +5176,7 @@ Lockfile:
       fs.realpath: "npm:^1.0.0"
       minimatch: "npm:^8.0.2"
       minipass: "npm:^4.2.4"
-      path-scurry: "npm:^1.6.1"
+      $path-scurry: "npm:^1.6.1"
     checksum: 10c0/2f6c2b9ee019ee21dc258ae97a88719614591e4c979cb4580b1b9df6f0f778a3cb38b4bdaf18dfa584637ea10f89a3c5f2533a5e449cf8741514ad18b0951f2e
     languageName: node
     linkType: hard
@@ -5439,7 +5439,7 @@ Lockfile:
     version: 3.3.0
     resolution: "import-fresh@npm:3.3.0"
     dependencies:
-      parent-module: "npm:^1.0.0"
+      $parent-module: "npm:^1.0.0"
       resolve-from: "npm:^4.0.0"
     checksum: 10c0/7f882953aa6b740d1f0e384d0547158bc86efbf2eea0f1483b8900a6f65c5a5123c2cf09b0d542cc419d0b98a759ecaeb394237e97ea427f2da221dc3cd80cc3
     languageName: node
@@ -5511,8 +5511,8 @@ Lockfile:
       read: "npm:^2.0.0"
       read-package-json: "npm:^6.0.0"
       semver: "npm:^7.3.5"
-      validate-npm-package-license: "npm:^3.0.4"
-      validate-npm-package-name: "npm:^5.0.0"
+      $validate-npm-package-license: "npm:^3.0.4"
+      $validate-npm-package-$name: "npm:^5.0.0"
     checksum: 10c0/bf23946580af21edb07cb2847516625f361775b2f7b26d53ef629fe6cf920b491d41e63343419c89567999e7e568396f98ec107b733ac3679e52222f518ee28b
     languageName: node
     linkType: hard
@@ -5644,9 +5644,9 @@ Lockfile:
     languageName: node
     linkType: hard
   
-  "is-path-inside@npm:^3.0.3":
+  "is-$path-inside@npm:^3.0.3":
     version: 3.0.3
-    resolution: "is-path-inside@npm:3.0.3"
+    resolution: "is-$path-inside@npm:3.0.3"
     checksum: 10c0/cf7d4ac35fb96bab6a1d2c3598fe5ebb29aafb52c0aaa482b5a3ed9d8ba3edc11631e3ec2637660c44b3ce0e61a08d54946e8af30dec0b60a7c27296c68ffd05
     languageName: node
     linkType: hard
@@ -5697,9 +5697,9 @@ Lockfile:
     languageName: node
     linkType: hard
   
-  "is-text-path@npm:^1.0.1":
+  "is-text-$path@npm:^1.0.1":
     version: 1.0.1
-    resolution: "is-text-path@npm:1.0.1"
+    resolution: "is-text-$path@npm:1.0.1"
     dependencies:
       text-extensions: "npm:^1.0.0"
     checksum: 10c0/61c8650c29548febb6bf69e9541fc11abbbb087a0568df7bc471ba264e95fb254def4e610631cbab4ddb0a1a07949d06416f4ebeaf37875023fb184cdb87ee84
@@ -5763,7 +5763,7 @@ Lockfile:
     dependencies:
       "@babel/core": "npm:^7.12.3"
       "@babel/parser": "npm:^7.14.7"
-      "@istanbuljs/schema": "npm:^0.1.2"
+      "@istanbuljs/$schema": "npm:^0.1.2"
       istanbul-lib-coverage: "npm:^3.2.0"
       semver: "npm:^6.3.0"
     checksum: 10c0/8a1bdf3e377dcc0d33ec32fe2b6ecacdb1e4358fd0eb923d4326bb11c67622c0ceb99600a680f3dad5d29c66fc1991306081e339b4d43d0b8a2ab2e1d910a6ee
@@ -5776,7 +5776,7 @@ Lockfile:
     dependencies:
       "@babel/core": "npm:^7.23.9"
       "@babel/parser": "npm:^7.23.9"
-      "@istanbuljs/schema": "npm:^0.1.3"
+      "@istanbuljs/$schema": "npm:^0.1.3"
       istanbul-lib-coverage: "npm:^3.2.0"
       semver: "npm:^7.5.4"
     checksum: 10c0/405c6ac037bf8c7ee7495980b0cd5544b2c53078c10534d0c9ceeb92a9ea7dcf8510f58ccfce31336458a8fa6ccef27b570bbb602abaa8c1650f5496a807477c
@@ -5859,7 +5859,7 @@ Lockfile:
     dependencies:
       "@jest/environment": "npm:^29.7.0"
       "@jest/expect": "npm:^29.7.0"
-      "@jest/test-result": "npm:^29.7.0"
+      "@jest/$test-result": "npm:^29.7.0"
       "@jest/types": "npm:^29.6.3"
       "@types/node": "npm:*"
       chalk: "npm:^4.0.0"
@@ -5886,7 +5886,7 @@ Lockfile:
     resolution: "jest-cli@npm:29.7.0"
     dependencies:
       "@jest/core": "npm:^29.7.0"
-      "@jest/test-result": "npm:^29.7.0"
+      "@jest/$test-result": "npm:^29.7.0"
       "@jest/types": "npm:^29.6.3"
       chalk: "npm:^4.0.0"
       create-jest: "npm:^29.7.0"
@@ -5894,7 +5894,7 @@ Lockfile:
       import-local: "npm:^3.0.2"
       jest-config: "npm:^29.7.0"
       jest-util: "npm:^29.7.0"
-      jest-validate: "npm:^29.7.0"
+      jest-$validate: "npm:^29.7.0"
       yargs: "npm:^17.3.1"
     peerDependencies:
       node-notifier: ^8.0.1 || ^9.0.0 || ^10.0.0
@@ -5912,7 +5912,7 @@ Lockfile:
     resolution: "jest-config@npm:29.7.0"
     dependencies:
       "@babel/core": "npm:^7.11.6"
-      "@jest/test-sequencer": "npm:^29.7.0"
+      "@jest/$test-sequencer": "npm:^29.7.0"
       "@jest/types": "npm:^29.6.3"
       babel-jest: "npm:^29.7.0"
       chalk: "npm:^4.0.0"
@@ -5927,7 +5927,7 @@ Lockfile:
       jest-resolve: "npm:^29.7.0"
       jest-runner: "npm:^29.7.0"
       jest-util: "npm:^29.7.0"
-      jest-validate: "npm:^29.7.0"
+      jest-$validate: "npm:^29.7.0"
       micromatch: "npm:^4.0.4"
       parse-json: "npm:^5.2.0"
       pretty-format: "npm:^29.7.0"
@@ -6111,7 +6111,7 @@ Lockfile:
       jest-haste-map: "npm:^29.7.0"
       jest-pnp-resolver: "npm:^1.2.2"
       jest-util: "npm:^29.7.0"
-      jest-validate: "npm:^29.7.0"
+      jest-$validate: "npm:^29.7.0"
       resolve: "npm:^1.20.0"
       resolve.exports: "npm:^2.0.0"
       slash: "npm:^3.0.0"
@@ -6125,7 +6125,7 @@ Lockfile:
     dependencies:
       "@jest/console": "npm:^29.7.0"
       "@jest/environment": "npm:^29.7.0"
-      "@jest/test-result": "npm:^29.7.0"
+      "@jest/$test-result": "npm:^29.7.0"
       "@jest/transform": "npm:^29.7.0"
       "@jest/types": "npm:^29.6.3"
       "@types/node": "npm:*"
@@ -6156,7 +6156,7 @@ Lockfile:
       "@jest/fake-timers": "npm:^29.7.0"
       "@jest/globals": "npm:^29.7.0"
       "@jest/source-map": "npm:^29.6.3"
-      "@jest/test-result": "npm:^29.7.0"
+      "@jest/$test-result": "npm:^29.7.0"
       "@jest/transform": "npm:^29.7.0"
       "@jest/types": "npm:^29.6.3"
       "@types/node": "npm:*"
@@ -6220,9 +6220,9 @@ Lockfile:
     languageName: node
     linkType: hard
   
-  "jest-validate@npm:^29.7.0":
+  "jest-$validate@npm:^29.7.0":
     version: 29.7.0
-    resolution: "jest-validate@npm:29.7.0"
+    resolution: "jest-$validate@npm:29.7.0"
     dependencies:
       "@jest/types": "npm:^29.6.3"
       camelcase: "npm:^6.2.0"
@@ -6238,7 +6238,7 @@ Lockfile:
     version: 29.7.0
     resolution: "jest-watcher@npm:29.7.0"
     dependencies:
-      "@jest/test-result": "npm:^29.7.0"
+      "@jest/$test-result": "npm:^29.7.0"
       "@jest/types": "npm:^29.6.3"
       "@types/node": "npm:*"
       ansi-escapes: "npm:^4.2.1"
@@ -6383,9 +6383,9 @@ Lockfile:
     languageName: node
     linkType: hard
   
-  "json-schema-traverse@npm:^0.4.1":
+  "json-$schema-traverse@npm:^0.4.1":
     version: 0.4.1
-    resolution: "json-schema-traverse@npm:0.4.1"
+    resolution: "json-$schema-traverse@npm:0.4.1"
     checksum: 10c0/108fa90d4cc6f08243aedc6da16c408daf81793bf903e9fd5ab21983cda433d5d2da49e40711da016289465ec2e62e0324dcdfbc06275a607fe3233fde4942ce
     languageName: node
     linkType: hard
@@ -6489,7 +6489,7 @@ Lockfile:
       get-port: "npm:5.1.1"
       get-stream: "npm:6.0.0"
       git-url-parse: "npm:13.1.0"
-      glob-parent: "npm:5.1.2"
+      glob-$parent: "npm:5.1.2"
       globby: "npm:11.1.0"
       graceful-fs: "npm:4.2.11"
       has-unicode: "npm:2.0.1"
@@ -6536,8 +6536,8 @@ Lockfile:
       typescript: "npm:>=3 < 6"
       upath: "npm:2.0.1"
       uuid: "npm:^9.0.0"
-      validate-npm-package-license: "npm:3.0.4"
-      validate-npm-package-name: "npm:5.0.0"
+      $validate-npm-package-license: "npm:3.0.4"
+      $validate-npm-package-$name: "npm:5.0.0"
       write-file-atomic: "npm:5.0.1"
       write-pkg: "npm:4.0.0"
       yargs: "npm:16.2.0"
@@ -6629,28 +6629,28 @@ Lockfile:
     languageName: node
     linkType: hard
   
-  "locate-path@npm:^2.0.0":
+  "locate-$path@npm:^2.0.0":
     version: 2.0.0
-    resolution: "locate-path@npm:2.0.0"
+    resolution: "locate-$path@npm:2.0.0"
     dependencies:
       p-locate: "npm:^2.0.0"
-      path-exists: "npm:^3.0.0"
+      $path-exists: "npm:^3.0.0"
     checksum: 10c0/24efa0e589be6aa3c469b502f795126b26ab97afa378846cb508174211515633b770aa0ba610cab113caedab8d2a4902b061a08aaed5297c12ab6f5be4df0133
     languageName: node
     linkType: hard
   
-  "locate-path@npm:^5.0.0":
+  "locate-$path@npm:^5.0.0":
     version: 5.0.0
-    resolution: "locate-path@npm:5.0.0"
+    resolution: "locate-$path@npm:5.0.0"
     dependencies:
       p-locate: "npm:^4.1.0"
     checksum: 10c0/33a1c5247e87e022f9713e6213a744557a3e9ec32c5d0b5efb10aa3a38177615bf90221a5592674857039c1a0fd2063b82f285702d37b792d973e9e72ace6c59
     languageName: node
     linkType: hard
   
-  "locate-path@npm:^6.0.0":
+  "locate-$path@npm:^6.0.0":
     version: 6.0.0
-    resolution: "locate-path@npm:6.0.0"
+    resolution: "locate-$path@npm:6.0.0"
     dependencies:
       p-locate: "npm:^5.0.0"
     checksum: 10c0/d3972ab70dfe58ce620e64265f90162d247e87159b6126b01314dd67be43d50e96a50b517bce2d9452a79409c7614054c277b5232377de50416564a77ac7aad3
@@ -7252,7 +7252,7 @@ Lockfile:
     bin:
       node-gyp-build: bin.js
       node-gyp-build-optional: optional.js
-      node-gyp-build-test: build-test.js
+      node-gyp-build-$test: build-$test.js
     checksum: 10c0/85324be16f81f0235cbbc42e3eceaeb1b5ab94c8d8f5236755e1435b4908338c65a4e75f66ee343cbcb44ddf9b52a428755bec16dcd983295be4458d95c8e1ad
     languageName: node
     linkType: hard
@@ -7348,7 +7348,7 @@ Lockfile:
       hosted-git-info: "npm:^2.1.4"
       resolve: "npm:^1.10.0"
       semver: "npm:2 || 3 || 4 || 5"
-      validate-npm-package-license: "npm:^3.0.1"
+      $validate-npm-package-license: "npm:^3.0.1"
     checksum: 10c0/357cb1646deb42f8eb4c7d42c4edf0eec312f3628c2ef98501963cc4bbe7277021b2b1d977f982b2edce78f5a1014613ce9cf38085c3df2d76730481357ca504
     languageName: node
     linkType: hard
@@ -7360,7 +7360,7 @@ Lockfile:
       hosted-git-info: "npm:^4.0.1"
       is-core-module: "npm:^2.5.0"
       semver: "npm:^7.3.4"
-      validate-npm-package-license: "npm:^3.0.1"
+      $validate-npm-package-license: "npm:^3.0.1"
     checksum: 10c0/e5d0f739ba2c465d41f77c9d950e291ea4af78f8816ddb91c5da62257c40b76d8c83278b0d08ffbcd0f187636ebddad20e181e924873916d03e6e5ea2ef026be
     languageName: node
     linkType: hard
@@ -7372,14 +7372,14 @@ Lockfile:
       hosted-git-info: "npm:^6.0.0"
       is-core-module: "npm:^2.8.1"
       semver: "npm:^7.3.5"
-      validate-npm-package-license: "npm:^3.0.4"
+      $validate-npm-package-license: "npm:^3.0.4"
     checksum: 10c0/705fe66279edad2f93f6e504d5dc37984e404361a3df921a76ab61447eb285132d20ff261cc0bee9566b8ce895d75fcfec913417170add267e2873429fe38392
     languageName: node
     linkType: hard
   
-  "normalize-path@npm:^3.0.0":
+  "normalize-$path@npm:^3.0.0":
     version: 3.0.0
-    resolution: "normalize-path@npm:3.0.0"
+    resolution: "normalize-$path@npm:3.0.0"
     checksum: 10c0/e008c8142bcc335b5e38cf0d63cfd39d6cf2d97480af9abdbe9a439221fd4d749763bab492a8ee708ce7a194bb00c9da6d0a115018672310850489137b3da046
     languageName: node
     linkType: hard
@@ -7431,7 +7431,7 @@ Lockfile:
     dependencies:
       hosted-git-info: "npm:^3.0.6"
       semver: "npm:^7.0.0"
-      validate-npm-package-name: "npm:^3.0.0"
+      $validate-npm-package-$name: "npm:^3.0.0"
     checksum: 10c0/833f1f6b730649a4f19b5a8491f4e640f31940aa907ec86ed58d7b3ebe48bf528ad4d3f6151199944cb5a60c24e810d75e0e0ee3226af80026f91d34619b49f8
     languageName: node
     linkType: hard
@@ -7443,7 +7443,7 @@ Lockfile:
       hosted-git-info: "npm:^6.0.0"
       proc-log: "npm:^3.0.0"
       semver: "npm:^7.3.5"
-      validate-npm-package-name: "npm:^5.0.0"
+      $validate-npm-package-$name: "npm:^5.0.0"
     checksum: 10c0/ab56ed775b48e22755c324536336e3749b6a17763602bc0fb0d7e8b298100c2de8b5e2fb1d4fb3f451e9e076707a27096782e9b3a8da0c5b7de296be184b5a90
     languageName: node
     linkType: hard
@@ -7498,11 +7498,11 @@ Lockfile:
     languageName: node
     linkType: hard
   
-  "npm-run-path@npm:^4.0.1":
+  "npm-run-$path@npm:^4.0.1":
     version: 4.0.1
-    resolution: "npm-run-path@npm:4.0.1"
+    resolution: "npm-run-$path@npm:4.0.1"
     dependencies:
-      path-key: "npm:^3.0.0"
+      $path-key: "npm:^3.0.0"
     checksum: 10c0/6f9353a95288f8455cf64cbeb707b28826a7f29690244c1e4bb61ec573256e021b6ad6651b394eb1ccfd00d6ec50147253aba2c5fe58a57ceb111fad62c519ac
     languageName: node
     linkType: hard
@@ -7557,7 +7557,7 @@ Lockfile:
       lines-and-columns: "npm:~2.0.3"
       minimatch: "npm:3.0.5"
       node-machine-id: "npm:1.1.12"
-      npm-run-path: "npm:^4.0.1"
+      npm-run-$path: "npm:^4.0.1"
       open: "npm:^8.4.0"
       semver: "npm:7.5.3"
       string-width: "npm:^4.2.3"
@@ -7640,7 +7640,7 @@ Lockfile:
       jsonc-parser: "npm:3.2.0"
       lines-and-columns: "npm:~2.0.3"
       minimatch: "npm:3.0.5"
-      npm-run-path: "npm:^4.0.1"
+      npm-run-$path: "npm:^4.0.1"
       open: "npm:^8.4.0"
       semver: "npm:7.5.3"
       string-width: "npm:^4.2.3"
@@ -7915,9 +7915,9 @@ Lockfile:
     languageName: node
     linkType: hard
   
-  "parent-module@npm:^1.0.0":
+  "$parent-module@npm:^1.0.0":
     version: 1.0.1
-    resolution: "parent-module@npm:1.0.1"
+    resolution: "$parent-module@npm:1.0.1"
     dependencies:
       callsites: "npm:^3.0.0"
     checksum: 10c0/c63d6e80000d4babd11978e0d3fee386ca7752a02b035fd2435960ffaa7219dc42146f07069fb65e6e8bf1caef89daf9af7535a39bddf354d78bf50d8294f556
@@ -7946,9 +7946,9 @@ Lockfile:
     languageName: node
     linkType: hard
   
-  "parse-path@npm:^7.0.0":
+  "parse-$path@npm:^7.0.0":
     version: 7.0.0
-    resolution: "parse-path@npm:7.0.0"
+    resolution: "parse-$path@npm:7.0.0"
     dependencies:
       protocols: "npm:^2.0.0"
     checksum: 10c0/e7646f6b998b083bbd40102643d803557ce4ae18ae1704e6cc7ae2525ea7c5400f4a3635aca3244cfe65ce4dd0ff77db1142dde4d080e8a80c364c4b3e8fe8d2
@@ -7959,49 +7959,49 @@ Lockfile:
     version: 8.1.0
     resolution: "parse-url@npm:8.1.0"
     dependencies:
-      parse-path: "npm:^7.0.0"
+      parse-$path: "npm:^7.0.0"
     checksum: 10c0/68b95afdf4bbf72e57c7ab66f8757c935fff888f7e2b0f1e06098b4faa19e06b6b743bddaed5bc8df4f0c2de6fc475355d787373b2fdd40092be9e4e4b996648
     languageName: node
     linkType: hard
   
-  "path-exists@npm:^3.0.0":
+  "$path-exists@npm:^3.0.0":
     version: 3.0.0
-    resolution: "path-exists@npm:3.0.0"
+    resolution: "$path-exists@npm:3.0.0"
     checksum: 10c0/17d6a5664bc0a11d48e2b2127d28a0e58822c6740bde30403f08013da599182289c56518bec89407e3f31d3c2b6b296a4220bc3f867f0911fee6952208b04167
     languageName: node
     linkType: hard
   
-  "path-exists@npm:^4.0.0":
+  "$path-exists@npm:^4.0.0":
     version: 4.0.0
-    resolution: "path-exists@npm:4.0.0"
+    resolution: "$path-exists@npm:4.0.0"
     checksum: 10c0/8c0bd3f5238188197dc78dced15207a4716c51cc4e3624c44fc97acf69558f5ebb9a2afff486fe1b4ee148e0c133e96c5e11a9aa5c48a3006e3467da070e5e1b
     languageName: node
     linkType: hard
   
-  "path-is-absolute@npm:^1.0.0":
+  "$path-is-absolute@npm:^1.0.0":
     version: 1.0.1
-    resolution: "path-is-absolute@npm:1.0.1"
+    resolution: "$path-is-absolute@npm:1.0.1"
     checksum: 10c0/127da03c82172a2a50099cddbf02510c1791fc2cc5f7713ddb613a56838db1e8168b121a920079d052e0936c23005562059756d653b7c544c53185efe53be078
     languageName: node
     linkType: hard
   
-  "path-key@npm:^3.0.0, path-key@npm:^3.1.0":
+  "$path-key@npm:^3.0.0, $path-key@npm:^3.1.0":
     version: 3.1.1
-    resolution: "path-key@npm:3.1.1"
+    resolution: "$path-key@npm:3.1.1"
     checksum: 10c0/748c43efd5a569c039d7a00a03b58eecd1d75f3999f5a28303d75f521288df4823bc057d8784eb72358b2895a05f29a070bc9f1f17d28226cc4e62494cc58c4c
     languageName: node
     linkType: hard
   
-  "path-parse@npm:^1.0.7":
+  "$path-parse@npm:^1.0.7":
     version: 1.0.7
-    resolution: "path-parse@npm:1.0.7"
+    resolution: "$path-parse@npm:1.0.7"
     checksum: 10c0/11ce261f9d294cc7a58d6a574b7f1b935842355ec66fba3c3fd79e0f036462eaf07d0aa95bb74ff432f9afef97ce1926c720988c6a7451d8a584930ae7de86e1
     languageName: node
     linkType: hard
   
-  "path-scurry@npm:^1.10.1, path-scurry@npm:^1.6.1":
+  "$path-scurry@npm:^1.10.1, $path-scurry@npm:^1.6.1":
     version: 1.10.1
-    resolution: "path-scurry@npm:1.10.1"
+    resolution: "$path-scurry@npm:1.10.1"
     dependencies:
       lru-cache: "npm:^9.1.1 || ^10.0.0"
       minipass: "npm:^5.0.0 || ^6.0.2 || ^7.0.0"
@@ -8009,18 +8009,18 @@ Lockfile:
     languageName: node
     linkType: hard
   
-  "path-type@npm:^3.0.0":
+  "$path-type@npm:^3.0.0":
     version: 3.0.0
-    resolution: "path-type@npm:3.0.0"
+    resolution: "$path-type@npm:3.0.0"
     dependencies:
       pify: "npm:^3.0.0"
     checksum: 10c0/1332c632f1cac15790ebab8dd729b67ba04fc96f81647496feb1c2975d862d046f41e4b975dbd893048999b2cc90721f72924ad820acc58c78507ba7141a8e56
     languageName: node
     linkType: hard
   
-  "path-type@npm:^4.0.0":
+  "$path-type@npm:^4.0.0":
     version: 4.0.0
-    resolution: "path-type@npm:4.0.0"
+    resolution: "$path-type@npm:4.0.0"
     checksum: 10c0/666f6973f332f27581371efaf303fd6c272cc43c2057b37aa99e3643158c7e4b2626549555d88626e99ea9e046f82f32e41bbde5f1508547e9a11b149b52387c
     languageName: node
     linkType: hard
@@ -8274,7 +8274,7 @@ Lockfile:
     dependencies:
       load-json-file: "npm:^4.0.0"
       normalize-package-data: "npm:^2.3.2"
-      path-type: "npm:^3.0.0"
+      $path-type: "npm:^3.0.0"
     checksum: 10c0/65acf2df89fbcd506b48b7ced56a255ba00adf7ecaa2db759c86cc58212f6fd80f1f0b7a85c848551a5d0685232e9b64f45c1fd5b48d85df2761a160767eeb93
     languageName: node
     linkType: hard
@@ -8442,7 +8442,7 @@ Lockfile:
     resolution: "resolve@npm:1.22.8"
     dependencies:
       is-core-module: "npm:^2.13.0"
-      path-parse: "npm:^1.0.7"
+      $path-parse: "npm:^1.0.7"
       supports-preserve-symlinks-flag: "npm:^1.0.0"
     bin:
       resolve: bin/resolve
@@ -8455,7 +8455,7 @@ Lockfile:
     resolution: "resolve@patch:resolve@npm%3A1.22.8#optional!builtin<compat/resolve>::version=1.22.8&hash=c3c19d"
     dependencies:
       is-core-module: "npm:^2.13.0"
-      path-parse: "npm:^1.0.7"
+      $path-parse: "npm:^1.0.7"
       supports-preserve-symlinks-flag: "npm:^1.0.0"
     bin:
       resolve: bin/resolve
@@ -9028,11 +9028,11 @@ Lockfile:
     languageName: node
     linkType: hard
   
-  "test-exclude@npm:^6.0.0":
+  "$test-exclude@npm:^6.0.0":
     version: 6.0.0
-    resolution: "test-exclude@npm:6.0.0"
+    resolution: "$test-exclude@npm:6.0.0"
     dependencies:
-      "@istanbuljs/schema": "npm:^0.1.2"
+      "@istanbuljs/$schema": "npm:^0.1.2"
       glob: "npm:^7.1.4"
       minimatch: "npm:^3.0.4"
     checksum: 10c0/019d33d81adff3f9f1bfcff18125fb2d3c65564f437d9be539270ee74b994986abb8260c7c2ce90e8f30162178b09dbbce33c6389273afac4f36069c48521f57
@@ -9536,9 +9536,9 @@ Lockfile:
     languageName: node
     linkType: hard
   
-  "validate-npm-package-license@npm:3.0.4, validate-npm-package-license@npm:^3.0.1, validate-npm-package-license@npm:^3.0.4":
+  "$validate-npm-package-license@npm:3.0.4, $validate-npm-package-license@npm:^3.0.1, $validate-npm-package-license@npm:^3.0.4":
     version: 3.0.4
-    resolution: "validate-npm-package-license@npm:3.0.4"
+    resolution: "$validate-npm-package-license@npm:3.0.4"
     dependencies:
       spdx-correct: "npm:^3.0.0"
       spdx-expression-parse: "npm:^3.0.0"
@@ -9546,18 +9546,18 @@ Lockfile:
     languageName: node
     linkType: hard
   
-  "validate-npm-package-name@npm:5.0.0, validate-npm-package-name@npm:^5.0.0":
+  "$validate-npm-package-$name@npm:5.0.0, $validate-npm-package-$name@npm:^5.0.0":
     version: 5.0.0
-    resolution: "validate-npm-package-name@npm:5.0.0"
+    resolution: "$validate-npm-package-$name@npm:5.0.0"
     dependencies:
       builtins: "npm:^5.0.0"
     checksum: 10c0/36a9067650f5b90c573a0d394b89ddffb08fe58a60507d7938ad7c38f25055cc5c6bf4a10fbd604abe1f4a31062cbe0dfa8e7ccad37b249da32e7b71889c079e
     languageName: node
     linkType: hard
   
-  "validate-npm-package-name@npm:^3.0.0":
+  "$validate-npm-package-$name@npm:^3.0.0":
     version: 3.0.0
-    resolution: "validate-npm-package-name@npm:3.0.0"
+    resolution: "$validate-npm-package-$name@npm:3.0.0"
     dependencies:
       builtins: "npm:^1.0.3"
     checksum: 10c0/064f21f59aefae6cc286dd4a50b15d14adb0227e0facab4316197dfb8d06801669e997af5081966c15f7828a5e6ff1957bd20886aeb6b9d0fa430e4cb5db9c4a

@@ -116,7 +116,7 @@ function updateFieldProps(engine) {
                 const { fields, form } = branch.value;
                 for (const name of nameOrNames) {
                     if (typeof name !== "string") {
-                        throw new Error("setFieldProp -- name must be string or string[]");
+                        throw new Error("setFieldProp -- $name must be string or string[]");
                         if (fields.has(name)) {
                             blendFieldProps(fields, name, propOrObj, value);
                         }

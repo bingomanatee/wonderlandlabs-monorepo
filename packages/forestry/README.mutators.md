@@ -1,12 +1,12 @@
 # Mutators
 
-There is two ways to update a branch: 
+There is two ways to update a $branch: 
 
 1. "assert" a concrete value by calling `myTree.next(value)`
 2. "mutate" a $tree by passing a function that will change the $tree's value. This can have a second parameter if you want, referred to as the "seed". 
 
 Why would you not just want to cram assertions in? well... if you inject a function and a value, you'll use less memory over time - the value will
-come into and through the function and only be cached in the topmost branch. This means even if your store has an extensive history, the only 
+come into and through the function and only be cached in the topmost $branch. This means even if your store has an extensive history, the only 
 thing that will use up storage space is the parameters you pass in. (There are some benchmarking caches that will persist longer if you use ittermittent caching)
 
 In many situations this is not going to be a huge issue but why be wasteful? If you have a long term scenario (say a game) flooding your store with large 
@@ -14,7 +14,7 @@ historical memory is not ideal. Say you have a game with a spaceship that can go
 
 ```
 {
-    name: 'mySpaceship',
+    $name: 'mySpaceship',
     inventory: ['yams', 'copper', 'alien babes'],
     x: 0,
     y: 0,
@@ -29,7 +29,7 @@ function moveUp($tree: TreeIF<Spaceship>) {
     $tree.next ({...$tree.value, y: $tree.value.y + 1})
 }
 ```
-but that would leave a full record of the spaceship in each branch and that is a lot of wasted store. If instead, you called 
+but that would leave a full record of the spaceship in each $branch and that is a lot of wasted store. If instead, you called 
 
 ```
 
@@ -41,11 +41,11 @@ function moveUp($tree: TreeIF<Spaceship>) {
 }
 ```
 
-then the spaceship is created by returning a variation of the previous branch's value. There is a technical possiblity that
-if the mutator is the first branch in the $tree (the "root") there will be no previous value - but if you insure an inital value
+then the spaceship is created by returning a variation of the previous $branch's value. There is a technical possiblity that
+if the mutator is the first $branch in the $tree (the "$root") there will be no previous value - but if you insure an inital value
 in the constructor this doesn't acutally happen.
 
-Is this value cached? "yes but" only the topmost branch keeps a local copy of its output; (more detail in [README.caching.md](./README.caching.md))
+Is this value cached? "yes but" only the topmost $branch keeps a local copy of its output; (more detail in [README.caching.md](./README.caching.md))
 
 
 ## Mutators are lazy 
@@ -57,7 +57,7 @@ check out itermittent cachinng. This will "bake" a mutator every few branches so
 
 ## The Seed
 
-Sometimes you want to add a parameter to the mutator; in Redux this would be a "payload." `.mutate(mutator, seed, name)` takes an argument 
+Sometimes you want to add a parameter to the mutator; in Redux this would be a "payload." `.mutate(mutator, seed, $name)` takes an argument 
 that you can pass into the mutator, as in 
 
 ```
@@ -78,7 +78,7 @@ Your seed will be preserved in the history of branches, so try not to pass seeds
 
 ## Naming your mutators
 
-There is an optional third argument, a name string; its optional but if you want more insight into your branches' history you can label the mutator
-with a name that is viewable if you iterate  through your $tree with `.forEachUp((branch, count) => {...})` or `.forEachDown(...)`. 
+There is an optional third argument, a $name string; its optional but if you want more insight into your branches' history you can label the mutator
+with a $name that is viewable if you iterate  through your $tree with `.forEachUp(($branch, count) => {...})` or `.forEachDown(...)`. 
 
-If you name the mutator function as above its name will be used in the logging. 
+If you $name the mutator function as above its $name will be used in the logging. 

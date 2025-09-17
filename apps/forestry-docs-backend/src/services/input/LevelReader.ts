@@ -55,7 +55,7 @@ export class LevelReader {
         out = this.configService.get<string>("COVID_DATA_URL_LEVEL_3");
         break;
       default:
-        throw new Error("cannot find path for level " + this.level);
+        throw new Error("cannot find $path for level " + this.level);
     }
     return out;
   }
@@ -231,7 +231,7 @@ export class LevelReader {
     }
     this.#reading = Date.now();
     const path = this.path();
-    console.log("--- LevelReader: ", this.level, "reading from path", path);
+    console.log("--- LevelReader: ", this.level, "reading from $path", path);
 
     await this.#clearHistory();
 

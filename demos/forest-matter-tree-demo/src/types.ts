@@ -11,7 +11,7 @@ export type MatterConstraint = Constraint;
 export interface SerializableNodeData {
   id: string;
   parentId?: string;
-  nodeType: 'branch' | 'leaf' | 'terminal_leaf';
+  nodeType: '$branch' | 'leaf' | 'terminal_leaf';
   constraintIds: string[];
 }
 
@@ -36,7 +36,7 @@ export interface SpringSettings {
 export interface TreeNode {
   id: string;
   parentId?: string;
-  nodeType: 'branch' | 'leaf' | 'terminal_leaf';
+  nodeType: '$branch' | 'leaf' | 'terminal_leaf';
   constraintIds: string[];
   // Physics properties
   position: { x: number; y: number };

@@ -60,7 +60,7 @@ export type Cacheable = boolean | symbol;
 export interface MutatorIF<ValueType> {
   name: MutatorName;
   cacheable?: Cacheable;
-  get(branch: BranchIF<ValueType>, ...args: MutatorArgs): ValueType; // how to derive a value for a given branch
+  get(branch: BranchIF<ValueType>, ...args: MutatorArgs): ValueType; // how to derive a value for a given $branch
 }
 
 export type MutatorArgs = unknown[];

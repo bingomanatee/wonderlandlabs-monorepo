@@ -1,17 +1,9 @@
 export { Store } from './Stores/Store';
 export { Forest } from './Stores/Forest';
-export { ForestBranch } from './Stores/ForestBranch';
+// ForestBranch is now merged into Forest
 
 // Export types for better TypeScript support
 export type {
-  ActionParamsFn,
-  ActionExposedFn,
-  ActionParamsRecord,
-  ActionExposedRecord,
-  TransformActionMethod,
-  TransformActionRecord,
-  InferExposedActions,
-  RecordToParams,
   ValueTestFn,
   Listener,
   ValidationResult,

@@ -1,53 +1,7 @@
 import { z } from 'zod';
 
-import { Observable, Observer, Subject, Subscription } from 'rxjs';
+import { Observable, Observer, Subscription } from 'rxjs';
 import { ZodParser } from './typeguards';
-
-// these are the actions as defined, in the params
-export type ActionParamsFn<
-  DataType = unknown,
-  Args extends readonly unknown[] = any[],
-  Returned = any | void,
-> = (value: DataType, ...args: Args) => Returned;
-
-// these are the actions as exposed in the state
-export type ActionExposedFn<
-  Args extends readonly unknown[] = any[],
-  Returned = any | void,
-> = (...args: Args) => Returned;
-
-export type ActionParamsRecord = Record<string, ActionParamsFn>;
-export type ActionExposedRecord = Record<string, ActionExposedFn>;
-// Utility type to transform ActionParamsFn to ActionExposedFn (removes first parameter)
-export type TransformActionMethod<T> = T extends (
-  value: any,
-  ...args: infer Args
-) => infer Return
-  ? (...args: Args) => Return
-  : T;
-
-// Utility type to transform an entire ActionParamsRecord to ActionExposedRecord
-export type TransformActionRecord<T extends ActionParamsRecord> = {
-  [K in keyof T]: TransformActionMethod<T[K]>;
-};
-
-// Utility type to infer the exposed Actions type from ActionParamsRecord
-export type InferExposedActions<T extends ActionParamsRecord> =
-  TransformActionRecord<T>;
-
-// Utility type to convert exposed ActionExposedRecord back to ActionParamsRecord (adds value parameter)
-export type RecordToParams<
-  T extends ActionExposedRecord,
-  DataType = unknown,
-> = {
-  [K in keyof T]: T[K] extends (...args: infer Args) => infer Return
-    ? (value: DataType, ...args: Args) => Return
-    : never;
-};
-export type ValueTestFn<DataType> = (
-  value: unknown,
-  store: StoreIF<DataType>,
-) => null | void | string;
 
 export type TransParams = {
   action: TransFn;
@@ -64,7 +18,7 @@ export type ValidationResult = string | null; // null = valid, string = error me
 // Forest messaging system for validation
 export interface ForestMessage {
   type:
-    | 'validate-all'
+    | '$validate-all'
     | 'validation-failure'
     | 'validation-complete'
     | 'complete';
@@ -87,82 +41,62 @@ export type PendingValue<DataType = unknown> = {
   suspendValidation?: boolean;
 };
 
-export interface StoreIF<
-  DataType,
-  Actions extends ActionExposedRecord = ActionExposedRecord,
-> {
+export interface StoreIF<DataType> {
   value: DataType;
-  name: string;
+  $name: string;
 
   subscribe(listener: Listener<DataType>): Subscription;
 
-  transact(params: TransParams | TransFn<DataType>, suspend?: boolean): void;
+  $transact(params: TransParams | TransFn<DataType>, suspend?: boolean): void;
 
-  acts: Actions;
-  $: Actions;
   next: (value: Partial<DataType>) => void;
 
   // Resource map for non-immutable external resources (DOM, WebGL, etc.)
-  res: Map<string, any>;
+  $res: Map<string, any>;
 
   complete: () => DataType;
   isActive: boolean;
 
-  // pending value
-  queuePendingValue(value: DataType): string;
-  dequeuePendingValue(id: string): void;
-
   // validators
-  schema?: ZodParser;
-  test(value: unknown): Validity;
-  prep(input: Partial<DataType>): DataType;
-
-  validate(value: unknown): Validity;
-
-  isValid(value: unknown): boolean;
+  $schema?: ZodParser;
+  $test(value: unknown): Validity;
+  $validate(value: unknown): Validity;
+  $isValid(value: unknown): boolean;
 
   // Core utility methods
   get(path?: Path): any;
   set(path: Path, value: unknown): void;
-
   mutate(producerFn: (draft: DataType) => void, path?: Path): DataType;
 
-  root: StoreIF<unknown>;
-  isRoot: boolean;
-  parent?: StoreIF<unknown>;
-  broadcast: (message: unknown, fromRoot?: boolean) => void;
+  $root: StoreIF<unknown>;
+  $isRoot: boolean;
+  $parent?: StoreIF<unknown>;
+  $broadcast: (message: unknown, down?: boolean) => void;
 }
 
-export interface StoreBranch<
-  DataType,
-  Actions extends ActionExposedRecord = ActionExposedRecord,
-> extends StoreIF<DataType, Actions> {
-  path: Path;
-  root: StoreBranch<unknown>;
-  isRoot: boolean;
-  parent?: StoreBranch<unknown>;
-  broadcast: (message: unknown, fromRoot?: boolean) => void;
-  receiver: Subject<unknown>;
-
+export interface StoreBranch<DataType> extends StoreIF<DataType> {
+  $path: Path;
+  $root: StoreBranch<unknown>;
+  $isRoot: boolean;
+  $parent?: StoreBranch<unknown>;
+  $broadcast: (message: unknown, fromRoot?: boolean) => void;
   set(path: Path, value: unknown): void;
-
-  subject: Observable<DataType>;
-
-  branch<Type, BranchActions extends ActionExposedRecord = ActionExposedRecord>(
+  $subject: Observable<DataType>;
+  $branch<Type, Subclass extends StoreBranch<Type> = StoreBranch<Type>>(
     path: Path,
-    params: BranchParams<Type, BranchActions>,
-  ): StoreBranch<Type, BranchActions>;
+    params: BranchParams<Type, Subclass>,
+  ): Subclass;
 }
 
 // Resource map for managing non-immutable external resources
 export type ResourceMap = Map<string, any>;
+export type ValueTestFn<DataType> = (
+  value: unknown,
+  store: StoreIF<DataType>,
+) => null | void | string;
 
-export type StoreParams<
-  DataType,
-  Actions extends ActionExposedRecord = ActionExposedRecord,
-> = {
+export type StoreParams<DataType> = {
   value: DataType;
-  actions?: RecordToParams<Actions, DataType>; // Input actions always have value as first parameter
   schema?: z.ZodSchema<DataType>;
   tests?: ValueTestFn<DataType> | ValueTestFn<DataType>[];
   prep?: (
@@ -176,12 +110,8 @@ export type StoreParams<
   res?: Map<string, any>;
 };
 
-// Specific type for branch parameters that properly types the actions
-export type BranchParams<
-  DataType,
-  Actions extends ActionExposedRecord = ActionExposedRecord,
-> = {
-  actions?: RecordToParams<Actions, DataType>;
+// Specific type for $branch parameters that properly types the subclass
+export type BranchParams<DataType, Subclass extends StoreBranch<DataType> = StoreBranch<DataType>> = {
   schema?: z.ZodSchema<DataType>;
   tests?: ValueTestFn<DataType> | ValueTestFn<DataType>[];
   prep?: (
@@ -192,6 +122,7 @@ export type BranchParams<
   name?: string;
   debug?: boolean;
   res?: Map<string, any>;
+  subclass?: Subclass;
 };
 
 type PathElement = string;

@@ -30,36 +30,16 @@ class TypeDef {
 }
 const types = [
   new TypeDef(TypeEnum.undefined, FormEnum.void, TypeofEnum.undefined),
-  new TypeDef(
-    TypeEnum.null,
-    FormEnum.void,
-    TypeofEnum.object,
-    (s) => s === null
-  ),
+  new TypeDef(TypeEnum.null, FormEnum.void, TypeofEnum.object, (s) => s === null),
   new TypeDef(TypeEnum.boolean, FormEnum.scalar, TypeofEnum.boolean),
   new TypeDef(TypeEnum.string, FormEnum.scalar, TypeofEnum.string),
   new TypeDef(TypeEnum.number, FormEnum.scalar, TypeofEnum.number),
   new TypeDef(TypeEnum.number, FormEnum.scalar, TypeofEnum.bigint),
   new TypeDef(TypeEnum.symbol, FormEnum.scalar, TypeofEnum.symbol),
   new TypeDef(TypeEnum.function, FormEnum.function, TypeofEnum.function),
-  new TypeDef(
-    TypeEnum.array,
-    FormEnum.array,
-    TypeofEnum.object,
-    (v) => Array.isArray(v)
-  ),
-  new TypeDef(
-    TypeEnum.map,
-    FormEnum.map,
-    TypeofEnum.object,
-    (m) => m instanceof Map
-  ),
-  new TypeDef(
-    TypeEnum.set,
-    FormEnum.set,
-    TypeofEnum.object,
-    (s) => s instanceof Set
-  ),
+  new TypeDef(TypeEnum.array, FormEnum.array, TypeofEnum.object, (v) => Array.isArray(v)),
+  new TypeDef(TypeEnum.map, FormEnum.map, TypeofEnum.object, (m) => m instanceof Map),
+  new TypeDef(TypeEnum.set, FormEnum.set, TypeofEnum.object, (s) => s instanceof Set),
   new TypeDef(
     TypeEnum.object,
     FormEnum.object,

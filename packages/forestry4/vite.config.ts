@@ -22,16 +22,11 @@ export default defineConfig({
       // Externalize dependencies that shouldn't be bundled
       external: ['@wonderlandlabs/walrus', 'immer', 'lodash-es', 'rxjs'],
       output: {
-        // Preserve module structure instead of bundling
-        preserveModules: true,
-        preserveModulesRoot: 'src',
-        // Ensure proper ES module format with .js extensions
+        // Don't preserve modules - bundle everything into single files
         format: 'es',
         entryFileNames: '[name].js',
         chunkFileNames: '[name].js',
         assetFileNames: '[name].[ext]',
-        // This should add .js extensions to imports
-        interop: 'auto',
       },
     },
     target: 'es2022',

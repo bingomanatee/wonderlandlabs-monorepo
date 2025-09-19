@@ -21,6 +21,9 @@ import { pathString } from '../lib/combinePaths';
 // Enable Immer support for Map and Set
 enableMapSet();
 
+/**
+ * @internal Base implementation class - not intended for direct use
+ */
 export class Store<DataType> implements StoreIF<DataType>
 {
   constructor(p: StoreParams<DataType>, noSubject = false) {

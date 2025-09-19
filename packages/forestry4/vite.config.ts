@@ -27,9 +27,9 @@ export default defineConfig({
         preserveModulesRoot: 'src',
         // Ensure proper ES module format with .js extensions
         format: 'es',
-        entryFileNames: '[$name].js',
-        chunkFileNames: '[$name].js',
-        assetFileNames: '[$name].[ext]',
+        entryFileNames: '[name].js',
+        chunkFileNames: '[name].js',
+        assetFileNames: '[name].[ext]',
         // This should add .js extensions to imports
         interop: 'auto',
       },

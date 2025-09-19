@@ -12,6 +12,29 @@ export type Listener<DataType> =
   | Partial<Observer<DataType>>
   | ((value: DataType) => void);
 
+/**
+ * Utility type for Forest subclasses - the recommended pattern for Forestry4
+ *
+ * @example Recommended Usage:
+ * ```typescript
+ * // ✅ Extend Forest to create custom stores
+ * class UserStore extends Forest<UserData> {
+ *   constructor() {
+ *     super({ value: { name: '', email: '' } });
+ *   }
+ *
+ *   updateProfile(data: Partial<UserData>) {
+ *     this.mutate(draft => Object.assign(draft, data));
+ *   }
+ * }
+ *
+ * // ✅ Use the custom store
+ * const userStore = new UserStore();
+ * userStore.updateProfile({ name: 'John' });
+ * ```
+ */
+export type ForestSubclass<T> = new (...args: any[]) => Forest<T>;
+
 // Validation result type
 export type ValidationResult = string | null; // null = valid, string = error message
 

@@ -12,7 +12,8 @@ import useForestryLocal from '../../hooks/useForestryLocal';
 import demoStoreFactory from '../../storeFactories/demoStoreFactory';
 
 const TestRunner: React.FC = () => {
-  const [testResults, setTestResults] = useForestryLocal(() => 
+  return ''; // TEMPORARILY DISABLED FOR 4.1.3 MIGRATION
+  const [testResults, setTestResults] = useForestryLocal(() =>
     demoStoreFactory({ 
       value: { results: [] as string[] },
       actions: {

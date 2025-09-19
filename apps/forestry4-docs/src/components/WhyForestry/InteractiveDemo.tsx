@@ -14,6 +14,7 @@ import demoStoreFactory from '../../storeFactories/demoStoreFactory';
 import FormField from '../FormField';
 
 const InteractiveDemo: React.FC = () => {
+  return ''; // TEMPORARILY DISABLED FOR 4.1.3 MIGRATION
   const [state, store] = useForestryLocal(demoStoreFactory);
   const [testResults, setTestResults] = React.useState<string[]>([]);
 

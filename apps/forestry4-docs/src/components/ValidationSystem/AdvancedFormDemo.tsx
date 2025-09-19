@@ -29,6 +29,7 @@ import ErrorField from '@/components/ErrorField';
 import Section from '../Section';
 
 const AdvancedFormDemo: React.FC = () => {
+  return ''; // TEMPORARILY DISABLED FOR 4.1.3 MIGRATION
   const { handleSuccess } = useErrorHandler();
 
   // Advanced form using extracted store factory

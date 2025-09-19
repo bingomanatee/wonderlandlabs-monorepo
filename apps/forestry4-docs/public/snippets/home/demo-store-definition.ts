@@ -1,6 +1,6 @@
 // Auto-generated snippet from: apps/forestry4-docs/src/storeFactories/homeDemoStoreFactory.ts
 // Description: Demo store definition for home page live demo
-// Last synced: Mon Sep 15 14:19:17 PDT 2025
+// Last synced: Thu Sep 18 21:57:37 PDT 2025
 // DO NOT EDIT - This file is automatically synced from the source
 
 import { Forest } from '@wonderlandlabs/forestry4';

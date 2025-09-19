@@ -14,6 +14,7 @@ import useForestryLocal from '@/hooks/useForestryLocal';
 import { createTodoStore, TodoState } from '@/storeFactories/createTodoStore.tsx';
 
 const TodoAppDemo: React.FC = () => {
+  return ''; // TEMPORARILY DISABLED FOR 4.1.3 MIGRATION
   // Use useForestryLocal hook instead of manual subscription
   const [todoValue, todoStore] = useForestryLocal<TodoState>(createTodoStore);
 

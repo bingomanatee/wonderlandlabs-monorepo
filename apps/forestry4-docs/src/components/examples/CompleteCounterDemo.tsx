@@ -4,6 +4,7 @@ import useForestryLocal from '../../hooks/useForestryLocal';
 import { homeDemoStoreFactory } from '../../storeFactories/homeDemoStoreFactory';
 
 const CompleteCounterDemo: React.FC = () => {
+  return ''; // TEMPORARILY DISABLED FOR 4.1.3 MIGRATION
   // Hook usage - connects store to React component
   const [value, store] = useForestryLocal(homeDemoStoreFactory);
   const { count } = value;

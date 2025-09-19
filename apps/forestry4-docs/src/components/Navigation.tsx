@@ -1,24 +1,62 @@
 import React from 'react';
 import {
   Box,
+  Button,
+  Container,
   Flex,
   HStack,
   Image,
   Link,
   Menu,
   MenuButton,
-  MenuList,
   MenuItem,
-  Button,
+  MenuList,
   Text,
-  Container,
   useColorModeValue,
 } from '@chakra-ui/react';
 import { Link as RouterLink, useLocation } from 'react-router-dom';
 import { ChevronDownIcon, ExternalLinkIcon } from '@chakra-ui/icons';
 import { FaGithub } from 'react-icons/fa';
 import useForestryLocal from '../hooks/useForestryLocal';
-import { navigationStoreFactory } from '../storeFactories/navigationStoreFactory';
+const menuItems: Record<string, MenuItem[]> = {
+  'Getting Started': [
+    { label: 'Quick Start', path: '/' },
+    { label: 'Why Forestry?', path: '/why' },
+  ],
+  'Essential Features': [
+    { label: 'Basics', path: '/store' },
+    { label: 'Actions', path: '/actions' },
+    { label: 'With React', path: '/react' },
+  ],
+  'Power Tools': [
+    { label: 'Validation', path: '/validation' },
+    { label: 'Schema', path: '/schemas' },
+    { label: 'Transactions', path: '/transactions' },
+    { label: 'RxJS / Immer', path: '/rxjs' },
+  ],
+  'Practical Examples': [
+    { label: 'Overview', path: '/examples' },
+    { label: 'Todo App', path: '/examples/todo-app' },
+    { label: 'Shopping Cart', path: '/examples/shopping-cart' },
+    { label: 'Form Validation', path: '/examples/form-validation' },
+    { label: 'Transaction Demo', path: '/examples/transaction-demo' },
+  ],
+  'API Reference': [
+    { label: 'Overview', path: '/api' },
+    { label: 'Forest Class', path: '/api#forest' },
+    { label: 'Constructor & Properties', path: '/api#forest-constructor' },
+    { label: 'Core Methods', path: '/api#forest-core' },
+    { label: 'Branching Methods', path: '/api#forest-branching' },
+    { label: 'Transactions', path: '/api#forest-transactions' },
+    { label: 'Validation', path: '/api#forest-validation' },
+    { label: 'ForestBranch', path: '/api#forestbranch' },
+    { label: 'Configuration Types', path: '/api#types-config' },
+    { label: 'Action Types', path: '/api#types-actions' },
+    { label: 'Validation Types', path: '/api#types-validation' },
+    { label: 'Utility Types', path: '/api#types-utility' },
+  ],
+};
+import { NavigationState, navigationStoreFactory } from '../storeFactories/navigationStoreFactory';
 
 interface MenuItem {
   label: string;
@@ -32,50 +70,10 @@ const Navigation: React.FC = () => {
   const borderColor = useColorModeValue('gray.200', 'gray.700');
 
   // Navigation state management with Forestry
-  const [navState, navStore] = useForestryLocal(navigationStoreFactory);
-  const { openMenu, hoveredMenu } = navState;
+  const [navState, navStore] = useForestryLocal<NavigationState>(navigationStoreFactory);
+  const { openMenu } = navState;
 
   const isActive = (path: string) => location.pathname === path;
-
-  const menuItems: Record<string, MenuItem[]> = {
-    'Getting Started': [
-      { label: 'Quick Start', path: '/' },
-      { label: 'Why Forestry?', path: '/why' },
-    ],
-    'Essential Features': [
-      { label: 'Basics', path: '/store' },
-      { label: 'Actions', path: '/actions' },
-      { label: 'With React', path: '/react' },
-    ],
-    'Power Tools': [
-      { label: 'Validation', path: '/validation' },
-      { label: 'Schema', path: '/schemas' },
-      { label: 'Transactions', path: '/transactions' },
-      { label: 'RxJS / Immer', path: '/rxjs' },
-      /*    { label: 'Advanced Patterns', path: '/advanced' },*/
-    ],
-    'Practical Examples': [
-      { label: 'Overview', path: '/examples' },
-      { label: 'Todo App', path: '/examples/todo-app' },
-      { label: 'Shopping Cart', path: '/examples/shopping-cart' },
-      { label: 'Form Validation', path: '/examples/form-validation' },
-      { label: 'Transaction Demo', path: '/examples/transaction-demo' },
-    ],
-    'API Reference': [
-      { label: 'Overview', path: '/api' },
-      { label: 'Forest Class', path: '/api#forest' },
-      { label: 'Constructor & Properties', path: '/api#forest-constructor' },
-      { label: 'Core Methods', path: '/api#forest-core' },
-      { label: 'Branching Methods', path: '/api#forest-branching' },
-      { label: 'Transactions', path: '/api#forest-transactions' },
-      { label: 'Validation', path: '/api#forest-validation' },
-      { label: 'ForestBranch', path: '/api#forestbranch' },
-      { label: 'Configuration Types', path: '/api#types-config' },
-      { label: 'Action Types', path: '/api#types-actions' },
-      { label: 'Validation Types', path: '/api#types-validation' },
-      { label: 'Utility Types', path: '/api#types-utility' },
-    ],
-  };
 
   return (
     <Box
@@ -115,20 +113,20 @@ const Navigation: React.FC = () => {
                   _hover={{ bg: 'green.100' }}
                   _active={{ bg: 'green.200' }}
                   rightIcon={<ChevronDownIcon />}
-                  onMouseEnter={() => navStore.$.handleMenuEnter(category)}
+                  onMouseEnter={() => navStore.handleMenuEnter(category)}
                   onClick={() => {
                     if (openMenu === category) {
-                      navStore.$.closeMenu();
+                      navStore.closeMenu();
                     } else {
-                      navStore.$.openMenu(category);
+                      navStore.openMenu(category);
                     }
                   }}
                 >
                   {category}
                 </MenuButton>
                 <MenuList
-                  onMouseLeave={() => navStore.$.handleMenuLeave()}
-                  onMouseEnter={() => navStore.$.setHoveredMenu(category)}
+                  onMouseLeave={() => navStore.handleMenuLeave()}
+                  onMouseEnter={() => navStore.setHoveredMenu(category)}
                 >
                   {items.map((item) => (
                     <MenuItem
@@ -143,7 +141,7 @@ const Navigation: React.FC = () => {
                       _hover={{
                         bg: !item.external && isActive(item.path) ? 'forest.100' : 'gray.50',
                       }}
-                      onClick={() => navStore.$.handleItemClick()}
+                      onClick={() => navStore.handleItemClick()}
                     >
                       {item.label}
                     </MenuItem>

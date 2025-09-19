@@ -1,5 +1,15 @@
 // Auto-generated snippet from: apps/forestry4-docs/public/snippets/home/installation.sh
 // Description: Installation instructions for Forestry 4
+// Last synced: Thu Sep 18 21:57:37 PDT 2025
+// DO NOT EDIT - This file is automatically synced from the source
+
+// Auto-generated snippet from: apps/forestry4-docs/public/snippets/home/installation.sh
+// Description: Installation instructions for Forestry 4
+// Last synced: Thu Sep 18 21:50:05 PDT 2025
+// DO NOT EDIT - This file is automatically synced from the source
+
+// Auto-generated snippet from: apps/forestry4-docs/public/snippets/home/installation.sh
+// Description: Installation instructions for Forestry 4
 // Last synced: Mon Sep 15 14:19:17 PDT 2025
 // DO NOT EDIT - This file is automatically synced from the source
 

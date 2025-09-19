@@ -1,6 +1,6 @@
 // Auto-generated snippet from: apps/forestry4-docs/src/components/examples/CompleteCounterDemo.tsx
 // Description: Complete React component demo for home page
-// Last synced: Mon Sep 15 14:19:17 PDT 2025
+// Last synced: Thu Sep 18 21:57:37 PDT 2025
 // DO NOT EDIT - This file is automatically synced from the source
 
 import React from 'react';
@@ -9,6 +9,7 @@ import useForestryLocal from '../../hooks/useForestryLocal';
 import { homeDemoStoreFactory } from '../../storeFactories/homeDemoStoreFactory';
 
 const CompleteCounterDemo: React.FC = () => {
+  return ''; // TEMPORARILY DISABLED FOR 4.1.3 MIGRATION
   // Hook usage - connects store to React component
   const [value, store] = useForestryLocal(homeDemoStoreFactory);
   const { count } = value;

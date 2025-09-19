@@ -1,6 +1,6 @@
 // Auto-generated snippet from: apps/forestry4-docs/src/pages/examples/FormValidation.tsx
 // Description: Form validation example page
-// Last synced: Mon Sep 15 14:19:16 PDT 2025
+// Last synced: Thu Sep 18 21:57:37 PDT 2025
 // DO NOT EDIT - This file is automatically synced from the source
 
 import React from 'react';
@@ -20,6 +20,23 @@ import {
 import { CheckCircleIcon } from '@chakra-ui/icons';
 import AdvancedFormDemo from '../../components/ValidationSystem/AdvancedFormDemo';
 import CodeBlock from '../../components/CodeBlock';
+import SnippetBlock from '../../components/SnippetBlock';
+
+// Types for the form validation examples
+interface FormState {
+  username: string;
+  email: string;
+  password: string;
+  confirmPassword: string;
+  firstName: string;
+  lastName: string;
+  age: number;
+  agreeToTerms: boolean;
+  newsletter?: boolean;
+  interests?: string[];
+}
+
+
 
 const FormValidation: React.FC = () => {
   return (
@@ -148,93 +165,13 @@ const FormValidation: React.FC = () => {
           <Heading size="md" mb={4}>
             Validation Schema
           </Heading>
-          <CodeBlock language="typescript" title="Form Schema with Complex Rules">
-            {`import { z } from 'zod';
+          <SnippetBlock
+            snippetName="UserRegistrationSchema"
+            language="typescript"
+            title="Form Schema with Complex Rules"
+          />
 
-const UserRegistrationSchema = z.object({
-  username: z.string()
-    .min(3, 'Username must be at least 3 characters')
-    .max(20, 'Username must be less than 20 characters')
-    .regex(/^[a-zA-Z0-9_]+$/, 'Username can only contain letters, numbers, and underscores'),
-    
-  email: z.string()
-    .email('Please enter a valid email address')
-    .min(1, 'Email is required'),
-    
-  password: z.string()
-    .min(8, 'Password must be at least 8 characters')
-    .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/, 'Password must contain uppercase, lowercase, and number'),
-    
-  confirmPassword: z.string()
-    .min(1, 'Please confirm your password'),
-    
-  firstName: z.string()
-    .min(1, 'First name is required')
-    .max(50, 'First name must be less than 50 characters'),
-    
-  lastName: z.string()
-    .min(1, 'Last name is required')
-    .max(50, 'Last name must be less than 50 characters'),
-    
-  age: z.number()
-    .int('Age must be a whole number')
-    .min(13, 'Must be at least 13 years old')
-    .max(120, 'Please enter a valid age'),
-    
-  agreeToTerms: z.boolean()
-    .refine(val => val === true, 'You must agree to the terms and conditions'),
-    
-  newsletter: z.boolean().optional(),
-  
-  // Conditional field - required if newsletter is true
-  interests: z.array(z.string()).optional(),
-}).refine(
-  (data) => data.password === data.confirmPassword,
-  {
-    message: "Passwords don't match",
-    path: ["confirmPassword"],
-  }
-).refine(
-  (data) => !data.newsletter || (data.interests && data.interests.length > 0),
-  {
-    message: "Please select at least one interest for newsletter",
-    path: ["interests"],
-  }
-);
 
-// Custom async validation tests
-const formTests = [
-  // Async username availability check
-  async (form: FormState) => {
-    if (form.username && form.username.length >= 3) {
-      const isAvailable = await checkUsernameAvailability(form.username);
-      if (!isAvailable) {
-        return 'Username is already taken';
-      }
-    }
-    return null;
-  },
-  
-  // Async email verification
-  async (form: FormState) => {
-    if (form.email && form.email.includes('@')) {
-      const isValid = await verifyEmailDomain(form.email);
-      if (!isValid) {
-        return 'Email domain is not supported';
-      }
-    }
-    return null;
-  },
-  
-  // Business logic validation
-  (form: FormState) => {
-    if (form.age && form.age < 18 && form.newsletter) {
-      return 'Users under 18 cannot subscribe to newsletter';
-    }
-    return null;
-  }
-];`}
-          </CodeBlock>
         </Box>
 
         {/* Store Implementation */}
@@ -247,7 +184,6 @@ const formTests = [
   name: 'registration-form',
   value: initialFormState,
   schema: UserRegistrationSchema,
-  tests: formTests,
   
   actions: {
     // Field-specific validation

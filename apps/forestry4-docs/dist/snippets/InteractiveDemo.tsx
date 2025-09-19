@@ -1,6 +1,6 @@
 // Auto-generated snippet from: apps/forestry4-docs/src/components/WhyForestry/InteractiveDemo.tsx
 // Description: Interactive demo component showing Forestry in action
-// Last synced: Mon Sep 15 14:19:16 PDT 2025
+// Last synced: Thu Sep 18 21:57:37 PDT 2025
 // DO NOT EDIT - This file is automatically synced from the source
 
 import React from 'react';
@@ -19,6 +19,7 @@ import demoStoreFactory from '../../storeFactories/demoStoreFactory';
 import FormField from '../FormField';
 
 const InteractiveDemo: React.FC = () => {
+  return ''; // TEMPORARILY DISABLED FOR 4.1.3 MIGRATION
   const [state, store] = useForestryLocal(demoStoreFactory);
   const [testResults, setTestResults] = React.useState<string[]>([]);
 

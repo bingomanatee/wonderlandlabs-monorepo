@@ -23,6 +23,7 @@ import CodeTabs from '@/components/CodeTabs';
 import Section from '../Section';
 
 const ShoppingCartDemo: React.FC = () => {
+  return ''; // TEMPORARILY DISABLED FOR 4.1.3 MIGRATION
   const { handleError } = useErrorHandler();
   const [cartState, cartStore] = useForestryLocal(() => shoppingCartStoreFactory(handleError));
   const [cartErrors, setCartErrors] = useState<string[]>([]);

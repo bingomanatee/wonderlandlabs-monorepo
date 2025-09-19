@@ -15,6 +15,23 @@ import {
 import { CheckCircleIcon } from '@chakra-ui/icons';
 import AdvancedFormDemo from '../../components/ValidationSystem/AdvancedFormDemo';
 import CodeBlock from '../../components/CodeBlock';
+import SnippetBlock from '../../components/SnippetBlock';
+
+// Types for the form validation examples
+interface FormState {
+  username: string;
+  email: string;
+  password: string;
+  confirmPassword: string;
+  firstName: string;
+  lastName: string;
+  age: number;
+  agreeToTerms: boolean;
+  newsletter?: boolean;
+  interests?: string[];
+}
+
+
 
 const FormValidation: React.FC = () => {
   return (
@@ -143,93 +160,13 @@ const FormValidation: React.FC = () => {
           <Heading size="md" mb={4}>
             Validation Schema
           </Heading>
-          <CodeBlock language="typescript" title="Form Schema with Complex Rules">
-            {`import { z } from 'zod';
+          <SnippetBlock
+            snippetName="UserRegistrationSchema"
+            language="typescript"
+            title="Form Schema with Complex Rules"
+          />
 
-const UserRegistrationSchema = z.object({
-  username: z.string()
-    .min(3, 'Username must be at least 3 characters')
-    .max(20, 'Username must be less than 20 characters')
-    .regex(/^[a-zA-Z0-9_]+$/, 'Username can only contain letters, numbers, and underscores'),
-    
-  email: z.string()
-    .email('Please enter a valid email address')
-    .min(1, 'Email is required'),
-    
-  password: z.string()
-    .min(8, 'Password must be at least 8 characters')
-    .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/, 'Password must contain uppercase, lowercase, and number'),
-    
-  confirmPassword: z.string()
-    .min(1, 'Please confirm your password'),
-    
-  firstName: z.string()
-    .min(1, 'First name is required')
-    .max(50, 'First name must be less than 50 characters'),
-    
-  lastName: z.string()
-    .min(1, 'Last name is required')
-    .max(50, 'Last name must be less than 50 characters'),
-    
-  age: z.number()
-    .int('Age must be a whole number')
-    .min(13, 'Must be at least 13 years old')
-    .max(120, 'Please enter a valid age'),
-    
-  agreeToTerms: z.boolean()
-    .refine(val => val === true, 'You must agree to the terms and conditions'),
-    
-  newsletter: z.boolean().optional(),
-  
-  // Conditional field - required if newsletter is true
-  interests: z.array(z.string()).optional(),
-}).refine(
-  (data) => data.password === data.confirmPassword,
-  {
-    message: "Passwords don't match",
-    path: ["confirmPassword"],
-  }
-).refine(
-  (data) => !data.newsletter || (data.interests && data.interests.length > 0),
-  {
-    message: "Please select at least one interest for newsletter",
-    path: ["interests"],
-  }
-);
 
-// Custom async validation tests
-const formTests = [
-  // Async username availability check
-  async (form: FormState) => {
-    if (form.username && form.username.length >= 3) {
-      const isAvailable = await checkUsernameAvailability(form.username);
-      if (!isAvailable) {
-        return 'Username is already taken';
-      }
-    }
-    return null;
-  },
-  
-  // Async email verification
-  async (form: FormState) => {
-    if (form.email && form.email.includes('@')) {
-      const isValid = await verifyEmailDomain(form.email);
-      if (!isValid) {
-        return 'Email domain is not supported';
-      }
-    }
-    return null;
-  },
-  
-  // Business logic validation
-  (form: FormState) => {
-    if (form.age && form.age < 18 && form.newsletter) {
-      return 'Users under 18 cannot subscribe to newsletter';
-    }
-    return null;
-  }
-];`}
-          </CodeBlock>
         </Box>
 
         {/* Store Implementation */}
@@ -237,120 +174,11 @@ const formTests = [
           <Heading size="md" mb={4}>
             Store Implementation
           </Heading>
-          <CodeBlock language="typescript" title="Form Store with Advanced Validation">
-            {`const createFormStore = () => new Forest<FormState>({
-  name: 'registration-form',
-  value: initialFormState,
-  schema: UserRegistrationSchema,
-  tests: formTests,
-  
-  actions: {
-    // Field-specific validation
-    validateField: async function(value: FormState, fieldName: keyof FormState) {
-      try {
-        // Validate single field using schema
-        const fieldSchema = UserRegistrationSchema.shape[fieldName];
-        if (fieldSchema) {
-          fieldSchema.parse(value[fieldName]);
-        }
-        
-        // Run relevant async tests
-        const relevantTests = formTests.filter(test => 
-          test.toString().includes(fieldName)
-        );
-        
-        for (const test of relevantTests) {
-          const error = await test(value);
-          if (error) {
-            this.$.setFieldError(fieldName, error);
-            return;
-          }
-        }
-        
-        // Clear error if validation passes
-        this.$.clearFieldError(fieldName);
-      } catch (error) {
-        if (error instanceof z.ZodError) {
-          const fieldError = error.errors.find(e => 
-            e.path.includes(fieldName)
-          );
-          if (fieldError) {
-            this.$.setFieldError(fieldName, fieldError.message);
-          }
-        }
-      }
-    },
-    
-    // Update field with validation
-    updateField: function(value: FormState, fieldName: keyof FormState, fieldValue: any) {
-      this.set(fieldName, fieldValue);
-      
-      // Trigger validation for this field and dependent fields
-      this.$.validateField(fieldName);
-      
-      // Handle cross-field dependencies
-      if (fieldName === 'password') {
-        this.$.validateField('confirmPassword');
-      }
-      if (fieldName === 'newsletter') {
-        this.$.validateField('interests');
-      }
-    },
-    
-    // Set field error
-    setFieldError: function(value: FormState, fieldName: string, error: string) {
-      this.mutate(draft => {
-        if (!draft.errors) draft.errors = {};
-        draft.errors[fieldName] = error;
-      });
-    },
-    
-    // Clear field error
-    clearFieldError: function(value: FormState, fieldName: string) {
-      this.mutate(draft => {
-        if (draft.errors) {
-          delete draft.errors[fieldName];
-        }
-      });
-    },
-    
-    // Form submission with full validation
-    submitForm: async function(value: FormState) {
-      this.set('isSubmitting', true);
-      
-      try {
-        // Run full validation
-        const validation = await this.validate(value);
-        if (!validation.isValid) {
-          throw new Error(\`Form validation failed: \${validation.error}\`);
-        }
-        
-        // Submit to server
-        const result = await submitRegistration(value);
-        
-        this.set('isSubmitted', true);
-        this.set('submitMessage', 'Registration successful!');
-        
-        return result;
-      } catch (error) {
-        this.set('submitError', error.message);
-        throw error;
-      } finally {
-        this.set('isSubmitting', false);
-      }
-    },
-    
-    // Check if form is valid
-    isFormValid: function(value: FormState): boolean {
-      const hasErrors = value.errors && Object.keys(value.errors).length > 0;
-      const hasRequiredFields = value.username && value.email && 
-                               value.password && value.firstName && 
-                               value.lastName && value.agreeToTerms;
-      return !hasErrors && !!hasRequiredFields;
-    }
-  }
-});`}
-          </CodeBlock>
+          <SnippetBlock
+            snippetName="formValidationStoreFactory"
+            language="typescript"
+            title="Form Store with Advanced Validation"
+          />
         </Box>
 
         {/* Best Practices */}

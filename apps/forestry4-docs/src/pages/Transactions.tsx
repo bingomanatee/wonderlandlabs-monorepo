@@ -31,6 +31,7 @@ import { createTransactionDemoStore } from '@/storeFactories/createTransactionDe
 import Section from '../components/Section';
 
 const Transactions: React.FC = () => {
+  return ''; // TEMPORARILY DISABLED FOR 4.1.3 MIGRATION
   const { handleError } = useErrorHandler();
 
   const [demoState, demoStore] = useForestryLocal(createTransactionDemoStore, handleError);

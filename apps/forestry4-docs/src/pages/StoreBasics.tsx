@@ -45,6 +45,7 @@ const constructorTabs = [
 ];
 
 const StoreBasics: React.FC = () => {
+  return ''; // TEMPORARILY DISABLED FOR 4.1.3 MIGRATION
   const [userValue, store] = useForestryLocal(userProfileFactory);
   const [error, setError] = useState('');
 

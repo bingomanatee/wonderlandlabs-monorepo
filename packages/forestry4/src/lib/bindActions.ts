@@ -32,7 +32,7 @@ export default function bindActions(target: FnRecord) {
       return $;
     }
 
-    $[key] = (...args: unknown[]) => target[key](...args);
+    $[key] = (...args: unknown[]) => (target[key] as Function).apply(target, args);
     return $;
   }, {});
 }

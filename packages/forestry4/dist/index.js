@@ -644,7 +644,7 @@ function bindActions(target) {
     if (/^\$/.test(key) || exclude.includes(key) || typeof target[key] !== "function") {
       return $;
     }
-    $[key] = (...args) => target[key](...args);
+    $[key] = (...args) => target[key].apply(target, args);
     return $;
   }, {});
 }

@@ -13,7 +13,6 @@ export type {
   ForestMessage,
   Validity,
   StoreIF,
-  StoreBranch,
   ResourceMap,
   StoreParams,
   Path,

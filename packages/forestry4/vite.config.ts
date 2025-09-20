@@ -4,12 +4,13 @@ import { resolve } from 'path';
 
 export default defineConfig({
   plugins: [
-    // Temporarily disable DTS plugin due to TypeScript resolution issues
-    // dts({
-    //   insertTypesEntry: true,
-    //   include: ['src/**/*'],
-    //   exclude: ['src/**/*.$test.ts', 'src/**/*.spec.ts'],
-    // }),
+    dts({
+      insertTypesEntry: true,
+      include: ['src/**/*'],
+      exclude: ['src/**/*.test.ts', 'src/**/*.spec.ts', 'src/**/__tests__/**'],
+      outDir: 'dist',
+      rollupTypes: true,
+    }),
   ],
   build: {
     lib: {

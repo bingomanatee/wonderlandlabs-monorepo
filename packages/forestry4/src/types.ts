@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-import { Observable, Observer, SubjectLike, Subscription } from 'rxjs';
+import { Observer, SubjectLike, Subscription } from 'rxjs';
 import { ZodParser } from './typeguards';
 
 export type TransParams = {
@@ -33,7 +33,12 @@ export type Listener<DataType> =
  * userStore.updateProfile({ name: 'John' });
  * ```
  */
-export type ForestSubclass<T> = new (...args: any[]) => Forest<T>;
+// Forward declaration to avoid circular imports
+interface ForestLike<T> {
+  value: T;
+}
+
+export type ForestSubclass<T> = new (...args: any[]) => ForestLike<T>;
 
 // Validation result type
 export type ValidationResult = string | null; // null = valid, string = error message

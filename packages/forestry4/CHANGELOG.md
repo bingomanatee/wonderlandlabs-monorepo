@@ -12,7 +12,7 @@ much simpler/ better type safe forests
 
 ## 4.1.2 .. 4.1.4
 
-Compresing classes to make a single base class (Forest); renaming key methods with 
+Compressing classes to make a single base class (Forest); renaming key methods with 
 "$" prefix to make custom functions less intrusive. note - to keep in the RxJS 
 pattern for observables Subject fields (value, next, complete...) are not $-prefixed.
 

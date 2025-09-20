@@ -1,6 +1,6 @@
 import { Path } from '../types';
 
-function toPathArray(p) {
+function toPathArray(p: Path): (string | RegExp)[] {
   if (Array.isArray(p)) {
     return p;
   }

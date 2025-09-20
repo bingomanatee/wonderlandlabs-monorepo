@@ -1,15 +1,16 @@
 import React from 'react';
 import { Forest } from '@wonderlandlabs/forestry4';
-import { type FieldValue, NumberFieldValueSchema } from './FieldBranch';
+import { type FieldValue, NumberFieldValueSchema } from './FieldBranch.ts';
 import { z } from 'zod';
 
 // Age-specific validators
 const ageValidators = [
-  (value: number) => !Number.isFinite(value) ? 'Please enter a valid number' : null,
-  (value: number) => value < 0 ? 'Age cannot be negative' : null,
-  (value: number) => !Number.isInteger(value) ? 'Age must be a whole number' : null,
-  (value: number) => value < 13 ? 'Users under 13 cannot create accounts due to COPPA regulations' : null,
-  (value: number) => value > 120 ? 'Age must be realistic (max 120)' : null,
+  (value: number) => (!Number.isFinite(value) ? 'Please enter a valid number' : null),
+  (value: number) => (value < 0 ? 'Age cannot be negative' : null),
+  (value: number) => (!Number.isInteger(value) ? 'Age must be a whole number' : null),
+  (value: number) =>
+    value < 13 ? 'Users under 13 cannot create accounts due to COPPA regulations' : null,
+  (value: number) => (value > 120 ? 'Age must be realistic (max 120)' : null),
 ];
 
 /**
@@ -22,7 +23,10 @@ export class AgeBranch extends Forest<FieldValue<number>> {
       ...params,
       // The $branch method provides parent, path, name automatically
       // We add field-specific prep function for validation
-      prep: (input: Partial<FieldValue<number>>, current: FieldValue<number>): FieldValue<number> => {
+      prep: (
+        input: Partial<FieldValue<number>>,
+        current: FieldValue<number>
+      ): FieldValue<number> => {
         const result = { ...current, ...input };
 
         // Set initial value if it doesn't exist - use ORIGINAL value, not updated value
@@ -56,11 +60,19 @@ export class AgeBranch extends Forest<FieldValue<number>> {
 
   // Age-specific methods
   setFromEvent(event: React.ChangeEvent<HTMLInputElement>) {
+    // Block changes if form is submitting
+    if (this.$root?.value?.isSubmitting) {
+      return;
+    }
     const numValue = parseInt(event.target.value) || 0;
     this.setValue(numValue);
   }
 
   setValue(newValue: number) {
+    // Block changes if form is submitting
+    if (this.$root?.value?.isSubmitting) {
+      return;
+    }
     this.mutate((draft: FieldValue<number>) => {
       draft.value = newValue;
       draft.isDirty = true;
@@ -68,14 +80,26 @@ export class AgeBranch extends Forest<FieldValue<number>> {
   }
 
   clear() {
+    // Block changes if form is submitting
+    if (this.$root?.value?.isSubmitting) {
+      return;
+    }
     this.setValue(0);
   }
 
   increment() {
+    // Block changes if form is submitting
+    if (this.$root?.value?.isSubmitting) {
+      return;
+    }
     this.setValue(this.value.value + 1);
   }
 
   decrement() {
+    // Block changes if form is submitting
+    if (this.$root?.value?.isSubmitting) {
+      return;
+    }
     if (this.value.value > 0) {
       this.setValue(this.value.value - 1);
     }

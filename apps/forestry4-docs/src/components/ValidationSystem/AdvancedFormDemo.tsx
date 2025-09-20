@@ -14,10 +14,10 @@ import {
 import useForestryLocal from '@/hooks/useForestryLocal.ts';
 import useErrorHandler from '@/hooks/useErrorHandler.ts';
 
-import formStateFactory, { FormState } from '@/storeFactories/ValidationSystem/formState.ts';
-import { usernameBranchConfig } from '@/storeFactories/ValidationSystem/usernameBranch.ts';
-import { emailBranchConfig } from '@/storeFactories/ValidationSystem/emailBranch.ts';
-import { ageBranchConfig } from '@/storeFactories/ValidationSystem/ageBranch.ts';
+import formStateFactory, { FormState } from '@/storeFactories/ValidationSystem/form/formState.ts';
+import { usernameBranchConfig } from '@/storeFactories/ValidationSystem/form/usernameBranch.ts';
+import { emailBranchConfig } from '@/storeFactories/ValidationSystem/form/emailBranch.ts';
+import { ageBranchConfig } from '@/storeFactories/ValidationSystem/form/ageBranch.ts';
 import CodeTabs from '@/components/CodeTabs';
 import Field from '@/components/ValidationSystem/Field';
 import Section from '../Section';
@@ -25,11 +25,11 @@ import Section from '../Section';
 const AdvancedFormDemo: React.FC = () => {
   const { handleSuccess, handleError } = useErrorHandler();
 
-  // Advanced form using extracted store factory
-  const [formState, formForest] = useForestryLocal<FormState>(formStateFactory, handleError);
-
-  console.log('formState:', formState);
-  // No need to create branches manually - Field components handle this internally
+  const [formState, formForest] = useForestryLocal<FormState>(
+    formStateFactory,
+    handleError,
+    handleSuccess
+  );
 
   return (
     <Section>

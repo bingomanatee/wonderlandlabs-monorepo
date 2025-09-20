@@ -26,6 +26,10 @@ function Field<T>({ parentStore, path, branchFactory, type, placeholder }: Field
   const hasError = fieldValue.error !== null;
   const borderColor = hasError ? 'red.300' : 'gray.200';
 
+  // Check if the root form is submitting to disable input
+  const isSubmitting = fieldStore.$root?.value?.isSubmitting || false;
+
+  console.log('$ of fieldStore', fieldStore.$);
   return (
     <Box>
       <Text mb={2} fontWeight="semibold">
@@ -34,13 +38,21 @@ function Field<T>({ parentStore, path, branchFactory, type, placeholder }: Field
       <Input
         type={type}
         value={fieldValue.value as string}
-        onChange={(e) => (fieldStore as any).setFromEvent(e)}
+        onChange={fieldStore.$.setFromEvent}
         borderColor={borderColor}
         placeholder={placeholder}
+        disabled={isSubmitting}
+        opacity={isSubmitting ? 0.6 : 1}
+        cursor={isSubmitting ? 'not-allowed' : 'text'}
       />
       {hasError && (
         <Text fontSize="sm" color="red.500" mt={1}>
           {fieldValue.error}
+        </Text>
+      )}
+      {isSubmitting && (
+        <Text fontSize="sm" color="blue.500" mt={1}>
+          Form is submitting...
         </Text>
       )}
     </Box>

@@ -1,22 +1,31 @@
 import React from 'react';
 import { Forest } from '@wonderlandlabs/forestry4';
-import { type FieldValue, StringFieldValueSchema } from './FieldBranch';
+import { type FieldValue, StringFieldValueSchema } from './FieldBranch.ts';
 import { z } from 'zod';
 
 // Email-specific validators
 const emailValidators = [
-  (value: string) => value.length > 100 ? 'Email too long (max 100 characters)' : null,
-  (value: string) => !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value) ? 'Invalid email format' : null,
+  (value: string) => (value.length > 100 ? 'Email too long (max 100 characters)' : null),
+  (value: string) => (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value) ? 'Invalid email format' : null),
   (value: string) => {
     const domain = value.split('@')[1]?.toLowerCase();
-    const disposableDomains = ['10minutemail.com', 'tempmail.org', 'guerrillamail.com', 'mailinator.com'];
-    return domain && disposableDomains.includes(domain) ? 'Disposable email addresses are not allowed' : null;
+    const disposableDomains = [
+      '10minutemail.com',
+      'tempmail.org',
+      'guerrillamail.com',
+      'mailinator.com',
+    ];
+    return domain && disposableDomains.includes(domain)
+      ? 'Disposable email addresses are not allowed'
+      : null;
   },
   (value: string) => {
     const domain = value.split('@')[1]?.toLowerCase();
     const restrictedDomains = ['competitor.com', 'blocked-company.com'];
-    return domain && restrictedDomains.includes(domain) ? 'Email domain is not allowed for registration' : null;
-  }
+    return domain && restrictedDomains.includes(domain)
+      ? 'Email domain is not allowed for registration'
+      : null;
+  },
 ];
 
 /**
@@ -29,7 +38,10 @@ export class EmailBranch extends Forest<FieldValue<string>> {
       ...params,
       // The $branch method provides parent, path, name automatically
       // We add field-specific prep function for validation
-      prep: (input: Partial<FieldValue<string>>, current: FieldValue<string>): FieldValue<string> => {
+      prep: (
+        input: Partial<FieldValue<string>>,
+        current: FieldValue<string>
+      ): FieldValue<string> => {
         const result = { ...current, ...input };
 
         // Set initial value if it doesn't exist - use ORIGINAL value, not updated value
@@ -63,10 +75,18 @@ export class EmailBranch extends Forest<FieldValue<string>> {
 
   // Email-specific methods
   setFromEvent(event: React.ChangeEvent<HTMLInputElement>) {
+    // Block changes if form is submitting
+    if (this.$root?.value?.isSubmitting) {
+      return;
+    }
     this.setValue(event.target.value);
   }
 
   setValue(newValue: string) {
+    // Block changes if form is submitting
+    if (this.$root?.value?.isSubmitting) {
+      return;
+    }
     this.mutate((draft: FieldValue<string>) => {
       draft.value = newValue;
       draft.isDirty = true;
@@ -74,6 +94,10 @@ export class EmailBranch extends Forest<FieldValue<string>> {
   }
 
   clear() {
+    // Block changes if form is submitting
+    if (this.$root?.value?.isSubmitting) {
+      return;
+    }
     this.setValue('');
   }
 
@@ -91,7 +115,12 @@ export class EmailBranch extends Forest<FieldValue<string>> {
   get isDisposable(): boolean {
     const domain = this.domain;
     if (!domain) return false;
-    const disposableDomains = ['10minutemail.com', 'tempmail.org', 'guerrillamail.com', 'mailinator.com'];
+    const disposableDomains = [
+      '10minutemail.com',
+      'tempmail.org',
+      'guerrillamail.com',
+      'mailinator.com',
+    ];
     return disposableDomains.includes(domain);
   }
 

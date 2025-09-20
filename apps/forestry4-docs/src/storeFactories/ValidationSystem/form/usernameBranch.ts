@@ -1,21 +1,25 @@
 import React from 'react';
 import { Forest } from '@wonderlandlabs/forestry4';
-import { type FieldValue, StringFieldValueSchema } from './FieldBranch';
+import { type FieldValue, StringFieldValueSchema } from './FieldBranch.ts';
 import { z } from 'zod';
 
 // Username-specific validators
 const usernameValidators = [
-  (value: string) => value.length < 3 ? 'Username too short (min 3 characters)' : null,
-  (value: string) => value.length > 20 ? 'Username too long (max 20 characters)' : null,
-  (value: string) => value.includes(' ') ? 'Username cannot contain spaces' : null,
+  (value: string) => (value.length < 3 ? 'Username too short (min 3 characters)' : null),
+  (value: string) => (value.length > 20 ? 'Username too long (max 20 characters)' : null),
+  (value: string) => (value.includes(' ') ? 'Username cannot contain spaces' : null),
   (value: string) => {
     const reservedUsernames = ['admin', 'root', 'system', 'api', 'null', 'undefined'];
-    return reservedUsernames.includes(value.toLowerCase()) ? 'Username is reserved and cannot be used' : null;
+    return reservedUsernames.includes(value.toLowerCase())
+      ? 'Username is reserved and cannot be used'
+      : null;
   },
   (value: string) => {
     const inappropriateWords = ['spam', 'test123', 'delete', 'hack'];
-    return inappropriateWords.some(word => value.toLowerCase().includes(word)) ? 'Username contains inappropriate content' : null;
-  }
+    return inappropriateWords.some((word) => value.toLowerCase().includes(word))
+      ? 'Username contains inappropriate content'
+      : null;
+  },
 ];
 
 /**
@@ -28,7 +32,10 @@ export class UsernameBranch extends Forest<FieldValue<string>> {
       ...params,
       // The $branch method provides parent, path, name automatically
       // We add field-specific prep function for validation
-      prep: (input: Partial<FieldValue<string>>, current: FieldValue<string>): FieldValue<string> => {
+      prep: (
+        input: Partial<FieldValue<string>>,
+        current: FieldValue<string>
+      ): FieldValue<string> => {
         const result = { ...current, ...input };
 
         // Set initial value if it doesn't exist - use ORIGINAL value, not updated value
@@ -62,10 +69,18 @@ export class UsernameBranch extends Forest<FieldValue<string>> {
 
   // Username-specific methods
   setFromEvent(event: React.ChangeEvent<HTMLInputElement>) {
+    // Block changes if form is submitting
+    if (this.$root?.value?.isSubmitting) {
+      return;
+    }
     this.setValue(event.target.value);
   }
 
   setValue(newValue: string) {
+    // Block changes if form is submitting
+    if (this.$root?.value?.isSubmitting) {
+      return;
+    }
     this.mutate((draft: FieldValue<string>) => {
       draft.value = newValue;
       draft.isDirty = true;
@@ -73,6 +88,10 @@ export class UsernameBranch extends Forest<FieldValue<string>> {
   }
 
   clear() {
+    // Block changes if form is submitting
+    if (this.$root?.value?.isSubmitting) {
+      return;
+    }
     this.setValue('');
   }
 

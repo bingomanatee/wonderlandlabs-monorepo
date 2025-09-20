@@ -1,7 +1,8 @@
 import { Forest } from '@wonderlandlabs/forestry4';
 import { z } from 'zod';
 import React from 'react';
-import { NumberFieldValueSchema, StringFieldValueSchema } from './FieldBranch';
+import { NumberFieldValueSchema, StringFieldValueSchema } from './FieldBranch.ts';
+import type { FeedbackFn } from '@/hooks/useErrorHandler.ts';
 
 // Zod schema for the form state
 export const FormStateSchema = z.object({
@@ -29,11 +30,15 @@ const INITIAL: FormState = {
  * Modern Forestry 4.1.3 subclass for advanced form state management
  */
 export class FormStateForest extends Forest<FormState> {
-  constructor() {
+  constructor(handleError: FeedbackFn, handleSuccess: FeedbackFn) {
     super({
       name: 'advanced-form',
       schema: FormStateSchema,
       value: INITIAL,
+      res: new Map([
+        ['handleError', handleError],
+        ['handleSuccess', handleSuccess],
+      ]),
       prep: (input: Partial<FormState>, current: FormState): FormState => {
         const result = { ...current, ...input };
 
@@ -80,28 +85,6 @@ export class FormStateForest extends Forest<FormState> {
     this.set('isSubmitting', !!isSubmitting);
   }
 
-  // Field update methods
-  updateUsername(newValue: string) {
-    this.mutate((draft) => {
-      draft.username.value = newValue;
-      draft.username.isDirty = true;
-    });
-  }
-
-  updateEmail(newValue: string) {
-    this.mutate((draft) => {
-      draft.email.value = newValue;
-      draft.email.isDirty = true;
-    });
-  }
-
-  updateAge(newValue: number) {
-    this.mutate((draft) => {
-      draft.age.value = newValue;
-      draft.age.isDirty = true;
-    });
-  }
-
   // Generic form change handler
   onChange(event: React.ChangeEvent<HTMLInputElement>) {
     const { name, value: fieldValue, type } = event.target;
@@ -132,6 +115,18 @@ export class FormStateForest extends Forest<FormState> {
     );
   }
 
+  submit() {
+    if (!this.canSubmit) {
+      return this.$res.get('handleError')?.('you cannot submit data', 'Submission Blocked');
+    }
+    this.set('isSubmitting', true);
+    this.$res.get('handleSuccess')?.('Your data has been submitted', 'Sim Submit');
+    const self = this;
+    setTimeout(() => {
+      self.reset();
+    }, 2000);
+  }
+
   get hasErrors(): boolean {
     return !this.isFormValid;
   }
@@ -142,6 +137,6 @@ export class FormStateForest extends Forest<FormState> {
 }
 
 // Factory function for useForestryLocal compatibility
-export default function formStateFactory() {
-  return new FormStateForest();
+export default function formStateFactory(handleError: FeedbackFn, handleSuccess: FeedbackFn) {
+  return new FormStateForest(handleError, handleSuccess);
 }

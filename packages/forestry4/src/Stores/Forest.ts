@@ -1,49 +1,32 @@
 import { Store } from './Store';
-import {
-  Path,
-  StoreParams,
-  StoreBranch,
-  ForestMessage,
-  BranchParams,
-  Listener,
-} from '../types';
-import { Subject, Subscription, map } from 'rxjs';
-import { pathString } from '../lib/combinePaths';
+import { ForestMessage, Listener, Path, StoreIF, StoreParams } from '../types';
+import { map, Subject, Subscription } from 'rxjs';
+import combinePaths, { pathString } from '../lib/combinePaths';
 import { produce } from 'immer';
-import { setPath, getPath } from '../lib/path';
+import { getPath, setPath } from '../lib/path';
 import asError from '../lib/asError';
 import { isStore } from '../typeguards';
 import { get, isEqual } from 'lodash-es';
 import { distinctUntilChanged } from 'rxjs/operators';
-import combinePaths from '../lib/combinePaths';
 
 export class Forest<DataType>
   extends Store<DataType>
-  implements StoreBranch<DataType>
+  implements StoreIF<DataType>
 {
   #parentSub?: Subscription;
 
-  constructor(p: StoreParams<DataType>);
-  constructor(
-    p: BranchParams<DataType>,
-    $path: Path,
-    $parent: StoreBranch<unknown>,
-  );
-  constructor(
-    p: StoreParams<DataType> | BranchParams<DataType>,
-    public readonly $path?: Path,
-    public readonly $parent?: StoreBranch<unknown>,
-  ) {
+  constructor(p: StoreParams<DataType>) {
+    const { path, parent } = p;
     // Determine if this is a branch (has both path and parent) or root
-    const isBranch = $path !== undefined && $parent !== undefined;
+    const isBranch = path !== undefined && parent !== undefined;
 
     if (isBranch) {
       // Handle branch construction
-      if (!isStore($parent)) {
+      if (!isStore(parent)) {
         throw new Error('Forest branches must have parents');
       }
 
-      const branchValue = getPath($parent.value, $path) as DataType;
+      const branchValue = getPath(parent?.value, path) as DataType;
       super(
         {
           ...p,
@@ -51,20 +34,20 @@ export class Forest<DataType>
         },
         true, // noSubject = true for branches (they use parent's subject)
       );
-
+      this.$path = path;
+      this.$parent = parent;
       // Subscribe to parent messages
-      this.#parentSub = $parent.receiver.subscribe((message) => {
+      this.#parentSub = parent.receiver.subscribe((message) => {
         this.handleMessage(message);
       });
     } else {
       // Handle root construction - no subject needed for branches
-      super(p as StoreParams<DataType>, false); // noSubject = false for roots (they need their own subject)
-
-      // Ensure root properties are set correctly
-      (this as any).$path = [];
-      (this as any).$parent = undefined;
+      super(p); // noSubject = false for roots (they need their own subject)
     }
   }
+
+  readonly $path?: Path = [];
+  readonly $parent?: StoreIF<unknown>;
 
   get $isRoot() {
     return !this.$parent;
@@ -95,11 +78,11 @@ export class Forest<DataType>
     }
   }
 
-  get $root(): StoreBranch<unknown> {
+  get $root(): StoreIF<unknown> | undefined {
     if (this.$isRoot) {
       return this;
     }
-    return this.$parent!.$root;
+    return this.$parent?.$root;
   }
 
   // Override complete to handle forest-wide completion
@@ -217,29 +200,25 @@ export class Forest<DataType>
     return this.next(newValue);
   }
 
-  $branch<Type, Subclass extends StoreBranch<Type> = StoreBranch<Type>>(
+  $branch<Type, Subclass extends StoreIF<Type> = StoreIF<Type>>(
     path: Path,
-    params: BranchParams<Type, Subclass>,
+    params: StoreParams<Type, Subclass>,
   ): Subclass {
     const name = this.$name + '.' + pathString(path);
     if (params.subclass) {
-      return new params.subclass(
-        {
-          name,
-          ...params,
-        },
-        path,
-        this,
-      );
-    }
-    return new Forest<Type>(
-      {
+      return new params.subclass({
         name,
         ...params,
-      },
+        path,
+        parent: this,
+      });
+    }
+    return new Forest<Type>({
+      name,
+      ...params,
+      parent: this,
       path,
-      this,
-    ) as unknown as Subclass;
+    }) as unknown as Subclass;
   }
 
   // Branch-specific methods (from ForestBranch)
@@ -288,6 +267,4 @@ export class Forest<DataType>
       );
     }
   }
-
-
 }

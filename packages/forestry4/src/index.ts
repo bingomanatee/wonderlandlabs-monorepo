@@ -16,6 +16,5 @@ export type {
   StoreBranch,
   ResourceMap,
   StoreParams,
-  BranchParams,
   Path,
 } from './types';

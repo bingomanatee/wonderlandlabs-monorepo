@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-import { Observable, Observer, Subscription } from 'rxjs';
+import { Observable, Observer, SubjectLike, Subscription } from 'rxjs';
 import { ZodParser } from './typeguards';
 
 export type TransParams = {
@@ -65,50 +65,47 @@ export type PendingValue<DataType = unknown> = {
 };
 
 export interface StoreIF<DataType> {
-  value: DataType;
+  $broadcast: (message: unknown, down?: boolean) => void;
+  $isRoot: boolean;
+
+  $isValid(value: unknown): boolean;
+
   $name: string;
 
-  subscribe(listener: Listener<DataType>): Subscription;
+  $parent?: StoreIF<unknown> | undefined;
+  $path?: Path | undefined;
+  $res: Map<string, any>;
 
+  // Resource map for non-immutable external resources (DOM, WebGL, etc.)
+  $root: StoreIF<unknown>;
+
+  $schema?: ZodParser;
+
+  $test(value: unknown): Validity;
+
+  // validators
   $transact(params: TransParams | TransFn<DataType>, suspend?: boolean): void;
+
+  $validate(value: unknown): Validity;
+
+  complete: () => DataType;
+
+  get(path?: Path): any;
+
+  // Core utility methods
+  isActive: boolean;
+
+  mutate(producerFn: (draft: DataType) => void, path?: Path): DataType;
 
   next: (value: Partial<DataType>) => void;
 
-  // Resource map for non-immutable external resources (DOM, WebGL, etc.)
-  $res: Map<string, any>;
+  receiver: SubjectLike<unknown>;
 
-  complete: () => DataType;
-  isActive: boolean;
-
-  // validators
-  $schema?: ZodParser;
-  $test(value: unknown): Validity;
-  $validate(value: unknown): Validity;
-  $isValid(value: unknown): boolean;
-
-  // Core utility methods
-  get(path?: Path): any;
   set(path: Path, value: unknown): void;
-  mutate(producerFn: (draft: DataType) => void, path?: Path): DataType;
 
-  $root: StoreIF<unknown>;
-  $isRoot: boolean;
-  $parent?: StoreIF<unknown>;
-  $broadcast: (message: unknown, down?: boolean) => void;
-}
+  subscribe(listener: Listener<DataType>): Subscription;
 
-export interface StoreBranch<DataType> extends StoreIF<DataType> {
-  $path: Path;
-  $root: StoreBranch<unknown>;
-  $isRoot: boolean;
-  $parent?: StoreBranch<unknown>;
-  $broadcast: (message: unknown, fromRoot?: boolean) => void;
-  set(path: Path, value: unknown): void;
-  $subject: Observable<DataType>;
-  $branch<Type, Subclass extends StoreBranch<Type> = StoreBranch<Type>>(
-    path: Path,
-    params: BranchParams<Type, Subclass>,
-  ): Subclass;
+  value: DataType;
 }
 
 // Resource map for managing non-immutable external resources
@@ -118,7 +115,7 @@ export type ValueTestFn<DataType> = (
   store: StoreIF<DataType>,
 ) => null | void | string;
 
-export type StoreParams<DataType> = {
+export type StoreParams<DataType, SubClass = StoreIF<DataType>> = {
   value: DataType;
   schema?: z.ZodSchema<DataType>;
   tests?: ValueTestFn<DataType> | ValueTestFn<DataType>[];
@@ -131,21 +128,9 @@ export type StoreParams<DataType> = {
   name?: string;
   debug?: boolean;
   res?: Map<string, any>;
-};
-
-// Specific type for $branch parameters that properly types the subclass
-export type BranchParams<DataType, Subclass extends StoreBranch<DataType> = StoreBranch<DataType>> = {
-  schema?: z.ZodSchema<DataType>;
-  tests?: ValueTestFn<DataType> | ValueTestFn<DataType>[];
-  prep?: (
-    input: Partial<DataType>,
-    current: DataType,
-    initial: DataType,
-  ) => DataType;
-  name?: string;
-  debug?: boolean;
-  res?: Map<string, any>;
-  subclass?: Subclass;
+  path?: Path;
+  parent?: StoreIF<unknown>;
+  subclass?: SubClass;
 };
 
 type PathElement = string;

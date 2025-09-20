@@ -18,19 +18,19 @@ interface AppState {
 
 class UserProfileBranch extends Forest<UserProfile> {
   updateName(name: string) {
-    this.mutate(draft => {
+    this.mutate((draft) => {
       draft.name = name;
     });
   }
 
   updateEmail(email: string) {
-    this.mutate(draft => {
+    this.mutate((draft) => {
       draft.email = email;
     });
   }
 
   incrementAge() {
-    this.mutate(draft => {
+    this.mutate((draft) => {
       draft.age += 1;
     });
   }
@@ -45,9 +45,9 @@ class AppForest extends Forest<AppState> {
     super({
       value: {
         user: { name: 'John', email: 'john@example.com', age: 30 },
-        settings: { theme: 'light', notifications: true }
+        settings: { theme: 'light', notifications: true },
       },
-      name: 'app'
+      name: 'app',
     });
   }
 
@@ -57,19 +57,20 @@ class AppForest extends Forest<AppState> {
       schema: z.object({
         name: z.string().min(1),
         email: z.string().email(),
-        age: z.number().min(0)
-      })
+        age: z.number().min(0),
+      }),
     });
   }
 
   toggleTheme() {
-    this.mutate(draft => {
-      draft.settings.theme = draft.settings.theme === 'light' ? 'dark' : 'light';
+    this.mutate((draft) => {
+      draft.settings.theme =
+        draft.settings.theme === 'light' ? 'dark' : 'light';
     });
   }
 
   toggleNotifications() {
-    this.mutate(draft => {
+    this.mutate((draft) => {
       draft.settings.notifications = !draft.settings.notifications;
     });
   }
@@ -80,7 +81,7 @@ describe('Forest Refactored', () => {
     it('should create a forest with initial value', () => {
       const forest = new Forest({
         value: { count: 0, name: 'test' },
-        name: 'simple'
+        name: 'simple',
       });
 
       expect(forest.value.count).toBe(0);
@@ -91,7 +92,7 @@ describe('Forest Refactored', () => {
 
     it('should update forest value', () => {
       const forest = new Forest({
-        value: { count: 0 }
+        value: { count: 0 },
       });
 
       forest.next({ count: 5 });
@@ -100,10 +101,10 @@ describe('Forest Refactored', () => {
 
     it('should support mutation', () => {
       const forest = new Forest({
-        value: { items: ['a', 'b'], total: 2 }
+        value: { items: ['a', 'b'], total: 2 },
       });
 
-      forest.mutate(draft => {
+      forest.mutate((draft) => {
         draft.items.push('c');
         draft.total = draft.items.length;
       });
@@ -118,8 +119,8 @@ describe('Forest Refactored', () => {
       const forest = new Forest({
         value: {
           user: { name: 'John', age: 30 },
-          settings: { theme: 'light' }
-        }
+          settings: { theme: 'light' },
+        },
       });
 
       const userBranch = forest.$branch(['user'], {});
@@ -189,7 +190,7 @@ describe('Forest Refactored', () => {
 
     it('should notify branch subscribers when parent changes', () => {
       const forest = new Forest({
-        value: { user: { name: 'John' }, other: 'data' }
+        value: { user: { name: 'John' }, other: 'data' },
       });
 
       const userBranch = forest.$branch(['user'], {});
@@ -198,7 +199,7 @@ describe('Forest Refactored', () => {
       userBranch.subscribe(listener);
       expect(listener).toHaveBeenCalledWith({ name: 'John' });
 
-      forest.mutate(draft => {
+      forest.mutate((draft) => {
         draft.user.name = 'Jane';
       });
 
@@ -207,7 +208,7 @@ describe('Forest Refactored', () => {
 
     it('should notify parent subscribers when branch changes', () => {
       const forest = new Forest({
-        value: { user: { name: 'John' }, count: 0 }
+        value: { user: { name: 'John' }, count: 0 },
       });
 
       const userBranch = forest.$branch(['user'], {});
@@ -220,7 +221,7 @@ describe('Forest Refactored', () => {
 
       expect(parentListener).toHaveBeenCalledWith({
         user: { name: 'Jane' },
-        count: 0
+        count: 0,
       });
     });
   });

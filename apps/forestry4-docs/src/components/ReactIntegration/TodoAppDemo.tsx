@@ -14,7 +14,6 @@ import useForestryLocal from '@/hooks/useForestryLocal';
 import { createTodoStore, TodoState } from '@/storeFactories/createTodoStore.tsx';
 
 const TodoAppDemo: React.FC = () => {
-  return ''; // TEMPORARILY DISABLED FOR 4.1.3 MIGRATION
   // Use useForestryLocal hook instead of manual subscription
   const [todoValue, todoStore] = useForestryLocal<TodoState>(createTodoStore);
 
@@ -22,6 +21,7 @@ const TodoAppDemo: React.FC = () => {
   if (!todoValue) {
     return <Text>Loading...</Text>;
   }
+  const filteredTodos = todoStore.$.filteredTodos();
 
   return (
     <SimpleGrid columns={{ base: 1, lg: 2 }} spacing={6}>
@@ -59,7 +59,7 @@ const TodoAppDemo: React.FC = () => {
               colorScheme="forest"
               onClick={todoStore.$.setFilterAll}
             >
-              All ({todoValue.todos.length})
+              Show All ({todoValue.todos.length})
             </Button>
             <Button
               size="sm"
@@ -67,7 +67,7 @@ const TodoAppDemo: React.FC = () => {
               colorScheme="forest"
               onClick={todoStore.$.setFilterActive}
             >
-              Active ({todoStore.$.activeCount()})
+              Show Active ({todoStore.$.activeCount()})
             </Button>
             <Button
               size="sm"
@@ -75,7 +75,7 @@ const TodoAppDemo: React.FC = () => {
               colorScheme="forest"
               onClick={todoStore.$.setFilterCompleted}
             >
-              Completed ({todoStore.$.completedCount()})
+              Show Completed ({todoStore.$.completedCount()})
             </Button>
           </HStack>
         </Box>
@@ -104,7 +104,7 @@ const TodoAppDemo: React.FC = () => {
           borderRadius="md"
           p={4}
         >
-          {todoStore.$.filteredTodos().length === 0 ? (
+          {filteredTodos.length === 0 ? (
             <Text color="gray.500" fontStyle="italic" textAlign="center">
               {todoValue.filter === 'all'
                 ? 'No todos yet!'
@@ -114,7 +114,7 @@ const TodoAppDemo: React.FC = () => {
             </Text>
           ) : (
             <VStack spacing={3} align="stretch">
-              {todoStore.$.filteredTodos().map((todo) => (
+              {filteredTodos.map((todo) => (
                 <HStack key={todo.id} p={3} bg="gray.50" borderRadius="md">
                   <Checkbox
                     isChecked={todo.completed}

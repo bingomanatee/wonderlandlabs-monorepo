@@ -17,6 +17,7 @@ import { enableMapSet, produce } from 'immer';
 import { testize } from './helpers';
 import { getPath, setPath } from '../lib/path';
 import { pathString } from '../lib/combinePaths';
+import bindActions, { FnRecord } from '../lib/bindActions';
 
 // Enable Immer support for Map and Set
 enableMapSet();
@@ -24,8 +25,7 @@ enableMapSet();
 /**
  * @internal Base implementation class - not intended for direct use
  */
-export class Store<DataType> implements StoreIF<DataType>
-{
+export class Store<DataType> implements StoreIF<DataType> {
   constructor(p: StoreParams<DataType>, noSubject = false) {
     // Apply prep function to initial value if it exists
     if (!noSubject) {
@@ -63,8 +63,6 @@ export class Store<DataType> implements StoreIF<DataType>
   get $subject(): Observable<DataType> {
     return this.#subject!;
   }
-
-
 
   public debug: boolean; // more alerts on validation failures;
   #prep?: (input: Partial<DataType>, current: DataType) => DataType;
@@ -209,6 +207,15 @@ export class Store<DataType> implements StoreIF<DataType>
         this.next(last.value);
       }
     }
+  }
+
+  _$?: Record<string, (...args: any[]) => unknown>;
+
+  get $() {
+    if (!this._$) {
+      this._$ = bindActions(this as unknown as FnRecord);
+    }
+    return this._$;
   }
 
   queuePendingValue(value: DataType): string {

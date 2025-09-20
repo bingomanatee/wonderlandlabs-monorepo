@@ -1,116 +1,98 @@
-import { FormField } from '@/types.ts';
+import React from 'react';
+import { Forest } from '@wonderlandlabs/forestry4';
+import { type FieldValue, StringFieldValueSchema } from './FieldBranch';
+import { z } from 'zod';
 
-type ErrorHandler = (error: Error | string, title?: string) => void;
+// Username-specific validators
+const usernameValidators = [
+  (value: string) => value.length < 3 ? 'Username too short (min 3 characters)' : null,
+  (value: string) => value.length > 20 ? 'Username too long (max 20 characters)' : null,
+  (value: string) => value.includes(' ') ? 'Username cannot contain spaces' : null,
+  (value: string) => {
+    const reservedUsernames = ['admin', 'root', 'system', 'api', 'null', 'undefined'];
+    return reservedUsernames.includes(value.toLowerCase()) ? 'Username is reserved and cannot be used' : null;
+  },
+  (value: string) => {
+    const inappropriateWords = ['spam', 'test123', 'delete', 'hack'];
+    return inappropriateWords.some(word => value.toLowerCase().includes(word)) ? 'Username contains inappropriate content' : null;
+  }
+];
 
-export function usernameBranchConfig(handleError?: ErrorHandler) {
-  return {
-  value: { value: '', isValid: true, errorString: '', dirty: false },
+/**
+ * Username-specific branch that extends Forest directly
+ * This will be connected to the parent FormStateForest at the 'username' path
+ */
+export class UsernameBranch extends Forest<FieldValue<string>> {
+  constructor(params: any) {
+    super({
+      ...params,
+      // The $branch method provides parent, path, name automatically
+      // We add field-specific prep function for validation
+      prep: (input: Partial<FieldValue<string>>, current: FieldValue<string>): FieldValue<string> => {
+        const result = { ...current, ...input };
 
-  actions: {
-    setValue: function(value: FormField<string>, newValue: string) {
-      this.next({ ...value, value: newValue, dirty: true })
-    },
-
-    // Event-centric action that extracts value from input events
-    setValueFromEvent: function(value: FormField<string>, event: React.ChangeEvent<HTMLInputElement>) {
-      this.$.setValue(event.target.value)
-    },
-
-    // Safe actions that catch validation errors and show toasts
-    ...(handleError ? {
-      safeSetValue: function(value: FormField<string>, newValue: string) {
-        try {
-          this.$.setValue(newValue);
-        } catch (error) {
-          handleError(error as Error, 'Username Validation Error');
+        // Set initial value if it doesn't exist - use ORIGINAL value, not updated value
+        if (!this.$res.has('initialValue')) {
+          this.$res.set('initialValue', current.value);
         }
+
+        const initialValue = this.$res.get('initialValue');
+        // Don't override isDirty if it's already set to true
+        if (!result.isDirty) {
+          result.isDirty = result.value !== initialValue;
+        }
+
+        // Run username-specific validation when dirty
+        let error: string | null = null;
+        if (result.isDirty) {
+          for (const validator of usernameValidators) {
+            const validationError = validator(result.value);
+            if (validationError) {
+              error = validationError;
+              break;
+            }
+          }
+        }
+        result.error = error;
+
+        return result;
       },
+    });
+  }
 
-      safeSetValueFromEvent: function(value: FormField<string>, event: React.ChangeEvent<HTMLInputElement>) {
-        try {
-          this.$.setValueFromEvent(event);
-        } catch (error) {
-          handleError(error as Error, 'Username Validation Error');
-        }
-      }
-    } : {})
-  },
-  prep: function(input: Partial<FormField<string>>, current: FormField<string>): FormField<string> {
-    const result = { ...current, ...input }
+  // Username-specific methods
+  setFromEvent(event: React.ChangeEvent<HTMLInputElement>) {
+    this.setValue(event.target.value);
+  }
 
-    // ALL user validation feedback (real-time, only show errors when dirty)
-    let isValid = true
-    let errorString = ''
+  setValue(newValue: string) {
+    this.mutate((draft: FieldValue<string>) => {
+      draft.value = newValue;
+      draft.isDirty = true;
+    });
+  }
 
-    if (result.dirty && result.value.length > 0) {
-      if (result.value.length < 3) {
-        isValid = false
-        errorString = 'Username too short (min 3 characters)'
-      } else if (result.value.length > 20) {
-        isValid = false
-        errorString = 'Username too long (max 20 characters)'
-      } else if (result.value.includes(' ')) {
-        isValid = false
-        errorString = 'Username cannot contain spaces'
-      } else {
-        // Check for reserved usernames
-        const reservedUsernames = ['admin', 'root', 'system', 'api', 'null', 'undefined']
-        if (reservedUsernames.includes(result.value.toLowerCase())) {
-          isValid = false
-          errorString = 'Username is reserved and cannot be used'
-        }
+  clear() {
+    this.setValue('');
+  }
 
-        // Check for inappropriate content
-        const inappropriateWords = ['spam', 'test123', 'delete', 'hack']
-        if (inappropriateWords.some(word => result.value.toLowerCase().includes(word))) {
-          isValid = false
-          errorString = 'Username contains inappropriate content'
-        }
-      }
-    }
+  // Computed properties
+  get isValidLength(): boolean {
+    const length = this.value.value.length;
+    return length >= 3 && length <= 20;
+  }
 
-    return {
-      ...result,
-      isValid,
-      errorString
-    }
-  },
+  get isAvailable(): boolean {
+    // In a real app, this would check against a database
+    const reservedUsernames = ['admin', 'root', 'system', 'api', 'null', 'undefined'];
+    return !reservedUsernames.includes(this.value.value.toLowerCase());
+  }
+}
 
-  res: new Map([
-    // Reactive validation state for external consumption
-    ['validationStatus', function(field: FormField<string>) {
-      return {
-        isValid: field.isValid,
-        errorMessage: field.errorString,
-        hasError: !field.isValid,
-        fieldType: 'username'
-      }
-    }],
-
-    // Username quality metrics
-    ['usernameQuality', function(field: FormField<string>) {
-      return {
-        length: field.value.length,
-        hasMinLength: field.value.length >= 3,
-        hasMaxLength: field.value.length <= 20,
-        isAvailable: !['admin', 'root', 'system'].includes(field.value.toLowerCase())
-      }
-    }],
-
-    // Character analysis
-    ['characterAnalysis', function(field: FormField<string>) {
-      return {
-        hasLetters: /[a-zA-Z]/.test(field.value),
-        hasNumbers: /[0-9]/.test(field.value),
-        hasSpecialChars: /[^a-zA-Z0-9]/.test(field.value),
-        isAlphanumeric: /^[a-zA-Z0-9]+$/.test(field.value)
-      }
-    }]
-  ]),
-
-  tests: [
-    // Tests should only catch truly impossible states that indicate system bugs
-    // User input validation belongs in prep
-  ]
+// Branch configuration for use with $branch
+export function usernameBranchConfig() {
+  return {
+    subclass: UsernameBranch,
+    schema: StringFieldValueSchema,
   };
 }

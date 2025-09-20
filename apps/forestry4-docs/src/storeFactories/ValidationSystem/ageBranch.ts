@@ -1,103 +1,113 @@
+import React from 'react';
 import { Forest } from '@wonderlandlabs/forestry4';
-import { FormField } from '@/types.ts';
+import { type FieldValue, NumberFieldValueSchema } from './FieldBranch';
+import { z } from 'zod';
 
-type ErrorHandler = (error: Error | string, title?: string) => void;
+// Age-specific validators
+const ageValidators = [
+  (value: number) => !Number.isFinite(value) ? 'Please enter a valid number' : null,
+  (value: number) => value < 0 ? 'Age cannot be negative' : null,
+  (value: number) => !Number.isInteger(value) ? 'Age must be a whole number' : null,
+  (value: number) => value < 13 ? 'Users under 13 cannot create accounts due to COPPA regulations' : null,
+  (value: number) => value > 120 ? 'Age must be realistic (max 120)' : null,
+];
 
-// @TODO: the validationStatus here etc. looks malformed
-
-class AgeBranch extends Forest<FormField<number>> {
-
-  constructor(handleError?: ErrorHandler) {
+/**
+ * Age-specific branch that extends Forest directly
+ * This will be connected to the parent FormStateForest at the 'age' path
+ */
+export class AgeBranch extends Forest<FieldValue<number>> {
+  constructor(params: any) {
     super({
-      value: { value: 0, isValid: true, errorString: '', isDirty: false },
-      prep(input: Partial<FormField<number>>, current: FormField<number>): FormField<number> {
+      ...params,
+      // The $branch method provides parent, path, name automatically
+      // We add field-specific prep function for validation
+      prep: (input: Partial<FieldValue<number>>, current: FieldValue<number>): FieldValue<number> => {
         const result = { ...current, ...input };
 
-        // Set initial value if it doesn't exist, then check if dirty
-        if (!this.res.has('initialValue')) {
-          this.res.set('initialValue', result.value);
+        // Set initial value if it doesn't exist - use ORIGINAL value, not updated value
+        if (!this.$res.has('initialValue')) {
+          this.$res.set('initialValue', current.value);
         }
 
-        const initialValue = this.res.get('initialValue');
-        const isDirty = result.isDirty || result.value !== initialValue;
-
-        // Once dirty, stop checking - just validate
-        if (isDirty) {
-          result.isDirty = true;
+        const initialValue = this.$res.get('initialValue');
+        // Don't override isDirty if it's already set to true
+        if (!result.isDirty) {
+          result.isDirty = result.value !== initialValue;
         }
 
-        // ALL user validation feedback (only show errors when dirty)
-        let isValid = true;
-        let errorString = '';
-
-        if (isDirty) {
-          if (!Number.isFinite(result.value)) {
-            isValid = false;
-            errorString = 'Please enter a valid number';
-          } else if (result.value < 0) {
-            isValid = false;
-            errorString = 'Age cannot be negative';
-          } else if (!Number.isInteger(result.value)) {
-            isValid = false;
-            errorString = 'Age must be a whole number';
-          } else if (result.value < 13) {
-            isValid = false;
-            errorString = 'Users under 13 cannot create accounts due to COPPA regulations';
-          } else if (result.value > 120) {
-            isValid = false;
-            errorString = 'Age must be realistic (max 120)';
+        // Run age-specific validation when dirty
+        let error: string | null = null;
+        if (result.isDirty) {
+          for (const validator of ageValidators) {
+            const validationError = validator(result.value);
+            if (validationError) {
+              error = validationError;
+              break;
+            }
           }
         }
+        result.error = error;
 
-        return {
-          ...result,
-          isValid,
-          errorString,
-          isDirty,
-        };
-      }
-
-      res: new Map([
-        ['handleError', handleError],
-        // Reactive validation state for external consumption
-        [ 'validationStatus', (field: FormField<number>) => {
-          return {
-            isValid: field.isValid,
-            errorMessage: field.errorString,
-            hasError: !field.isValid,
-            fieldType: 'age',
-          };
-        } ],
-
-        // Business rule compliance status
-        [ 'coppaCompliant', (field: FormField<number>) => {
-          return field.value >= 13;
-        } ],
-
-        // Data quality indicators
-        [ 'dataQuality', (field: FormField<number>) => {
-          return {
-            isComplete: field.value > 0,
-            isRealistic: field.value <= 120,
-            isLegal: field.value >= 13,
-          };
-        } ],
-      ]),
+        return result;
+      },
     });
   }
 
-  setValue(newValue: number) {
-    this.set('value', newValue);
-  }
-
-  // Event-centric action that extracts and parses value from number input events
-  setValueFromEvent(valueString: string) {
-    const numValue = parseInt(valueString) || 0;
+  // Age-specific methods
+  setFromEvent(event: React.ChangeEvent<HTMLInputElement>) {
+    const numValue = parseInt(event.target.value) || 0;
     this.setValue(numValue);
   }
 
+  setValue(newValue: number) {
+    this.mutate((draft: FieldValue<number>) => {
+      draft.value = newValue;
+      draft.isDirty = true;
+    });
+  }
+
+  clear() {
+    this.setValue(0);
+  }
+
+  increment() {
+    this.setValue(this.value.value + 1);
+  }
+
+  decrement() {
+    if (this.value.value > 0) {
+      this.setValue(this.value.value - 1);
+    }
+  }
+
+  // Computed properties
+  get isMinor(): boolean {
+    return this.value.value < 18;
+  }
+
+  get isSenior(): boolean {
+    return this.value.value >= 65;
+  }
+
+  get isValidForRegistration(): boolean {
+    return this.value.value >= 13 && this.value.value <= 120;
+  }
+
+  get ageGroup(): 'child' | 'teen' | 'adult' | 'senior' | 'invalid' {
+    const age = this.value.value;
+    if (age < 0 || age > 120) return 'invalid';
+    if (age < 13) return 'child';
+    if (age < 18) return 'teen';
+    if (age < 65) return 'adult';
+    return 'senior';
+  }
 }
 
-export function ageBranchConfig(handleError?: ErrorHandler) {
-  return new AgeBranch(handleError);
+// Branch configuration for use with $branch
+export function ageBranchConfig() {
+  return {
+    subclass: AgeBranch,
+    schema: NumberFieldValueSchema,
+  };
 }

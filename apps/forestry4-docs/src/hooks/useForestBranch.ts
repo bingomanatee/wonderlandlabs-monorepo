@@ -2,32 +2,34 @@ import { useEffect, useRef, useState } from 'react';
 import type { StoreIF } from '@wonderlandlabs/forestry4';
 
 /**
- * Hook for creating and managing Forest branches
+ * Hook for creating and managing Forest branches using modern subclass pattern
  * @param store - The parent Forest store
  * @param path - The path for the branch (e.g., 'username', 'email')
- * @param storeParams - Partial store parameters for the branch (actions, tests, prep, etc.)
+ * @param branchConfigFactory - Factory function that returns branch configuration with subclass
+ * @param rest - Additional arguments passed to the branchConfigFactory
  * @returns [branchValue, branchStore] - The branch value and store instance
  */
 export default function useForestBranch<ValueType>(
   store: StoreIF<any>,
   path: string,
-  storeParams: Partial<{
-    actions: Record<string, Function>;
-    tests: Array<(value: ValueType) => string | null>;
-    prep: (input: Partial<ValueType>, current: ValueType) => ValueType;
-    name?: string;
-  }>
+  branchConfigFactory: (...args: any[]) => {
+    subclass: new () => StoreIF<ValueType>;
+    schema?: any;
+  },
+  ...rest: any[]
 ): [ValueType, StoreIF<ValueType>] {
   const branchRef = useRef<StoreIF<ValueType> | null>(null);
-  
+
   // Create branch if it doesn't exist
-  if (!branchRef.current && store && typeof (store as any).branch === 'function') {
-    branchRef.current = (store as any).branch(path, storeParams);
+  if (!branchRef.current && store && typeof (store as any)?.$branch === 'function') {
+    const branchConfig = branchConfigFactory(...rest);
+    branchRef.current = (store as any).$branch(path, branchConfig);
+    console.log('made branch:', branchRef.current, 'for path', path);
+  } else if (!branchRef.current) {
+    console.error('bad store ', store);
   }
 
-  const [value, setValue] = useState<ValueType>(
-    branchRef.current?.value
-  );
+  const [value, setValue] = useState<ValueType>(branchRef.current?.value);
 
   useEffect(() => {
     if (branchRef.current) {
@@ -39,5 +41,5 @@ export default function useForestBranch<ValueType>(
     }
   }, [branchRef.current]);
 
-  return [value, branchRef.current!];
+  return [value ?? branchRef.current?.value, branchRef.current!];
 }

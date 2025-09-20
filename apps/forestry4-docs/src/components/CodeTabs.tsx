@@ -59,9 +59,6 @@ const CodeTabs: React.FC<CodeTabsProps> = ({ tabs, defaultIndex = 0 }) => {
                 throw new Error(`Failed to load snippet: ${tab.snippet}`);
               }
               const text = await response.text();
-              console.log('config:', tab);
-              console.log('path: ', path);
-              console.log('  .... text = ', text.substring(0, 100).replace('\n', ''));
               // Filter out sync headers from auto-generated snippets
               const cleanText = text
                 .split('\n')

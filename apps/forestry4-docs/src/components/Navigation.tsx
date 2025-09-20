@@ -90,7 +90,7 @@ const Navigation: React.FC = () => {
       <Container maxW="container.xl">
         <Flex alignItems="center" justifyContent="space-between">
           {/* Logo */}
-          <HStack as={Link} spacing={2} mr={2} to="/" mr={10}>
+          <HStack as={Link} spacing={2} to="/" mr={10}>
             <Image w="32px" h="32px" src="/logo.png" />
 
             <Text fontSize="xl" fontWeight="bold" color="gray.800" whiteSpace="nowrap">

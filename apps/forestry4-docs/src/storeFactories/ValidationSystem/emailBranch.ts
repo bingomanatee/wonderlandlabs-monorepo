@@ -1,119 +1,112 @@
-import { FormField } from '@/types.ts';
+import React from 'react';
+import { Forest } from '@wonderlandlabs/forestry4';
+import { type FieldValue, StringFieldValueSchema } from './FieldBranch';
+import { z } from 'zod';
 
-type ErrorHandler = (error: Error | string, title?: string) => void;
+// Email-specific validators
+const emailValidators = [
+  (value: string) => value.length > 100 ? 'Email too long (max 100 characters)' : null,
+  (value: string) => !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value) ? 'Invalid email format' : null,
+  (value: string) => {
+    const domain = value.split('@')[1]?.toLowerCase();
+    const disposableDomains = ['10minutemail.com', 'tempmail.org', 'guerrillamail.com', 'mailinator.com'];
+    return domain && disposableDomains.includes(domain) ? 'Disposable email addresses are not allowed' : null;
+  },
+  (value: string) => {
+    const domain = value.split('@')[1]?.toLowerCase();
+    const restrictedDomains = ['competitor.com', 'blocked-company.com'];
+    return domain && restrictedDomains.includes(domain) ? 'Email domain is not allowed for registration' : null;
+  }
+];
 
-export function emailBranchConfig(handleError?: ErrorHandler) {
-  return {
-  value: { value: '', isValid: true, errorString: '', dirty: false },
+/**
+ * Email-specific branch that extends Forest directly
+ * This will be connected to the parent FormStateForest at the 'email' path
+ */
+export class EmailBranch extends Forest<FieldValue<string>> {
+  constructor(params: any) {
+    super({
+      ...params,
+      // The $branch method provides parent, path, name automatically
+      // We add field-specific prep function for validation
+      prep: (input: Partial<FieldValue<string>>, current: FieldValue<string>): FieldValue<string> => {
+        const result = { ...current, ...input };
 
-  actions: {
-    setValue: function(value: FormField<string>, newValue: string) {
-      this.next({ ...value, value: newValue, dirty: true })
-    },
-
-    // Event-centric action that extracts value from input events
-    setValueFromEvent: function(value: FormField<string>, event: React.ChangeEvent<HTMLInputElement>) {
-      this.$.setValue(event.target.value)
-    },
-
-    // Safe actions that catch validation errors and show toasts
-    ...(handleError ? {
-      safeSetValue: function(value: FormField<string>, newValue: string) {
-        try {
-          this.$.setValue(newValue);
-        } catch (error) {
-          handleError(error as Error, 'Email Validation Error');
+        // Set initial value if it doesn't exist - use ORIGINAL value, not updated value
+        if (!this.$res.has('initialValue')) {
+          this.$res.set('initialValue', current.value);
         }
+
+        const initialValue = this.$res.get('initialValue');
+        // Don't override isDirty if it's already set to true
+        if (!result.isDirty) {
+          result.isDirty = result.value !== initialValue;
+        }
+
+        // Run email-specific validation when dirty
+        let error: string | null = null;
+        if (result.isDirty) {
+          for (const validator of emailValidators) {
+            const validationError = validator(result.value);
+            if (validationError) {
+              error = validationError;
+              break;
+            }
+          }
+        }
+        result.error = error;
+
+        return result;
       },
+    });
+  }
 
-      safeSetValueFromEvent: function(value: FormField<string>, event: React.ChangeEvent<HTMLInputElement>) {
-        try {
-          this.$.setValueFromEvent(event);
-        } catch (error) {
-          handleError(error as Error, 'Email Validation Error');
-        }
-      }
-    } : {})
-  },
-  prep: function(input: Partial<FormField<string>>, current: FormField<string>): FormField<string> {
-    const result = { ...current, ...input }
+  // Email-specific methods
+  setFromEvent(event: React.ChangeEvent<HTMLInputElement>) {
+    this.setValue(event.target.value);
+  }
 
-    // ALL user validation feedback (real-time, only show errors when dirty)
-    let isValid = true
-    let errorString = ''
+  setValue(newValue: string) {
+    this.mutate((draft: FieldValue<string>) => {
+      draft.value = newValue;
+      draft.isDirty = true;
+    });
+  }
 
-    if (result.dirty && result.value.length > 0) {
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+  clear() {
+    this.setValue('');
+  }
 
-      if (result.value.length > 100) {
-        isValid = false
-        errorString = 'Email too long (max 100 characters)'
-      } else if (!emailRegex.test(result.value)) {
-        isValid = false
-        errorString = 'Invalid email format'
-      } else {
-        const domain = result.value.split('@')[1]?.toLowerCase()
+  // Computed properties
+  get domain(): string | null {
+    const email = this.value.value;
+    const parts = email.split('@');
+    return parts.length === 2 ? parts[1].toLowerCase() : null;
+  }
 
-        // Check for disposable email domains
-        const disposableDomains = ['10minutemail.com', 'tempmail.org', 'guerrillamail.com', 'mailinator.com']
-        if (domain && disposableDomains.includes(domain)) {
-          isValid = false
-          errorString = 'Disposable email addresses are not allowed'
-        }
+  get isValidFormat(): boolean {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.value.value);
+  }
 
-        // Check for restricted domains
-        const restrictedDomains = ['competitor.com', 'blocked-company.com']
-        if (domain && restrictedDomains.includes(domain)) {
-          isValid = false
-          errorString = 'Email domain is not allowed for registration'
-        }
-      }
-    }
+  get isDisposable(): boolean {
+    const domain = this.domain;
+    if (!domain) return false;
+    const disposableDomains = ['10minutemail.com', 'tempmail.org', 'guerrillamail.com', 'mailinator.com'];
+    return disposableDomains.includes(domain);
+  }
 
-    return {
-      ...result,
-      isValid,
-      errorString
-    }
-  },
+  get isRestricted(): boolean {
+    const domain = this.domain;
+    if (!domain) return false;
+    const restrictedDomains = ['competitor.com', 'blocked-company.com'];
+    return restrictedDomains.includes(domain);
+  }
+}
 
-  res: new Map([
-    // Reactive validation state for external consumption
-    ['validationStatus', function(field: FormField<string>) {
-      return {
-        isValid: field.isValid,
-        errorMessage: field.errorString,
-        hasError: !field.isValid,
-        fieldType: 'email'
-      }
-    }],
-
-    // Email domain analysis
-    ['domainAnalysis', function(field: FormField<string>) {
-      const domain = field.value.split('@')[1]?.toLowerCase() || ''
-      return {
-        domain,
-        isGmail: domain === 'gmail.com',
-        isOutlook: domain.includes('outlook') || domain.includes('hotmail'),
-        isCorporate: !['gmail.com', 'yahoo.com', 'hotmail.com', 'outlook.com'].includes(domain),
-        isDisposable: ['10minutemail.com', 'tempmail.org'].includes(domain)
-      }
-    }],
-
-    // Email format quality
-    ['formatQuality', function(field: FormField<string>) {
-      return {
-        hasAtSymbol: field.value.includes('@'),
-        hasDomain: field.value.split('@').length === 2,
-        hasValidFormat: /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(field.value),
-        length: field.value.length
-      }
-    }]
-  ]),
-
-  tests: [
-    // Tests should only catch truly impossible states that indicate system bugs
-    // User input validation belongs in prep
-  ]
+// Branch configuration for use with $branch
+export function emailBranchConfig() {
+  return {
+    subclass: EmailBranch,
+    schema: StringFieldValueSchema,
   };
 }

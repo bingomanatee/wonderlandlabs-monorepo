@@ -1,37 +1,18 @@
 import React from 'react';
 import {
-  Container,
-  VStack,
-  Heading,
-  Text,
-  Badge,
-  Box,
   Alert,
   AlertIcon,
+  Badge,
+  Box,
+  Container,
+  Heading,
   List,
   ListItem,
-  ListIcon,
+  Text,
+  VStack,
 } from '@chakra-ui/react';
-import { CheckCircleIcon } from '@chakra-ui/icons';
 import AdvancedFormDemo from '../../components/ValidationSystem/AdvancedFormDemo';
-import CodeBlock from '../../components/CodeBlock';
 import SnippetBlock from '../../components/SnippetBlock';
-
-// Types for the form validation examples
-interface FormState {
-  username: string;
-  email: string;
-  password: string;
-  confirmPassword: string;
-  firstName: string;
-  lastName: string;
-  age: number;
-  agreeToTerms: boolean;
-  newsletter?: boolean;
-  interests?: string[];
-}
-
-
 
 const FormValidation: React.FC = () => {
   return (
@@ -58,30 +39,24 @@ const FormValidation: React.FC = () => {
           </Heading>
           <List spacing={2}>
             <ListItem>
-              <ListIcon as={CheckCircleIcon} color="green.500" />
               <strong>Field-Level Validation:</strong> Individual field validation with specific
               error messages
             </ListItem>
             <ListItem>
-              <ListIcon as={CheckCircleIcon} color="green.500" />
               <strong>Cross-Field Dependencies:</strong> Password confirmation, conditional required
               fields
             </ListItem>
             <ListItem>
-              <ListIcon as={CheckCircleIcon} color="green.500" />
               <strong>Async Validation:</strong> Username availability, email verification
             </ListItem>
             <ListItem>
-              <ListIcon as={CheckCircleIcon} color="green.500" />
               <strong>Dynamic Validation Rules:</strong> Rules that change based on other field
               values
             </ListItem>
             <ListItem>
-              <ListIcon as={CheckCircleIcon} color="green.500" />
               <strong>Error State Management:</strong> Field-specific error display and clearing
             </ListItem>
             <ListItem>
-              <ListIcon as={CheckCircleIcon} color="green.500" />
               <strong>Form Submission Flow:</strong> Validation before submission with loading
               states
             </ListItem>
@@ -165,8 +140,6 @@ const FormValidation: React.FC = () => {
             language="typescript"
             title="Form Schema with Complex Rules"
           />
-
-
         </Box>
 
         {/* Store Implementation */}
@@ -188,28 +161,22 @@ const FormValidation: React.FC = () => {
           </Heading>
           <List spacing={3}>
             <ListItem>
-              <ListIcon as={CheckCircleIcon} color="green.500" />
               <strong>Immediate Feedback:</strong> Validate fields as users type for better UX
             </ListItem>
             <ListItem>
-              <ListIcon as={CheckCircleIcon} color="green.500" />
               <strong>Progressive Enhancement:</strong> Start with basic validation, add async
               checks
             </ListItem>
             <ListItem>
-              <ListIcon as={CheckCircleIcon} color="green.500" />
               <strong>Clear Error Messages:</strong> Provide specific, actionable error information
             </ListItem>
             <ListItem>
-              <ListIcon as={CheckCircleIcon} color="green.500" />
               <strong>Loading States:</strong> Show progress during async validation and submission
             </ListItem>
             <ListItem>
-              <ListIcon as={CheckCircleIcon} color="green.500" />
               <strong>Accessibility:</strong> Proper ARIA labels and error associations
             </ListItem>
             <ListItem>
-              <ListIcon as={CheckCircleIcon} color="green.500" />
               <strong>Error Recovery:</strong> Allow users to easily correct and retry
             </ListItem>
           </List>

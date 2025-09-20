@@ -1,5 +1,85 @@
 // Auto-generated snippet from: apps/forestry4-docs/public/snippets/home/installation.sh
 // Description: Installation instructions for Forestry 4
+// Last synced: Sat Sep 20 13:42:05 PDT 2025
+// DO NOT EDIT - This file is automatically synced from the source
+
+// Auto-generated snippet from: apps/forestry4-docs/public/snippets/home/installation.sh
+// Description: Installation instructions for Forestry 4
+// Last synced: Sat Sep 20 13:35:30 PDT 2025
+// DO NOT EDIT - This file is automatically synced from the source
+
+// Auto-generated snippet from: apps/forestry4-docs/public/snippets/home/installation.sh
+// Description: Installation instructions for Forestry 4
+// Last synced: Sat Sep 20 13:31:32 PDT 2025
+// DO NOT EDIT - This file is automatically synced from the source
+
+// Auto-generated snippet from: apps/forestry4-docs/public/snippets/home/installation.sh
+// Description: Installation instructions for Forestry 4
+// Last synced: Sat Sep 20 13:29:21 PDT 2025
+// DO NOT EDIT - This file is automatically synced from the source
+
+// Auto-generated snippet from: apps/forestry4-docs/public/snippets/home/installation.sh
+// Description: Installation instructions for Forestry 4
+// Last synced: Sat Sep 20 13:14:48 PDT 2025
+// DO NOT EDIT - This file is automatically synced from the source
+
+// Auto-generated snippet from: apps/forestry4-docs/public/snippets/home/installation.sh
+// Description: Installation instructions for Forestry 4
+// Last synced: Sat Sep 20 13:14:09 PDT 2025
+// DO NOT EDIT - This file is automatically synced from the source
+
+// Auto-generated snippet from: apps/forestry4-docs/public/snippets/home/installation.sh
+// Description: Installation instructions for Forestry 4
+// Last synced: Sat Sep 20 13:07:23 PDT 2025
+// DO NOT EDIT - This file is automatically synced from the source
+
+// Auto-generated snippet from: apps/forestry4-docs/public/snippets/home/installation.sh
+// Description: Installation instructions for Forestry 4
+// Last synced: Sat Sep 20 13:05:18 PDT 2025
+// DO NOT EDIT - This file is automatically synced from the source
+
+// Auto-generated snippet from: apps/forestry4-docs/public/snippets/home/installation.sh
+// Description: Installation instructions for Forestry 4
+// Last synced: Sat Sep 20 13:04:18 PDT 2025
+// DO NOT EDIT - This file is automatically synced from the source
+
+// Auto-generated snippet from: apps/forestry4-docs/public/snippets/home/installation.sh
+// Description: Installation instructions for Forestry 4
+// Last synced: Sat Sep 20 13:03:06 PDT 2025
+// DO NOT EDIT - This file is automatically synced from the source
+
+// Auto-generated snippet from: apps/forestry4-docs/public/snippets/home/installation.sh
+// Description: Installation instructions for Forestry 4
+// Last synced: Sat Sep 20 13:00:40 PDT 2025
+// DO NOT EDIT - This file is automatically synced from the source
+
+// Auto-generated snippet from: apps/forestry4-docs/public/snippets/home/installation.sh
+// Description: Installation instructions for Forestry 4
+// Last synced: Sat Sep 20 12:23:14 PDT 2025
+// DO NOT EDIT - This file is automatically synced from the source
+
+// Auto-generated snippet from: apps/forestry4-docs/public/snippets/home/installation.sh
+// Description: Installation instructions for Forestry 4
+// Last synced: Sat Sep 20 12:14:06 PDT 2025
+// DO NOT EDIT - This file is automatically synced from the source
+
+// Auto-generated snippet from: apps/forestry4-docs/public/snippets/home/installation.sh
+// Description: Installation instructions for Forestry 4
+// Last synced: Sat Sep 20 11:39:51 PDT 2025
+// DO NOT EDIT - This file is automatically synced from the source
+
+// Auto-generated snippet from: apps/forestry4-docs/public/snippets/home/installation.sh
+// Description: Installation instructions for Forestry 4
+// Last synced: Fri Sep 19 21:34:25 PDT 2025
+// DO NOT EDIT - This file is automatically synced from the source
+
+// Auto-generated snippet from: apps/forestry4-docs/public/snippets/home/installation.sh
+// Description: Installation instructions for Forestry 4
+// Last synced: Fri Sep 19 21:30:33 PDT 2025
+// DO NOT EDIT - This file is automatically synced from the source
+
+// Auto-generated snippet from: apps/forestry4-docs/public/snippets/home/installation.sh
+// Description: Installation instructions for Forestry 4
 // Last synced: Thu Sep 18 21:57:37 PDT 2025
 // DO NOT EDIT - This file is automatically synced from the source
 

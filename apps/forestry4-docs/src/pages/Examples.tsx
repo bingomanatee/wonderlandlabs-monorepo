@@ -12,6 +12,7 @@ import {
   HStack,
   Icon,
   Link,
+  Button,
 } from '@chakra-ui/react';
 import { Link as RouterLink } from 'react-router-dom';
 import { CheckCircleIcon, StarIcon, SettingsIcon, LockIcon } from '@chakra-ui/icons';
@@ -21,24 +22,25 @@ const Examples: React.FC = () => {
     {
       title: 'Todo App',
       path: '/examples/todo-app',
-      badge: 'Complete Example',
+      badge: 'Classic example',
       badgeColor: 'green',
       icon: CheckCircleIcon,
-      description: 'A fully-featured todo application demonstrating action-based architecture, form handling, and React integration patterns.',
+      description:
+        'A fully-featured todo application demonstrating action-based architecture, form handling, and React integration patterns.',
       features: [
-        'Action-Based Architecture',
-        'Computed Values as Actions',
-        'Tactical Form Handling',
-        'useForestryLocal Integration',
+        'Fully dynamic properties',
+        'Event Listeners',
+        'Reactive feedback from data summary',
       ],
     },
     {
       title: 'Shopping Cart',
       path: '/examples/shopping-cart',
-      badge: 'Validation Focus',
+      badge: 'Validation',
       badgeColor: 'purple',
       icon: StarIcon,
-      description: 'A shopping cart application showcasing Forestry 4\'s validation system, schema integration, and complex business logic.',
+      description:
+        "A shopping cart application showcasing Forestry 4's validation system, schema integration, and complex business logic.",
       features: [
         'Zod Schema Validation',
         'Custom Test Functions',
@@ -52,7 +54,8 @@ const Examples: React.FC = () => {
       badge: 'Form Patterns',
       badgeColor: 'blue',
       icon: SettingsIcon,
-      description: 'Advanced form validation with field-level validation, cross-field dependencies, and async validation patterns.',
+      description:
+        'Advanced form validation with field-level validation, cross-field dependencies, and async validation patterns.',
       features: [
         'Field-Level Validation',
         'Cross-Field Dependencies',
@@ -63,10 +66,11 @@ const Examples: React.FC = () => {
     {
       title: 'Transaction Demo',
       path: '/examples/transaction-demo',
-      badge: 'Advanced Pattern',
+      badge: 'Atomic mutation',
       badgeColor: 'orange',
       icon: LockIcon,
-      description: 'Comprehensive transaction system example demonstrating atomic operations, rollback capabilities, and complex state management.',
+      description:
+        'Comprehensive transaction system example demonstrating atomic operations, rollback capabilities, and complex state management.',
       features: [
         'Atomic Operations',
         'Automatic Rollback',
@@ -80,12 +84,10 @@ const Examples: React.FC = () => {
     <Container maxW="container.xl" py={8}>
       <VStack spacing={8} align="stretch">
         <Box textAlign="center">
-          <Heading size="xl" mb={4}>
-            Practical Examples
-          </Heading>
+          <Heading variant="page">Practical Examples</Heading>
           <Text fontSize="lg" color="gray.600" maxW="2xl" mx="auto">
-            Real-world examples demonstrating Forestry 4's capabilities in various scenarios.
-            Each example showcases different aspects of the library with complete, working code.
+            Functioning examples demonstrating Forestry 4's capabilities in various scenarios. Each
+            example showcases different aspects of the library with complete, working code.
           </Text>
         </Box>
 
@@ -108,7 +110,7 @@ const Examples: React.FC = () => {
                   <HStack justify="space-between" align="start">
                     <HStack>
                       <Icon as={example.icon} color="forest.500" boxSize={5} />
-                      <Heading size="md">{example.title}</Heading>
+                      <Heading variant="card">{example.title}</Heading>
                     </HStack>
                     <Badge colorScheme={example.badgeColor} variant="subtle">
                       {example.badge}
@@ -135,15 +137,19 @@ const Examples: React.FC = () => {
                     </VStack>
                   </Box>
 
-                  <Link
-                    as="span"
-                    color="forest.600"
-                    fontWeight="semibold"
-                    fontSize="sm"
-                    _hover={{ color: 'forest.700' }}
-                  >
-                    View Example →
-                  </Link>
+                  <HStack justify="flex-end" width="full" flex={0}>
+                    <Link
+                      as="span"
+                      color="forest.600"
+                      fontWeight="semibold"
+                      fontSize="sm"
+                      _hover={{ color: 'forest.700' }}
+                    >
+                      <Button colorScheme="green" size="lg">
+                        View Example
+                      </Button>
+                    </Link>
+                  </HStack>
                 </VStack>
               </CardBody>
             </Card>
@@ -152,8 +158,8 @@ const Examples: React.FC = () => {
 
         <Box textAlign="center" mt={8}>
           <Text color="gray.500" fontSize="sm">
-            More examples coming soon! Each example includes live demos, complete source code,
-            and detailed explanations of the patterns used.
+            More examples coming soon! Each example includes live demos, complete source code, and
+            detailed explanations of the patterns used.
           </Text>
         </Box>
       </VStack>
@@ -161,4 +167,4 @@ const Examples: React.FC = () => {
   );
 };
 
-export default Examples
+export default Examples;

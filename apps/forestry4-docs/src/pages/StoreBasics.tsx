@@ -16,7 +16,7 @@ import {
   Badge,
   Image,
 } from '@chakra-ui/react';
-import CodeTabs from '../components/CodeTabs';
+import CodeTabs from '../components/CodeTabs.tsx';
 import SnippetBlock from '../components/SnippetBlock';
 import { Link } from 'react-router-dom';
 import useForestryLocal from '../hooks/useForestryLocal';

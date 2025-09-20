@@ -1,29 +1,16 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef } from 'react';
+import { Box, Tab, TabList, Tabs, TabPanels, useColorModeValue } from '@chakra-ui/react';
+import useForestryLocal from '../hooks/useForestryLocal.ts';
 import {
-  Box,
-  Tabs,
-  TabList,
-  TabPanels,
-  Tab,
-  TabPanel,
-  Code,
-  useColorModeValue,
-} from '@chakra-ui/react';
+  CodeTab,
+  CodeTabsState,
+  createCodeTabsStore,
+} from '../storeFactories/codeTabsStoreFactory.ts';
+import SingleTabPanel from './SingleTabPanel.tsx';
 import Prism from 'prismjs';
 import 'prismjs/themes/prism-tomorrow.css';
 import 'prismjs/components/prism-typescript';
 import 'prismjs/components/prism-jsx';
-import 'prismjs/components/prism-tsx';
-
-interface CodeTab {
-  label: string;
-  language: string;
-  code?: string;
-  snippet?: string;
-  folder?: string;
-  ts?: boolean;
-  tsx?: boolean;
-}
 
 interface CodeTabsProps {
   tabs: CodeTab[];
@@ -31,62 +18,34 @@ interface CodeTabsProps {
 }
 
 const CodeTabs: React.FC<CodeTabsProps> = ({ tabs, defaultIndex = 0 }) => {
-  const bg = useColorModeValue('gray.900', 'gray.800');
-  const [tabContents, setTabContents] = useState<string[]>([]);
-
-  useEffect(() => {
-    const loadSnippets = async () => {
-      const contents = await Promise.all(
-        tabs.map(async (tab) => {
-          if (tab.code) {
-            return tab.code;
-          } else if (tab.snippet) {
-            try {
-              const extension = tab.ts
-                ? '.ts.txt'
-                : tab.tsx
-                  ? '.tsx.txt'
-                  : tab.language === 'bash'
-                    ? '.sh'
-                    : tab.language === 'tsx'
-                      ? '.tsx.txt'
-                      : '.tsx.txt';
-              const path = tab.folder
-                ? `/snippets/${tab.folder}/${tab.snippet}${extension}`
-                : `/snippets/${tab.snippet}${extension}`;
-              const response = await fetch(path);
-              if (!response.ok) {
-                throw new Error(`Failed to load snippet: ${tab.snippet}`);
-              }
-              const text = await response.text();
-              // Filter out sync headers from auto-generated snippets
-              const cleanText = text
-                .split('\n')
-                .filter((line) => !line.startsWith('// Auto-generated snippet from:'))
-                .filter((line) => !line.startsWith('// Description:'))
-                .filter((line) => !line.startsWith('// Last synced:'))
-                .filter((line) => !line.startsWith('// DO NOT EDIT'))
-                .join('\n')
-                .replace(/^\n+/, ''); // Remove leading empty lines
-
-              return cleanText;
-            } catch (err) {
-              return `// Error loading snippet: ${tab.snippet}`;
-            }
-          }
-          return '// No content';
-        })
-      );
-      setTabContents(contents);
-    };
-
-    loadSnippets();
-  }, [tabs]);
   const borderColor = useColorModeValue('gray.200', 'gray.600');
+  const contentRefs = useRef<(HTMLDivElement | null)[]>([]);
 
+  // Use Forest store with factory function - useForestryLocal returns [value, store]
+  const [storeValue, store] = useForestryLocal<CodeTabsState>(
+    createCodeTabsStore,
+    tabs,
+    defaultIndex
+  );
+  const { tabContents, activeIndex, loading } = storeValue;
+
+  // Load snippets on mount or when tabs change
   useEffect(() => {
-    Prism.highlightAll();
-  }, [tabContents]);
+    store.loadAllSnippets(tabs);
+  }, [tabs, store]);
+
+  // Check if content needs expansion after render
+  useEffect(() => {
+    store.checkExpansionNeeds(contentRefs.current);
+  }, [tabContents, store]);
+
+  // Highlight code when content changes
+  useEffect(() => {
+    if (!loading) {
+      // Small delay to ensure DOM is updated
+      setTimeout(() => Prism.highlightAll(), 10);
+    }
+  }, [tabContents, loading]);
 
   return (
     <Box
@@ -97,7 +56,11 @@ const CodeTabs: React.FC<CodeTabsProps> = ({ tabs, defaultIndex = 0 }) => {
       my={4}
       width="full"
     >
-      <Tabs defaultIndex={defaultIndex} variant="enclosed">
+      <Tabs
+        index={activeIndex}
+        onChange={(index) => store.setActiveIndex(index)}
+        variant="enclosed"
+      >
         <TabList bg="gray.100" borderBottom="1px" borderColor={borderColor}>
           {tabs.map((tab, index) => (
             <Tab
@@ -105,42 +68,23 @@ const CodeTabs: React.FC<CodeTabsProps> = ({ tabs, defaultIndex = 0 }) => {
               fontSize="sm"
               fontWeight="medium"
               _selected={{
-                bg: bg,
+                bg: 'black',
                 color: 'white',
-                borderBottomColor: bg,
+                borderBottomColor: 'black',
               }}
             >
               {tab.label}
+              {tabContents[index]?.error && (
+                <Box as="span" color="red.400" fontSize="xs" ml={2}>
+                  ⚠️
+                </Box>
+              )}
             </Tab>
           ))}
         </TabList>
-        <TabPanels>
+        <TabPanels mt={0}>
           {tabs.map((tab, index) => (
-            <TabPanel key={index} p={0}>
-              <Box
-                as="pre"
-                bg={bg}
-                color="white"
-                p={4}
-                overflow="auto"
-                fontSize="sm"
-                fontFamily="mono"
-                lineHeight="1.5"
-              >
-                <Code
-                  as="code"
-                  className={`language-${tab.language}`}
-                  bg="transparent"
-                  color="inherit"
-                  p={0}
-                  fontSize="inherit"
-                  fontFamily="inherit"
-                  whiteSpace="pre"
-                >
-                  {tabContents[index] || '// Loading...'}
-                </Code>
-              </Box>
-            </TabPanel>
+            <SingleTabPanel key={index} tab={tab} tabIndex={index} store={store} />
           ))}
         </TabPanels>
       </Tabs>

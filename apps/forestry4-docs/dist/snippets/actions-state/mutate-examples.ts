@@ -1,5 +1,20 @@
 // Auto-generated snippet from: apps/forestry4-docs/public/snippets/actions-state/mutate-examples.ts
 // Description: Examples of using the mutate method with Immer
+// Last synced: Sat Sep 20 11:39:51 PDT 2025
+// DO NOT EDIT - This file is automatically synced from the source
+
+// Auto-generated snippet from: apps/forestry4-docs/public/snippets/actions-state/mutate-examples.ts
+// Description: Examples of using the mutate method with Immer
+// Last synced: Fri Sep 19 21:34:25 PDT 2025
+// DO NOT EDIT - This file is automatically synced from the source
+
+// Auto-generated snippet from: apps/forestry4-docs/public/snippets/actions-state/mutate-examples.ts
+// Description: Examples of using the mutate method with Immer
+// Last synced: Fri Sep 19 21:30:33 PDT 2025
+// DO NOT EDIT - This file is automatically synced from the source
+
+// Auto-generated snippet from: apps/forestry4-docs/public/snippets/actions-state/mutate-examples.ts
+// Description: Examples of using the mutate method with Immer
 // Last synced: Thu Sep 18 21:57:37 PDT 2025
 // DO NOT EDIT - This file is automatically synced from the source
 

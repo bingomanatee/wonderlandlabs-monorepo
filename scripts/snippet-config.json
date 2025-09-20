@@ -19,16 +19,16 @@
     {
       "name": "createTodoStore",
       "description": "Todo store factory from createTodoStore",
-      "source": "apps/forestry4-docs/src/storeFactories/createTodoStore.tsx",
-      "target": "apps/forestry4-docs/public/snippets/createTodoStore.tsx",
+      "source": "apps/forestry4-docs/src/storeFactories/createTodoStore.ts",
+      "target": "apps/forestry4-docs/public/snippets/createTodoStore.ts",
       "extractMode": "full",
       "language": "typescript"
     },
     {
-      "name": "createTransactionDemoStore",
-      "description": "Transaction demo store factory",
-      "source": "apps/forestry4-docs/src/storeFactories/createTransactionDemoStore.tsx",
-      "target": "apps/forestry4-docs/public/snippets/createTransactionDemoStore.tsx",
+      "name": "transactionDemoStoreFactory",
+      "description": "Transaction demo store factory with bank, order, and migration examples",
+      "source": "apps/forestry4-docs/src/storeFactories/transactionDemoStoreFactory.ts",
+      "target": "apps/forestry4-docs/public/snippets/transactionDemoStoreFactory.ts",
       "extractMode": "full",
       "language": "typescript"
     },
@@ -202,6 +202,119 @@
       "target": "apps/forestry4-docs/public/snippets/home/demo-jsx-template.tsx",
       "extractMode": "full",
       "language": "tsx"
+    },
+    {
+      "name": "counter-example-tests",
+      "description": "Basic counter example unit tests",
+      "source": "apps/forestry4-docs/src/__tests__/counter-example.test.ts",
+      "target": "apps/forestry4-docs/public/snippets/counter-example-tests.ts",
+      "extractMode": "full",
+      "language": "typescript"
+    },
+    {
+      "name": "advanced-counter-example-tests",
+      "description": "Advanced counter with history unit tests",
+      "source": "apps/forestry4-docs/src/__tests__/advanced-counter-example.test.ts",
+      "target": "apps/forestry4-docs/public/snippets/advanced-counter-example-tests.ts",
+      "extractMode": "full",
+      "language": "typescript"
+    },
+    {
+      "name": "user-profile-example-tests",
+      "description": "User profile store example unit tests",
+      "source": "apps/forestry4-docs/src/__tests__/user-profile-example.test.ts",
+      "target": "apps/forestry4-docs/public/snippets/user-profile-example-tests.ts",
+      "extractMode": "full",
+      "language": "typescript"
+    },
+    {
+      "name": "shopping-cart-example-tests",
+      "description": "Shopping cart store example unit tests",
+      "source": "apps/forestry4-docs/src/__tests__/shopping-cart-example.test.ts",
+      "target": "apps/forestry4-docs/public/snippets/shopping-cart-example-tests.ts",
+      "extractMode": "full",
+      "language": "typescript"
+    },
+    {
+      "name": "username-branch-example-tests",
+      "description": "Username branch validation example unit tests",
+      "source": "apps/forestry4-docs/src/__tests__/username-branch-example.test.ts",
+      "target": "apps/forestry4-docs/public/snippets/username-branch-example-tests.ts",
+      "extractMode": "full",
+      "language": "typescript"
+    },
+    {
+      "name": "transaction-demo-example-tests",
+      "description": "Transaction demo example unit tests covering bank, order, and migration stores",
+      "source": "apps/forestry4-docs/src/__tests__/transaction-demo-example.test.ts",
+      "target": "apps/forestry4-docs/public/snippets/transaction-demo-example-tests.ts",
+      "extractMode": "full",
+      "language": "typescript"
+    },
+    {
+      "name": "formValidationStoreFactory",
+      "description": "Advanced form validation store with Zod schema, async validation, and error handling",
+      "source": "apps/forestry4-docs/src/storeFactories/formValidationStoreFactory.ts",
+      "target": "apps/forestry4-docs/public/snippets/formValidationStoreFactory.ts",
+      "extractMode": "full",
+      "language": "typescript"
+    },
+    {
+      "name": "form-validation-example-tests",
+      "description": "Form validation example unit tests covering field validation, async validation, and form submission",
+      "source": "apps/forestry4-docs/src/__tests__/form-validation-example.test.ts",
+      "target": "apps/forestry4-docs/public/snippets/form-validation-example-tests.ts",
+      "extractMode": "full",
+      "language": "typescript"
+    },
+    {
+      "name": "UserRegistrationSchema",
+      "description": "Comprehensive Zod schema for user registration form with complex validation rules",
+      "source": "apps/forestry4-docs/src/examples/form-validation/UserRegistrationSchema.ts",
+      "target": "apps/forestry4-docs/public/snippets/UserRegistrationSchema.ts",
+      "extractMode": "full",
+      "language": "typescript"
+    },
+    {
+      "name": "formValidationStoreFactory",
+      "description": "Advanced form validation store with Zod schema, field validation, and error handling",
+      "source": "apps/forestry4-docs/src/storeFactories/formValidationStoreFactory.ts",
+      "target": "apps/forestry4-docs/public/snippets/formValidationStoreFactory.ts",
+      "extractMode": "full",
+      "language": "typescript"
+    },
+    {
+      "name": "todoAppStoreFactory",
+      "description": "Todo app store with filtering, editing, persistence, and comprehensive todo management",
+      "source": "apps/forestry4-docs/src/storeFactories/createTodoStore.ts",
+      "target": "apps/forestry4-docs/public/snippets/todoAppStoreFactory.ts",
+      "extractMode": "full",
+      "language": "typescript"
+    },  {
+      "name": "todoAppDemo",
+      "description": "todo component",
+      "source": "apps/forestry4-docs/src/pages/examples/TodoApp.tsx",
+      "target": "apps/forestry4-docs/public/snippets/TodoApp.tsx",
+      "extractMode": "full",
+      "language": "typescript"
+    },
+
+
+    {
+      "name": "shoppingCartStoreFactory",
+      "description": "Shopping cart store with validation, coupons, tax calculation, and checkout processing",
+      "source": "apps/forestry4-docs/src/storeFactories/ValidationSystem/shoppingCartStore.ts",
+      "target": "apps/forestry4-docs/public/snippets/shoppingCartStoreFactory.ts",
+      "extractMode": "full",
+      "language": "typescript"
+    },
+    {
+      "name": "codeTabsStoreFactory",
+      "description": "Forest-based CodeTabs store factory for managing tabbed code snippets",
+      "source": "apps/forestry4-docs/src/storeFactories/codeTabsStoreFactory.ts",
+      "target": "apps/forestry4-docs/public/snippets/codeTabsStoreFactory.ts",
+      "extractMode": "full",
+      "language": "typescript"
     }
   ]
 }

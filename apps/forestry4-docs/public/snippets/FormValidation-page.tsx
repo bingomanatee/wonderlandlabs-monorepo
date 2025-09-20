@@ -1,42 +1,23 @@
 // Auto-generated snippet from: apps/forestry4-docs/src/pages/examples/FormValidation.tsx
 // Description: Form validation example page
-// Last synced: Thu Sep 18 21:57:37 PDT 2025
+// Last synced: Sat Sep 20 13:42:04 PDT 2025
 // DO NOT EDIT - This file is automatically synced from the source
 
 import React from 'react';
 import {
-  Container,
-  VStack,
-  Heading,
-  Text,
-  Badge,
-  Box,
   Alert,
   AlertIcon,
+  Badge,
+  Box,
+  Container,
+  Heading,
   List,
   ListItem,
-  ListIcon,
+  Text,
+  VStack,
 } from '@chakra-ui/react';
-import { CheckCircleIcon } from '@chakra-ui/icons';
 import AdvancedFormDemo from '../../components/ValidationSystem/AdvancedFormDemo';
-import CodeBlock from '../../components/CodeBlock';
 import SnippetBlock from '../../components/SnippetBlock';
-
-// Types for the form validation examples
-interface FormState {
-  username: string;
-  email: string;
-  password: string;
-  confirmPassword: string;
-  firstName: string;
-  lastName: string;
-  age: number;
-  agreeToTerms: boolean;
-  newsletter?: boolean;
-  interests?: string[];
-}
-
-
 
 const FormValidation: React.FC = () => {
   return (
@@ -63,30 +44,24 @@ const FormValidation: React.FC = () => {
           </Heading>
           <List spacing={2}>
             <ListItem>
-              <ListIcon as={CheckCircleIcon} color="green.500" />
               <strong>Field-Level Validation:</strong> Individual field validation with specific
               error messages
             </ListItem>
             <ListItem>
-              <ListIcon as={CheckCircleIcon} color="green.500" />
               <strong>Cross-Field Dependencies:</strong> Password confirmation, conditional required
               fields
             </ListItem>
             <ListItem>
-              <ListIcon as={CheckCircleIcon} color="green.500" />
               <strong>Async Validation:</strong> Username availability, email verification
             </ListItem>
             <ListItem>
-              <ListIcon as={CheckCircleIcon} color="green.500" />
               <strong>Dynamic Validation Rules:</strong> Rules that change based on other field
               values
             </ListItem>
             <ListItem>
-              <ListIcon as={CheckCircleIcon} color="green.500" />
               <strong>Error State Management:</strong> Field-specific error display and clearing
             </ListItem>
             <ListItem>
-              <ListIcon as={CheckCircleIcon} color="green.500" />
               <strong>Form Submission Flow:</strong> Validation before submission with loading
               states
             </ListItem>
@@ -170,8 +145,6 @@ const FormValidation: React.FC = () => {
             language="typescript"
             title="Form Schema with Complex Rules"
           />
-
-
         </Box>
 
         {/* Store Implementation */}
@@ -179,119 +152,11 @@ const FormValidation: React.FC = () => {
           <Heading size="md" mb={4}>
             Store Implementation
           </Heading>
-          <CodeBlock language="typescript" title="Form Store with Advanced Validation">
-            {`const createFormStore = () => new Forest<FormState>({
-  name: 'registration-form',
-  value: initialFormState,
-  schema: UserRegistrationSchema,
-  
-  actions: {
-    // Field-specific validation
-    validateField: async function(value: FormState, fieldName: keyof FormState) {
-      try {
-        // Validate single field using schema
-        const fieldSchema = UserRegistrationSchema.shape[fieldName];
-        if (fieldSchema) {
-          fieldSchema.parse(value[fieldName]);
-        }
-        
-        // Run relevant async tests
-        const relevantTests = formTests.filter(test => 
-          test.toString().includes(fieldName)
-        );
-        
-        for (const test of relevantTests) {
-          const error = await test(value);
-          if (error) {
-            this.$.setFieldError(fieldName, error);
-            return;
-          }
-        }
-        
-        // Clear error if validation passes
-        this.$.clearFieldError(fieldName);
-      } catch (error) {
-        if (error instanceof z.ZodError) {
-          const fieldError = error.errors.find(e => 
-            e.path.includes(fieldName)
-          );
-          if (fieldError) {
-            this.$.setFieldError(fieldName, fieldError.message);
-          }
-        }
-      }
-    },
-    
-    // Update field with validation
-    updateField: function(value: FormState, fieldName: keyof FormState, fieldValue: any) {
-      this.set(fieldName, fieldValue);
-      
-      // Trigger validation for this field and dependent fields
-      this.$.validateField(fieldName);
-      
-      // Handle cross-field dependencies
-      if (fieldName === 'password') {
-        this.$.validateField('confirmPassword');
-      }
-      if (fieldName === 'newsletter') {
-        this.$.validateField('interests');
-      }
-    },
-    
-    // Set field error
-    setFieldError: function(value: FormState, fieldName: string, error: string) {
-      this.mutate(draft => {
-        if (!draft.errors) draft.errors = {};
-        draft.errors[fieldName] = error;
-      });
-    },
-    
-    // Clear field error
-    clearFieldError: function(value: FormState, fieldName: string) {
-      this.mutate(draft => {
-        if (draft.errors) {
-          delete draft.errors[fieldName];
-        }
-      });
-    },
-    
-    // Form submission with full validation
-    submitForm: async function(value: FormState) {
-      this.set('isSubmitting', true);
-      
-      try {
-        // Run full validation
-        const validation = await this.validate(value);
-        if (!validation.isValid) {
-          throw new Error(\`Form validation failed: \${validation.error}\`);
-        }
-        
-        // Submit to server
-        const result = await submitRegistration(value);
-        
-        this.set('isSubmitted', true);
-        this.set('submitMessage', 'Registration successful!');
-        
-        return result;
-      } catch (error) {
-        this.set('submitError', error.message);
-        throw error;
-      } finally {
-        this.set('isSubmitting', false);
-      }
-    },
-    
-    // Check if form is valid
-    isFormValid: function(value: FormState): boolean {
-      const hasErrors = value.errors && Object.keys(value.errors).length > 0;
-      const hasRequiredFields = value.username && value.email && 
-                               value.password && value.firstName && 
-                               value.lastName && value.agreeToTerms;
-      return !hasErrors && !!hasRequiredFields;
-    }
-  }
-});`}
-          </CodeBlock>
+          <SnippetBlock
+            snippetName="formValidationStoreFactory"
+            language="typescript"
+            title="Form Store with Advanced Validation"
+          />
         </Box>
 
         {/* Best Practices */}
@@ -301,28 +166,22 @@ const FormValidation: React.FC = () => {
           </Heading>
           <List spacing={3}>
             <ListItem>
-              <ListIcon as={CheckCircleIcon} color="green.500" />
               <strong>Immediate Feedback:</strong> Validate fields as users type for better UX
             </ListItem>
             <ListItem>
-              <ListIcon as={CheckCircleIcon} color="green.500" />
               <strong>Progressive Enhancement:</strong> Start with basic validation, add async
               checks
             </ListItem>
             <ListItem>
-              <ListIcon as={CheckCircleIcon} color="green.500" />
               <strong>Clear Error Messages:</strong> Provide specific, actionable error information
             </ListItem>
             <ListItem>
-              <ListIcon as={CheckCircleIcon} color="green.500" />
               <strong>Loading States:</strong> Show progress during async validation and submission
             </ListItem>
             <ListItem>
-              <ListIcon as={CheckCircleIcon} color="green.500" />
               <strong>Accessibility:</strong> Proper ARIA labels and error associations
             </ListItem>
             <ListItem>
-              <ListIcon as={CheckCircleIcon} color="green.500" />
               <strong>Error Recovery:</strong> Allow users to easily correct and retry
             </ListItem>
           </List>

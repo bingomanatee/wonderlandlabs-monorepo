@@ -33,10 +33,7 @@ class NavigationStore extends Forest<NavigationState> {
   setHoveredMenu(menuKey: string | null) {
     this.mutate((draft) => {
       draft.hoveredMenu = menuKey;
-      // If we're hovering over a different menu while one is open, switch to it
-      if (value.openMenu && menuKey && menuKey !== value.openMenu) {
-        draft.openMenu = menuKey;
-      }
+      draft.openMenu = menuKey;
     });
   }
 

@@ -22,7 +22,7 @@ import {
 } from '@chakra-ui/react';
 import { CheckCircleIcon, InfoIcon, WarningIcon } from '@chakra-ui/icons';
 import CodeBlock from '@/components/CodeBlock';
-import CodeTabs from '@/components/CodeTabs';
+import CodeTabs from '@/components/CodeTabs.tsx';
 import ItemDef from '@/components/ItemDef';
 import SnippetBlock from '@/components/SnippetBlock';
 import useForestryLocal from '@/hooks/useForestryLocal';
@@ -72,292 +72,286 @@ const Transactions: React.FC = () => {
 
         {/* Core Concepts */}
         <Section title="Core Transaction Concepts">
-
-            <SimpleGrid columns={{ base: 1, md: 2 }} spacing={6}>
-              <Box>
-                <Heading size="md" mb={3} color="green.600">
-                  <CheckCircleIcon mr={2} />
-                  Atomic Operations
-                </Heading>
-                <Text fontSize="sm" color="gray.600" mb={3}>
-                  All operations within a transaction succeed or fail together. No partial updates.
-                </Text>
-                <List spacing={2} fontSize="sm">
-                  <ListItem>
-                    <ListIcon as={CheckCircleIcon} color="green.500" />
-                    Multiple state changes grouped together
-                  </ListItem>
-                  <ListItem>
-                    <ListIcon as={CheckCircleIcon} color="green.500" />
-                    Automatic rollback on any failure
-                  </ListItem>
-                  <ListItem>
-                    <ListIcon as={CheckCircleIcon} color="green.500" />
-                    Maintains data consistency
-                  </ListItem>
-                </List>
-              </Box>
-
-              <Box>
-                <Heading size="md" mb={3} color="blue.600">
-                  <InfoIcon mr={2} />
-                  Validation Suspension
-                </Heading>
-                <Text fontSize="sm" color="gray.600" mb={3}>
-                  Temporarily allow invalid intermediate states during complex operations.
-                </Text>
-                <List spacing={2} fontSize="sm">
-                  <ListItem>
-                    <ListIcon as={InfoIcon} color="blue.500" />
-                    Suspend validation during transaction
-                  </ListItem>
-                  <ListItem>
-                    <ListIcon as={InfoIcon} color="blue.500" />
-                    Final state must still be valid
-                  </ListItem>
-                  <ListItem>
-                    <ListIcon as={InfoIcon} color="blue.500" />
-                    Enables complex multi-step operations
-                  </ListItem>
-                </List>
-              </Box>
-            </SimpleGrid>
-
-            <Divider my={6} />
-
+          <SimpleGrid columns={{ base: 1, md: 2 }} spacing={6}>
             <Box>
-              <Heading size="md" mb={3} color="purple.600">
-                <WarningIcon mr={2} />
-                Nested Transactions
+              <Heading size="md" mb={3} color="green.600">
+                <CheckCircleIcon mr={2} />
+                Atomic Operations
               </Heading>
               <Text fontSize="sm" color="gray.600" mb={3}>
-                Transactions can be nested, with inner transactions rolling back to outer
-                transaction boundaries.
+                All operations within a transaction succeed or fail together. No partial updates.
               </Text>
               <List spacing={2} fontSize="sm">
                 <ListItem>
-                  <ListIcon as={WarningIcon} color="purple.500" />
-                  Inner transactions can be caught and handled
+                  <ListIcon as={CheckCircleIcon} color="green.500" />
+                  Multiple state changes grouped together
                 </ListItem>
                 <ListItem>
-                  <ListIcon as={WarningIcon} color="purple.500" />
-                  Outer transaction continues if inner error is caught
+                  <ListIcon as={CheckCircleIcon} color="green.500" />
+                  Automatic rollback on any failure
                 </ListItem>
                 <ListItem>
-                  <ListIcon as={WarningIcon} color="purple.500" />
-                  Uncaught errors bubble up and rollback all levels; use try/catch to interrupt
-                  cascading failure
+                  <ListIcon as={CheckCircleIcon} color="green.500" />
+                  Maintains data consistency
                 </ListItem>
               </List>
             </Box>
-          
+
+            <Box>
+              <Heading size="md" mb={3} color="blue.600">
+                <InfoIcon mr={2} />
+                Validation Suspension
+              </Heading>
+              <Text fontSize="sm" color="gray.600" mb={3}>
+                Temporarily allow invalid intermediate states during complex operations.
+              </Text>
+              <List spacing={2} fontSize="sm">
+                <ListItem>
+                  <ListIcon as={InfoIcon} color="blue.500" />
+                  Suspend validation during transaction
+                </ListItem>
+                <ListItem>
+                  <ListIcon as={InfoIcon} color="blue.500" />
+                  Final state must still be valid
+                </ListItem>
+                <ListItem>
+                  <ListIcon as={InfoIcon} color="blue.500" />
+                  Enables complex multi-step operations
+                </ListItem>
+              </List>
+            </Box>
+          </SimpleGrid>
+
+          <Divider my={6} />
+
+          <Box>
+            <Heading size="md" mb={3} color="purple.600">
+              <WarningIcon mr={2} />
+              Nested Transactions
+            </Heading>
+            <Text fontSize="sm" color="gray.600" mb={3}>
+              Transactions can be nested, with inner transactions rolling back to outer transaction
+              boundaries.
+            </Text>
+            <List spacing={2} fontSize="sm">
+              <ListItem>
+                <ListIcon as={WarningIcon} color="purple.500" />
+                Inner transactions can be caught and handled
+              </ListItem>
+              <ListItem>
+                <ListIcon as={WarningIcon} color="purple.500" />
+                Outer transaction continues if inner error is caught
+              </ListItem>
+              <ListItem>
+                <ListIcon as={WarningIcon} color="purple.500" />
+                Uncaught errors bubble up and rollback all levels; use try/catch to interrupt
+                cascading failure
+              </ListItem>
+            </List>
+          </Box>
         </Section>
 
         {/* Live Demo */}
         <Section title="Live Transaction Demo">
-            <Text color="gray.600" mb={6}>
-              This banking demo shows atomic transactions in action. Try the payroll processing to
-              see how multiple operations are grouped together.
-            </Text>
+          <Text color="gray.600" mb={6}>
+            This banking demo shows atomic transactions in action. Try the payroll processing to see
+            how multiple operations are grouped together.
+          </Text>
 
-            <SimpleGrid columns={{ base: 1, lg: 2 }} spacing={6}>
-              {/* Account Status */}
-              <VStack spacing={4} align="stretch">
-                <Box p={4} bg="green.50" borderRadius="md" border="1px" borderColor="green.200">
-                  <HStack justify="space-between" mb={2}>
-                    <Text fontWeight="semibold">Account Balance</Text>
-                    <Badge colorScheme="green" fontSize="lg">
-                      ${demoState.balance.toFixed(2)}
-                    </Badge>
-                  </HStack>
-                  {demoState.pendingOperations > 0 && (
-                    <Text fontSize="sm" color="orange.600">
-                      Processing {demoState.pendingOperations} operations...
-                    </Text>
-                  )}
-                  {demoState.isProcessing && (
-                    <Text fontSize="sm" color="blue.600">
-                      Processing payroll...
-                    </Text>
-                  )}
-                </Box>
-
-                <VStack spacing={2}>
-                  <Button
-                    colorScheme="blue"
-                    onClick={() => demoStore.$.safeDeposit(500, 'Demo deposit')}
-                    size="sm"
-                    width="full"
-                  >
-                    Deposit $500
-                  </Button>
-
-                  <Button
-                    colorScheme="orange"
-                    onClick={() => demoStore.$.safeTransfer(200, 'Demo transfer')}
-                    size="sm"
-                    width="full"
-                  >
-                    Transfer $200
-                  </Button>
-
-                  <Button
-                    colorScheme="green"
-                    onClick={() => demoStore.$.handlePayrollDemo()}
-                    isLoading={demoState.isProcessing}
-                    loadingText="Processing..."
-                    size="sm"
-                    width="full"
-                  >
-                    Process Payroll ($950)
-                  </Button>
-
-                  <Button
-                    colorScheme="red"
-                    variant="outline"
-                    onClick={() => demoStore.$.handleFailedPayroll()}
-                    size="sm"
-                    width="full"
-                  >
-                    Try Failed Payroll ($1800)
-                  </Button>
-
-                  <Button
-                    variant="outline"
-                    onClick={() => demoStore.$.reset()}
-                    size="sm"
-                    width="full"
-                  >
-                    Reset Demo
-                  </Button>
-                </VStack>
-              </VStack>
-
-              {/* Transaction History */}
-              <Box>
-                <Heading size="md" mb={3}>
-                  Recent Transactions
-                </Heading>
-                <Box
-                  maxHeight="300px"
-                  overflowY="auto"
-                  border="1px"
-                  borderColor={borderColor}
-                  borderRadius="md"
-                  p={3}
-                >
-                  {demoState.transactions.length === 0 ? (
-                    <Text color="gray.500" textAlign="center" py={4}>
-                      No transactions yet
-                    </Text>
-                  ) : (
-                    <VStack spacing={2} align="stretch">
-                      {demoState.transactions
-                        .slice(-10)
-                        .reverse()
-                        .map((transaction) => (
-                          <Box
-                            key={transaction.id}
-                            p={2}
-                            bg={transaction.amount > 0 ? 'green.50' : 'red.50'}
-                            borderRadius="sm"
-                            fontSize="sm"
-                          >
-                            <HStack justify="space-between">
-                              <Text>{transaction.description}</Text>
-                              <Text
-                                fontWeight="semibold"
-                                color={transaction.amount > 0 ? 'green.600' : 'red.600'}
-                              >
-                                {transaction.amount > 0 ? '+' : ''}${transaction.amount.toFixed(2)}
-                              </Text>
-                            </HStack>
-                            <Text fontSize="xs" color="gray.500">
-                              {new Date(transaction.timestamp).toLocaleTimeString()}
-                            </Text>
-                          </Box>
-                        ))}
-                    </VStack>
-                  )}
-                </Box>
+          <SimpleGrid columns={{ base: 1, lg: 2 }} spacing={6}>
+            {/* Account Status */}
+            <VStack spacing={4} align="stretch">
+              <Box p={4} bg="green.50" borderRadius="md" border="1px" borderColor="green.200">
+                <HStack justify="space-between" mb={2}>
+                  <Text fontWeight="semibold">Account Balance</Text>
+                  <Badge colorScheme="green" fontSize="lg">
+                    ${demoState.balance.toFixed(2)}
+                  </Badge>
+                </HStack>
+                {demoState.pendingOperations > 0 && (
+                  <Text fontSize="sm" color="orange.600">
+                    Processing {demoState.pendingOperations} operations...
+                  </Text>
+                )}
+                {demoState.isProcessing && (
+                  <Text fontSize="sm" color="blue.600">
+                    Processing payroll...
+                  </Text>
+                )}
               </Box>
-            </SimpleGrid>
-          
+
+              <VStack spacing={2}>
+                <Button
+                  colorScheme="blue"
+                  onClick={() => demoStore.$.safeDeposit(500, 'Demo deposit')}
+                  size="sm"
+                  width="full"
+                >
+                  Deposit $500
+                </Button>
+
+                <Button
+                  colorScheme="orange"
+                  onClick={() => demoStore.$.safeTransfer(200, 'Demo transfer')}
+                  size="sm"
+                  width="full"
+                >
+                  Transfer $200
+                </Button>
+
+                <Button
+                  colorScheme="green"
+                  onClick={() => demoStore.$.handlePayrollDemo()}
+                  isLoading={demoState.isProcessing}
+                  loadingText="Processing..."
+                  size="sm"
+                  width="full"
+                >
+                  Process Payroll ($950)
+                </Button>
+
+                <Button
+                  colorScheme="red"
+                  variant="outline"
+                  onClick={() => demoStore.$.handleFailedPayroll()}
+                  size="sm"
+                  width="full"
+                >
+                  Try Failed Payroll ($1800)
+                </Button>
+
+                <Button
+                  variant="outline"
+                  onClick={() => demoStore.$.reset()}
+                  size="sm"
+                  width="full"
+                >
+                  Reset Demo
+                </Button>
+              </VStack>
+            </VStack>
+
+            {/* Transaction History */}
+            <Box>
+              <Heading size="md" mb={3}>
+                Recent Transactions
+              </Heading>
+              <Box
+                maxHeight="300px"
+                overflowY="auto"
+                border="1px"
+                borderColor={borderColor}
+                borderRadius="md"
+                p={3}
+              >
+                {demoState.transactions.length === 0 ? (
+                  <Text color="gray.500" textAlign="center" py={4}>
+                    No transactions yet
+                  </Text>
+                ) : (
+                  <VStack spacing={2} align="stretch">
+                    {demoState.transactions
+                      .slice(-10)
+                      .reverse()
+                      .map((transaction) => (
+                        <Box
+                          key={transaction.id}
+                          p={2}
+                          bg={transaction.amount > 0 ? 'green.50' : 'red.50'}
+                          borderRadius="sm"
+                          fontSize="sm"
+                        >
+                          <HStack justify="space-between">
+                            <Text>{transaction.description}</Text>
+                            <Text
+                              fontWeight="semibold"
+                              color={transaction.amount > 0 ? 'green.600' : 'red.600'}
+                            >
+                              {transaction.amount > 0 ? '+' : ''}${transaction.amount.toFixed(2)}
+                            </Text>
+                          </HStack>
+                          <Text fontSize="xs" color="gray.500">
+                            {new Date(transaction.timestamp).toLocaleTimeString()}
+                          </Text>
+                        </Box>
+                      ))}
+                  </VStack>
+                )}
+              </Box>
+            </Box>
+          </SimpleGrid>
         </Section>
 
         {/* API Reference */}
         <Section title="Transaction API">
+          <VStack spacing={6} align="stretch">
+            <Box>
+              <Heading size="md" mb={3}>
+                Basic Transaction Syntax
+              </Heading>
+              <SnippetBlock
+                snippetName="basicTransactionSyntax"
+                folder="Transactions"
+                language="typescript"
+              />
+            </Box>
 
-            <VStack spacing={6} align="stretch">
-              <Box>
-                <Heading size="md" mb={3}>
-                  Basic Transaction Syntax
-                </Heading>
-                <SnippetBlock
-                  snippetName="basicTransactionSyntax"
-                  folder="Transactions"
-                  language="typescript"
-                />
+            <Box>
+              <Heading size="md" mb={3}>
+                Transaction Parameters
+              </Heading>
+              <Box p={4} bg="gray.50" borderRadius="md">
+                <VStack spacing={3} align="stretch">
+                  <ItemDef
+                    title="suspendValidation: boolean"
+                    titleAsCode={true}
+                    snippetName="suspendValidationExample"
+                    snippetFolder="Transactions"
+                    codeTitle="Validation Suspension Example"
+                  >
+                    When <Code>true</Code>, validation is suspended during the transaction, allowing
+                    temporarily invalid states. Final state must still be valid.
+                  </ItemDef>
+
+                  <ItemDef
+                    title="action: (value: DataType) => void"
+                    titleAsCode={true}
+                    snippetName="actionFunctionExample"
+                    snippetFolder="Transactions"
+                    codeTitle="Action Function Example"
+                  >
+                    The function containing all operations to be executed atomically. Use
+                    <Code>this.$</Code> to call other actions within the transaction. Actions{' '}
+                    <i>cannot be lambdas / arrow functions</i> and must be <b>synchronous</b>.
+                    Transactional integrity cannot be maintained over async operations, but you can
+                    call transactions from inside async functions (as long as the action itself is
+                    sync).
+                  </ItemDef>
+                </VStack>
               </Box>
+            </Box>
 
-              <Box>
-                <Heading size="md" mb={3}>
-                  Transaction Parameters
-                </Heading>
-                <Box p={4} bg="gray.50" borderRadius="md">
-                  <VStack spacing={3} align="stretch">
-                    <ItemDef
-                      title="suspendValidation: boolean"
-                      titleAsCode={true}
-                      snippetName="suspendValidationExample"
-                      snippetFolder="Transactions"
-                      codeTitle="Validation Suspension Example"
-                    >
-                      When <Code>true</Code>, validation is suspended during the transaction,
-                      allowing temporarily invalid states. Final state must still be valid.
-                    </ItemDef>
-
-                    <ItemDef
-                      title="action: (value: DataType) => void"
-                      titleAsCode={true}
-                      snippetName="actionFunctionExample"
-                      snippetFolder="Transactions"
-                      codeTitle="Action Function Example"
-                    >
-                      The function containing all operations to be executed atomically. Use
-                      <Code>this.$</Code> to call other actions within the transaction. Actions{' '}
-                      <i>cannot be lambdas / arrow functions</i> and must be <b>synchronous</b>.
-                      Transactional integrity cannot be maintained over async operations, but you
-                      can call transactions from inside async functions (as long as the action
-                      itself is sync).
-                    </ItemDef>
-                  </VStack>
-                </Box>
-              </Box>
-
-              <Box>
-                <Heading size="md" mb={3}>
-                  Error Handling & Rollback
-                </Heading>
-                <SnippetBlock
-                  snippetName="errorHandlingRollback"
-                  folder="Transactions"
-                  language="typescript"
-                />
-              </Box>
-            </VStack>
-          
+            <Box>
+              <Heading size="md" mb={3}>
+                Error Handling & Rollback
+              </Heading>
+              <SnippetBlock
+                snippetName="errorHandlingRollback"
+                folder="Transactions"
+                language="typescript"
+              />
+            </Box>
+          </VStack>
         </Section>
 
         {/* Advanced Examples */}
         <Section title="Advanced Transaction Patterns">
-
-            <CodeTabs
-              tabs={[
-                {
-                  label: 'Shopping Cart Checkout',
-                  language: 'typescript',
-                  code: `// Complex e-commerce checkout process
+          <CodeTabs
+            tabs={[
+              {
+                label: 'Shopping Cart Checkout',
+                language: 'typescript',
+                code: `// Complex e-commerce checkout process
 const checkoutActions = {
   processCheckout(value, paymentInfo, shippingInfo) {
     this.transact({
@@ -397,11 +391,11 @@ const checkoutActions = {
     })
   }
 }`,
-                },
-                {
-                  label: 'Nested Transactions',
-                  language: 'typescript',
-                  code: `// Nested transactions with error recovery
+              },
+              {
+                label: 'Nested Transactions',
+                language: 'typescript',
+                code: `// Nested transactions with error recovery
 const batchActions = {
   processBatchUpdates(value, updates) {
     this.transact({
@@ -438,11 +432,11 @@ const batchActions = {
     })
   }
 }`,
-                },
-                {
-                  label: 'Transaction Monitoring',
-                  language: 'typescript',
-                  code: `// Monitor transaction stack for debugging
+              },
+              {
+                label: 'Transaction Monitoring',
+                language: 'typescript',
+                code: `// Monitor transaction stack for debugging
 const store = new Store({
   value: { count: 0, operations: [] },
   actions: {
@@ -473,11 +467,11 @@ store.$.complexOperation()
 
 // Clean up
 stackSubscription.unsubscribe()`,
-                },
-                {
-                  label: 'Safe Action Patterns',
-                  language: 'typescript',
-                  code: `// Pattern for creating safe actions that handle transaction errors
+              },
+              {
+                label: 'Safe Action Patterns',
+                language: 'typescript',
+                code: `// Pattern for creating safe actions that handle transaction errors
 function createStoreWithSafeActions(errorHandler) {
   return new Store({
     value: { data: [], status: 'idle' },
@@ -518,96 +512,92 @@ const store = createStoreWithSafeActions(handleError)
 <Button onClick={() => store.$.safeDangerousUpdate(newData)}>
   Update Data
 </Button>`,
-                },
-              ]}
-            />
-          
+              },
+            ]}
+          />
         </Section>
 
         {/* Best Practices */}
         <Section title="Best Practices">
+          <SimpleGrid columns={{ base: 1, md: 2 }} spacing={6}>
+            <VStack spacing={4} align="stretch">
+              <Box>
+                <Heading size="sm" color="green.600" mb={2}>
+                  ✅ Best Practices
+                </Heading>
+                <List spacing={2} fontSize="sm">
+                  <ListItem>
+                    <ListIcon as={CheckCircleIcon} color="green.500" />
+                    Use transactions for multi-step operations that must succeed or fail together
+                  </ListItem>
+                  <ListItem>
+                    <ListIcon as={CheckCircleIcon} color="green.500" />
+                    Suspend validation when intermediate states may be temporarily invalid
+                  </ListItem>
+                  <ListItem>
+                    <ListIcon as={CheckCircleIcon} color="green.500" />
+                    Keep transaction functions focused and atomic
+                  </ListItem>
+                  <ListItem>
+                    <ListIcon as={CheckCircleIcon} color="green.500" />
+                    Use <Code>this.$</Code> to call other actions within transactions
+                  </ListItem>
+                  <ListItem>
+                    <ListIcon as={CheckCircleIcon} color="green.500" />
+                    Handle transaction errors gracefully with try/catch
+                  </ListItem>
+                </List>
+              </Box>
+            </VStack>
 
-            <SimpleGrid columns={{ base: 1, md: 2 }} spacing={6}>
-              <VStack spacing={4} align="stretch">
-                <Box>
-                  <Heading size="sm" color="green.600" mb={2}>
-                    ✅ Best Practices
-                  </Heading>
-                  <List spacing={2} fontSize="sm">
-                    <ListItem>
-                      <ListIcon as={CheckCircleIcon} color="green.500" />
-                      Use transactions for multi-step operations that must succeed or fail together
-                    </ListItem>
-                    <ListItem>
-                      <ListIcon as={CheckCircleIcon} color="green.500" />
-                      Suspend validation when intermediate states may be temporarily invalid
-                    </ListItem>
-                    <ListItem>
-                      <ListIcon as={CheckCircleIcon} color="green.500" />
-                      Keep transaction functions focused and atomic
-                    </ListItem>
-                    <ListItem>
-                      <ListIcon as={CheckCircleIcon} color="green.500" />
-                      Use <Code>this.$</Code> to call other actions within transactions
-                    </ListItem>
-                    <ListItem>
-                      <ListIcon as={CheckCircleIcon} color="green.500" />
-                      Handle transaction errors gracefully with try/catch
-                    </ListItem>
-                  </List>
-                </Box>
-              </VStack>
-
-              <VStack spacing={4} align="stretch">
-                <Box>
-                  <Heading size="sm" color="red.600" mb={2}>
-                    ❌ Avoid This
-                  </Heading>
-                  <List spacing={2} fontSize="sm">
-                    <ListItem>
-                      <ListIcon as={WarningIcon} color="red.500" />
-                      Don't use transactions for simple single-step operations
-                    </ListItem>
-                    <ListItem>
-                      <ListIcon as={WarningIcon} color="red.500" />
-                      Don't nest transactions unnecessarily deep
-                    </ListItem>
-                    <ListItem>
-                      <ListIcon as={WarningIcon} color="red.500" />
-                      Don't expect suspended transactions to permanently sidestep validation. the
-                      suspendValidation only is in effect until the close of the function.
-                    </ListItem>
-                    <ListItem>
-                      <ListIcon as={WarningIcon} color="red.500" />
-                      Don't perform async operations inside transaction functions
-                    </ListItem>
-                  </List>
-                </Box>
-              </VStack>
-            </SimpleGrid>
-          
+            <VStack spacing={4} align="stretch">
+              <Box>
+                <Heading size="sm" color="red.600" mb={2}>
+                  ❌ Avoid This
+                </Heading>
+                <List spacing={2} fontSize="sm">
+                  <ListItem>
+                    <ListIcon as={WarningIcon} color="red.500" />
+                    Don't use transactions for simple single-step operations
+                  </ListItem>
+                  <ListItem>
+                    <ListIcon as={WarningIcon} color="red.500" />
+                    Don't nest transactions unnecessarily deep
+                  </ListItem>
+                  <ListItem>
+                    <ListIcon as={WarningIcon} color="red.500" />
+                    Don't expect suspended transactions to permanently sidestep validation. the
+                    suspendValidation only is in effect until the close of the function.
+                  </ListItem>
+                  <ListItem>
+                    <ListIcon as={WarningIcon} color="red.500" />
+                    Don't perform async operations inside transaction functions
+                  </ListItem>
+                </List>
+              </Box>
+            </VStack>
+          </SimpleGrid>
         </Section>
 
         {/* Troubleshooting */}
         <Section title="Troubleshooting">
+          <VStack spacing={6} align="stretch">
+            <Box>
+              <Heading size="md" mb={3} color="orange.600">
+                Common Issues & Solutions
+              </Heading>
 
-            <VStack spacing={6} align="stretch">
-              <Box>
-                <Heading size="md" mb={3} color="orange.600">
-                  Common Issues & Solutions
-                </Heading>
-
-                <VStack spacing={4} align="stretch">
-                  <Box p={4} bg="orange.50" borderRadius="md" border="1px" borderColor="orange.200">
-                    <Text fontWeight="semibold" color="orange.800" mb={2}>
-                      "Transaction failed but state seems unchanged"
-                    </Text>
-                    <Text fontSize="sm" color="gray.700" mb={2}>
-                      This is expected behavior. When a transaction fails, all changes are rolled
-                      back automatically.
-                    </Text>
-                    <CodeBlock language="typescript">
-                      {`// Check transaction errors
+              <VStack spacing={4} align="stretch">
+                <Box p={4} bg="orange.50" borderRadius="md" border="1px" borderColor="orange.200">
+                  <Text fontWeight="semibold" color="orange.800" mb={2}>
+                    "Transaction failed but state seems unchanged"
+                  </Text>
+                  <Text fontSize="sm" color="gray.700" mb={2}>
+                    This is expected behavior. When a transaction fails, all changes are rolled back
+                    automatically.
+                  </Text>
+                  <CodeBlock language="typescript">
+                    {`// Check transaction errors
 try {
   store.transact({
     action() {
@@ -620,19 +610,19 @@ try {
   console.log('Transaction rolled back:', error.message)
   // Store state is exactly as it was before the transaction
 }`}
-                    </CodeBlock>
-                  </Box>
+                  </CodeBlock>
+                </Box>
 
-                  <Box p={4} bg="red.50" borderRadius="md" border="1px" borderColor="red.200">
-                    <Text fontWeight="semibold" color="red.800" mb={2}>
-                      "Validation errors even with suspendValidation: true"
-                    </Text>
-                    <Text fontSize="sm" color="gray.700" mb={2}>
-                      <Code>suspendValidation</Code> only suspends validation during the
-                      transaction. The final state must still pass all validation rules.
-                    </Text>
-                    <CodeBlock language="typescript">
-                      {`store.transact({
+                <Box p={4} bg="red.50" borderRadius="md" border="1px" borderColor="red.200">
+                  <Text fontWeight="semibold" color="red.800" mb={2}>
+                    "Validation errors even with suspendValidation: true"
+                  </Text>
+                  <Text fontSize="sm" color="gray.700" mb={2}>
+                    <Code>suspendValidation</Code> only suspends validation during the transaction.
+                    The final state must still pass all validation rules.
+                  </Text>
+                  <CodeBlock language="typescript">
+                    {`store.transact({
   suspendValidation: true,
   action() {
     // These intermediate states can be invalid
@@ -643,19 +633,19 @@ try {
     this.next({ balance: 200 })  // ✅ Valid final state
   }
 })`}
-                    </CodeBlock>
-                  </Box>
+                  </CodeBlock>
+                </Box>
 
-                  <Box p={4} bg="blue.50" borderRadius="md" border="1px" borderColor="blue.200">
-                    <Text fontWeight="semibold" color="blue.800" mb={2}>
-                      "Nested transaction behavior is confusing"
-                    </Text>
-                    <Text fontSize="sm" color="gray.700" mb={2}>
-                      Inner transactions can be caught and handled. Only uncaught errors bubble up
-                      to outer transactions.
-                    </Text>
-                    <CodeBlock language="typescript">
-                      {`store.transact({
+                <Box p={4} bg="blue.50" borderRadius="md" border="1px" borderColor="blue.200">
+                  <Text fontWeight="semibold" color="blue.800" mb={2}>
+                    "Nested transaction behavior is confusing"
+                  </Text>
+                  <Text fontSize="sm" color="gray.700" mb={2}>
+                    Inner transactions can be caught and handled. Only uncaught errors bubble up to
+                    outer transactions.
+                  </Text>
+                  <CodeBlock language="typescript">
+                    {`store.transact({
   action() {
     try {
       // Inner transaction that might fail
@@ -673,21 +663,21 @@ try {
     this.$.finalStep() // This still executes
   }
 })`}
-                    </CodeBlock>
-                  </Box>
-                </VStack>
-              </Box>
+                  </CodeBlock>
+                </Box>
+              </VStack>
+            </Box>
 
-              <Box>
-                <Heading size="md" mb={3}>
-                  Debugging Transactions
-                </Heading>
-                <Text fontSize="sm" color="gray.600" mb={3}>
-                  Use the transaction stack observer to debug complex transaction flows:
-                </Text>
+            <Box>
+              <Heading size="md" mb={3}>
+                Debugging Transactions
+              </Heading>
+              <Text fontSize="sm" color="gray.600" mb={3}>
+                Use the transaction stack observer to debug complex transaction flows:
+              </Text>
 
-                <CodeBlock language="typescript">
-                  {`// Enable transaction debugging
+              <CodeBlock language="typescript">
+                {`// Enable transaction debugging
 const debugSub = store.observeTransStack((stack) => {
   console.log('Transaction Stack:', stack.map(t => ({
     id: t.id.slice(-8), // Show last 8 chars of ID
@@ -708,10 +698,9 @@ store.transact({
 
 // Clean up when done
 debugSub.unsubscribe()`}
-                </CodeBlock>
-              </Box>
-            </VStack>
-          
+              </CodeBlock>
+            </Box>
+          </VStack>
         </Section>
       </VStack>
     </Container>

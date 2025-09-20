@@ -18,7 +18,7 @@ import formStateFactory, { FormState } from '@/storeFactories/ValidationSystem/f
 import { usernameBranchConfig } from '@/storeFactories/ValidationSystem/form/usernameBranch.ts';
 import { emailBranchConfig } from '@/storeFactories/ValidationSystem/form/emailBranch.ts';
 import { ageBranchConfig } from '@/storeFactories/ValidationSystem/form/ageBranch.ts';
-import CodeTabs from '@/components/CodeTabs';
+import CodeTabs from '@/components/CodeTabs.tsx';
 import Field from '@/components/ValidationSystem/Field';
 import Section from '../Section';
 

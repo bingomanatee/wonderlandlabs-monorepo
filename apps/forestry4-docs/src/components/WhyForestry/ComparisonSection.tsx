@@ -14,7 +14,7 @@ import {
   Tr,
   VStack,
 } from '@chakra-ui/react';
-import CodeTabs from '../CodeTabs';
+import CodeTabs from '../CodeTabs.tsx';
 import { Link } from 'react-router-dom';
 
 const ComparisonSection: React.FC = () => {
@@ -73,9 +73,7 @@ const ComparisonSection: React.FC = () => {
 
       {/* Feature Comparison Table */}
       <Box layerStyle="card" bg="gray.50">
-        <Heading size="lg" mb={6}>
-          Feature Comparison
-        </Heading>
+        <Heading variant="section">Feature Comparison</Heading>
         <TableContainer>
           <Table variant="simple" size="sm">
             <Thead>
@@ -294,7 +292,7 @@ const ComparisonSection: React.FC = () => {
       {/* Key Differentiators */}
       <SimpleGrid columns={{ base: 1, lg: 2 }} spacing={6}>
         <Box layerStyle="card" bg="green.50">
-          <Heading size="md" mb={4} color="green.700">
+          <Heading variant="card" color="green.700">
             ✅ Forestry Advantages
           </Heading>
           <VStack spacing={3} align="stretch">
@@ -318,7 +316,7 @@ const ComparisonSection: React.FC = () => {
         </Box>
 
         <Box layerStyle="card" bg="orange.50">
-          <Heading size="md" mb={4} color="orange.700">
+          <Heading variant="card" color="orange.700">
             ⚠️ Trade-offs
           </Heading>
           <VStack spacing={3} align="stretch">

@@ -1,36 +1,35 @@
 // Auto-generated snippet from: apps/forestry4-docs/src/pages/examples/TodoApp.tsx
 // Description: TodoApp example page component
-// Last synced: Thu Sep 18 21:57:37 PDT 2025
+// Last synced: Sat Sep 20 11:39:50 PDT 2025
 // DO NOT EDIT - This file is automatically synced from the source
 
 import React from 'react';
 import {
-  Container,
-  VStack,
-  Box,
   Alert,
   AlertIcon,
+  Badge,
+  Box,
+  Container,
+  Heading,
   List,
-  ListItem,
   ListIcon,
+  ListItem,
+  Text,
+  VStack,
 } from '@chakra-ui/react';
 import { CheckCircleIcon } from '@chakra-ui/icons';
 import TodoAppDemo from '../../components/ReactIntegration/TodoAppDemo';
 import CodeBlock from '../../components/CodeBlock';
 import PageTitle from '../../components/PageTitle';
+import Section from '@/components/Section.tsx';
 
 const TodoApp: React.FC = () => {
   return (
     <Container maxW="container.xl" py={8}>
+      <PageTitle>Todo App example </PageTitle>
       <VStack layerStyle="section" spacing={8}>
         {/* Header */}
         <Box textAlign="center">
-          <Heading size="xl" mb={4}>
-            Todo App Example
-            <Badge ml={3} colorScheme="green">
-              Complete Example
-            </Badge>
-          </Heading>
           <Text fontSize="lg" color="gray.600" maxW="2xl">
             A fully-featured todo application demonstrating Forestry 4's action-based architecture,
             form handling, filtering, and React integration patterns.
@@ -38,10 +37,7 @@ const TodoApp: React.FC = () => {
         </Box>
 
         {/* Key Features */}
-        <Box layerStyle="methodCard" w="full">
-          <Heading size="md" mb={4}>
-            Key Features Demonstrated
-          </Heading>
+        <Section titleSize="md" title={'Key Features Demonstrated'}>
           <List spacing={2}>
             <ListItem>
               <ListIcon as={CheckCircleIcon} color="green.500" />
@@ -70,23 +66,20 @@ const TodoApp: React.FC = () => {
               <strong>Validation:</strong> Built-in tests for input validation
             </ListItem>
           </List>
-        </Box>
+        </Section>
 
         {/* Live Demo */}
-        <Box layerStyle="methodCard" w="full">
-          <Heading size="md" mb={4}>
-            Live Demo
-          </Heading>
+        <Section title="Live Demo" titleSize="md">
           <Text mb={4} color="gray.600">
             Try the todo app below. Notice how all interactions are handled through store actions,
             and the component is purely presentational.
           </Text>
           <TodoAppDemo />
-        </Box>
+        </Section>
 
         {/* Architecture Highlights */}
         <Box layerStyle="methodCard" w="full">
-          <Heading size="md" mb={4}>
+          <Heading variant="card">
             Architecture Highlights
           </Heading>
 
@@ -98,7 +91,7 @@ const TodoApp: React.FC = () => {
 
           <VStack spacing={4} align="stretch">
             <Box>
-              <Heading size="sm" mb={2}>
+              <Heading variant="subtle">
                 Pure Component Pattern
               </Heading>
               <Text fontSize="sm" color="gray.600">
@@ -132,7 +125,7 @@ const TodoApp: React.FC = () => {
             </Box>
 
             <Box>
-              <Heading size="sm" mb={2}>
+              <Heading variant="subtle">
                 Inline Function Calls
               </Heading>
               <Text fontSize="sm" color="gray.600">
@@ -145,64 +138,15 @@ const TodoApp: React.FC = () => {
 
         {/* Code Structure */}
         <Box layerStyle="methodCard" w="full">
-          <Heading size="md" mb={4}>
+          <Heading variant="card">
             Store Structure
           </Heading>
-          <CodeBlock language="typescript" title="Store Factory Pattern">
-            {`const createTodoStore = () => {
-  return new Forest<TodoState>({
-    name: 'todo-app',
-    value: {
-      todos: initialTodos,
-      filter: 'all',
-      newTodoText: '',
-    },
-    actions: {
-      // Selector actions (computed values)
-      filteredTodos: function (value: TodoState): TodoItem[] {
-        switch (value.filter) {
-          case 'active': return value.todos.filter(todo => !todo.completed);
-          case 'completed': return value.todos.filter(todo => todo.completed);
-          default: return value.todos;
-        }
-      },
-      
-      completedCount: function (value: TodoState): number {
-        return value.todos.filter(todo => todo.completed).length;
-      },
-      
-      // UI event actions
-      setFilterAll: function (value: TodoState) {
-        this.$.setFilter('all');
-      },
-      
-      // Data manipulation actions
-      addTodo: function (value: TodoState) {
-        if (!value.newTodoText.trim()) return;
-        const newTodo = {
-          id: Date.now(),
-          text: value.newTodoText.trim(),
-          completed: false,
-        };
-        this.mutate((draft) => {
-          draft.todos.push(newTodo);
-          draft.newTodoText = '';
-        });
-      },
-      
-      // ... more actions
-    },
-    tests: [
-      (value: TodoState) => value.newTodoText.length > 100 ? 'Todo text too long' : null,
-    ]
-  });
-};`}
-          </CodeBlock>
+          <CodeBlock language="typescript" title="Store Factory Pattern" snippet="todoStoreFactoryPattern" />
         </Box>
 
         {/* Component Usage */}
         <Box layerStyle="methodCard" w="full">
-          <Heading size="md" mb={4}>
+          <Heading variant="card">
             Component Usage
           </Heading>
           <CodeBlock language="typescript" title="Pure React Component">
@@ -257,7 +201,7 @@ const TodoApp: React.FC = () => {
 
         {/* Best Practices */}
         <Box layerStyle="methodCard" w="full">
-          <Heading size="md" mb={4}>
+          <Heading variant="card">
             Best Practices Demonstrated
           </Heading>
           <List spacing={3}>

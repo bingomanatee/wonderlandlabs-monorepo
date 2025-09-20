@@ -12,7 +12,7 @@ import {
   VStack,
 } from '@chakra-ui/react';
 import { Link as RouterLink } from 'react-router-dom';
-import CodeTabs from '../components/CodeTabs';
+import CodeTabs from '../components/CodeTabs.tsx';
 import Section from '../components/Section';
 import LiveCounterDemo from '../components/home/LiveCounterDemo';
 

@@ -26,7 +26,7 @@ const BenefitsSection: React.FC = () => {
       <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} spacing={6}>
         <Box layerStyle="card" bg="blue.50">
           <Icon as={StarIcon} color="blue.500" boxSize={8} mb={4} />
-          <Heading size="md" mb={3} color="blue.700">Type Safety First</Heading>
+          <Heading variant="card" color="blue.700">Type Safety First</Heading>
           <List spacing={2}>
             <ListItem>
               <ListIcon as={CheckIcon} color="blue.500" />
@@ -49,7 +49,7 @@ const BenefitsSection: React.FC = () => {
 
         <Box layerStyle="card" bg="green.50">
           <Icon as={StarIcon} color="green.500" boxSize={8} mb={4} />
-          <Heading size="md" mb={3} color="green.700">Reactive by Design</Heading>
+          <Heading variant="card" color="green.700">Reactive by Design</Heading>
           <List spacing={2}>
             <ListItem>
               <ListIcon as={CheckIcon} color="green.500" />
@@ -72,7 +72,7 @@ const BenefitsSection: React.FC = () => {
 
         <Box layerStyle="card" bg="purple.50">
           <Icon as={StarIcon} color="purple.500" boxSize={8} mb={4} />
-          <Heading size="md" mb={3} color="purple.700">Developer Experience</Heading>
+          <Heading variant="card" color="purple.700">Developer Experience</Heading>
           <List spacing={2}>
             <ListItem>
               <ListIcon as={CheckIcon} color="purple.500" />
@@ -95,7 +95,7 @@ const BenefitsSection: React.FC = () => {
 
         <Box layerStyle="card" bg="orange.50">
           <Icon as={StarIcon} color="orange.500" boxSize={8} mb={4} />
-          <Heading size="md" mb={3} color="orange.700">Validation & Quality</Heading>
+          <Heading variant="card" color="orange.700">Validation & Quality</Heading>
           <List spacing={2}>
             <ListItem>
               <ListIcon as={CheckIcon} color="orange.500" />
@@ -118,7 +118,7 @@ const BenefitsSection: React.FC = () => {
 
         <Box layerStyle="card" bg="teal.50">
           <Icon as={StarIcon} color="teal.500" boxSize={8} mb={4} />
-          <Heading size="md" mb={3} color="teal.700">Scalable Architecture</Heading>
+          <Heading variant="card" color="teal.700">Scalable Architecture</Heading>
           <List spacing={2}>
             <ListItem>
               <ListIcon as={CheckIcon} color="teal.500" />
@@ -141,7 +141,7 @@ const BenefitsSection: React.FC = () => {
 
         <Box layerStyle="card" bg="red.50">
           <Icon as={StarIcon} color="red.500" boxSize={8} mb={4} />
-          <Heading size="md" mb={3} color="red.700">React Integration</Heading>
+          <Heading variant="card" color="red.700">React Integration</Heading>
           <List spacing={2}>
             <ListItem>
               <ListIcon as={CheckIcon} color="red.500" />

@@ -120,7 +120,7 @@ export const createTransactionDemoStore = (handleError?: (error: Error) => void)
         try {
           this.$.transfer(amount, description);
         } catch (error) {
-          this.res.get('handleError')(error as Error);
+          this.$res.get('handleError')(error as Error);
         }
       },
 
@@ -128,7 +128,7 @@ export const createTransactionDemoStore = (handleError?: (error: Error) => void)
         try {
           this.$.deposit(amount, description);
         } catch (error) {
-          this.res.get('handleError')(error as Error);
+          this.$res.get('handleError')(error as Error);
         }
       },
 
@@ -136,7 +136,7 @@ export const createTransactionDemoStore = (handleError?: (error: Error) => void)
         try {
           this.$.processPayroll(employees);
         } catch (error) {
-          this.res.get('handleError')(error as Error);
+          this.$res.get('handleError')(error as Error);
         }
       },
 
@@ -155,7 +155,7 @@ export const createTransactionDemoStore = (handleError?: (error: Error) => void)
           try {
             this.$.processPayroll(employees);
           } catch (error) {
-            this.res.get('handleError')(error as Error);
+            this.$res.get('handleError')(error as Error);
           } finally {
             this.set('isProcessing', false);
           }

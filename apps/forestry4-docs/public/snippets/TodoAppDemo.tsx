@@ -3,6 +3,7 @@ import {
   Box,
   Button,
   Checkbox,
+  CloseButton,
   Heading,
   HStack,
   Input,
@@ -11,7 +12,7 @@ import {
   VStack,
 } from '@chakra-ui/react';
 import useForestryLocal from '@/hooks/useForestryLocal';
-import { createTodoStore, TodoState } from '@/storeFactories/createTodoStore.tsx';
+import { createTodoStore, TodoState } from '@/storeFactories/createTodoStore.ts';
 
 const TodoAppDemo: React.FC = () => {
   // Use useForestryLocal hook instead of manual subscription
@@ -21,21 +22,20 @@ const TodoAppDemo: React.FC = () => {
   if (!todoValue) {
     return <Text>Loading...</Text>;
   }
+  const filteredTodos = todoStore.$.filteredTodos();
 
   return (
     <SimpleGrid columns={{ base: 1, lg: 2 }} spacing={6}>
       <VStack spacing={4} align="stretch">
         <Box>
-          <Heading size="md" mb={4}>
-            Add New Todo
-          </Heading>
+          <Heading variant="card">Add New Todo</Heading>
           <HStack>
             <Input
               name="newTodoText"
               placeholder="What needs to be done?"
               value={todoValue.newTodoText}
               onChange={todoStore.$.onChange}
-              onKeyPress={todoStore.$.handleKeyPress}
+              okKeyUp={todoStore.$.handleKeyPress}
             />
             <Button
               colorScheme="forest"
@@ -48,9 +48,7 @@ const TodoAppDemo: React.FC = () => {
         </Box>
 
         <Box>
-          <Heading size="md" mb={4}>
-            Filter Todos
-          </Heading>
+          <Heading variant="card">Filter Todos</Heading>
           <HStack>
             <Button
               size="sm"
@@ -58,7 +56,7 @@ const TodoAppDemo: React.FC = () => {
               colorScheme="forest"
               onClick={todoStore.$.setFilterAll}
             >
-              All ({todoValue.todos.length})
+              Show All ({todoValue.todos.length})
             </Button>
             <Button
               size="sm"
@@ -66,7 +64,7 @@ const TodoAppDemo: React.FC = () => {
               colorScheme="forest"
               onClick={todoStore.$.setFilterActive}
             >
-              Active ({todoStore.$.activeCount()})
+              Show Active ({todoStore.$.activeCount()})
             </Button>
             <Button
               size="sm"
@@ -74,7 +72,7 @@ const TodoAppDemo: React.FC = () => {
               colorScheme="forest"
               onClick={todoStore.$.setFilterCompleted}
             >
-              Completed ({todoStore.$.completedCount()})
+              Show Completed ({todoStore.$.completedCount()})
             </Button>
           </HStack>
         </Box>
@@ -94,7 +92,7 @@ const TodoAppDemo: React.FC = () => {
       </VStack>
 
       <VStack spacing={4} align="stretch">
-        <Heading size="md">Todo List</Heading>
+        <Heading variant="card">Todo List</Heading>
         <Box
           maxH="400px"
           overflowY="auto"
@@ -103,7 +101,7 @@ const TodoAppDemo: React.FC = () => {
           borderRadius="md"
           p={4}
         >
-          {todoStore.$.filteredTodos().length === 0 ? (
+          {filteredTodos.length === 0 ? (
             <Text color="gray.500" fontStyle="italic" textAlign="center">
               {todoValue.filter === 'all'
                 ? 'No todos yet!'
@@ -113,10 +111,11 @@ const TodoAppDemo: React.FC = () => {
             </Text>
           ) : (
             <VStack spacing={3} align="stretch">
-              {todoStore.$.filteredTodos().map((todo) => (
+              {filteredTodos.map((todo) => (
                 <HStack key={todo.id} p={3} bg="gray.50" borderRadius="md">
                   <Checkbox
                     isChecked={todo.completed}
+                    title="click to complete task"
                     onChange={todoStore.$.createToggleTodo(todo.id)}
                   />
                   <Text
@@ -126,14 +125,12 @@ const TodoAppDemo: React.FC = () => {
                   >
                     {todo.text}
                   </Text>
-                  <Button
+                  <CloseButton
                     size="sm"
                     colorScheme="red"
                     variant="ghost"
                     onClick={todoStore.$.createRemoveTodo(todo.id)}
-                  >
-                    ×
-                  </Button>
+                  />
                 </HStack>
               ))}
             </VStack>

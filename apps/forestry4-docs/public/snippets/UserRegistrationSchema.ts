@@ -1,6 +1,6 @@
 // Auto-generated snippet from: apps/forestry4-docs/src/examples/form-validation/UserRegistrationSchema.ts
 // Description: Comprehensive Zod schema for user registration form with complex validation rules
-// Last synced: Thu Sep 18 21:57:37 PDT 2025
+// Last synced: Sat Sep 20 13:42:05 PDT 2025
 // DO NOT EDIT - This file is automatically synced from the source
 
 import { z } from 'zod';

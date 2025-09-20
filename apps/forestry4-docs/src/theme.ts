@@ -144,20 +144,78 @@ const theme = extendTheme({
     Heading: {
       baseStyle: {
         fontWeight: 'semibold',
+        fontFamily: 'heading',
+        lineHeight: 'shorter',
+        color: 'gray.800',
       },
       sizes: {
+        xs: {
+          fontSize: 'sm',
+          mb: 1,
+          lineHeight: 'base',
+        },
         sm: {
           fontSize: 'md',
           mb: 2,
+          lineHeight: 'base',
         },
         md: {
           fontSize: 'lg',
           mb: 3,
+          lineHeight: 'short',
         },
         lg: {
           fontSize: 'xl',
           mb: 4,
+          lineHeight: 'short',
         },
+        xl: {
+          fontSize: '2xl',
+          mb: 4,
+          lineHeight: 'shorter',
+          fontWeight: 'bold',
+        },
+        '2xl': {
+          fontSize: '3xl',
+          mb: 6,
+          lineHeight: 'shorter',
+          fontWeight: 'bold',
+        },
+        '3xl': {
+          fontSize: '4xl',
+          mb: 6,
+          lineHeight: 'none',
+          fontWeight: 'bold',
+        },
+        '4xl': {
+          fontSize: '5xl',
+          mb: 8,
+          lineHeight: 'none',
+          fontWeight: 'bold',
+        },
+      },
+      variants: {
+        section: (props) => ({
+          ...props.theme.components.Heading.sizes.lg,
+          color: 'gray.700',
+          fontWeight: 'medium',
+        }),
+        card: (props) => ({
+          ...props.theme.components.Heading.sizes.md,
+          color: 'gray.800',
+          fontWeight: 'semibold',
+        }),
+        page: (props) => ({
+          ...props.theme.components.Heading.sizes.xl,
+          color: 'gray.900',
+          fontWeight: 'bold',
+          textAlign: 'center',
+        }),
+        subtle: (props) => ({
+          ...props.theme.components.Heading.sizes.sm,
+          color: 'gray.600',
+          fontWeight: 'medium',
+        }),
       },
     },
   },

@@ -10,7 +10,7 @@ import {
   Text,
   VStack,
 } from '@chakra-ui/react';
-import CodeTabs from '../components/CodeTabs';
+import CodeTabs from '../components/CodeTabs.tsx';
 import SnippetBlock from '../components/SnippetBlock';
 import CounterDemo from '../components/ActionsState/CounterDemo';
 import CodeBlock from '../components/CodeBlock';

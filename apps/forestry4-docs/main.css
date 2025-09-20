@@ -41,3 +41,7 @@ tt, kbd, samp {
 pre *, code *, [class*="language-"] * {
     font-family: inherit !important;
 }
+
+pre[class*="language-"] {
+    margin-top: 0 !important;
+}

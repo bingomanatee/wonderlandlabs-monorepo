@@ -17,8 +17,7 @@ import useForestryLocal from '@/hooks/useForestryLocal.ts';
 import counterForestFactory, { type CounterState } from '@/storeFactories/counterStoreFactory.ts';
 
 const CounterDemo: React.FC = () => {
-  return ''; // TEMPORARILY DISABLED FOR 4.1.3 MIGRATION
-  // Use Forestry hook instead of manual state management
+  // Use Forestry hook with modern 4.1.x class extension pattern
   const [counterState, counterForest] = useForestryLocal(counterForestFactory);
 
 

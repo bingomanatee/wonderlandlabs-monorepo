@@ -1,6 +1,6 @@
 // Auto-generated snippet from: apps/forestry4-docs/src/components/WhyForestry/InteractiveDemo.tsx
 // Description: Interactive demo component showing Forestry in action
-// Last synced: Thu Sep 18 21:57:37 PDT 2025
+// Last synced: Sat Sep 20 13:42:05 PDT 2025
 // DO NOT EDIT - This file is automatically synced from the source
 
 import React from 'react';

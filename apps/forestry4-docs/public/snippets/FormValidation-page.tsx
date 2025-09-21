@@ -1,6 +1,6 @@
 // Auto-generated snippet from: apps/forestry4-docs/src/pages/examples/FormValidation.tsx
 // Description: Form validation example page
-// Last synced: Sat Sep 20 19:53:27 PDT 2025
+// Last synced: Sat Sep 20 21:09:31 PDT 2025
 // DO NOT EDIT - This file is automatically synced from the source
 
 import React from 'react';
@@ -67,7 +67,7 @@ const FormValidation: React.FC = () => {
                   ts: true,
                 },
                 {
-                  label: 'Forest Factory',
+                  label: 'Form State Factory',
                   language: 'typescript',
                   snippet: 'formStateFactory',
                   folder: 'ValidationSystem',

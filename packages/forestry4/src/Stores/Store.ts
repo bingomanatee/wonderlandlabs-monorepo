@@ -121,7 +121,12 @@ export class Store<DataType> implements StoreIF<DataType> {
       return;
     }
     if (this.debug) {
-      this.$broadcast({ action: 'next-error', error, value: preparedValue });
+      this.$broadcast({
+        action: 'next-error',
+        error,
+        input: value,
+        value: preparedValue,
+      });
     }
     throw asError(error);
   }

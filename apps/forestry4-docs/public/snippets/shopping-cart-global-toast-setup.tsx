@@ -1,6 +1,6 @@
 // Auto-generated snippet from: apps/forestry4-docs/src/examples/shopping-cart/global-toast-setup.tsx
 // Description: Global toast configuration for shopping cart error handling
-// Last synced: Sat Sep 20 19:53:28 PDT 2025
+// Last synced: Sat Sep 20 21:09:31 PDT 2025
 // DO NOT EDIT - This file is automatically synced from the source
 
 // main.tsx - Global toast configuration

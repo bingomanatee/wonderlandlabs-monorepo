@@ -1,6 +1,6 @@
 // Auto-generated snippet from: apps/forestry4-docs/src/examples/shopping-cart/component-usage.tsx
 // Description: Shopping cart component usage with error handling
-// Last synced: Sat Sep 20 19:53:28 PDT 2025
+// Last synced: Sat Sep 20 21:09:31 PDT 2025
 // DO NOT EDIT - This file is automatically synced from the source
 
 // Component with error handling - pass handleError to factory

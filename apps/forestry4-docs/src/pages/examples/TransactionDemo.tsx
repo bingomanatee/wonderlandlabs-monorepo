@@ -4,7 +4,6 @@ import {
   VStack,
   Heading,
   Text,
-  Badge,
   Box,
   Alert,
   AlertIcon,
@@ -15,30 +14,20 @@ import {
 import { CheckCircleIcon } from '@chakra-ui/icons';
 import CodeBlock from '../../components/CodeBlock';
 import SnippetBlock from '../../components/SnippetBlock';
+import Section from '@/components/Section.tsx';
 
 const TransactionDemo: React.FC = () => {
   return (
     <Container maxW="container.xl" py={8}>
+      <Heading variant="page"> Transaction System Example</Heading>
       <VStack layerStyle="section" spacing={8}>
-        {/* Header */}
-        <Box textAlign="center">
-          <Heading size="xl" mb={4}>
-            Transaction System Example
-            <Badge ml={3} colorScheme="orange">
-              Advanced Pattern
-            </Badge>
-          </Heading>
-          <Text fontSize="lg" color="gray.600" maxW="2xl">
-            A comprehensive example demonstrating Forestry 4's transaction system for atomic
-            operations, rollback capabilities, and complex state management scenarios.
-          </Text>
-        </Box>
+        <Text fontSize="lg" color="gray.600" maxW="2xl">
+          A comprehensive example demonstrating Forestry 4's transaction system for atomic
+          operations, rollback capabilities, and complex state management scenarios.
+        </Text>
 
         {/* Key Features */}
-        <Box layerStyle="methodCard" w="full">
-          <Heading size="md" mb={4}>
-            Key Features Demonstrated
-          </Heading>
+        <Section title="Features Demonstrated">
           <List spacing={2}>
             <ListItem>
               <ListIcon as={CheckCircleIcon} color="green.500" />
@@ -68,170 +57,178 @@ const TransactionDemo: React.FC = () => {
               <strong>Performance Optimization:</strong> Batch operations for better performance
             </ListItem>
           </List>
-        </Box>
+        </Section>
 
         {/* Transaction Concepts */}
-        <Box layerStyle="methodCard" w="full">
-          <Heading size="md" mb={4}>
-            Transaction Concepts
-          </Heading>
-
+        <Section title="Transaction Concepts">
           <Alert status="info" mb={4}>
             <AlertIcon />
             Transactions ensure data consistency by treating multiple operations as a single, atomic
             unit that either completes entirely or rolls back completely.
           </Alert>
 
-          <VStack spacing={4} align="stretch">
-            <Box>
-              <Heading size="sm" mb={2}>
-                Atomicity
-              </Heading>
-              <Text fontSize="sm" color="gray.600">
-                All operations within a transaction succeed together or fail together. No partial
-                updates are left in an inconsistent state.
-              </Text>
-            </Box>
+          <Box>
+            <Heading size="sm" mb={2}>
+              Atomicity
+            </Heading>
+            <Text fontSize="sm" color="gray.600">
+              All operations within a transaction succeed together or fail together. No partial
+              updates are left in an inconsistent state.
+            </Text>
+          </Box>
 
-            <Box>
-              <Heading size="sm" mb={2}>
-                Rollback Safety
-              </Heading>
-              <Text fontSize="sm" color="gray.600">
-                If any operation fails, the entire transaction is rolled back to the original state
-                before the transaction began.
-              </Text>
-            </Box>
+          <Box>
+            <Heading size="sm" mb={2}>
+              Rollback Safety
+            </Heading>
+            <Text fontSize="sm" color="gray.600">
+              If any operation fails, the entire transaction is rolled back to the original state
+              before the transaction began.
+            </Text>
+          </Box>
 
-            <Box>
-              <Heading size="sm" mb={2}>
-                Validation Control
-              </Heading>
-              <Text fontSize="sm" color="gray.600">
-                Validation can be suspended during transactions to allow intermediate invalid
-                states, then resumed for final validation.
-              </Text>
-            </Box>
+          <Box>
+            <Heading size="sm" mb={2}>
+              Validation Control
+            </Heading>
+            <Text fontSize="sm" color="gray.600">
+              Validation can be suspended during transactions to allow intermediate invalid states,
+              then resumed for final validation.
+            </Text>
+          </Box>
 
-            <Box>
-              <Heading size="sm" mb={2}>
-                Performance Benefits
-              </Heading>
-              <Text fontSize="sm" color="gray.600">
-                Batch multiple operations together to reduce validation overhead and improve
-                performance for complex state changes.
-              </Text>
-            </Box>
-          </VStack>
-        </Box>
+          <Box>
+            <Heading size="sm" mb={2}>
+              Performance Benefits
+            </Heading>
+            <Text fontSize="sm" color="gray.600">
+              Batch multiple operations together to reduce validation overhead and improve
+              performance for complex state changes.
+            </Text>
+          </Box>
+        </Section>
 
         {/* Basic Transaction Example */}
         <Box layerStyle="methodCard" w="full">
           <Heading size="md" mb={4}>
             Basic Transaction Pattern
           </Heading>
-          <CodeBlock language="typescript" title="Simple Transaction Example">
-            {`// Basic transaction for atomic operations
-const transferFunds = function(value: BankState, fromAccount: string, toAccount: string, amount: number) {
-  return this.transact({
-    suspendValidation: true, // Allow intermediate invalid states
-    action() {
-      // Step 1: Withdraw from source account
-      const fromBalance = this.value.accounts[fromAccount];
-      if (fromBalance < amount) {
-        throw new Error('Insufficient funds');
-      }
-      this.set(\`accounts.\${fromAccount}\`, fromBalance - amount);
-      
-      // Step 2: Deposit to destination account
-      const toBalance = this.value.accounts[toAccount];
-      this.set(\`accounts.\${toAccount}\`, toBalance + amount);
-      
-      // Step 3: Record transaction
-      this.mutate(draft => {
-        draft.transactions.push({
-          id: Date.now(),
-          from: fromAccount,
-          to: toAccount,
-          amount,
-          timestamp: new Date(),
-        });
-      });
-      
-      // Final validation will run here automatically
-      // If validation fails, entire transaction rolls back
-    }
-  });
-};`}
-          </CodeBlock>
-        </Box>
-
-        {/* Complex Transaction Example */}
-        <Box layerStyle="methodCard" w="full">
-          <Heading size="md" mb={4}>
-            Complex Transaction Example
-          </Heading>
           <SnippetBlock
-            snippetName="transaction-examples.ts"
+            snippetName="transactionDemoStoreFactory"
             language="typescript"
-            title="Advanced Transaction Patterns"
+            title="Modern Transaction Store Factory"
           />
         </Box>
 
-        {/* Nested Transactions */}
+        {/* Transaction Tests Example */}
         <Box layerStyle="methodCard" w="full">
           <Heading size="md" mb={4}>
-            Nested Transactions
+            Transaction Testing
           </Heading>
-          <CodeBlock language="typescript" title="Nested Transaction Pattern">
-            {`// Nested transactions for complex operations
-const processOrder = function(value: OrderState, order: Order) {
-  return this.transact({
-    suspendValidation: false, // Keep validation active
-    action() {
-      // Outer transaction: Process entire order
-      
-      // Step 1: Validate inventory (inner transaction)
-      this.transact({
-        suspendValidation: true,
-        action() {
-          for (const item of order.items) {
-            const inventory = this.value.inventory[item.productId];
-            if (inventory < item.quantity) {
-              throw new Error(\`Insufficient inventory for \${item.name}\`);
-            }
-            // Reserve inventory
-            this.set(\`inventory.\${item.productId}\`, inventory - item.quantity);
-          }
+          <SnippetBlock
+            snippetName="transaction-demo-example-tests"
+            language="typescript"
+            title="Comprehensive Transaction Tests"
+          />
+        </Box>
+
+        {/* Modern Transaction Patterns */}
+        <Box layerStyle="methodCard" w="full">
+          <Heading size="md" mb={4}>
+            Modern Transaction Patterns
+          </Heading>
+          <CodeBlock language="typescript" title="Forestry 4.1.x Transaction Patterns">
+            {`// Modern class-based transaction patterns
+class TransactionDemoForest extends Forest<BankState> {
+  // Bank transfer with transaction
+  transferFunds(fromAccountId: string, toAccountId: string, amount: number) {
+    this.$transact({
+      suspendValidation: true,
+      action: () => {
+        const fromAccount = this.value.bankAccounts[fromAccountId];
+        const toAccount = this.value.bankAccounts[toAccountId];
+
+        if (!fromAccount || !toAccount) {
+          throw new Error('Invalid account');
         }
-      });
-      
-      // Step 2: Process payment (inner transaction)
-      this.transact({
-        suspendValidation: true,
-        action() {
-          const paymentResult = this.$.processPayment(order.payment);
-          if (!paymentResult.success) {
-            throw new Error(\`Payment failed: \${paymentResult.error}\`);
-          }
-          this.set('paymentStatus', 'completed');
+
+        if (fromAccount.balance < amount) {
+          throw new Error('Insufficient funds');
         }
-      });
-      
-      // Step 3: Update order status
-      this.mutate(draft => {
-        draft.orders[order.id] = {
-          ...order,
-          status: 'confirmed',
-          processedAt: new Date(),
+
+        // Step 1: Withdraw from source account
+        this.mutate(draft => {
+          draft.bankAccounts[fromAccountId].balance -= amount;
+        });
+
+        // Step 2: Deposit to destination account
+        this.mutate(draft => {
+          draft.bankAccounts[toAccountId].balance += amount;
+        });
+
+        // Step 3: Record transaction
+        const transaction = {
+          id: Date.now().toString(),
+          amount,
+          description: \`Transfer from \${fromAccount.name} to \${toAccount.name}\`,
+          timestamp: Date.now(),
         };
-      });
-      
-      // Step 4: Send confirmation
-      this.$.sendOrderConfirmation(order.id);
-    }
-  });
-};`}
+
+        this.mutate(draft => {
+          draft.bankTransactions.push(transaction);
+        });
+      },
+    });
+  }
+
+  // Complex order processing with nested transactions
+  processOrder(order: Order) {
+    this.$transact({
+      suspendValidation: false,
+      action: () => {
+        // Step 1: Validate inventory (inner transaction)
+        this.$transact({
+          suspendValidation: true,
+          action: () => {
+            for (const item of order.items) {
+              const inventory = this.value.inventory[item.productId];
+              if (inventory < item.quantity) {
+                throw new Error(\`Insufficient inventory for \${item.name}\`);
+              }
+              // Reserve inventory
+              this.mutate(draft => {
+                draft.inventory[item.productId] -= item.quantity;
+              });
+            }
+          },
+        });
+
+        // Step 2: Process payment (inner transaction)
+        this.$transact({
+          suspendValidation: true,
+          action: () => {
+            this.set('paymentStatus', 'processing');
+
+            const paymentResult = this.processPayment(order.totalAmount);
+            if (!paymentResult.success) {
+              throw new Error(\`Payment failed: \${paymentResult.error}\`);
+            }
+            this.set('paymentStatus', 'completed');
+          },
+        });
+
+        // Step 3: Create order
+        this.mutate(draft => {
+          draft.orders[order.id] = {
+            ...order,
+            status: 'confirmed',
+            processedAt: new Date(),
+          };
+        });
+      },
+    });
+  }
+}`}
           </CodeBlock>
         </Box>
 

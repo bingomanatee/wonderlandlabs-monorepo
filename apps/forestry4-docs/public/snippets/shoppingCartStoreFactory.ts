@@ -1,6 +1,6 @@
 // Auto-generated snippet from: apps/forestry4-docs/src/storeFactories/ValidationSystem/shoppingCartStore.ts
 // Description: Shopping cart store with validation, coupons, tax calculation, and checkout processing
-// Last synced: Sat Sep 20 19:53:28 PDT 2025
+// Last synced: Sat Sep 20 21:09:32 PDT 2025
 // DO NOT EDIT - This file is automatically synced from the source
 
 import { Forest } from '@wonderlandlabs/forestry4';

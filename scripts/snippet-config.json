@@ -17,6 +17,14 @@
       "language": "typescript"
     },
     {
+      "name": "useErrorHandler-hook",
+      "description": "useErrorHandler hook for toast-based error handling",
+      "source": "apps/forestry4-docs/src/hooks/useErrorHandler.ts",
+      "target": "apps/forestry4-docs/public/snippets/useErrorHandler.ts",
+      "extractMode": "full",
+      "language": "typescript"
+    },
+    {
       "name": "createTodoStore",
       "description": "Todo store factory from createTodoStore",
       "source": "apps/forestry4-docs/src/storeFactories/createTodoStore.ts",
@@ -232,6 +240,54 @@
       "description": "Shopping cart store example unit tests",
       "source": "apps/forestry4-docs/src/__tests__/shopping-cart-example.test.ts",
       "target": "apps/forestry4-docs/public/snippets/shopping-cart-example-tests.ts",
+      "extractMode": "full",
+      "language": "typescript"
+    },
+    {
+      "name": "shopping-cart-component-usage",
+      "description": "Shopping cart component usage with error handling",
+      "source": "apps/forestry4-docs/src/examples/shopping-cart/component-usage.tsx",
+      "target": "apps/forestry4-docs/public/snippets/shopping-cart-component-usage.tsx",
+      "extractMode": "full",
+      "language": "typescript"
+    },
+    {
+      "name": "shopping-cart-global-toast-setup",
+      "description": "Global toast configuration for shopping cart error handling",
+      "source": "apps/forestry4-docs/src/examples/shopping-cart/global-toast-setup.tsx",
+      "target": "apps/forestry4-docs/public/snippets/shopping-cart-global-toast-setup.tsx",
+      "extractMode": "full",
+      "language": "typescript"
+    },
+    {
+      "name": "shopping-cart-demo-component",
+      "description": "Complete shopping cart demo component with validation and error handling",
+      "source": "apps/forestry4-docs/src/examples/shopping-cart/ShoppingCartDemoComponent.tsx",
+      "target": "apps/forestry4-docs/public/snippets/shopping-cart-demo-component.tsx",
+      "extractMode": "full",
+      "language": "typescript"
+    },
+    {
+      "name": "shopping-cart-schema-validation",
+      "description": "Zod schema definitions and custom business logic tests for shopping cart validation",
+      "source": "apps/forestry4-docs/src/examples/shopping-cart/schema-validation.ts",
+      "target": "apps/forestry4-docs/public/snippets/shopping-cart-schema-validation.ts",
+      "extractMode": "full",
+      "language": "typescript"
+    },
+    {
+      "name": "shopping-cart-store-actions",
+      "description": "Shopping cart store actions with validation and transaction handling",
+      "source": "apps/forestry4-docs/src/examples/shopping-cart/store-actions.ts",
+      "target": "apps/forestry4-docs/public/snippets/shopping-cart-store-actions.ts",
+      "extractMode": "full",
+      "language": "typescript"
+    },
+    {
+      "name": "field-branch-component",
+      "description": "Reusable Field component demonstrating Forest branch usage with validation",
+      "source": "apps/forestry4-docs/src/components/ValidationSystem/Field.tsx",
+      "target": "apps/forestry4-docs/public/snippets/field-branch-component.tsx",
       "extractMode": "full",
       "language": "typescript"
     },

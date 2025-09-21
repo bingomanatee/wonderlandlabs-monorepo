@@ -1,6 +1,6 @@
 // Auto-generated snippet from: apps/forestry4-docs/src/storeFactories/__tests__/demoStoreFactory.test.ts
 // Description: Complete test suite for demoStoreFactory
-// Last synced: Sat Sep 20 19:53:27 PDT 2025
+// Last synced: Sat Sep 20 21:09:31 PDT 2025
 // DO NOT EDIT - This file is automatically synced from the source
 
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';

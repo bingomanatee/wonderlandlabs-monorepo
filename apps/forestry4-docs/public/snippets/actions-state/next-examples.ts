@@ -1,5 +1,20 @@
 // Auto-generated snippet from: apps/forestry4-docs/public/snippets/actions-state/next-examples.ts
 // Description: Examples of using the next method for complete state replacement
+// Last synced: Sat Sep 20 21:09:31 PDT 2025
+// DO NOT EDIT - This file is automatically synced from the source
+
+// Auto-generated snippet from: apps/forestry4-docs/public/snippets/actions-state/next-examples.ts
+// Description: Examples of using the next method for complete state replacement
+// Last synced: Sat Sep 20 21:09:07 PDT 2025
+// DO NOT EDIT - This file is automatically synced from the source
+
+// Auto-generated snippet from: apps/forestry4-docs/public/snippets/actions-state/next-examples.ts
+// Description: Examples of using the next method for complete state replacement
+// Last synced: Sat Sep 20 21:06:56 PDT 2025
+// DO NOT EDIT - This file is automatically synced from the source
+
+// Auto-generated snippet from: apps/forestry4-docs/public/snippets/actions-state/next-examples.ts
+// Description: Examples of using the next method for complete state replacement
 // Last synced: Sat Sep 20 19:53:28 PDT 2025
 // DO NOT EDIT - This file is automatically synced from the source
 

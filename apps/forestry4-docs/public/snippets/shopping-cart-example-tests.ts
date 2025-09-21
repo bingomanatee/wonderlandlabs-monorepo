@@ -1,6 +1,6 @@
 // Auto-generated snippet from: apps/forestry4-docs/src/__tests__/shopping-cart-example.test.ts
 // Description: Shopping cart store example unit tests
-// Last synced: Sat Sep 20 19:53:28 PDT 2025
+// Last synced: Sat Sep 20 21:09:31 PDT 2025
 // DO NOT EDIT - This file is automatically synced from the source
 
 import { describe, it, expect, vi } from 'vitest';

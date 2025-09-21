@@ -1,6 +1,6 @@
 // Auto-generated snippet from: apps/forestry4-docs/src/examples/home/react-integration.tsx
 // Description: React integration example for Forestry 4
-// Last synced: Sat Sep 20 18:53:38 PDT 2025
+// Last synced: Sat Sep 20 19:53:28 PDT 2025
 // DO NOT EDIT - This file is automatically synced from the source
 
 import React from 'react';

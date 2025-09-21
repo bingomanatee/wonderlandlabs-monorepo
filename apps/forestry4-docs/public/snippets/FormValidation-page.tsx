@@ -1,47 +1,83 @@
 // Auto-generated snippet from: apps/forestry4-docs/src/pages/examples/FormValidation.tsx
 // Description: Form validation example page
-// Last synced: Sat Sep 20 18:53:38 PDT 2025
+// Last synced: Sat Sep 20 19:53:27 PDT 2025
 // DO NOT EDIT - This file is automatically synced from the source
 
 import React from 'react';
 import {
   Alert,
   AlertIcon,
-  Badge,
   Box,
   Container,
   Heading,
   List,
   ListItem,
   Text,
+  UnorderedList,
   VStack,
 } from '@chakra-ui/react';
 import AdvancedFormDemo from '../../components/ValidationSystem/AdvancedFormDemo';
 import SnippetBlock from '../../components/SnippetBlock';
+import Section from '@/components/Section.tsx';
+import CodeTabs from '@/components/CodeTabs.tsx';
 
 const FormValidation: React.FC = () => {
   return (
     <Container maxW="container.xl" py={8}>
-      <VStack layerStyle="section" spacing={8}>
-        {/* Header */}
-        <Box textAlign="center">
-          <Heading size="xl" mb={4}>
-            Advanced Form Validation
-            <Badge ml={3} colorScheme="blue">
-              Form Patterns
-            </Badge>
-          </Heading>
-          <Text fontSize="lg" color="gray.600" maxW="2xl">
-            A comprehensive form validation example demonstrating field-level validation,
-            cross-field dependencies, async validation, and error handling patterns.
-          </Text>
-        </Box>
+      <Heading variant="page">Form Validation</Heading>
+      <Text fontSize="lg" color="gray.600" maxW="2xl">
+        A comprehensive form validation example demonstrating field-level validation, cross-field
+        dependencies, async validation, and error handling patterns.
+      </Text>
 
-        {/* Key Features */}
-        <Box layerStyle="methodCard" w="full">
-          <Heading size="md" mb={4}>
-            Key Features Demonstrated
-          </Heading>
+      <VStack layerStyle="section" spacing={8}>
+        {/* Live Demo */}
+        <Section title="Form Demo" layerStyle="methodCard" w="full">
+          <Text mb={4} color="gray.600">
+            Try filling out the form below. Notice how validation provides immediate feedback,
+            handles async operations, and manages complex field dependencies.
+          </Text>
+          <AdvancedFormDemo />
+        </Section>
+        <Section title="source Code">
+          <Box>
+            <Text color="gray.600" mb={4}>
+              Here's how to implement advanced form validation using Forest branches with individual
+              field state management:
+            </Text>
+
+            <CodeTabs
+              tabs={[
+                {
+                  label: 'Form Component',
+                  language: 'tsx',
+                  snippet: 'advancedFormComponent',
+                  folder: 'ValidationSystem',
+                },
+                {
+                  label: 'Field Branch Component',
+                  language: 'tsx',
+                  snippet: 'field-branch-component',
+                },
+                {
+                  label: 'Branch Configuration',
+                  language: 'typescript',
+                  snippet: 'usernameBranchConfig',
+                  folder: 'ValidationSystem',
+                  ts: true,
+                },
+                {
+                  label: 'Forest Factory',
+                  language: 'typescript',
+                  snippet: 'formStateFactory',
+                  folder: 'ValidationSystem',
+                  ts: true,
+                },
+              ]}
+            />
+          </Box>
+        </Section>
+        <Section title="    Features Demonstrated">
           <List spacing={2}>
             <ListItem>
               <strong>Field-Level Validation:</strong> Individual field validation with specific
@@ -66,20 +102,49 @@ const FormValidation: React.FC = () => {
               states
             </ListItem>
           </List>
-        </Box>
-
-        {/* Live Demo */}
-        <Box layerStyle="methodCard" w="full">
-          <Heading size="md" mb={4}>
-            Live Demo
-          </Heading>
-          <Text mb={4} color="gray.600">
-            Try filling out the form below. Notice how validation provides immediate feedback,
-            handles async operations, and manages complex field dependencies.
+        </Section>
+        <Section title="Branched Stores">
+          <Heading size="lg">Advanced Form - Using Forest with Branches</Heading>
+          <Text color="gray.600">
+            This example showcases Forestry 4's branch system. Only <strong>Forests</strong> can
+            create branches - each form field is managed by its own branch with independent
+            validation, while the parent forest coordinates overall form state.
           </Text>
-          <AdvancedFormDemo />
-        </Box>
 
+          <Box p={4} bg="blue.50" borderRadius="md">
+            <Text fontWeight="semibold" mb={2}>
+              🌿 Branch Benefits:
+            </Text>
+            <VStack spacing={1} align="start" fontSize="sm">
+              <Text>
+                • <strong>Independent validation</strong> - Each field has its own validation logic
+              </Text>
+              <Text>
+                • <strong>Focused actions</strong> - Field-specific actions like setValue()
+              </Text>
+              <Text>
+                • <strong>Isolated state</strong> - Changes to one field don't affect others
+              </Text>
+              <Text>
+                • <strong>Coordinated updates</strong> - Parent store sees all field changes
+              </Text>
+              <Text>
+                • <strong>Modular design</strong> - Easy to add/remove fields without affecting
+                others
+              </Text>
+            </VStack>
+          </Box>
+
+          <Alert status="info">
+            <AlertIcon />
+            <Text fontSize="sm">
+              <strong>Key Points:</strong> Only <code>Forest</code> instances can create branches.
+              Form submission state (<code>canSubmit</code>, <code>submitError</code>) is calculated
+              in prep functions as data state, not validation errors. This allows the UI to show why
+              submission is disabled without throwing exceptions.
+            </Text>
+          </Alert>
+        </Section>
         {/* Validation Architecture */}
         <Box layerStyle="methodCard" w="full">
           <Heading size="md" mb={4}>
@@ -164,7 +229,7 @@ const FormValidation: React.FC = () => {
           <Heading size="md" mb={4}>
             Form Validation Best Practices
           </Heading>
-          <List spacing={3}>
+          <UnorderedList>
             <ListItem>
               <strong>Immediate Feedback:</strong> Validate fields as users type for better UX
             </ListItem>
@@ -184,7 +249,7 @@ const FormValidation: React.FC = () => {
             <ListItem>
               <strong>Error Recovery:</strong> Allow users to easily correct and retry
             </ListItem>
-          </List>
+          </UnorderedList>
         </Box>
       </VStack>
     </Container>

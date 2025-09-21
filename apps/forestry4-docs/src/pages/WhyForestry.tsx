@@ -3,6 +3,12 @@ import { Container, Heading, Text, Box, VStack, Divider } from '@chakra-ui/react
 import BenefitsSection from '../components/WhyForestry/BenefitsSection';
 import ComparisonSection from '../components/WhyForestry/ComparisonSection';
 import LiveDemo from '../components/WhyForestry/LiveDemo';
+import Section from '@/components/Section.tsx';
+import FormValidation from '@/pages/examples/FormValidation.tsx';
+import AdvancedFormComponent from '../../public/snippets/ValidationSystem/advancedFormComponent.tsx';
+import CodeTabs from '@/components/CodeTabs.tsx';
+import TodoApp from '@/pages/examples/TodoApp.tsx';
+import TodoAppDemo from '@/components/ReactIntegration/TodoAppDemo.tsx';
 
 const WhyForestry: React.FC = () => {
   return (
@@ -36,19 +42,32 @@ const WhyForestry: React.FC = () => {
           allowFullScreen
         ></iframe>
 
-        <Text>the TLDR of the above; </Text>
+        <Text>Why useEffect is not a panacea</Text>
 
         <Divider />
 
         {/* Live Demo Section */}
-        <Box>
-          <Heading size="xl" mb={6} textAlign="center">
-            Try Forestry Live
-          </Heading>
-          <LiveDemo />
-        </Box>
+        <Section title="Try Forestry Live">
+          <TodoAppDemo />
+        </Section>
 
-        <Divider />
+        {/* Code Structure */}
+        <Section title="Implementation">
+          <CodeTabs
+            tabs={[
+              {
+                label: 'Store Structure',
+                language: 'typescript',
+                snippet: 'createTodoStore',
+              },
+              {
+                label: 'Component Usage',
+                language: 'tsx',
+                snippet: 'TodoApp',
+              },
+            ]}
+          />
+        </Section>
       </VStack>
     </Container>
   );

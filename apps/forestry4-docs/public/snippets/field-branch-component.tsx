@@ -1,3 +1,8 @@
+// Auto-generated snippet from: apps/forestry4-docs/src/components/ValidationSystem/Field.tsx
+// Description: Reusable Field component demonstrating Forest branch usage with validation
+// Last synced: Sat Sep 20 19:53:28 PDT 2025
+// DO NOT EDIT - This file is automatically synced from the source
+
 import React from 'react';
 import { Box, Text, Input, NumberInput, NumberInputField } from '@chakra-ui/react';
 import type { StoreIF } from '@wonderlandlabs/forestry4';

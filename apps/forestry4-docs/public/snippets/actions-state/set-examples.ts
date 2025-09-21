@@ -1,5 +1,20 @@
 // Auto-generated snippet from: apps/forestry4-docs/public/snippets/actions-state/set-examples.ts
 // Description: Examples of using the set method for state updates
+// Last synced: Sat Sep 20 19:53:28 PDT 2025
+// DO NOT EDIT - This file is automatically synced from the source
+
+// Auto-generated snippet from: apps/forestry4-docs/public/snippets/actions-state/set-examples.ts
+// Description: Examples of using the set method for state updates
+// Last synced: Sat Sep 20 19:10:09 PDT 2025
+// DO NOT EDIT - This file is automatically synced from the source
+
+// Auto-generated snippet from: apps/forestry4-docs/public/snippets/actions-state/set-examples.ts
+// Description: Examples of using the set method for state updates
+// Last synced: Sat Sep 20 19:09:35 PDT 2025
+// DO NOT EDIT - This file is automatically synced from the source
+
+// Auto-generated snippet from: apps/forestry4-docs/public/snippets/actions-state/set-examples.ts
+// Description: Examples of using the set method for state updates
 // Last synced: Sat Sep 20 18:53:38 PDT 2025
 // DO NOT EDIT - This file is automatically synced from the source
 

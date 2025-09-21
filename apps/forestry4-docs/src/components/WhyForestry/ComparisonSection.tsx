@@ -256,39 +256,6 @@ const ComparisonSection: React.FC = () => {
         </TableContainer>
       </Box>
 
-      {/* Code Comparison */}
-      <Box layerStyle="card" bg="blue.50">
-        <Heading size="lg" mb={6}>
-          Code Comparison
-        </Heading>
-        <Text color="gray.600" mb={6}>
-          Compare how the same functionality looks across different state management solutions.
-        </Text>
-
-        <CodeTabs
-          tabs={[
-            {
-              label: 'Forestry',
-              language: 'typescript',
-              snippet: 'forestryExample',
-              folder: 'WhyForestry',
-            },
-            {
-              label: 'Redux Toolkit',
-              language: 'typescript',
-              snippet: 'reduxExample',
-              folder: 'WhyForestry',
-            },
-            {
-              label: 'Zustand',
-              language: 'typescript',
-              snippet: 'zustandExample',
-              folder: 'WhyForestry',
-            },
-          ]}
-        />
-      </Box>
-
       {/* Key Differentiators */}
       <SimpleGrid columns={{ base: 1, lg: 2 }} spacing={6}>
         <Box layerStyle="card" bg="green.50">

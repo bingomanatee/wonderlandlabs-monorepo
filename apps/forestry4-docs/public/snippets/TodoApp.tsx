@@ -1,3 +1,8 @@
+// Auto-generated snippet from: apps/forestry4-docs/src/pages/examples/TodoApp.tsx
+// Description: todo component
+// Last synced: Sat Sep 20 19:53:28 PDT 2025
+// DO NOT EDIT - This file is automatically synced from the source
+
 import React from 'react';
 import type { StoreIF } from '@wonderlandlabs/forestry4';
 import { Forest } from '@wonderlandlabs/forestry4';
@@ -75,7 +80,8 @@ const TodoApp: React.FC = () => {
         </Section>
 
         {/* Code Structure */}
-        <Section title="Implementation">
+        <Box layerStyle="methodCard" w="full">
+          <Heading variant="card">Implementation</Heading>
           <CodeTabs
             tabs={[
               {
@@ -90,7 +96,7 @@ const TodoApp: React.FC = () => {
               },
             ]}
           />
-        </Section>
+        </Box>
 
         {show ? null : <ArchHead store={showStore} />}
         <Collapse in={show}>

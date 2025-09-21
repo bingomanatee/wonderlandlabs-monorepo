@@ -1,5 +1,45 @@
 // Auto-generated snippet from: apps/forestry4-docs/public/snippets/actions-state/arrow-function-antipattern.ts
 // Description: Example showing why arrow functions don't work as actions
+// Last synced: Sat Sep 20 18:53:38 PDT 2025
+// DO NOT EDIT - This file is automatically synced from the source
+
+// Auto-generated snippet from: apps/forestry4-docs/public/snippets/actions-state/arrow-function-antipattern.ts
+// Description: Example showing why arrow functions don't work as actions
+// Last synced: Sat Sep 20 18:01:54 PDT 2025
+// DO NOT EDIT - This file is automatically synced from the source
+
+// Auto-generated snippet from: apps/forestry4-docs/public/snippets/actions-state/arrow-function-antipattern.ts
+// Description: Example showing why arrow functions don't work as actions
+// Last synced: Sat Sep 20 17:57:32 PDT 2025
+// DO NOT EDIT - This file is automatically synced from the source
+
+// Auto-generated snippet from: apps/forestry4-docs/public/snippets/actions-state/arrow-function-antipattern.ts
+// Description: Example showing why arrow functions don't work as actions
+// Last synced: Sat Sep 20 17:47:35 PDT 2025
+// DO NOT EDIT - This file is automatically synced from the source
+
+// Auto-generated snippet from: apps/forestry4-docs/public/snippets/actions-state/arrow-function-antipattern.ts
+// Description: Example showing why arrow functions don't work as actions
+// Last synced: Sat Sep 20 17:45:36 PDT 2025
+// DO NOT EDIT - This file is automatically synced from the source
+
+// Auto-generated snippet from: apps/forestry4-docs/public/snippets/actions-state/arrow-function-antipattern.ts
+// Description: Example showing why arrow functions don't work as actions
+// Last synced: Sat Sep 20 17:00:43 PDT 2025
+// DO NOT EDIT - This file is automatically synced from the source
+
+// Auto-generated snippet from: apps/forestry4-docs/public/snippets/actions-state/arrow-function-antipattern.ts
+// Description: Example showing why arrow functions don't work as actions
+// Last synced: Sat Sep 20 16:49:03 PDT 2025
+// DO NOT EDIT - This file is automatically synced from the source
+
+// Auto-generated snippet from: apps/forestry4-docs/public/snippets/actions-state/arrow-function-antipattern.ts
+// Description: Example showing why arrow functions don't work as actions
+// Last synced: Sat Sep 20 16:45:06 PDT 2025
+// DO NOT EDIT - This file is automatically synced from the source
+
+// Auto-generated snippet from: apps/forestry4-docs/public/snippets/actions-state/arrow-function-antipattern.ts
+// Description: Example showing why arrow functions don't work as actions
 // Last synced: Sat Sep 20 13:42:05 PDT 2025
 // DO NOT EDIT - This file is automatically synced from the source
 

@@ -24,7 +24,6 @@ export default function useForestBranch<ValueType>(
   if (!branchRef.current && store && typeof (store as any)?.$branch === 'function') {
     const branchConfig = branchConfigFactory(...rest);
     branchRef.current = (store as any).$branch(path, branchConfig);
-    console.log('made branch:', branchRef.current, 'for path', path);
   } else if (!branchRef.current) {
     console.error('bad store ', store);
   }

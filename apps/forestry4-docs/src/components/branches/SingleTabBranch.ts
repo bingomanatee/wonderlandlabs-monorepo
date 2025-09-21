@@ -46,7 +46,6 @@ export class SingleTabBranch extends Forest<any> {
   }
 
   toggleImportsExpansion(e) {
-    console.log('checked:', e.target?.checked);
     this.mutate((draft) => {
       draft.isImportsExpanded = !draft.isImportsExpanded;
     });
@@ -59,7 +58,7 @@ export class SingleTabBranch extends Forest<any> {
       const scrollHeight = element.scrollHeight;
       const clientHeight = element.clientHeight;
       const needsExpansion = scrollHeight > clientHeight;
-      console.log('for element', element.id, scrollHeight, clientHeight);
+
       if (needsExpansion !== this.value.needsExpansion) {
         this.mutate((draft) => {
           draft.needsExpansion = needsExpansion;

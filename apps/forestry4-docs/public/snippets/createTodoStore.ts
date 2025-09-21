@@ -1,6 +1,6 @@
 // Auto-generated snippet from: apps/forestry4-docs/src/storeFactories/createTodoStore.ts
 // Description: Todo store factory from createTodoStore
-// Last synced: Sat Sep 20 13:42:04 PDT 2025
+// Last synced: Sat Sep 20 18:53:38 PDT 2025
 // DO NOT EDIT - This file is automatically synced from the source
 
 import React from 'react';
@@ -109,7 +109,7 @@ class TodoForest extends Forest<TodoState> {
 
   // Compute active todos count
   get activeCount(): number {
-    return this.filteredTodos.length;
+    return this.value.todos.filter((todo) => !todo.completed).length;
   }
 
   // Check if add button should be disabled

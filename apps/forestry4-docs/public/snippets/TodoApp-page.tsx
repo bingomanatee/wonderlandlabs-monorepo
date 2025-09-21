@@ -1,6 +1,6 @@
 // Auto-generated snippet from: apps/forestry4-docs/src/pages/examples/TodoApp.tsx
 // Description: TodoApp example page component
-// Last synced: Sat Sep 20 13:42:04 PDT 2025
+// Last synced: Sat Sep 20 18:53:38 PDT 2025
 // DO NOT EDIT - This file is automatically synced from the source
 
 import React from 'react';
@@ -20,7 +20,7 @@ import {
 } from '@chakra-ui/react';
 import { CheckCircleIcon } from '@chakra-ui/icons';
 import TodoAppDemo from '@/components/ReactIntegration/TodoAppDemo';
-import CodeTabs from '@/components/CodeTabs';
+import CodeTabs from '@/components/CodeTabs.tsx';
 import PageTitle from '@/components/PageTitle';
 import Section from '@/components/Section.tsx';
 import useForestryLocal from '@/hooks/useForestryLocal.ts';
@@ -79,6 +79,25 @@ const TodoApp: React.FC = () => {
           <TodoAppDemo />
         </Section>
 
+        {/* Code Structure */}
+        <Box layerStyle="methodCard" w="full">
+          <Heading variant="card">Implementation</Heading>
+          <CodeTabs
+            tabs={[
+              {
+                label: 'Store Structure',
+                language: 'typescript',
+                snippet: 'createTodoStore',
+              },
+              {
+                label: 'Component Usage',
+                language: 'tsx',
+                snippet: 'TodoApp',
+              },
+            ]}
+          />
+        </Box>
+
         {show ? null : <ArchHead store={showStore} />}
         <Collapse in={show}>
           <Section>
@@ -98,9 +117,7 @@ const TodoApp: React.FC = () => {
               </Box>
 
               <Box>
-                <Heading size="sm" mb={2}>
-                  Action Categories
-                </Heading>
+                <Heading variant="subtle">Action Categories</Heading>
                 <List spacing={1} fontSize="sm">
                   <ListItem>
                     <strong>Data Actions:</strong> addTodo, toggleTodo, removeTodo, setFilter,
@@ -131,52 +148,6 @@ const TodoApp: React.FC = () => {
             </VStack>
           </Section>
         </Collapse>
-
-        {/* Code Structure */}
-        <Box layerStyle="methodCard" w="full">
-          <Heading variant="card">Implementation</Heading>
-          <CodeTabs
-            tabs={[
-              {
-                label: 'Store Structure',
-                language: 'typescript',
-                snippet: 'createTodoStore',
-              },
-              {
-                label: 'Component Usage',
-                language: 'tsx',
-                snippet: 'TodoApp',
-              },
-            ]}
-          />
-        </Box>
-        <Section titleSize="md" title={'Key Features Demonstrated'}>
-          <List spacing={2}>
-            <ListItem>
-              <ListIcon as={CheckCircleIcon} color="green.500" />
-              <strong>Fully Centralized change actions:</strong> All logic encapsulated in store
-              actions and exposed as bound actions from the "$" property
-            </ListItem>
-            <ListItem>
-              <ListIcon as={CheckCircleIcon} color="green.500" />
-              <strong>Selectors as properties:</strong> filteredTodos, completedCount, activeCount
-            </ListItem>
-            <ListItem>
-              <ListIcon as={CheckCircleIcon} color="green.500" />
-              <strong>DOM friendly methods:</strong> onChange handlers subsume all event parsing
-            </ListItem>
-            <ListItem>
-              <ListIcon as={CheckCircleIcon} color="green.500" />
-              <strong>Action-Based Selectors:</strong> Computed values as actions rather than React
-              useMemo
-            </ListItem>
-            <ListItem>
-              <ListIcon as={CheckCircleIcon} color="green.500" />
-              <strong>Tactical Form Handling:</strong> Single onChange action using
-              event.target.name pattern
-            </ListItem>
-          </List>
-        </Section>
       </VStack>
     </Container>
   );

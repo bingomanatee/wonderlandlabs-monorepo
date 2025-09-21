@@ -68,6 +68,36 @@ describe('Transaction Demo Store', () => {
       expect(store.value.bankAccounts.checking.balance).toBe(1000);
       expect(store.value.bankTransactions).toHaveLength(0);
     });
+
+    it('should fail transfer to same account', () => {
+      expect(() => {
+        store.transferFunds('checking', 'checking', 100);
+      }).toThrow('Cannot transfer to the same account');
+
+      // State should remain unchanged
+      expect(store.value.bankAccounts.checking.balance).toBe(1000);
+      expect(store.value.bankTransactions).toHaveLength(0);
+    });
+
+    it('should fail transfer with zero amount', () => {
+      expect(() => {
+        store.transferFunds('checking', 'savings', 0);
+      }).toThrow('Transfer amount must be greater than 0');
+
+      // State should remain unchanged
+      expect(store.value.bankAccounts.checking.balance).toBe(1000);
+      expect(store.value.bankTransactions).toHaveLength(0);
+    });
+
+    it('should fail transfer with negative amount', () => {
+      expect(() => {
+        store.transferFunds('checking', 'savings', -100);
+      }).toThrow('Transfer amount must be greater than 0');
+
+      // State should remain unchanged
+      expect(store.value.bankAccounts.checking.balance).toBe(1000);
+      expect(store.value.bankTransactions).toHaveLength(0);
+    });
   });
 
   describe('order processing', () => {

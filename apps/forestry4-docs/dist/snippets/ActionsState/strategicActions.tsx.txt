@@ -1,7 +1,0 @@
-// Strategic: Business operation
-processOrder: function(order) {
-  this.$.addItem(order.item);
-  this.$.updateInventory(order.item);
-  this.$.logTransaction(order);
-  return this.$.calculateTotal();
-}

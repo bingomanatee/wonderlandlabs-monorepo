@@ -101,6 +101,16 @@ class TransactionDemoForest extends Forest<TransactionDemoState> {
     this.$transact({
       suspendValidation: true,
       action: () => {
+        // Block same-account transfers
+        if (fromAccountId === toAccountId) {
+          throw new Error('Cannot transfer to the same account');
+        }
+
+        // Validate amount
+        if (amount <= 0) {
+          throw new Error('Transfer amount must be greater than 0');
+        }
+
         const fromAccount = this.value.bankAccounts[fromAccountId];
         const toAccount = this.value.bankAccounts[toAccountId];
 

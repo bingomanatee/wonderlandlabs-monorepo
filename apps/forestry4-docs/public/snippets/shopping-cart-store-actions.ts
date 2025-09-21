@@ -1,6 +1,6 @@
 // Auto-generated snippet from: apps/forestry4-docs/src/examples/shopping-cart/store-actions.ts
 // Description: Shopping cart store actions with validation and transaction handling
-// Last synced: Sat Sep 20 21:09:31 PDT 2025
+// Last synced: Sun Sep 21 14:32:36 PDT 2025
 // DO NOT EDIT - This file is automatically synced from the source
 
 const createShoppingCartStore = () => new Forest<CartState>({

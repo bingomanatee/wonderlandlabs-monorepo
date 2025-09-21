@@ -1,6 +1,6 @@
 // Auto-generated snippet from: apps/forestry4-docs/src/examples/shopping-cart/schema-validation.ts
 // Description: Zod schema definitions and custom business logic tests for shopping cart validation
-// Last synced: Sat Sep 20 21:09:31 PDT 2025
+// Last synced: Sun Sep 21 14:32:36 PDT 2025
 // DO NOT EDIT - This file is automatically synced from the source
 
 import { z } from 'zod';

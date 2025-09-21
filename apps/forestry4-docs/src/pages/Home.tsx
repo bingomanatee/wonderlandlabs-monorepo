@@ -31,6 +31,12 @@ const Home: React.FC = () => {
       folder: 'home',
       ts: true,
     },
+    {
+      label: 'React Integration',
+      language: 'tsx',
+      snippet: 'react-integration',
+      folder: 'home',
+    },
   ];
 
   return (
@@ -49,10 +55,13 @@ const Home: React.FC = () => {
           </HStack>
 
           <Text fontSize="xl" color="gray.600" maxW="2xl">
-            A simple, powerful state management library for React. Start with the essentials, then
-            unlock advanced features when you need them.
+            A simple, powerful state management library for React. Forestry allows you to collect
+            instances that manage values with predefined schema and modify them with custom methods.
+            It allows you to create control systems that are faster, more consistent, and more
+            reliable update systems. It is designed not just to enhance short term work, but to
+            facilitate easy maintenance, testing and upgrading of long term projects.
           </Text>
-        </VStack>{' '}
+        </VStack>
         <Button as={RouterLink} to="/store" variant="outline" size="lg">
           Get Started
         </Button>

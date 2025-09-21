@@ -1,6 +1,6 @@
 // Auto-generated snippet from: apps/forestry4-docs/src/storeFactories/transactionDemoStoreFactory.ts
 // Description: Transaction demo store factory with bank, order, and migration examples
-// Last synced: Sat Sep 20 21:09:31 PDT 2025
+// Last synced: Sun Sep 21 14:32:35 PDT 2025
 // DO NOT EDIT - This file is automatically synced from the source
 
 import { Forest } from '@wonderlandlabs/forestry4';
@@ -106,6 +106,16 @@ class TransactionDemoForest extends Forest<TransactionDemoState> {
     this.$transact({
       suspendValidation: true,
       action: () => {
+        // Block same-account transfers
+        if (fromAccountId === toAccountId) {
+          throw new Error('Cannot transfer to the same account');
+        }
+
+        // Validate amount
+        if (amount <= 0) {
+          throw new Error('Transfer amount must be greater than 0');
+        }
+
         const fromAccount = this.value.bankAccounts[fromAccountId];
         const toAccount = this.value.bankAccounts[toAccountId];
 

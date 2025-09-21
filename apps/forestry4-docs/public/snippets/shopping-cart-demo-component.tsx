@@ -1,6 +1,6 @@
 // Auto-generated snippet from: apps/forestry4-docs/src/examples/shopping-cart/ShoppingCartDemoComponent.tsx
 // Description: Complete shopping cart demo component with validation and error handling
-// Last synced: Sat Sep 20 21:09:31 PDT 2025
+// Last synced: Sun Sep 21 14:32:36 PDT 2025
 // DO NOT EDIT - This file is automatically synced from the source
 
 import React from 'react';

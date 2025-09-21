@@ -1,5 +1,180 @@
 // Auto-generated snippet from: apps/forestry4-docs/public/snippets/actions-state/next-examples.ts
 // Description: Examples of using the next method for complete state replacement
+// Last synced: Sun Sep 21 14:32:35 PDT 2025
+// DO NOT EDIT - This file is automatically synced from the source
+
+// Auto-generated snippet from: apps/forestry4-docs/public/snippets/actions-state/next-examples.ts
+// Description: Examples of using the next method for complete state replacement
+// Last synced: Sun Sep 21 12:10:04 PDT 2025
+// DO NOT EDIT - This file is automatically synced from the source
+
+// Auto-generated snippet from: apps/forestry4-docs/public/snippets/actions-state/next-examples.ts
+// Description: Examples of using the next method for complete state replacement
+// Last synced: Sun Sep 21 12:06:12 PDT 2025
+// DO NOT EDIT - This file is automatically synced from the source
+
+// Auto-generated snippet from: apps/forestry4-docs/public/snippets/actions-state/next-examples.ts
+// Description: Examples of using the next method for complete state replacement
+// Last synced: Sun Sep 21 12:04:29 PDT 2025
+// DO NOT EDIT - This file is automatically synced from the source
+
+// Auto-generated snippet from: apps/forestry4-docs/public/snippets/actions-state/next-examples.ts
+// Description: Examples of using the next method for complete state replacement
+// Last synced: Sun Sep 21 11:58:39 PDT 2025
+// DO NOT EDIT - This file is automatically synced from the source
+
+// Auto-generated snippet from: apps/forestry4-docs/public/snippets/actions-state/next-examples.ts
+// Description: Examples of using the next method for complete state replacement
+// Last synced: Sun Sep 21 11:57:36 PDT 2025
+// DO NOT EDIT - This file is automatically synced from the source
+
+// Auto-generated snippet from: apps/forestry4-docs/public/snippets/actions-state/next-examples.ts
+// Description: Examples of using the next method for complete state replacement
+// Last synced: Sun Sep 21 11:54:49 PDT 2025
+// DO NOT EDIT - This file is automatically synced from the source
+
+// Auto-generated snippet from: apps/forestry4-docs/public/snippets/actions-state/next-examples.ts
+// Description: Examples of using the next method for complete state replacement
+// Last synced: Sun Sep 21 11:47:19 PDT 2025
+// DO NOT EDIT - This file is automatically synced from the source
+
+// Auto-generated snippet from: apps/forestry4-docs/public/snippets/actions-state/next-examples.ts
+// Description: Examples of using the next method for complete state replacement
+// Last synced: Sat Sep 20 21:09:31 PDT 2025
+// DO NOT EDIT - This file is automatically synced from the source
+
+// Auto-generated snippet from: apps/forestry4-docs/public/snippets/actions-state/next-examples.ts
+// Description: Examples of using the next method for complete state replacement
+// Last synced: Sat Sep 20 21:09:07 PDT 2025
+// DO NOT EDIT - This file is automatically synced from the source
+
+// Auto-generated snippet from: apps/forestry4-docs/public/snippets/actions-state/next-examples.ts
+// Description: Examples of using the next method for complete state replacement
+// Last synced: Sat Sep 20 21:06:56 PDT 2025
+// DO NOT EDIT - This file is automatically synced from the source
+
+// Auto-generated snippet from: apps/forestry4-docs/public/snippets/actions-state/next-examples.ts
+// Description: Examples of using the next method for complete state replacement
+// Last synced: Sat Sep 20 19:53:28 PDT 2025
+// DO NOT EDIT - This file is automatically synced from the source
+
+// Auto-generated snippet from: apps/forestry4-docs/public/snippets/actions-state/next-examples.ts
+// Description: Examples of using the next method for complete state replacement
+// Last synced: Sat Sep 20 19:10:09 PDT 2025
+// DO NOT EDIT - This file is automatically synced from the source
+
+// Auto-generated snippet from: apps/forestry4-docs/public/snippets/actions-state/next-examples.ts
+// Description: Examples of using the next method for complete state replacement
+// Last synced: Sat Sep 20 19:09:35 PDT 2025
+// DO NOT EDIT - This file is automatically synced from the source
+
+// Auto-generated snippet from: apps/forestry4-docs/public/snippets/actions-state/next-examples.ts
+// Description: Examples of using the next method for complete state replacement
+// Last synced: Sat Sep 20 18:53:38 PDT 2025
+// DO NOT EDIT - This file is automatically synced from the source
+
+// Auto-generated snippet from: apps/forestry4-docs/public/snippets/actions-state/next-examples.ts
+// Description: Examples of using the next method for complete state replacement
+// Last synced: Sat Sep 20 18:01:54 PDT 2025
+// DO NOT EDIT - This file is automatically synced from the source
+
+// Auto-generated snippet from: apps/forestry4-docs/public/snippets/actions-state/next-examples.ts
+// Description: Examples of using the next method for complete state replacement
+// Last synced: Sat Sep 20 17:57:32 PDT 2025
+// DO NOT EDIT - This file is automatically synced from the source
+
+// Auto-generated snippet from: apps/forestry4-docs/public/snippets/actions-state/next-examples.ts
+// Description: Examples of using the next method for complete state replacement
+// Last synced: Sat Sep 20 17:47:35 PDT 2025
+// DO NOT EDIT - This file is automatically synced from the source
+
+// Auto-generated snippet from: apps/forestry4-docs/public/snippets/actions-state/next-examples.ts
+// Description: Examples of using the next method for complete state replacement
+// Last synced: Sat Sep 20 17:45:36 PDT 2025
+// DO NOT EDIT - This file is automatically synced from the source
+
+// Auto-generated snippet from: apps/forestry4-docs/public/snippets/actions-state/next-examples.ts
+// Description: Examples of using the next method for complete state replacement
+// Last synced: Sat Sep 20 17:00:43 PDT 2025
+// DO NOT EDIT - This file is automatically synced from the source
+
+// Auto-generated snippet from: apps/forestry4-docs/public/snippets/actions-state/next-examples.ts
+// Description: Examples of using the next method for complete state replacement
+// Last synced: Sat Sep 20 16:49:03 PDT 2025
+// DO NOT EDIT - This file is automatically synced from the source
+
+// Auto-generated snippet from: apps/forestry4-docs/public/snippets/actions-state/next-examples.ts
+// Description: Examples of using the next method for complete state replacement
+// Last synced: Sat Sep 20 16:45:06 PDT 2025
+// DO NOT EDIT - This file is automatically synced from the source
+
+// Auto-generated snippet from: apps/forestry4-docs/public/snippets/actions-state/next-examples.ts
+// Description: Examples of using the next method for complete state replacement
+// Last synced: Sat Sep 20 13:42:05 PDT 2025
+// DO NOT EDIT - This file is automatically synced from the source
+
+// Auto-generated snippet from: apps/forestry4-docs/public/snippets/actions-state/next-examples.ts
+// Description: Examples of using the next method for complete state replacement
+// Last synced: Sat Sep 20 13:35:30 PDT 2025
+// DO NOT EDIT - This file is automatically synced from the source
+
+// Auto-generated snippet from: apps/forestry4-docs/public/snippets/actions-state/next-examples.ts
+// Description: Examples of using the next method for complete state replacement
+// Last synced: Sat Sep 20 13:31:32 PDT 2025
+// DO NOT EDIT - This file is automatically synced from the source
+
+// Auto-generated snippet from: apps/forestry4-docs/public/snippets/actions-state/next-examples.ts
+// Description: Examples of using the next method for complete state replacement
+// Last synced: Sat Sep 20 13:29:21 PDT 2025
+// DO NOT EDIT - This file is automatically synced from the source
+
+// Auto-generated snippet from: apps/forestry4-docs/public/snippets/actions-state/next-examples.ts
+// Description: Examples of using the next method for complete state replacement
+// Last synced: Sat Sep 20 13:14:48 PDT 2025
+// DO NOT EDIT - This file is automatically synced from the source
+
+// Auto-generated snippet from: apps/forestry4-docs/public/snippets/actions-state/next-examples.ts
+// Description: Examples of using the next method for complete state replacement
+// Last synced: Sat Sep 20 13:14:09 PDT 2025
+// DO NOT EDIT - This file is automatically synced from the source
+
+// Auto-generated snippet from: apps/forestry4-docs/public/snippets/actions-state/next-examples.ts
+// Description: Examples of using the next method for complete state replacement
+// Last synced: Sat Sep 20 13:07:22 PDT 2025
+// DO NOT EDIT - This file is automatically synced from the source
+
+// Auto-generated snippet from: apps/forestry4-docs/public/snippets/actions-state/next-examples.ts
+// Description: Examples of using the next method for complete state replacement
+// Last synced: Sat Sep 20 13:05:18 PDT 2025
+// DO NOT EDIT - This file is automatically synced from the source
+
+// Auto-generated snippet from: apps/forestry4-docs/public/snippets/actions-state/next-examples.ts
+// Description: Examples of using the next method for complete state replacement
+// Last synced: Sat Sep 20 13:04:18 PDT 2025
+// DO NOT EDIT - This file is automatically synced from the source
+
+// Auto-generated snippet from: apps/forestry4-docs/public/snippets/actions-state/next-examples.ts
+// Description: Examples of using the next method for complete state replacement
+// Last synced: Sat Sep 20 13:03:06 PDT 2025
+// DO NOT EDIT - This file is automatically synced from the source
+
+// Auto-generated snippet from: apps/forestry4-docs/public/snippets/actions-state/next-examples.ts
+// Description: Examples of using the next method for complete state replacement
+// Last synced: Sat Sep 20 13:00:40 PDT 2025
+// DO NOT EDIT - This file is automatically synced from the source
+
+// Auto-generated snippet from: apps/forestry4-docs/public/snippets/actions-state/next-examples.ts
+// Description: Examples of using the next method for complete state replacement
+// Last synced: Sat Sep 20 12:23:14 PDT 2025
+// DO NOT EDIT - This file is automatically synced from the source
+
+// Auto-generated snippet from: apps/forestry4-docs/public/snippets/actions-state/next-examples.ts
+// Description: Examples of using the next method for complete state replacement
+// Last synced: Sat Sep 20 12:14:06 PDT 2025
+// DO NOT EDIT - This file is automatically synced from the source
+
+// Auto-generated snippet from: apps/forestry4-docs/public/snippets/actions-state/next-examples.ts
+// Description: Examples of using the next method for complete state replacement
 // Last synced: Sat Sep 20 11:39:51 PDT 2025
 // DO NOT EDIT - This file is automatically synced from the source
 

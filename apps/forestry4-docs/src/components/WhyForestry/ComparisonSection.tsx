@@ -14,61 +14,110 @@ import {
   Tr,
   VStack,
 } from '@chakra-ui/react';
-import CodeTabs from '../CodeTabs.tsx';
 import { Link } from 'react-router-dom';
+import Section from '@/components/Section.tsx';
 
 const ComparisonSection: React.FC = () => {
   return (
     <VStack spacing={8} align="stretch">
+      <Heading variant="page">Yet Another Store System?</Heading>
       <Box>
-        <Heading size="xl" mb={4}>
-          Yet Another Store System?
-        </Heading>
-        <Text fontSize="lg" color="gray.600" maxW="3xl">
-          Forestry grew from a profound disaffection in the status quo. Redux, mainly but also a lot
-          of other alternatives including hooks. I saw the same patterns happening over and over
-          again:
-          <ul>
-            <li>
-              <b>A lack of the ability to synchronously update state</b>. There is no inbuilt reason
-              that local state needs to be forced into async patterns. (as is the case in hooks)
-              like RxJs (the backbone of Forestry) you should be able to change state and see
-              results in real time. hooks for instnace are particularly poor at reflecting the real
-              time state of anything given the large refresh cycle of useState.
-            </li>
-            <li>
-              <b>Far too much magic</b>. Actions should be straight up javascript code with as
-              little magic as necessary.
-            </li>
-            <li>
-              <b>Had coded state that is difficult to test</b>. Most state systems are so wed to
-              their context that they are difficult to isolate; this violates separation of concerns
-              and frankly most React testing is so painful that it behooves you to extricate the
-              business logic and enable independent testing.
-            </li>
-            <li>
-              <b>Abdication of responsibility for schema enforcement</b>; validation of change
-              values before they are submitted into state is not something to be put in as optional
-              nice to have or assumed to be a "solved problem" with typescript. State data is
-              dynamic and often comes from sources outside the codebase (fetch), so typescript
-              cannot enforce type sanity - state must take that responsibility to heart.
-            </li>
-            <li>
-              <b>Lack of transactional atomicity</b>; often you need to make several changes in
-              sequence and have them all succeed or fail; especially important with the use of
-              nested actions. Forestry even allows you to temporarily suspend validation constraints
-              while you change state over several steps as long as the net effect of transactions
-              produce valid data.
-            </li>
-            <li>
-              <b>Nested Actions</b>; composition is very difficult or impossible in many state
-              systems; Forestry allows you to drill deep into multiple actions.
-            </li>
-          </ul>
-          Foresty has been written to address these features point by point. Many of the solutions
-          are "passive" - some like <Link to="/validation">Validation</Link>
-          require some tooling.
-        </Text>
+        <Section title="Yes and here's why">
+          <Box>
+            <Text textStyle="body">
+              Forestry grew from a profound disaffection in the status quo. Redux, mainly but also a
+              lot of other alternatives including hooks. I saw the same patterns happening over and
+              over again:
+            </Text>
+            <ul>
+              <li>
+                <b>A lack of the ability to synchronously update state</b>. There is no (good)
+                reason that local state needs to be forced into async patterns. (as is the case in
+                hooks) like RxJs (the backbone of Forestry) you should be able to change state and
+                see results in real time. hooks for instance are particularly poor at reflecting the
+                real time state of anything given the large refresh cycle of useState. In my
+                experience, the federation that asynchronous code creates is a drag on
+                comprehension, testability, reliability and maintainability; if it is not a natural
+                side effect of activities that are naturally async, you're paying these costs not
+                because your use case demands it but because you have adopted a control system that
+                uses async processes for no good reason.
+              </li>
+              <li>
+                <b>Far too much magic</b>. Actions should be straight up javascript code with as
+                little magic as necessary.
+              </li>
+              <li>
+                <b>Had coded state that is difficult to test</b>. Most state systems are so wed to
+                their context that they are difficult to isolate; this violates separation of
+                concerns and frankly most React testing is so painful that it behooves you to
+                extricate the business logic and enable independent testing.
+              </li>
+              <li>
+                <b>Abdication of responsibility for schema enforcement</b>; validation of change
+                values before they are submitted into state is not something to be put in as
+                optional nice to have or assumed to be a "solved problem" with typescript. State
+                data is dynamic and often comes from sources outside the codebase (fetch), so
+                typescript cannot enforce type sanity - state must take that responsibility to
+                heart.
+              </li>
+              <li>
+                <b>Lack of transactional atomicity</b>; often you need to make several changes in
+                sequence and have them all succeed or fail; especially important with the use of
+                nested actions. Forestry even allows you to temporarily suspend validation
+                constraints while you change state over several steps as long as the net effect of
+                transactions produce valid data.
+              </li>
+              <li>
+                <b>Nested Actions</b>; composition is very difficult or impossible in many state
+                systems; Forestry allows you to drill deep into multiple actions.
+              </li>
+              <li>
+                <b>Complex or "magical" architecture</b>; it's easy to develop insular
+                meta-languages that steepen the learning curve without commensurate gains in
+                performance or scalability. This is true of Redux and equally true of systems like
+                Saga.
+              </li>
+            </ul>
+            <Text textStyle="body">
+              Foresty has been written to address these features point by point. Many of the
+              solutions are "passive" - some like <Link to="/validation">Validation</Link>
+              require some tooling.
+            </Text>
+          </Box>
+          <Box>
+            <Heading variant="subtle">
+              Simplicity that doesn't scale is a net loss in productivity
+            </Heading>
+            <Text textStyle="body">
+              A lot of stores exist and trade off of their "simplicity". This is well and good - but
+              simplicity is only good if it scales. Part of this is "can it be tested"; but part is
+              also does it address mid and long term concerns or force the developers to invent
+              custom solutions for routine tasks.
+            </Text>
+            <Text textStyle="body">
+              Its easy to assume that TypeScript will enforce type sanity; however Typescript only
+              ensures that the elements <i>coded by you</i> are internally consistent; and since you
+              are chored with writing your own gate functions, even that is not always guaranteed.
+              Real databases always ensure that the structure of your updates is consistent with the
+              store. "Unopinionated" stores like Redux or hooks abdicate this responsibility to the
+              developer.
+            </Text>
+            <Text textStyle="body">
+              Similarly most backend controllers execute multiple sub-tasks with changes including
+              validation, distribution of data, comparison with existing conditions and other
+              "change triggered" utilities. Designing change systems that don't allow for
+              "strategic" actions to trigger sub-actions for a more orchestrated process.{' '}
+            </Text>
+            <Text textStyle="body">
+              This is key for scaling apps past inception because at some point the strategic
+              methods may delegate to variations based on conditions; using sub-actions that you can
+              switch is much more scalable than creating multiple nearly identical top-level
+              actions. Consider for instance, a work flow that has three stages with two variations
+              for each stage. Varying this requires either one central method with complex switching
+              boilerplate inside it, or eight different top level functions with severe repetition.
+            </Text>
+          </Box>
+        </Section>
       </Box>
 
       {/* Feature Comparison Table */}

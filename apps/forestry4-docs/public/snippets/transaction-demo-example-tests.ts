@@ -1,6 +1,6 @@
 // Auto-generated snippet from: apps/forestry4-docs/src/__tests__/transaction-demo-example.test.ts
 // Description: Transaction demo example unit tests covering bank, order, and migration stores
-// Last synced: Sat Sep 20 21:09:32 PDT 2025
+// Last synced: Sun Sep 21 14:32:36 PDT 2025
 // DO NOT EDIT - This file is automatically synced from the source
 
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
@@ -68,6 +68,36 @@ describe('Transaction Demo Store', () => {
       expect(() => {
         store.transferFunds('checking', 'invalid', 100);
       }).toThrow('Invalid account');
+
+      // State should remain unchanged
+      expect(store.value.bankAccounts.checking.balance).toBe(1000);
+      expect(store.value.bankTransactions).toHaveLength(0);
+    });
+
+    it('should fail transfer to same account', () => {
+      expect(() => {
+        store.transferFunds('checking', 'checking', 100);
+      }).toThrow('Cannot transfer to the same account');
+
+      // State should remain unchanged
+      expect(store.value.bankAccounts.checking.balance).toBe(1000);
+      expect(store.value.bankTransactions).toHaveLength(0);
+    });
+
+    it('should fail transfer with zero amount', () => {
+      expect(() => {
+        store.transferFunds('checking', 'savings', 0);
+      }).toThrow('Transfer amount must be greater than 0');
+
+      // State should remain unchanged
+      expect(store.value.bankAccounts.checking.balance).toBe(1000);
+      expect(store.value.bankTransactions).toHaveLength(0);
+    });
+
+    it('should fail transfer with negative amount', () => {
+      expect(() => {
+        store.transferFunds('checking', 'savings', -100);
+      }).toThrow('Transfer amount must be greater than 0');
 
       // State should remain unchanged
       expect(store.value.bankAccounts.checking.balance).toBe(1000);

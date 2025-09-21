@@ -1,5 +1,0 @@
-const forest = useMemo(() => new Forest({
-  value: initialState,
-  actions: {...},
-  tests: [...]
-}), [])

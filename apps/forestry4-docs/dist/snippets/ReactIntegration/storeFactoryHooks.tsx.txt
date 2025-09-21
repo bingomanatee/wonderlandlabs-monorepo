@@ -1,5 +1,0 @@
-function useTodoForest() {
-  const forest = useMemo(() => todoForestFactory(), []);
-  const value = useForestryLocal(forest);
-  return [value, forest.$] as const;
-}

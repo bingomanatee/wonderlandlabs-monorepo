@@ -1,6 +1,0 @@
-increment: function() {
-  this.mutate((draft) => {
-    draft.count += draft.multiplier;
-    draft.history.push('Incremented');
-  });
-}

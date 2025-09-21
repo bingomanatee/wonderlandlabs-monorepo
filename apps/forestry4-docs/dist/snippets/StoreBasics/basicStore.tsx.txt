@@ -1,9 +1,0 @@
-import { Forest } from '@wonderlandlabs/forestry4';
-
-const forest = new Forest({
-  name: 'my-store',
-  value: { count: 0 },
-  actions: {
-    increment: (value) => this.set('count', value + 1)
-  }
-});

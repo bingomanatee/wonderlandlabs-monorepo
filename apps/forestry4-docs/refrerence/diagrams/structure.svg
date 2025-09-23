@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg version="1.1" xmlns:xl="http://www.w3.org/1999/xlink" xmlns="http://www.w3.org/2000/svg" xmlns:dc="http://purl.org/dc/elements/1.1/" viewBox="203 -463 984 1976" width="984" height="1976">
+  <defs>
+    <clipPath id="artboard_clip_path">
+      <path d="M 203 -463 L 1187 -463 L 1187 1513 L 203 1513 Z"/>
+    </clipPath>
+  </defs>
+  <g id="Canvas_1" stroke-opacity="1" stroke="none" stroke-dasharray="none" fill="none" fill-opacity="1">
+    <title>Canvas 1</title>
+    <rect fill="white" x="203" y="-463" width="984" height="1976"/>
+    <g id="Canvas_1_Layer_1" clip-path="url(#artboard_clip_path)">
+      <title>Layer 1</title>
+      <g id="Graphic_2">
+        <rect x="322.625" y="-361.2799" width="160.03906" height="1736.005" fill="white"/>
+        <rect x="322.625" y="-361.2799" width="160.03906" height="1736.005" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+        <text transform="translate(327.625 497.4986)" fill="black">
+          <tspan font-family="Helvetica Neue" font-size="16" fill="black" x="9.411531" y="15" xml:space="preserve">Forest&lt;DataType&gt;</tspan>
+        </text>
+      </g>
+      <g id="Graphic_5">
+        <rect x="492.4219" y="1246.3851" width="555.10156" height="58.48888" stroke="#0432ff" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+        <text transform="translate(512.4219 1266.4056)" fill="black">
+          <tspan font-family="Helvetica Neue" font-size="16" fill="black" x="0" y="15" xml:space="preserve">makeTree&lt;SubDataType&gt;(path, ActionRecord?): Store&lt;SubDataType&gt;</tspan>
+        </text>
+      </g>
+      <g id="Graphic_6">
+        <rect x="492.4219" y="314.8908" width="555.10156" height="58.48888" stroke="#0432ff" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+        <text transform="translate(512.4219 334.40318)" fill="black">
+          <tspan font-family="Helvetica Neue" font-weight="bold" font-size="16" fill="black" x="0" y="16" xml:space="preserve">failedNexts: Subject(MutationError)</tspan>
+        </text>
+      </g>
+      <g id="Graphic_7">
+        <rect x="492.4219" y="739.9224" width="555.10156" height="58.48888" stroke="#0432ff" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+        <text transform="translate(512.4219 759.4348)" fill="black">
+          <tspan font-family="Helvetica Neue" font-weight="bold" font-size="16" fill="black" x="0" y="16" xml:space="preserve">actions: ActionRecord</tspan>
+        </text>
+      </g>
+      <g id="Graphic_8">
+        <rect x="492.4219" y="1034.3868" width="555.10156" height="58.48888" stroke="#0432ff" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+        <text transform="translate(512.4219 1053.8991)" fill="black">
+          <tspan font-family="Helvetica Neue" font-weight="bold" font-size="16" fill="black" x="0" y="16" xml:space="preserve">branchTemplates: Map(pathPattern, ActionRecord)</tspan>
+        </text>
+      </g>
+      <g id="Graphic_9">
+        <rect x="492.4219" y="879.9609" width="555.10156" height="58.48888" stroke="#0432ff" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+        <text transform="translate(512.4219 899.4733)" fill="black">
+          <tspan font-family="Helvetica Neue" font-weight="bold" font-size="16" fill="black" x="0" y="16" xml:space="preserve">tests: Map(pathPattern, Validator);</tspan>
+        </text>
+      </g>
+      <g id="Graphic_10">
+        <rect x="492.4219" y="956.3475" width="555.10156" height="58.48888" stroke="#0432ff" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+        <text transform="translate(512.4219 975.8599)" fill="black">
+          <tspan font-family="Helvetica Neue" font-weight="bold" font-size="16" fill="black" x="0" y="16" xml:space="preserve">schema: Map&lt;Path, Zod&gt; | Zod</tspan>
+        </text>
+      </g>
+      <g id="Graphic_11">
+        <rect x="492.4219" y="30.810925" width="555.10156" height="58.48888" stroke="#0432ff" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+        <text transform="translate(512.4219 50.831365)" fill="black">
+          <tspan font-family="Helvetica Neue" font-size="16" fill="black" x="0" y="15" xml:space="preserve">complete()</tspan>
+        </text>
+      </g>
+      <g id="Graphic_12">
+        <rect x="492.4219" y="462.87336" width="555.10156" height="58.48888" stroke="#0432ff" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+        <text transform="translate(512.4219 482.38574)" fill="black">
+          <tspan font-family="Helvetica Neue" font-weight="bold" font-size="16" fill="black" x="0" y="16" xml:space="preserve">isActive: boolean</tspan>
+        </text>
+      </g>
+      <g id="Graphic_13">
+        <rect x="492.4219" y="1316.2363" width="555.10156" height="58.48888" stroke="#0432ff" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+        <text transform="translate(512.4219 1327.0327)" fill="black">
+          <tspan font-family="Helvetica Neue" font-size="16" fill="black" x="0" y="15" xml:space="preserve">transaction&lt;SubDataType&gt;((store) =&gt; void, path, actionRecord?, </tspan>
+          <tspan font-family="Helvetica Neue" font-size="16" fill="black" x="0" y="33.448" xml:space="preserve">actions: ActionRecord?)</tspan>
+        </text>
+      </g>
+      <g id="Graphic_14">
+        <rect x="492.4219" y="388.4058" width="555.10156" height="58.48888" stroke="#0432ff" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+        <text transform="translate(512.4219 407.9182)" fill="black">
+          <tspan font-family="Helvetica Neue" font-weight="bold" font-size="16" fill="black" x="0" y="16" xml:space="preserve">value: DataType</tspan>
+        </text>
+      </g>
+      <g id="Graphic_15">
+        <rect x="492.4219" y="667.9625" width="555.10156" height="58.48888" stroke="#0432ff" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+        <text transform="translate(512.4219 687.4749)" fill="black">
+          <tspan font-family="Helvetica Neue" font-weight="bold" font-size="16" fill="black" x="0" y="16" xml:space="preserve">acts: ActionMethodRecord (aka $)</tspan>
+        </text>
+      </g>
+      <g id="Graphic_19">
+        <rect x="492.4219" y="99.01814" width="555.10156" height="58.48888" stroke="#0432ff" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+        <text transform="translate(512.4219 119.03858)" fill="black">
+          <tspan font-family="Helvetica Neue" font-size="16" fill="black" x="0" y="15" xml:space="preserve">subscribe(listener): Subscription</tspan>
+        </text>
+      </g>
+      <g id="Graphic_21">
+        <rect x="492.4219" y="-163.0167" width="555.10156" height="58.48888" stroke="#0432ff" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+        <text transform="translate(512.4219 -142.99626)" fill="black">
+          <tspan font-family="Helvetica Neue" font-size="16" fill="black" x="0" y="15" xml:space="preserve">isRoot</tspan>
+        </text>
+      </g>
+      <g id="Graphic_23">
+        <rect x="492.4219" y="-313.91805" width="555.10156" height="58.48888" stroke="#0432ff" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+        <text transform="translate(512.4219 -293.8976)" fill="black">
+          <tspan font-family="Helvetica Neue" font-size="16" fill="black" x="0" y="15" xml:space="preserve">root</tspan>
+        </text>
+      </g>
+      <g id="Graphic_24">
+        <rect x="492.4219" y="-237.53142" width="555.10156" height="58.48888" stroke="#0432ff" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+        <text transform="translate(512.4219 -217.51098)" fill="black">
+          <tspan font-family="Helvetica Neue" font-size="16" fill="black" x="0" y="15" xml:space="preserve">rootPath</tspan>
+        </text>
+      </g>
+      <g id="Graphic_26">
+        <rect x="492.4219" y="167.22535" width="555.10156" height="58.48888" stroke="#0432ff" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+        <text transform="translate(512.4219 187.2458)" fill="black">
+          <tspan font-family="Helvetica Neue" font-size="16" fill="black" x="0" y="15" xml:space="preserve">next(value: DataType)</tspan>
+        </text>
+      </g>
+      <g id="Graphic_28">
+        <rect x="492.4219" y="1112.426" width="555.10156" height="58.48888" stroke="#0432ff" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+        <text transform="translate(512.4219 1132.4464)" fill="black">
+          <tspan font-family="Helvetica Neue" font-size="16" fill="black" x="0" y="15" xml:space="preserve">isValid(value, path?:: Path) : {isValid: boolean, error: strin}</tspan>
+        </text>
+      </g>
+      <g id="Graphic_16">
+        <text transform="translate(497.4219 844.1345)" fill="black">
+          <tspan font-family="Helvetica Neue" font-weight="bold" font-size="16" fill="black" x="192.98278" y="16" xml:space="preserve">structure / validators</tspan>
+        </text>
+      </g>
+      <g id="Graphic_17">
+        <text transform="translate(497.4219 1210.5588)" fill="black">
+          <tspan font-family="Helvetica Neue" font-weight="bold" font-size="16" fill="black" x="238.93478" y="16" xml:space="preserve">factories</tspan>
+        </text>
+      </g>
+      <g id="Graphic_18">
+        <text transform="translate(497.4219 -87.93757)" fill="black">
+          <tspan font-family="Helvetica Neue" font-weight="bold" font-size="16" fill="black" x="155.83878" y="16" xml:space="preserve">public properties and methods</tspan>
+        </text>
+      </g>
+      <g id="Graphic_25">
+        <text transform="translate(497.4219 -356.2799)" fill="black">
+          <tspan font-family="Helvetica Neue" font-weight="bold" font-size="16" fill="black" x="212.54278" y="16" xml:space="preserve">Forest Methods</tspan>
+        </text>
+      </g>
+      <g id="Graphic_27">
+        <text transform="translate(497.4219 629.92276)" fill="black">
+          <tspan font-family="Helvetica Neue" font-weight="bold" font-size="16" fill="black" x="244.55878" y="16" xml:space="preserve">actions</tspan>
+        </text>
+      </g>
+    </g>
+  </g>
+</svg>

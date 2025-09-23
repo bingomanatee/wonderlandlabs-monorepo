@@ -1,6 +1,6 @@
 import React from 'react';
 import { Alert, AlertIcon, Box, Heading, Text, VStack } from '@chakra-ui/react';
-import CodeBlock from '../CodeBlock';
+import CodePanel from '../CodePanel';
 import Section from '@/components/Section.tsx';
 
 const ReactHookPatternsCard: React.FC = () => {
@@ -23,7 +23,7 @@ const ReactHookPatternsCard: React.FC = () => {
               <Text textStyle="description">
                 Creates and manages a store instance using useRef pattern, returns [value, store]
               </Text>
-              <CodeBlock
+              <CodePanel
                 language="typescript"
                 snippetName="useForestryLocalSource"
                 folder="ReactIntegration"
@@ -37,7 +37,7 @@ const ReactHookPatternsCard: React.FC = () => {
               <Text textStyle="description">
                 Observes an existing store/forest instance, returns just the value
               </Text>
-              <CodeBlock
+              <CodePanel
                 language="typescript"
                 snippetName="useObserveForestSource"
                 folder="ReactIntegration"
@@ -53,7 +53,7 @@ const ReactHookPatternsCard: React.FC = () => {
           referentially unique. This means you can trust any component of state to drive useEffect
           dependencies correctly.
         </Text>
-        <CodeBlock
+        <CodePanel
           language="typescript"
           snippetName="referentialIntegrity"
           folder="ReactIntegration"

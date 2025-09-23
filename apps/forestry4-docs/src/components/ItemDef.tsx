@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { Box, Code, Heading, Text } from '@chakra-ui/react';
-import CodeBlock from './CodeBlock';
+import CodePanel from './CodePanel';
 
 interface ItemDefProps {
   /** The method signature or parameter name */
@@ -38,7 +38,6 @@ const ItemDef: React.FC<ItemDefProps> = ({
   titleSize = 'sm',
   titleAsCode = false,
   codeColorScheme = '',
-  ts = false,
 }) => {
   // Determine if we should show code (either inline or from snippet)
   const hasCode = code || snippetName;
@@ -77,19 +76,18 @@ const ItemDef: React.FC<ItemDefProps> = ({
       {hasCode && (
         <Box mt={4}>
           {snippetName ? (
-            // Use CodeBlock for external files
-            <CodeBlock
+            // Use CodePanel for external files
+            <CodePanel
               title={codeTitle}
               language={language}
               snippetName={snippetName}
               folder={snippetFolder}
-              ts={ts}
             />
           ) : (
-            // Use inline CodeBlock
-            <CodeBlock language={language} title={codeTitle}>
+            // Use inline CodePanel
+            <CodePanel language={language} title={codeTitle}>
               {code}
-            </CodeBlock>
+            </CodePanel>
           )}
         </Box>
       )}

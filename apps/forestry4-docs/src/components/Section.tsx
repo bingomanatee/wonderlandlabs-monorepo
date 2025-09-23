@@ -3,7 +3,7 @@ import { Card, CardBody, CardBodyProps, Heading, VStack } from '@chakra-ui/react
 
 interface SectionProps extends CardBodyProps {
   children: React.ReactNode;
-  title?: string;
+  title?: string | React.ReactNode;
   titleSize?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl' | '4xl';
   spacing?: number;
   noVStack?: boolean; // Opt-out of automatic VStack wrapping
@@ -25,6 +25,7 @@ const Section: React.FC<SectionProps> = ({
     ''
   );
 
+  console.log('section:', title, 'content:', children);
   return (
     <Card width="full" mb={3}>
       <CardBody {...props}>

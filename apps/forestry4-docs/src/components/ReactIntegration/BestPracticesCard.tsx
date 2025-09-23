@@ -1,6 +1,7 @@
 import React from 'react';
-import { Box, Heading, SimpleGrid, Text, VStack } from '@chakra-ui/react';
+import { Code, Heading, Text, VStack } from '@chakra-ui/react';
 import Section from '../Section';
+import { DoDont, DoList, DoItem, DontList, DontItem } from '../DoDont';
 
 const BestPracticesCard: React.FC = () => {
   return (
@@ -13,67 +14,65 @@ const BestPracticesCard: React.FC = () => {
           guidelines.
         </Text>
 
-        <SimpleGrid columns={{ base: 1, lg: 2 }} spacing={6}>
-          <Box>
-            <Heading size="md" mb={3} color="green.600">
-              ✅ Best Practices
-            </Heading>
-            <VStack layerStyle="section" spacing={3} align="stretch">
-              <Box p={3} bg="green.50" borderRadius="md">
-                <Text fontWeight="semibold">Use Forestry hooks to reduce blend boilerplate</Text>
-                <Text fontSize="sm" color="gray.600">
-                  You can subscribe in useEffect and store stores in ref -- but the hooks take care
-                  of a lot of housekeeping. At this point the hooks are not in the component -
-                  you'll have to bring the in, because it frees you to use your current react
-                  version (or Preact or whatever)
-                </Text>
-              </Box>
-              <Box p={3} bg="green.50" borderRadius="md">
-                <Text fontWeight="semibold">Trust referential integrity</Text>
-                <Text fontSize="sm" color="gray.600">
-                  given all parts of a store changes when part of it changes, you can trust any part
-                  of the store in dependency arrays to properly trigger useEffect
-                </Text>
-              </Box>
-              <Box p={3} bg="green.50" borderRadius="md">
-                <Text fontWeight="semibold">Diminish Hooks whenever possible</Text>
-                <Text fontSize="sm" color="gray.600">
-                  Using store values or selector actions reduces the number of callbacks or memos
-                  you have to put in your component body.
-                </Text>
-              </Box>
-              <Box p={3} bg="green.50" borderRadius="md">
-                <Text fontWeight="semibold">Pass whole stores via context or params</Text>
-                <Text fontSize="sm" color="gray.600">
-                  Rather than deconstructing actions or values down deep paths, pass the whole store
-                  and its value down or through context.
-                </Text>
-              </Box>
-            </VStack>
-          </Box>
+        <DoDont>
+          <DoList>
+            <DoItem title="Use Forestry hooks to reduce blend boilerplate">
+              You can subscribe in useEffect and store stores in ref -- but the hooks take care
+              of a lot of housekeeping. At this point the hooks are not in the component -
+              you'll have to bring the in, because it frees you to use your current react
+              version (or Preact or whatever)
+            </DoItem>
 
-          <Box>
-            <Heading size="md" mb={3} color="red.600">
-              ❌ Things that will not work well
-            </Heading>
-            <VStack layerStyle="section" spacing={3} align="stretch">
-              <Box p={3} bg="red.50" borderRadius="md">
-                <Text fontWeight="semibold">Mutate store values directly</Text>
-                <Text fontSize="sm" color="gray.600">
-                  Immer won't let you do that - use mutate or set to alter parts or all of the store
-                  value.
-                </Text>
-              </Box>
-              <Box p={3} bg="red.50" borderRadius="md">
-                <Text fontWeight="semibold">Create stores in component function body</Text>
-                <Text fontSize="sm" color="gray.600">
-                  If you don't use the factory hooks, create stores in memos or via careful use of
-                  refs.
-                </Text>
-              </Box>
-            </VStack>
-          </Box>
-        </SimpleGrid>
+            <DoItem title="Trust referential integrity">
+              given all parts of a store changes when part of it changes, you can trust any part
+              of the store in dependency arrays to properly trigger useEffect
+            </DoItem>
+
+            <DoItem title="Diminish Hooks whenever possible">
+              Using store values or selector actions reduces the number of callbacks or memos
+              you have to put in your component body.
+            </DoItem>
+
+            <DoItem title="Pass whole stores via context or params">
+              Rather than deconstructing actions or values down deep paths, pass the whole store
+              and its value down or through context.
+            </DoItem>
+          </DoList>
+
+          <DontList title="❌ Things that will not work well">
+            <DontItem title="Mutate store values directly">
+              Immer won't let you do that - use mutate or set to alter parts or all of the store
+              value.
+            </DontItem>
+
+            <DontItem title="Create stores in component function body">
+              If you don't use the factory hooks, create stores in memos or via careful use of
+              refs.
+            </DontItem>
+
+            <DontItem title="Pass methods and values through multiple properties">
+              It's not that it won't work - but passing value and store directly makes it much
+              easier to track and debug issues and makes your code much easier to read.
+            </DontItem>
+
+            <DontItem title="use useEffect on store values">
+              If you want to react to store changes use
+              <Code style={{ background: 'transparent', whiteSpace: 'pre' }}>
+                {`
+myStore.$subject.pipe(
+  distinctUntilChanged(
+    isEqual,
+    (value) => value.cartItems
+    )
+).subscribe((value) => console.log('cart items changed'));
+                `}
+              </Code>
+              It's faster than useEffect, doesn't have any of the double-call issues, and allows
+              you to further update state without requiring a second render cycle. This also
+              gives you access to nuance from RxJS including debounce and throttle.
+            </DontItem>
+          </DontList>
+        </DoDont>
       </VStack>
     </Section>
   );

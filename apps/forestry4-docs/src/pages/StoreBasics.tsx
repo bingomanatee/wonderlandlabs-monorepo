@@ -1,7 +1,7 @@
 import React from 'react';
 import { Badge, Box, Container, Heading, Image, SimpleGrid, Text, VStack } from '@chakra-ui/react';
 import CodeTabs from '../components/CodeTabs.tsx';
-import CodeBlock from '../components/CodeBlock';
+import CodePanel from '../components/CodePanel';
 import { Link } from 'react-router-dom';
 import Section from '../components/Section';
 import UserProfileDemo from '../components/examples/UserProfileDemo';
@@ -34,7 +34,7 @@ const StoreBasics: React.FC = () => {
         {/* Header */}
         <Box>
           <Heading variant="page">Forest Overview</Heading>
-          <Text fontSize="lg" color="gray.600">
+          <Text textStyle="hero">
             The Forest class is the core of Forestry 4, providing reactive state management with
             validation and transaction support. Stores extend off of this class to decorate it with
             actions and property selectors
@@ -49,7 +49,7 @@ const StoreBasics: React.FC = () => {
             value.
           </Text>
 
-          <CodeBlock
+          <CodePanel
             language="typescript"
             snippetName="storeConstructorSignature"
             folder="StoreBasics"
@@ -66,7 +66,7 @@ const StoreBasics: React.FC = () => {
                 Map, Set, Array, etc.; it is an Immerable value; in short any JSON-able entity with
                 the addition of Map and Set options.
               </Text>
-              <CodeBlock
+              <CodePanel
                 language="typescript"
                 snippetName="valueExample"
                 folder="StoreBasics"
@@ -90,7 +90,7 @@ const StoreBasics: React.FC = () => {
                   </li>
                 </ul>
               </Text>
-              <CodeBlock
+              <CodePanel
                 language="typescript"
                 snippetName="testsExample"
                 folder="StoreBasics"
@@ -109,7 +109,7 @@ const StoreBasics: React.FC = () => {
               <Text color="gray.600" mb={3}>
                 Unique identifier for the store instance.
               </Text>
-              <CodeBlock
+              <CodePanel
                 language="typescript"
                 snippetName="nameExample"
                 folder="StoreBasics"

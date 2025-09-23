@@ -13,7 +13,7 @@ The documentation is organized into three main categories to help developers lea
 ### ⚡ Essential Features
 *Start here for core functionality*
 - **Store Basics** (`/store`) - Creating stores, configuration, basic usage
-- **Actions & State** (`/actions`) - Defining actions, state updates, nested actions
+- **Actions & State** (`/change`) - Defining actions, state updates, nested actions
 - **React Integration** (`/react`) - Hooks, patterns, component integration
 
 ### 🔧 Power Tools

@@ -11,7 +11,7 @@ import {
   UnorderedList,
   VStack,
 } from '@chakra-ui/react';
-import CodeBlock from '../components/CodeBlock';
+import CodePanel from '../components/CodePanel';
 import CodeTabs from '../components/CodeTabs.tsx';
 import Section from '../components/Section';
 
@@ -24,7 +24,7 @@ const SchemaValidation: React.FC = () => {
           <Heading size="2xl" mb={4}>
             Schema Validation with Zod
           </Heading>
-          <Text fontSize="xl" color="gray.600" maxW="3xl" mx="auto">
+          <Text textStyle="hero">
             Use Zod schemas for runtime type validation and enhanced type safety in Forestry stores.
             Schemas provide structural validation, constraint enforcement, and clear error messages.
           </Text>
@@ -88,10 +88,10 @@ const SchemaValidation: React.FC = () => {
               constructor. Forestry will automatically validate state changes against this schema.
             </Text>
 
-            <CodeBlock
+            <CodePanel
               language="typescript"
               snippetName="zodSchemaValidation"
-              folder="ActionsState"
+              folder="ChangeValue"
             />
           </VStack>
         </Section>
@@ -156,7 +156,7 @@ const SchemaValidation: React.FC = () => {
               </Box>
             </Alert>
 
-            <CodeBlock
+            <CodePanel
               language="typescript"
               snippetName="schemaPrepIntegration"
               folder="SchemaValidation"
@@ -177,19 +177,19 @@ const SchemaValidation: React.FC = () => {
                 <VStack spacing={3} align="stretch">
                   <Box layerStyle="highlight" bg="green.50">
                     <Text fontWeight="semibold">Define schemas at factory level</Text>
-                    <Text fontSize="sm" color="gray.600">
+                    <Text textStyle="description">
                       Create schemas alongside your factory functions for reusability
                     </Text>
                   </Box>
                   <Box layerStyle="highlight" bg="green.50">
                     <Text fontWeight="semibold">Use meaningful constraints</Text>
-                    <Text fontSize="sm" color="gray.600">
+                    <Text textStyle="description">
                       Add min/max, patterns, and business-relevant validation rules
                     </Text>
                   </Box>
                   <Box layerStyle="highlight" bg="green.50">
                     <Text fontWeight="semibold">Infer TypeScript types</Text>
-                    <Text fontSize="sm" color="gray.600">
+                    <Text textStyle="description">
                       Use <Code>z.infer&lt;typeof Schema&gt;</Code> for type safety
                     </Text>
                   </Box>
@@ -203,19 +203,19 @@ const SchemaValidation: React.FC = () => {
                 <VStack spacing={3} align="stretch">
                   <Box layerStyle="highlight" bg="red.50">
                     <Text fontWeight="semibold">Duplicate validation logic</Text>
-                    <Text fontSize="sm" color="gray.600">
+                    <Text textStyle="description">
                       Don't repeat schema constraints in prep functions
                     </Text>
                   </Box>
                   <Box layerStyle="highlight" bg="red.50">
                     <Text fontWeight="semibold">Over-constrain schemas</Text>
-                    <Text fontSize="sm" color="gray.600">
+                    <Text textStyle="description">
                       Keep schemas focused on structure, not business rules
                     </Text>
                   </Box>
                   <Box layerStyle="highlight" bg="red.50">
                     <Text fontWeight="semibold">Ignore schema errors</Text>
-                    <Text fontSize="sm" color="gray.600">
+                    <Text textStyle="description">
                       Schema validation errors indicate serious structural issues
                     </Text>
                   </Box>

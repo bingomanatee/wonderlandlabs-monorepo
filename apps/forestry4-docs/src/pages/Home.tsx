@@ -7,6 +7,8 @@ import {
   Heading,
   HStack,
   Image,
+  ListItem,
+  OrderedList,
   SimpleGrid,
   Text,
   VStack,
@@ -77,11 +79,11 @@ const Home: React.FC = () => {
               <Text>✅</Text>
               <Text
                 as={RouterLink}
-                to="/actions"
+                to="/change"
                 color="forest.600"
                 _hover={{ textDecoration: 'underline' }}
               >
-                Define actions for state updates
+                change state with custom methods or build in setters
               </Text>
             </HStack>
             <HStack>
@@ -93,17 +95,6 @@ const Home: React.FC = () => {
                 _hover={{ textDecoration: 'underline' }}
               >
                 React hooks integration
-              </Text>
-            </HStack>
-            <HStack>
-              <Text>✅</Text>
-              <Text
-                as={RouterLink}
-                to="/store"
-                color="forest.600"
-                _hover={{ textDecoration: 'underline' }}
-              >
-                TypeScript support
               </Text>
             </HStack>
           </VStack>
@@ -153,20 +144,35 @@ const Home: React.FC = () => {
                 RxJS reactive programming
               </Text>
             </HStack>
-            <HStack>
-              <Text>🔧</Text>
-              <Text
-                as={RouterLink}
-                to="/examples"
-                color="purple.600"
-                _hover={{ textDecoration: 'underline' }}
-              >
-                Advanced patterns & debugging
-              </Text>
-            </HStack>
           </VStack>
         </Section>
       </SimpleGrid>
+      <Section title="Creating your First State">
+        <Box>
+          <Text textStyle="body">Follow these steps to create your first state</Text>
+          <OrderedList>
+            <ListItem>
+              Define the value you wish to modify; ideally both the initial state and its TS
+              definition.
+            </ListItem>
+            <ListItem>
+              create a class definition that extends Forest and pass{' '}
+              <code>{`super({value: initialValue})`}</code> in its constructor.
+            </ListItem>
+            <ListItem>
+              define methods in your superclass that modify or report on the values in state
+            </ListItem>
+            <ListItem>
+              In React, use useLocalForest and a factory function producing instances of your class
+              into local context of your component
+            </ListItem>
+            <ListItem>
+              Pass your state downstream in props or context to make your state and its value
+              available any time you need it.
+            </ListItem>
+          </OrderedList>
+        </Box>
+      </Section>
       {/* Live Demo */}
       <Section title="Example - basic counter">
         <LiveCounterDemo />

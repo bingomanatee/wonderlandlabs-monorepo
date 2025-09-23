@@ -58,7 +58,7 @@ const TodoApp: React.FC = () => {
       <PageTitle>Todo App example </PageTitle>
       <VStack layerStyle="section" spacing={8}>
         <Box textAlign="center">
-          <Text fontSize="lg" color="gray.600" maxW="2xl">
+          <Text textStyle="hero" maxW="2xl">
             The Classic ToDo app with compressed store structure in play.
           </Text>
         </Box>
@@ -102,7 +102,7 @@ const TodoApp: React.FC = () => {
             <VStack spacing={4} align="stretch">
               <Box>
                 <Heading variant="subtle">Pure Component Pattern</Heading>
-                <Text fontSize="sm" color="gray.600">
+                <Text textStyle="description">
                   The React component contains no business logic, state management, or event
                   handling code. Everything is delegated to store actions.
                 </Text>
@@ -132,7 +132,7 @@ const TodoApp: React.FC = () => {
 
               <Box>
                 <Heading variant="subtle">Inline Function Calls</Heading>
-                <Text fontSize="sm" color="gray.600">
+                <Text textStyle="description">
                   All computed values and event handlers use direct action references without arrow
                   functions, resulting in cleaner JSX and better performance.
                 </Text>

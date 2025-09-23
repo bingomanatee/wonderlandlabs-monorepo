@@ -14,10 +14,16 @@ code, i, b, strong, a {
 
 ol, ul {
     margin: 1rem 2.5rem;
+    list-style-position: outside;      /* default, keeps hanging indent */
+    padding-inline-start: 3ch;
 }
 
 li {
-    margin: 0.25rem 0;
+    margin: 0.125rem 0.25rem ;
+}
+
+ol > li {
+    margin: 0.125rem 1rem;
 }
 
 a, p > a {

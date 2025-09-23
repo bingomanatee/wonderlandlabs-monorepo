@@ -125,7 +125,7 @@ const APIReference: React.FC = () => {
                       <Code>name: string</Code> - Forest identifier
                     </ListItem>
                     <ListItem>
-                      <Code>$: Actions</Code> - Exposed <Link to="/actions'">action</Link> methods.
+                      <Code>$: Actions</Code> - Exposed <Link to="/change">action</Link> methods.
                     </ListItem>
                     <ListItem>
                       <Code>acts: Actions</Code> - Alias for $ property

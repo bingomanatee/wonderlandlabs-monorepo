@@ -21,7 +21,7 @@ const TransactionDemo: React.FC = () => {
     <Container maxW="container.xl" py={8}>
       <Heading variant="page"> Transaction System Example</Heading>
       <VStack layerStyle="section" spacing={8}>
-        <Text fontSize="lg" color="gray.600" maxW="2xl">
+        <Text textStyle="hero" maxW="2xl">
           A comprehensive example demonstrating Forestry 4's transaction system for atomic
           operations, rollback capabilities, and complex state management scenarios.
         </Text>
@@ -81,7 +81,7 @@ const TransactionDemo: React.FC = () => {
             <Heading size="sm" mb={2}>
               Atomicity
             </Heading>
-            <Text fontSize="sm" color="gray.600">
+            <Text textStyle="description">
               All operations within a transaction succeed together or fail together. No partial
               updates are left in an inconsistent state.
             </Text>
@@ -91,7 +91,7 @@ const TransactionDemo: React.FC = () => {
             <Heading size="sm" mb={2}>
               Rollback Safety
             </Heading>
-            <Text fontSize="sm" color="gray.600">
+            <Text textStyle="description">
               If any operation fails, the entire transaction is rolled back to the original state
               before the transaction began.
             </Text>
@@ -101,7 +101,7 @@ const TransactionDemo: React.FC = () => {
             <Heading size="sm" mb={2}>
               Validation Control
             </Heading>
-            <Text fontSize="sm" color="gray.600">
+            <Text textStyle="description">
               Validation can be suspended during transactions to allow intermediate invalid states,
               then resumed for final validation.
             </Text>
@@ -111,7 +111,7 @@ const TransactionDemo: React.FC = () => {
             <Heading size="sm" mb={2}>
               Performance Benefits
             </Heading>
-            <Text fontSize="sm" color="gray.600">
+            <Text textStyle="description">
               Batch multiple operations together to reduce validation overhead and improve
               performance for complex state changes.
             </Text>

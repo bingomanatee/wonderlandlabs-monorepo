@@ -314,7 +314,7 @@ function createStoreWithSafeActions(errorHandler?: (error: Error) => void) {
 
 // Usage in React component
 const MyComponent = () => {
-  const { handleError } = useErrorHandler()
+  const { handleError } = useToast()
   const [state, store] = useForestryLocal(() => 
     createStoreWithSafeActions(handleError)
   )

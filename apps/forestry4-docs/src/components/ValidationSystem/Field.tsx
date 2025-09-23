@@ -45,12 +45,12 @@ function Field<T>({ parentStore, path, branchFactory, type, placeholder }: Field
         cursor={isSubmitting ? 'not-allowed' : 'text'}
       />
       {hasError && (
-        <Text fontSize="sm" color="red.500" mt={1}>
+        <Text textStyle="description" color="red.500" mt={1}>
           {fieldValue.error}
         </Text>
       )}
       {isSubmitting && (
-        <Text fontSize="sm" color="blue.500" mt={1}>
+        <Text textStyle="description" color="blue.500" mt={1}>
           Form is submitting...
         </Text>
       )}

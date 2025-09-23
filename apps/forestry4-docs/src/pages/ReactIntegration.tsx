@@ -15,7 +15,7 @@ const ReactIntegration: React.FC = () => {
           <Heading size="xl" mb={4}>
             React Integration
           </Heading>
-          <Text fontSize="lg" color="gray.600">
+          <Text textStyle="hero">
             Learn how to integrate Forestry 4 stores with React components and hooks.
           </Text>
         </Box>

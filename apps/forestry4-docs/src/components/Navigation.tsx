@@ -27,7 +27,7 @@ const menuItems: Record<string, MenuItem[]> = {
   ],
   'Essential Features': [
     { label: 'Basics', path: '/forest' },
-    { label: 'Actions', path: '/actions' },
+    { label: 'Value Change', path: '/change' },
     { label: 'With React', path: '/react' },
   ],
   'Power Tools': [

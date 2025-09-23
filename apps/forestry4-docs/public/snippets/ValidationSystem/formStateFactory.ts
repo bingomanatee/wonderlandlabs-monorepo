@@ -7,7 +7,7 @@ import { Forest } from '@wonderlandlabs/forestry4';
 import { z } from 'zod';
 import React from 'react';
 import { NumberFieldValueSchema, StringFieldValueSchema } from './FieldBranch.ts';
-import type { FeedbackFn } from '@/hooks/useErrorHandler.ts';
+import type { FeedbackFn } from '@/hooks/useToast.ts';
 
 // Zod schema for the form state
 export const FormStateSchema = z.object({

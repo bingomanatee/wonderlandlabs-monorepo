@@ -13,15 +13,15 @@ import {
   VStack,
 } from '@chakra-ui/react';
 import { CheckCircleIcon, InfoIcon, WarningIcon } from '@chakra-ui/icons';
-import CodeBlock from '@/components/CodeBlock';
+import CodePanel from '@/components/CodePanel';
 import CodeTabs from '@/components/CodeTabs.tsx';
 import ItemDef from '@/components/ItemDef';
-import useErrorHandler from '@/hooks/useErrorHandler';
+import useToast from '@/hooks/useToast.ts';
 import Section from '../components/Section';
 import TransactionDemoComponent from '@/components/examples/TransactionDemoComponent';
 
 const Transactions: React.FC = () => {
-  const { handleError } = useErrorHandler();
+  const { handleError } = useToast();
 
   return (
     <Container maxW="container.xl" py={8}>
@@ -47,7 +47,7 @@ const Transactions: React.FC = () => {
                 <CheckCircleIcon mr={2} />
                 Atomic Operations
               </Heading>
-              <Text fontSize="sm" color="gray.600" mb={3}>
+              <Text textStyle="description" mb={3}>
                 All operations within a transaction succeed or fail together. No partial updates.
               </Text>
               <List spacing={2} fontSize="sm">
@@ -70,7 +70,7 @@ const Transactions: React.FC = () => {
                 <InfoIcon mr={2} />
                 Validation Suspension
               </Heading>
-              <Text fontSize="sm" color="gray.600" mb={3}>
+              <Text textStyle="description" mb={3}>
                 Temporarily allow invalid intermediate states during complex operations.
               </Text>
               <List spacing={2} fontSize="sm">
@@ -95,7 +95,7 @@ const Transactions: React.FC = () => {
               <WarningIcon mr={2} />
               Nested Transactions
             </Heading>
-            <Text fontSize="sm" color="gray.600" mb={3}>
+            <Text textStyle="description" mb={3}>
               Transactions can be nested, with inner transactions rolling back to outer transaction
               boundaries.
             </Text>
@@ -157,7 +157,7 @@ const Transactions: React.FC = () => {
               <Heading size="md" mb={3}>
                 Basic Transaction Syntax
               </Heading>
-              <CodeBlock
+              <CodePanel
                 snippetName="basicTransactionSyntax"
                 folder="Transactions"
                 language="typescript"
@@ -205,7 +205,7 @@ const Transactions: React.FC = () => {
               <Heading size="md" mb={3}>
                 Error Handling & Rollback
               </Heading>
-              <CodeBlock
+              <CodePanel
                 snippetName="errorHandlingRollback"
                 folder="Transactions"
                 language="typescript"
@@ -282,11 +282,11 @@ const Transactions: React.FC = () => {
                   <Text fontWeight="semibold" color="orange.800" mb={2}>
                     "Transaction failed but state seems unchanged"
                   </Text>
-                  <Text fontSize="sm" color="gray.700" mb={2}>
+                  <Text textStyle="description" color="gray.700">
                     This is expected behavior. When a transaction fails, all changes are rolled back
                     automatically.
                   </Text>
-                  <CodeBlock
+                  <CodePanel
                     snippetName="transactionErrorCheck"
                     folder="Transactions"
                     language="typescript"
@@ -297,11 +297,11 @@ const Transactions: React.FC = () => {
                   <Text fontWeight="semibold" color="red.800" mb={2}>
                     "Validation errors even with suspendValidation: true"
                   </Text>
-                  <Text fontSize="sm" color="gray.700" mb={2}>
+                  <Text textStyle="description" color="gray.700">
                     <Code>suspendValidation</Code> only suspends validation during the transaction.
                     The final state must still pass all validation rules.
                   </Text>
-                  <CodeBlock
+                  <CodePanel
                     snippetName="validationErrorExample"
                     folder="Transactions"
                     language="typescript"
@@ -312,11 +312,11 @@ const Transactions: React.FC = () => {
                   <Text fontWeight="semibold" color="blue.800" mb={2}>
                     "Nested transaction behavior is confusing"
                   </Text>
-                  <Text fontSize="sm" color="gray.700" mb={2}>
+                  <Text textStyle="description" color="gray.700">
                     Inner transactions can be caught and handled. Only uncaught errors bubble up to
                     outer transactions.
                   </Text>
-                  <CodeBlock
+                  <CodePanel
                     snippetName="nestedTransactionExample"
                     folder="Transactions"
                     language="typescript"
@@ -329,11 +329,11 @@ const Transactions: React.FC = () => {
               <Heading size="md" mb={3}>
                 Debugging Transactions
               </Heading>
-              <Text fontSize="sm" color="gray.600" mb={3}>
+              <Text textStyle="description" mb={3}>
                 Use the transaction stack observer to debug complex transaction flows:
               </Text>
 
-              <CodeBlock
+              <CodePanel
                 snippetName="transactionDebugging"
                 folder="Transactions"
                 language="typescript"

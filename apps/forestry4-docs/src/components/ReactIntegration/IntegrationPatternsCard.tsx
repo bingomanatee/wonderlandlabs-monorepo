@@ -1,7 +1,7 @@
 import React from 'react';
 import { Box, Heading, Text, VStack } from '@chakra-ui/react';
 import Section from '../Section';
-import CodeBlock from '../CodeBlock';
+import CodePanel from '../CodePanel';
 
 const IntegrationPatternsCard: React.FC = () => {
   return (
@@ -16,7 +16,7 @@ const IntegrationPatternsCard: React.FC = () => {
             Hook Usage
           </Heading>
           <Text textStyle="body">Use Forestry hooks to connect stores to React components.</Text>
-          <CodeBlock language="typescript" snippetName="forestryHooks" folder="ReactIntegration" />
+          <CodePanel language="typescript" snippetName="forestryHooks" folder="ReactIntegration" />
         </Box>
       </VStack>
     </Section>

@@ -85,7 +85,7 @@ const Examples: React.FC = () => {
       <VStack spacing={8} align="stretch">
         <Box textAlign="center">
           <Heading variant="page">Practical Examples</Heading>
-          <Text fontSize="lg" color="gray.600" maxW="2xl" mx="auto">
+          <Text textStyle="hero" maxW="2xl">
             Functioning examples demonstrating Forestry 4's capabilities in various scenarios. Each
             example showcases different aspects of the library with complete, working code.
           </Text>
@@ -117,19 +117,19 @@ const Examples: React.FC = () => {
                     </Badge>
                   </HStack>
 
-                  <Text color="gray.600" fontSize="sm">
+                  <Text textStyle="description">
                     {example.description}
                   </Text>
 
                   <Box>
-                    <Text fontSize="sm" fontWeight="semibold" mb={2} color="gray.700">
+                    <Text textStyle="description" fontWeight="semibold" color="gray.700">
                       Key Features:
                     </Text>
                     <VStack align="stretch" spacing={1}>
                       {example.features.map((feature) => (
                         <HStack key={feature} spacing={2}>
                           <CheckCircleIcon color="green.500" boxSize={3} />
-                          <Text fontSize="sm" color="gray.600">
+                          <Text textStyle="description">
                             {feature}
                           </Text>
                         </HStack>
@@ -157,7 +157,7 @@ const Examples: React.FC = () => {
         </SimpleGrid>
 
         <Box textAlign="center" mt={8}>
-          <Text color="gray.500" fontSize="sm">
+          <Text textStyle="description" color="gray.500">
             More examples coming soon! Each example includes live demos, complete source code, and
             detailed explanations of the patterns used.
           </Text>

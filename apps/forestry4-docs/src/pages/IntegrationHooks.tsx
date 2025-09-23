@@ -5,14 +5,14 @@ import {
   Box,
   Heading,
   ListItem,
-  SimpleGrid,
   Text,
   UnorderedList,
   VStack,
 } from '@chakra-ui/react';
-import CodeBlock from '../components/CodeBlock';
+import CodePanel from '../components/CodePanel';
 import CodeTabs from '../components/CodeTabs.tsx';
 import Section from '../components/Section';
+import { DoDont, DoList, DoItem, DontList, DontItem } from '../components/DoDont';
 
 const IntegrationHooks: React.FC = () => {
   return (
@@ -23,7 +23,7 @@ const IntegrationHooks: React.FC = () => {
           <Heading size="2xl" mb={4}>
             Integration Hooks
           </Heading>
-          <Text fontSize="xl" color="gray.600" maxW="3xl" mx="auto">
+          <Text textStyle="hero">
             Forestry provides specialized React hooks for seamless integration with stores and
             forests. These hooks handle subscription management, cleanup, and reactive updates
             automatically.
@@ -69,7 +69,7 @@ const IntegrationHooks: React.FC = () => {
                 <Heading size="md" mb={3}>
                   useForestryLocal - Example
                 </Heading>
-                <CodeBlock
+                <CodePanel
                   language="typescript"
                   snippetName="useForestryLocalExample"
                   folder="IntegrationHooks"
@@ -80,7 +80,7 @@ const IntegrationHooks: React.FC = () => {
                 <Heading size="md" mb={3}>
                   useForestryLocal - source
                 </Heading>
-                <CodeBlock
+                <CodePanel
                   language="typescript"
                   snippetName="useForestryLocalSource"
                   folder="IntegrationHooks"
@@ -180,59 +180,35 @@ const IntegrationHooks: React.FC = () => {
           <VStack spacing={6} align="stretch">
             <Heading size="lg">Integration Hook Best Practices</Heading>
 
-            <SimpleGrid columns={{ base: 1, lg: 2 }} spacing={6}>
-              <Box>
-                <Heading size="md" mb={3} color="green.600">
-                  ✅ Do
-                </Heading>
-                <VStack spacing={3} align="stretch">
-                  <Box layerStyle="highlight" bg="green.50">
-                    <Text fontWeight="semibold">Use useForestryLocal for stores</Text>
-                    <Text fontSize="sm" color="gray.600">
-                      Primary hook for store subscriptions in components
-                    </Text>
-                  </Box>
-                  <Box layerStyle="highlight" bg="green.50">
-                    <Text fontWeight="semibold">Use useForestBranch for forms</Text>
-                    <Text fontSize="sm" color="gray.600">
-                      Perfect for field-level state management and validation
-                    </Text>
-                  </Box>
-                  <Box layerStyle="highlight" bg="green.50">
-                    <Text fontWeight="semibold">Memoize store creation</Text>
-                    <Text fontSize="sm" color="gray.600">
-                      Use useMemo to prevent store recreation on re-renders
-                    </Text>
-                  </Box>
-                </VStack>
-              </Box>
+            <DoDont>
+              <DoList title="✅ Do">
+                <DoItem title="Use useForestryLocal for stores">
+                  Primary hook for store subscriptions in components
+                </DoItem>
 
-              <Box>
-                <Heading size="md" mb={3} color="red.600">
-                  ❌ These will not work
-                </Heading>
-                <VStack spacing={3} align="stretch">
-                  <Box layerStyle="highlight" bg="red.50">
-                    <Text fontWeight="semibold">Create stores in render</Text>
-                    <Text fontSize="sm" color="gray.600">
-                      Always memoize store creation, or attach it to a ref, to avoid memory leaks.
-                    </Text>
-                  </Box>
-                  <Box layerStyle="highlight" bg="red.50">
-                    <Text fontWeight="semibold">Mix hook types unnecessarily</Text>
-                    <Text fontSize="sm" color="gray.600">
-                      Choose the right hook for your use case
-                    </Text>
-                  </Box>
-                  <Box layerStyle="highlight" bg="red.50">
-                    <Text fontWeight="semibold">Forget dependency arrays</Text>
-                    <Text fontSize="sm" color="gray.600">
-                      Include store in useEffect dependencies when needed
-                    </Text>
-                  </Box>
-                </VStack>
-              </Box>
-            </SimpleGrid>
+                <DoItem title="Use useForestBranch for forms">
+                  Perfect for field-level state management and validation
+                </DoItem>
+
+                <DoItem title="Memoize store creation">
+                  Use useMemo to prevent store recreation on re-renders
+                </DoItem>
+              </DoList>
+
+              <DontList title="❌ These will not work">
+                <DontItem title="Create stores in render">
+                  Always memoize store creation, or attach it to a ref, to avoid memory leaks.
+                </DontItem>
+
+                <DontItem title="Mix hook types unnecessarily">
+                  Choose the right hook for your use case
+                </DontItem>
+
+                <DontItem title="Forget dependency arrays">
+                  Include store in useEffect dependencies when needed
+                </DontItem>
+              </DontList>
+            </DoDont>
           </VStack>
         </Section>
       </VStack>

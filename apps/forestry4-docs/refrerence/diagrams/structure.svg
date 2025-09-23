@@ -11,6 +11,18 @@
     <rect fill="white" x="203" y="-463" width="984" height="1976"/>
     <g id="Canvas_1_Layer_1" clip-path="url(#artboard_clip_path)">
       <title>Layer 1</title>
+      <g id="Graphic_3">
+        <rect x="492.4219" y="238.50416" width="555.10156" height="58.48888" stroke="#0432ff" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+        <text transform="translate(512.4219 258.01655)" fill="black">
+          <tspan font-family="Helvetica Neue" font-weight="bold" font-size="16" fill="black" x="0" y="16" xml:space="preserve">subject: BehaviorSubject&lt;DataType&gt;</tspan>
+        </text>
+      </g>
+      <g id="Graphic_4">
+        <rect x="492.4219" y="-45.57571" width="555.10156" height="58.48888" stroke="#0432ff" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+        <text transform="translate(512.4219 -25.555268)" fill="black">
+          <tspan font-family="Helvetica Neue" font-size="16" fill="black" x="0" y="15" xml:space="preserve">set(candidate, path?)</tspan>
+        </text>
+      </g>
       <g id="Graphic_2">
         <rect x="322.625" y="-361.2799" width="160.03906" height="1736.005" fill="white"/>
         <rect x="322.625" y="-361.2799" width="160.03906" height="1736.005" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>

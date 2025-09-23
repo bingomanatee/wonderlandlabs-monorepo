@@ -165,7 +165,7 @@ const MyComponent = () => {
           <Heading size="xl" mb={4}>
             Store Properties
           </Heading>
-          <Text fontSize="lg" color="gray.600">
+          <Text textStyle="hero">
             Explore all the public properties available on Store instances with interactive
             examples.
           </Text>

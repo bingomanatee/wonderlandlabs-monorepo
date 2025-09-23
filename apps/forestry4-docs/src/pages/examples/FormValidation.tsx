@@ -12,9 +12,10 @@ import {
   VStack,
 } from '@chakra-ui/react';
 import AdvancedFormDemo from '../../components/ValidationSystem/AdvancedFormDemo';
-import CodeBlock from '../../components/CodeBlock';
+import CodePanel from '../../components/CodePanel';
 import Section from '@/components/Section.tsx';
 import CodeTabs from '@/components/CodeTabs.tsx';
+import AdvancedFormDemoSource from '@/components/ValidationSystem/AdvancedFormDemoSource.tsx';
 
 const FormValidation: React.FC = () => {
   return (
@@ -34,42 +35,7 @@ const FormValidation: React.FC = () => {
           </Text>
           <AdvancedFormDemo />
         </Section>
-        <Section title="Source Code">
-          <Box>
-            <Text color="gray.600" mb={4}>
-              Here's how to implement advanced form validation using Forest branches with individual
-              field state management:
-            </Text>
-
-            <CodeTabs
-              tabs={[
-                {
-                  label: 'Form Component',
-                  language: 'tsx',
-                  snippet: 'advancedFormComponent',
-                  folder: 'ValidationSystem',
-                },
-                {
-                  label: 'Field Branch Component',
-                  language: 'tsx',
-                  snippet: 'field-branch-component',
-                },
-                {
-                  label: 'Branch Configuration',
-                  language: 'typescript',
-                  snippet: 'usernameBranchConfig',
-                  folder: 'ValidationSystem',
-                },
-                {
-                  label: 'Form State Factory',
-                  language: 'typescript',
-                  snippet: 'formStateFactory',
-                  folder: 'ValidationSystem',
-                },
-              ]}
-            />
-          </Box>
-        </Section>
+        <AdvancedFormDemoSource />
         <Section title="    Features Demonstrated">
           <List spacing={2}>
             <ListItem>
@@ -144,7 +110,7 @@ const FormValidation: React.FC = () => {
               <Heading size="sm" mb={2}>
                 Field-Level Validation
               </Heading>
-              <Text fontSize="sm" color="gray.600">
+              <Text textStyle="description">
                 Each field has its own validation rules that run immediately on change, providing
                 instant feedback to users.
               </Text>
@@ -154,7 +120,7 @@ const FormValidation: React.FC = () => {
               <Heading size="sm" mb={2}>
                 Cross-Field Dependencies
               </Heading>
-              <Text fontSize="sm" color="gray.600">
+              <Text textStyle="description">
                 Some fields depend on others (password confirmation, conditional requirements) and
                 are validated whenever dependent fields change.
               </Text>
@@ -164,7 +130,7 @@ const FormValidation: React.FC = () => {
               <Heading size="sm" mb={2}>
                 Async Validation
               </Heading>
-              <Text fontSize="sm" color="gray.600">
+              <Text textStyle="description">
                 Username and email fields perform server-side validation to check availability and
                 validity, with proper loading states and error handling.
               </Text>
@@ -174,7 +140,7 @@ const FormValidation: React.FC = () => {
               <Heading size="sm" mb={2}>
                 Form-Level Validation
               </Heading>
-              <Text fontSize="sm" color="gray.600">
+              <Text textStyle="description">
                 Overall form validation ensures all fields are valid before allowing submission,
                 with comprehensive error reporting.
               </Text>
@@ -187,7 +153,7 @@ const FormValidation: React.FC = () => {
           <Heading size="md" mb={4}>
             Validation Schema
           </Heading>
-          <CodeBlock
+          <CodePanel
             snippetName="UserRegistrationSchema"
             language="typescript"
             title="Form Schema with Complex Rules"
@@ -199,7 +165,7 @@ const FormValidation: React.FC = () => {
           <Heading size="md" mb={4}>
             Store Implementation
           </Heading>
-          <CodeBlock
+          <CodePanel
             snippetName="formValidationStoreFactory"
             language="typescript"
             title="Form Store with Advanced Validation"

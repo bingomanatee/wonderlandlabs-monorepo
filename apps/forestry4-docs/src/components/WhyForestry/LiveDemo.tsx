@@ -12,7 +12,7 @@ import {
   Text,
   VStack,
 } from '@chakra-ui/react';
-import CodeBlock from '../CodeBlock';
+import CodePanel from '../CodePanel';
 import InteractiveDemo from './InteractiveDemo';
 
 const LiveDemo: React.FC = () => {
@@ -45,7 +45,7 @@ const LiveDemo: React.FC = () => {
 
             {/* Store Factory Tab */}
             <TabPanel>
-              <CodeBlock language="typescript" title="Store Factory (demoStoreFactory.ts)">
+              <CodePanel language="typescript" title="Store Factory (demoStoreFactory.ts)">
                 {`import { Forest } from '@wonderlandlabs/forestry4';
 
 interface UserProfile {
@@ -195,12 +195,12 @@ export default function demoStoreFactory() {
     ]
   });
 }`}
-              </CodeBlock>
+              </CodePanel>
             </TabPanel>
 
             {/* Component Code Tab */}
             <TabPanel>
-              <CodeBlock
+              <CodePanel
                 snippetName="InteractiveDemo"
                 language="typescript"
                 title="InteractiveDemo Component Source"
@@ -209,7 +209,7 @@ export default function demoStoreFactory() {
 
             {/* Vitest Tests Tab */}
             <TabPanel>
-              <CodeBlock snippetName="demoStoreFactory-tests" language="typescript" ts={true} />
+              <CodePanel snippetName="demoStoreFactory-tests" language="typescript" ts={true} />
             </TabPanel>
           </TabPanels>
         </Tabs>

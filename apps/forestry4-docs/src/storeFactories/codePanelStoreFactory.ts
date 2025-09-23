@@ -114,15 +114,12 @@ export class CodePanelForest extends Forest<CodePanelState> {
   get displayContent(): string {
     // Handle loading state
     if (this.value.loading) {
-      const snippetName = this.value.snippetName || 'snippet';
-      const folder = this.value.folder;
-      return `// Loading snippet: ${snippetName}${folder ? ` from ${folder}` : ''}...\n// Please wait...`;
+      return `// Loading snippet: ${this.path}...\n// Please wait...`;
     }
 
     // Handle error state
     if (this.value.error) {
-      const snippetName = this.value.snippetName || 'snippet';
-      return `// Failed to load snippet: ${snippetName}\n// Error: ${this.value.error}\n// Please check the file path and try again.`;
+      return `// Failed to load snippet: ${this.path}\n// Error: ${this.value.error}\n// Please check the file path and try again.`;
     }
 
     // Handle normal content with imports logic
@@ -185,19 +182,23 @@ export class CodePanelForest extends Forest<CodePanelState> {
     });
   }
 
-  // Snippet loading functionality
-  async loadSnippet() {
+  get path() {
     const { folder, snippetName, language } = this.value;
     const extension = language === 'tsx' ? 'tsx' : 'ts';
+
+    return folder
+      ? `/snippets/${folder}/${snippetName}.${extension}`
+      : `/snippets/${snippetName}.${extension}`;
+  }
+
+  // Snippet loading functionality
+  async loadSnippet() {
+    const { snippetName } = this.value;
 
     this.setLoading(true);
 
     try {
-      const path = folder
-        ? `/snippets/${folder}/${snippetName}.${extension}`
-        : `/snippets/${snippetName}.${extension}`;
-
-      const response = await fetch(path);
+      const response = await fetch(this.path);
       if (!response.ok) {
         console.error('snippet load failure:', this.value, response);
         throw new Error(`Failed to load snippet: ${snippetName}`);

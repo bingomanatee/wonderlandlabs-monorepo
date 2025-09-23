@@ -3,7 +3,6 @@ import {
   Badge,
   Box,
   Heading,
-  SimpleGrid,
   Table,
   TableContainer,
   Tbody,
@@ -16,6 +15,7 @@ import {
 } from '@chakra-ui/react';
 import { Link } from 'react-router-dom';
 import Section from '@/components/Section.tsx';
+import { DoDont, DoList, DoItem, TradeoffList, TradeoffItem } from '@/components/DoDont';
 
 const ComparisonSection: React.FC = () => {
   return (
@@ -306,52 +306,47 @@ const ComparisonSection: React.FC = () => {
       </Box>
 
       {/* Key Differentiators */}
-      <SimpleGrid columns={{ base: 1, lg: 2 }} spacing={6}>
-        <Box layerStyle="card" bg="green.50">
-          <Heading variant="card" color="green.700">
-            ✅ Forestry Advantages
-          </Heading>
-          <VStack spacing={3} align="stretch">
-            <Text fontSize="sm">
-              <strong>Built-in Validation:</strong> Three-layer validation system with runtime
-              checks
-            </Text>
-            <Text fontSize="sm">
-              <strong>RxJS Integration:</strong> Powerful reactive programming capabilities
-            </Text>
-            <Text fontSize="sm">
-              <strong>Forest Branching:</strong> Unique field-level state management for forms
-            </Text>
-            <Text fontSize="sm">
-              <strong>Quality Feedback:</strong> User-friendly validation messages
-            </Text>
-            <Text fontSize="sm">
-              <strong>Factory Pattern:</strong> Dependency injection and reusable store creation
-            </Text>
-          </VStack>
-        </Box>
+      <DoDont>
+        <DoList title="✅ Forestry Advantages">
+          <DoItem title="Built-in Validation">
+            Three-layer validation system with runtime checks
+          </DoItem>
 
-        <Box layerStyle="card" bg="orange.50">
-          <Heading variant="card" color="orange.700">
-            ⚠️ Trade-offs
-          </Heading>
-          <VStack spacing={3} align="stretch">
-            <Text fontSize="sm">
-              <strong>Learning Curve:</strong> New concepts like Forest branching and validation
-              layers
-            </Text>
-            <Text fontSize="sm">
-              <strong>Bundle Size:</strong> RxJS dependency adds to bundle size
-            </Text>
-            <Text fontSize="sm">
-              <strong>Ecosystem:</strong> Newer library with smaller community
-            </Text>
-            <Text fontSize="sm">
-              <strong>Documentation:</strong> Still growing compared to established solutions
-            </Text>
-          </VStack>
-        </Box>
-      </SimpleGrid>
+          <DoItem title="RxJS Integration">
+            Powerful reactive programming capabilities
+          </DoItem>
+
+          <DoItem title="Forest Branching">
+            Unique field-level state management for forms
+          </DoItem>
+
+          <DoItem title="Quality Feedback">
+            User-friendly validation messages
+          </DoItem>
+
+          <DoItem title="Factory Pattern">
+            Dependency injection and reusable store creation
+          </DoItem>
+        </DoList>
+
+        <TradeoffList>
+          <TradeoffItem title="Learning Curve">
+            New concepts like Forest branching and validation layers
+          </TradeoffItem>
+
+          <TradeoffItem title="Bundle Size">
+            RxJS dependency adds to bundle size
+          </TradeoffItem>
+
+          <TradeoffItem title="Ecosystem">
+            Newer library with smaller community
+          </TradeoffItem>
+
+          <TradeoffItem title="Documentation">
+            Still growing compared to established solutions
+          </TradeoffItem>
+        </TradeoffList>
+      </DoDont>
     </VStack>
   );
 };

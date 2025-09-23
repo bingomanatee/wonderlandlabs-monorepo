@@ -176,7 +176,7 @@ const TransactionDemoComponent: React.FC = () => {
         </Button>
       </HStack>
 
-      <Text fontSize="sm" color="gray.600" fontStyle="italic" mb={6}>
+      <Text textStyle="description" fontStyle="italic" mb={6}>
         💡 Try transferring more than the available balance to see transaction rollback in action!
       </Text>
 

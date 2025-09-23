@@ -19,7 +19,7 @@ const BenefitsSection: React.FC = () => {
         <Heading size="xl" mb={4}>
           Why Choose Forestry?
         </Heading>
-        <Text fontSize="lg" color="gray.600" maxW="3xl" mx="auto">
+        <Text textStyle="hero">
           Forestry provides a powerful, type-safe, and intuitive approach to state management that
           scales from simple components to complex applications.
         </Text>

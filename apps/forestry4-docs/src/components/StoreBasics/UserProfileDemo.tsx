@@ -214,7 +214,7 @@ const UserProfileDemo: React.FC = () => {
         </Box>
 
         <Box>
-          <Text fontSize="sm" color="gray.600">
+          <Text textStyle="description">
             <strong>Try:</strong> Enter invalid values (negative age, empty name, invalid email) to
             see validation errors in action.
           </Text>

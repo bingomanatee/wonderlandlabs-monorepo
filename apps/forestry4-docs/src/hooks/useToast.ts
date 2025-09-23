@@ -3,7 +3,7 @@ import { useCallback } from 'react';
 
 export type FeedbackFn = (err: Error | string, title?: string) => void;
 
-export function useErrorHandler() {
+export function useToast() {
   const toast = useToast();
 
   const handleError = useCallback(
@@ -54,4 +54,4 @@ export function useErrorHandler() {
   };
 }
 
-export default useErrorHandler;
+export default useToast;

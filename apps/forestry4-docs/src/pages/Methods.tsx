@@ -8,7 +8,7 @@ const Methods: React.FC = () => {
         <Heading size="xl" mb={4}>
           Store Methods
         </Heading>
-        <Text fontSize="lg" color="gray.600">
+        <Text textStyle="hero">
           Comprehensive guide to all public methods available on Store instances.
         </Text>
         <Text mt={4} color="gray.500">

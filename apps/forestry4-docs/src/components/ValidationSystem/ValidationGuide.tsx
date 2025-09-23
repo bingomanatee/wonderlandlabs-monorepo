@@ -1,7 +1,7 @@
 import React from 'react';
 import { Box, Code, Heading, Text, VStack } from '@chakra-ui/react';
 import Section from '@/components/Section.tsx';
-import CodeBlock from '@/components/CodeBlock.tsx';
+import CodePanel from '@/components/CodePanel';
 
 const ValidationGuide: React.FC = () => {
   return (
@@ -46,7 +46,7 @@ const ValidationGuide: React.FC = () => {
             <b>Soft Validation</b> is encoded in pre or in actions to assert "annotation" on the
             state as a whole or specific fields; it is the sort of thing you expect to work with
             forms where the user is not prevented from entering a bad data, but they are{' '}
-            <i>infrormed</i> about the state of their field or form with error messages. Obviously,
+            <i>informed</i> about the state of their field or form with error messages. Obviously,
             for this to work both the bad data and the error message (and potentially an isValid
             boolean) exist for every field and potentially the form as a whole. there are two ways
             of doing this - embedding these properties in state or writing actions such as
@@ -61,7 +61,7 @@ const ValidationGuide: React.FC = () => {
           <Heading size="sm">🤔 In short:</Heading>
           <VStack spacing={2} align="start" fontSize="sm">
             <Text>
-              <strong>Transient ("soft") UI Feedback/ data correction</strong> → Use{' '}
+              <strong>Transient ("soft") UI Feedback/ data correction</strong> → Use
               <Code>prep</Code>
               functions or feedback actions.
             </Text>
@@ -79,27 +79,15 @@ const ValidationGuide: React.FC = () => {
           </Text>
         </Box>
 
-        <Box layerStyle="infoBox" bg="gray.50">
-          <Heading size="sm">📚 Complete Example - All Three Layers:</Heading>
-          <Text fontSize="sm" mb={3}>
-            A shopping cart that uses Zod for structure, tests for business rules, and prep for UI
-            state:
-          </Text>
-          <CodeBlock
-            snippetName="shoppingCartValidation"
-            language="typescript"
-            folder=" ValidationSystem"
-          />
-        </Box>
-
         <Box layerStyle=" infoBox" bg=" gray.50">
           <Heading size=" sm">Do I have to use Zod?</Heading>
           <Text>
-            Technically the schema parameter expects an object with a parse(value) method that
-            throws on bad code. If you don't want to pull in Zod you can put any other / a custom
-            parser in to schema as long as it exposes a parse method; if it doesn't create an object
-            and a parse method and enclose your validator inside of it. (FWIW Zod is not bundled
-            with Forestry so this option may appeal if you are fanatic about bundle size reduction.)
+            Technically the schema parameter expects an object with a <code>parse(value)</code>{' '}
+            method that throws (or returns a descriptive error string) on bad code. If you don't
+            want to pull in Zod you can put any another framework or a custom parser in to schema as
+            long as it exposes a parse method; if it doesn't create an object and a parse method and
+            enclose your validator inside of it. (FWIW Zod is not bundled with Forestry so this
+            option may appeal if you are fanatic about bundle size reduction.)
           </Text>
         </Box>
       </VStack>

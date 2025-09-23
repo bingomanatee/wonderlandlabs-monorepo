@@ -9,7 +9,7 @@ import WhyForestry from './pages/WhyForestry';
 
 // Essential Features
 import StoreBasics from './pages/StoreBasics';
-import ActionsState from './pages/ActionsState';
+import ChangeValue from './pages/ChangeValue.tsx';
 import ReactIntegration from './pages/ReactIntegration';
 
 // Power Tools
@@ -41,7 +41,7 @@ function App() {
 
           {/* Essential Features */}
           <Route path="/forest" element={<StoreBasics />} />
-          <Route path="/actions" element={<ActionsState />} />
+          <Route path="/change" element={<ChangeValue />} />
           <Route path="/react" element={<ReactIntegration />} />
 
           {/* Power Tools */}

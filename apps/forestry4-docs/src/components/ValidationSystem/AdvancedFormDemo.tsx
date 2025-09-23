@@ -1,7 +1,7 @@
 import React from 'react';
 import { Badge, Box, Button, Heading, HStack, SimpleGrid, Text, VStack } from '@chakra-ui/react';
 import useForestryLocal from '@/hooks/useForestryLocal.ts';
-import useErrorHandler from '@/hooks/useErrorHandler.ts';
+import useToast from '@/hooks/useToast.ts';
 
 import formStateFactory, { FormState } from '@/storeFactories/ValidationSystem/form/formState.ts';
 import { usernameBranchConfig } from '@/storeFactories/ValidationSystem/form/usernameBranch.ts';
@@ -11,7 +11,7 @@ import Field from '@/components/ValidationSystem/Field';
 import Section from '../Section';
 
 const AdvancedFormDemo: React.FC = () => {
-  const { handleSuccess, handleError } = useErrorHandler();
+  const { handleSuccess, handleError } = useToast();
 
   const [formState, formForest] = useForestryLocal<FormState>(
     formStateFactory,

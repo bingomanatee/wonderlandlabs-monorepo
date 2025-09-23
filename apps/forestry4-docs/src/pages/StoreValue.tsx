@@ -11,7 +11,7 @@ import {
   UnorderedList,
   VStack,
 } from '@chakra-ui/react';
-import CodeBlock from '../components/CodeBlock';
+import CodePanel from '../components/CodePanel';
 import CodeTabs from '../components/CodeTabs.tsx';
 import Section from '../components/Section';
 
@@ -24,7 +24,7 @@ const StoreValue: React.FC = () => {
           <Heading size="2xl" mb={4}>
             Store Value & Res Map
           </Heading>
-          <Text fontSize="xl" color="gray.600" maxW="3xl" mx="auto">
+          <Text textStyle="hero">
             Understanding the store's value property and res map - their capabilities, limitations,
             and proper usage patterns in Forestry stores.
           </Text>
@@ -147,7 +147,7 @@ const StoreValue: React.FC = () => {
               </Box>
             </Alert>
 
-            <CodeBlock language="typescript" snippetName="valueLimitations" folder="StoreValue" />
+            <CodePanel language="typescript" snippetName="valueLimitations" folder="StoreValue" />
           </VStack>
         </Section>
 
@@ -183,7 +183,7 @@ const StoreValue: React.FC = () => {
               </Box>
             </SimpleGrid>
 
-            <CodeBlock language="typescript" snippetName="resMapUsage" folder="StoreValue" />
+            <CodePanel language="typescript" snippetName="resMapUsage" folder="StoreValue" />
           </VStack>
         </Section>
 
@@ -200,19 +200,19 @@ const StoreValue: React.FC = () => {
                 <VStack spacing={3} align="stretch">
                   <Box layerStyle="highlight" bg="green.50">
                     <Text fontWeight="semibold">Store plain data in value</Text>
-                    <Text fontSize="sm" color="gray.600">
+                    <Text textStyle="description">
                       Objects, arrays, primitives, Maps, Sets - serializable data only
                     </Text>
                   </Box>
                   <Box layerStyle="highlight" bg="green.50">
                     <Text fontWeight="semibold">Use res for complex objects</Text>
-                    <Text fontSize="sm" color="gray.600">
+                    <Text textStyle="description">
                       DOM elements, class instances, functions go in res map
                     </Text>
                   </Box>
                   <Box layerStyle="highlight" bg="green.50">
                     <Text fontWeight="semibold">Design for immutability</Text>
-                    <Text fontSize="sm" color="gray.600">
+                    <Text textStyle="description">
                       Structure data assuming references will change on updates
                     </Text>
                   </Box>
@@ -226,19 +226,19 @@ const StoreValue: React.FC = () => {
                 <VStack spacing={3} align="stretch">
                   <Box layerStyle="highlight" bg="red.50">
                     <Text fontWeight="semibold">Store class instances in value</Text>
-                    <Text fontSize="sm" color="gray.600">
+                    <Text textStyle="description">
                       They lose prototypical inheritance through Immer
                     </Text>
                   </Box>
                   <Box layerStyle="highlight" bg="red.50">
                     <Text fontWeight="semibold">Rely on reference equality</Text>
-                    <Text fontSize="sm" color="gray.600">
+                    <Text textStyle="description">
                       Immer creates new references - use IDs for identity
                     </Text>
                   </Box>
                   <Box layerStyle="highlight" bg="red.50">
                     <Text fontWeight="semibold">Expect res changes to notify</Text>
-                    <Text fontSize="sm" color="gray.600">
+                    <Text textStyle="description">
                       Res is non-reactive - subscribers won't be notified
                     </Text>
                   </Box>

@@ -11,7 +11,7 @@ const AdvancedPatterns: React.FC = () => {
             Power Tool
           </Badge>
         </Heading>
-        <Text fontSize="lg" color="gray.600">
+        <Text textStyle="hero">
           Advanced patterns, debugging techniques, and performance optimization.
         </Text>
         <Text mt={4} color="gray.500">

@@ -12,7 +12,7 @@ import {
   VStack,
 } from '@chakra-ui/react';
 import useForestryLocal from '../../hooks/useForestryLocal';
-import useErrorHandler from '../../hooks/useErrorHandler';
+import useToast from '../../hooks/useToast.ts';
 import shoppingCartStoreFactory, {
   CartItem,
   ShoppingCart,
@@ -21,7 +21,7 @@ import { PRODUCTS } from '@/constants.ts';
 import { dollar } from '@/components/dollar.tsx';
 
 const ShoppingCartDemoComponent: React.FC = () => {
-  const { handleError } = useErrorHandler();
+  const { handleError } = useToast();
   const [cartState, cartStore] = useForestryLocal<ShoppingCart>(
     shoppingCartStoreFactory,
     handleError
@@ -36,9 +36,7 @@ const ShoppingCartDemoComponent: React.FC = () => {
             <HStack justify="space-between">
               <VStack align="start" spacing={1}>
                 <Text fontWeight="semibold">{product.name}</Text>
-                <Text fontSize="sm" color="gray.600">
-                  ${product.price}
-                </Text>
+                <Text textStyle="description">${product.price}</Text>
                 <Text fontSize="xs" color="gray.500">
                   Stock: {product.inStock}
                 </Text>
@@ -129,12 +127,8 @@ const ShoppingCartDemoComponent: React.FC = () => {
                     </HStack>
                   </HStack>
                   <HStack width="full" justify="space-between">
-                    <Text fontSize="sm" color="gray.600">
-                      {dollar.format(productPrice)} each
-                    </Text>
-                    <Text fontSize="sm" color="gray.600">
-                      {dollar.format(totalPrice)}
-                    </Text>
+                    <Text textStyle="description">{dollar.format(productPrice)} each</Text>
+                    <Text textStyle="description">{dollar.format(totalPrice)}</Text>
                   </HStack>
                 </Box>
               );

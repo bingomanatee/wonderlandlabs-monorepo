@@ -26,7 +26,7 @@ const ShoppingCart: React.FC = () => {
               Validation Focus
             </Badge>
           </Heading>
-          <Text fontSize="lg" color="gray.600" maxW="2xl">
+          <Text textStyle="hero" maxW="2xl">
             A shopping cart application demonstrating Forestry 4's validation system, schema
             integration, and complex business logic handling.
           </Text>

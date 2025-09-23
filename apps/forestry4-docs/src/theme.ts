@@ -58,6 +58,11 @@ const theme = extendTheme({
       p: 3,
       borderRadius: 'md',
     },
+    doDontItem: {
+      p: 3,
+      borderRadius: 'md',
+      border: '1px solid',
+    },
     section: {
       spacing: 6,
       align: 'stretch',

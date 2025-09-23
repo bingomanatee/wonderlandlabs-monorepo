@@ -1,7 +1,6 @@
 import React from 'react';
 import { Forest } from '@wonderlandlabs/forestry4';
 import { type FieldValue, NumberFieldValueSchema } from './FieldBranch.ts';
-import { z } from 'zod';
 
 // Age-specific validators
 const ageValidators = [

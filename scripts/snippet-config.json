@@ -84,6 +84,14 @@
       "language": "typescript"
     },
     {
+      "name": "UserProfileDemo-component",
+      "description": "Interactive user profile demo component with form validation",
+      "source": "apps/forestry4-docs/src/components/examples/UserProfileDemo.tsx",
+      "target": "apps/forestry4-docs/public/snippets/UserProfileDemo-component.tsx",
+      "extractMode": "full",
+      "language": "typescript"
+    },
+    {
       "name": "ShoppingCart-page",
       "description": "Shopping cart example page",
       "source": "apps/forestry4-docs/src/pages/examples/ShoppingCart.tsx",
@@ -104,6 +112,14 @@
       "description": "Transaction demo example page",
       "source": "apps/forestry4-docs/src/pages/examples/TransactionDemo.tsx",
       "target": "apps/forestry4-docs/public/snippets/TransactionDemo-page.tsx",
+      "extractMode": "full",
+      "language": "typescript"
+    },
+    {
+      "name": "TransactionDemo-component",
+      "description": "Interactive transaction demo component with bank transfers and data migration",
+      "source": "apps/forestry4-docs/src/components/examples/TransactionDemoComponent.tsx",
+      "target": "apps/forestry4-docs/public/snippets/TransactionDemo-component.tsx",
       "extractMode": "full",
       "language": "typescript"
     },
@@ -292,6 +308,30 @@
       "language": "typescript"
     },
     {
+      "name": "advancedFormComponent",
+      "description": "Advanced form component demonstrating field-level validation with Forest branches",
+      "source": "apps/forestry4-docs/src/components/ValidationSystem/AdvancedFormDemo.tsx",
+      "target": "apps/forestry4-docs/public/snippets/ValidationSystem/advancedFormComponent.tsx",
+      "extractMode": "full",
+      "language": "tsx"
+    },
+    {
+      "name": "usernameBranchConfig",
+      "description": "Username field branch configuration with validation rules",
+      "source": "apps/forestry4-docs/src/storeFactories/ValidationSystem/form/usernameBranch.ts",
+      "target": "apps/forestry4-docs/public/snippets/ValidationSystem/usernameBranchConfig.ts",
+      "extractMode": "full",
+      "language": "typescript"
+    },
+    {
+      "name": "formStateFactory",
+      "description": "Form state factory with branch coordination and validation",
+      "source": "apps/forestry4-docs/src/storeFactories/ValidationSystem/form/formState.ts",
+      "target": "apps/forestry4-docs/public/snippets/ValidationSystem/formStateFactory.ts",
+      "extractMode": "full",
+      "language": "typescript"
+    },
+    {
       "name": "username-branch-example-tests",
       "description": "Username branch validation example unit tests",
       "source": "apps/forestry4-docs/src/__tests__/username-branch-example.test.ts",
@@ -304,6 +344,190 @@
       "description": "Transaction demo example unit tests covering bank, order, and migration stores",
       "source": "apps/forestry4-docs/src/__tests__/transaction-demo-example.test.ts",
       "target": "apps/forestry4-docs/public/snippets/transaction-demo-example-tests.ts",
+      "extractMode": "full",
+      "language": "typescript"
+    },
+    {
+      "name": "basicTransactionSyntax",
+      "description": "Basic transaction syntax examples with validation suspension",
+      "source": "apps/forestry4-docs/src/examples/transactions/basicTransactionSyntax.ts",
+      "target": "apps/forestry4-docs/public/snippets/Transactions/basicTransactionSyntax.ts",
+      "extractMode": "full",
+      "language": "typescript"
+    },
+    {
+      "name": "errorHandlingRollback",
+      "description": "Transaction error handling and automatic rollback examples",
+      "source": "apps/forestry4-docs/src/examples/transactions/errorHandlingRollback.ts",
+      "target": "apps/forestry4-docs/public/snippets/Transactions/errorHandlingRollback.ts",
+      "extractMode": "full",
+      "language": "typescript"
+    },
+    {
+      "name": "suspendValidationExample",
+      "description": "Examples showing validation suspension during transactions",
+      "source": "apps/forestry4-docs/src/examples/transactions/suspendValidationExample.ts",
+      "target": "apps/forestry4-docs/public/snippets/Transactions/suspendValidationExample.ts",
+      "extractMode": "full",
+      "language": "typescript"
+    },
+    {
+      "name": "actionFunctionExample",
+      "description": "Transaction action function examples with complex logic",
+      "source": "apps/forestry4-docs/src/examples/transactions/actionFunctionExample.ts",
+      "target": "apps/forestry4-docs/public/snippets/Transactions/actionFunctionExample.ts",
+      "extractMode": "full",
+      "language": "typescript"
+    },
+    {
+      "name": "transactionDebugging",
+      "description": "Transaction debugging with stack observation",
+      "source": "apps/forestry4-docs/src/examples/transactions/transactionDebugging.ts",
+      "target": "apps/forestry4-docs/public/snippets/Transactions/transactionDebugging.ts",
+      "extractMode": "full",
+      "language": "typescript"
+    },
+    {
+      "name": "nestedTransactionExample",
+      "description": "Nested transaction example with error handling",
+      "source": "apps/forestry4-docs/src/examples/transactions/nestedTransactionExample.ts",
+      "target": "apps/forestry4-docs/public/snippets/Transactions/nestedTransactionExample.ts",
+      "extractMode": "full",
+      "language": "typescript"
+    },
+    {
+      "name": "validationErrorExample",
+      "description": "Validation error example with suspendValidation",
+      "source": "apps/forestry4-docs/src/examples/transactions/validationErrorExample.ts",
+      "target": "apps/forestry4-docs/public/snippets/Transactions/validationErrorExample.ts",
+      "extractMode": "full",
+      "language": "typescript"
+    },
+    {
+      "name": "transactionErrorCheck",
+      "description": "Transaction error checking and rollback verification",
+      "source": "apps/forestry4-docs/src/examples/transactions/transactionErrorCheck.ts",
+      "target": "apps/forestry4-docs/public/snippets/Transactions/transactionErrorCheck.ts",
+      "extractMode": "full",
+      "language": "typescript"
+    },
+    {
+      "name": "transactMethodExamples",
+      "description": "Transaction method examples with nested transactions and error handling",
+      "source": "apps/forestry4-docs/src/examples/transactions/transactMethodExamples.ts",
+      "target": "apps/forestry4-docs/public/snippets/Transactions/transactMethodExamples.ts",
+      "extractMode": "full",
+      "language": "typescript"
+    },
+    {
+      "name": "nextExample",
+      "description": "Forest next() method examples for updating values",
+      "source": "apps/forestry4-docs/src/examples/api-reference/nextExample.ts",
+      "target": "apps/forestry4-docs/public/snippets/APIReference/nextExample.ts",
+      "extractMode": "full",
+      "language": "typescript"
+    },
+    {
+      "name": "subscribeExample",
+      "description": "Forest subscribe() method examples for listening to changes",
+      "source": "apps/forestry4-docs/src/examples/api-reference/subscribeExample.ts",
+      "target": "apps/forestry4-docs/public/snippets/APIReference/subscribeExample.ts",
+      "extractMode": "full",
+      "language": "typescript"
+    },
+    {
+      "name": "getPathExample",
+      "description": "Forest get() method examples for retrieving values by path",
+      "source": "apps/forestry4-docs/src/examples/api-reference/getPathExample.ts",
+      "target": "apps/forestry4-docs/public/snippets/APIReference/getPathExample.ts",
+      "extractMode": "full",
+      "language": "typescript"
+    },
+    {
+      "name": "setValueExample",
+      "description": "Forest set() method examples for updating values by path",
+      "source": "apps/forestry4-docs/src/examples/api-reference/setValueExample.ts",
+      "target": "apps/forestry4-docs/public/snippets/APIReference/setValueExample.ts",
+      "extractMode": "full",
+      "language": "typescript"
+    },
+    {
+      "name": "branchCreationExample",
+      "description": "Forest branch() method examples for creating branches with actions",
+      "source": "apps/forestry4-docs/src/examples/api-reference/branchCreationExample.ts",
+      "target": "apps/forestry4-docs/public/snippets/APIReference/branchCreationExample.ts",
+      "extractMode": "full",
+      "language": "typescript"
+    },
+    {
+      "name": "validateMethod",
+      "description": "Forest validate() method examples with schema and test validation",
+      "source": "apps/forestry4-docs/src/examples/api-reference/validateMethod.ts",
+      "target": "apps/forestry4-docs/public/snippets/APIReference/validateMethod.ts",
+      "extractMode": "full",
+      "language": "typescript"
+    },
+    {
+      "name": "testMethod",
+      "description": "Forest test() method examples ignoring transaction suspension",
+      "source": "apps/forestry4-docs/src/examples/api-reference/testMethod.ts",
+      "target": "apps/forestry4-docs/public/snippets/APIReference/testMethod.ts",
+      "extractMode": "full",
+      "language": "typescript"
+    },
+    {
+      "name": "zodSchemaValidation",
+      "description": "Zod schema validation with Forestry stores",
+      "source": "apps/forestry4-docs/src/examples/schema-validation/zodSchemaValidation.ts",
+      "target": "apps/forestry4-docs/public/snippets/ActionsState/zodSchemaValidation.ts",
+      "extractMode": "full",
+      "language": "typescript"
+    },
+    {
+      "name": "schemaPrepIntegration",
+      "description": "Schema prep integration with custom validation logic",
+      "source": "apps/forestry4-docs/src/examples/schema-validation/schemaPrepIntegration.ts",
+      "target": "apps/forestry4-docs/public/snippets/SchemaValidation/schemaPrepIntegration.ts",
+      "extractMode": "full",
+      "language": "typescript"
+    },
+    {
+      "name": "basicTypes",
+      "description": "Basic Zod schema types and validation patterns",
+      "source": "apps/forestry4-docs/src/examples/schema-validation/basicTypes.ts",
+      "target": "apps/forestry4-docs/public/snippets/SchemaValidation/basicTypes.ts",
+      "extractMode": "full",
+      "language": "typescript"
+    },
+    {
+      "name": "complexObjects",
+      "description": "Complex nested object schemas with validation",
+      "source": "apps/forestry4-docs/src/examples/schema-validation/complexObjects.ts",
+      "target": "apps/forestry4-docs/public/snippets/SchemaValidation/complexObjects.ts",
+      "extractMode": "full",
+      "language": "typescript"
+    },
+    {
+      "name": "arraysValidation",
+      "description": "Array validation patterns with Zod schemas",
+      "source": "apps/forestry4-docs/src/examples/schema-validation/arraysValidation.ts",
+      "target": "apps/forestry4-docs/public/snippets/SchemaValidation/arraysValidation.ts",
+      "extractMode": "full",
+      "language": "typescript"
+    },
+    {
+      "name": "conditionalLogic",
+      "description": "Conditional validation logic and discriminated unions",
+      "source": "apps/forestry4-docs/src/examples/schema-validation/conditionalLogic.ts",
+      "target": "apps/forestry4-docs/public/snippets/SchemaValidation/conditionalLogic.ts",
+      "extractMode": "full",
+      "language": "typescript"
+    },
+    {
+      "name": "shoppingCartValidation",
+      "description": "Complete shopping cart validation example with all three layers: Zod schema, test functions, and prep function",
+      "source": "apps/forestry4-docs/src/examples/validation-system/shoppingCartValidation.ts",
+      "target": "apps/forestry4-docs/public/snippets/ValidationSystem/shoppingCartValidation.ts",
       "extractMode": "full",
       "language": "typescript"
     },
@@ -371,6 +595,134 @@
       "target": "apps/forestry4-docs/public/snippets/codeTabsStoreFactory.ts",
       "extractMode": "full",
       "language": "typescript"
+    },
+    {
+      "name": "basicStore",
+      "description": "Basic store example using modern Forestry 4.1.x class extension pattern",
+      "source": "apps/forestry4-docs/src/examples/store-basics/basic-store.ts",
+      "target": "apps/forestry4-docs/public/snippets/StoreBasics/basicStore.ts",
+      "extractMode": "full",
+      "language": "typescript"
+    },
+    {
+      "name": "storeWithValidation",
+      "description": "Store with validation using modern Forestry 4.1.x pattern",
+      "source": "apps/forestry4-docs/src/examples/store-basics/store-with-validation.ts",
+      "target": "apps/forestry4-docs/public/snippets/StoreBasics/storeWithValidation.ts",
+      "extractMode": "full",
+      "language": "typescript"
+    },
+    {
+      "name": "reactHookPattern",
+      "description": "React hook pattern with modern Forestry 4.1.x store",
+      "source": "apps/forestry4-docs/src/examples/store-basics/react-hook-pattern.tsx",
+      "target": "apps/forestry4-docs/public/snippets/StoreBasics/reactHookPattern.tsx",
+      "extractMode": "full",
+      "language": "tsx"
+    },
+    {
+      "name": "storeConstructorSignature",
+      "description": "Modern Forestry 4.1.x constructor signature",
+      "source": "apps/forestry4-docs/src/examples/store-basics/store-constructor-signature.ts",
+      "target": "apps/forestry4-docs/public/snippets/StoreBasics/storeConstructorSignature.ts",
+      "extractMode": "full",
+      "language": "typescript"
+    },
+    {
+      "name": "nameExample",
+      "description": "Store name configuration example",
+      "source": "apps/forestry4-docs/src/examples/store-basics/name-example.ts",
+      "target": "apps/forestry4-docs/public/snippets/StoreBasics/nameExample.ts",
+      "extractMode": "full",
+      "language": "typescript"
+    },
+    {
+      "name": "valueExample",
+      "description": "Store value configuration example",
+      "source": "apps/forestry4-docs/src/examples/store-basics/value-example.ts",
+      "target": "apps/forestry4-docs/public/snippets/StoreBasics/valueExample.ts",
+      "extractMode": "full",
+      "language": "typescript"
+    },
+    {
+      "name": "actionsExample",
+      "description": "Modern class methods example (replaces actions object)",
+      "source": "apps/forestry4-docs/src/examples/store-basics/actions-example.ts",
+      "target": "apps/forestry4-docs/public/snippets/StoreBasics/actionsExample.ts",
+      "extractMode": "full",
+      "language": "typescript"
+    },
+    {
+      "name": "testsExample",
+      "description": "Validation tests configuration example",
+      "source": "apps/forestry4-docs/src/examples/store-basics/tests-example.ts",
+      "target": "apps/forestry4-docs/public/snippets/StoreBasics/testsExample.ts",
+      "extractMode": "full",
+      "language": "typescript"
+    },
+    {
+      "name": "formOnChangeHandler",
+      "description": "Form onChange handler using modern Forestry 4.1.x pattern",
+      "source": "apps/forestry4-docs/src/examples/store-basics/form-onchange-handler.ts",
+      "target": "apps/forestry4-docs/public/snippets/StoreBasics/formOnChangeHandler.ts",
+      "extractMode": "full",
+      "language": "typescript"
+    },
+    {
+      "name": "singleFieldUpdates",
+      "description": "Single field update patterns with modern class methods",
+      "source": "apps/forestry4-docs/src/examples/store-basics/single-field-updates.ts",
+      "target": "apps/forestry4-docs/public/snippets/StoreBasics/singleFieldUpdates.ts",
+      "extractMode": "full",
+      "language": "typescript"
+    },
+    {
+      "name": "multipleFieldUpdates",
+      "description": "Multiple field update patterns with modern class methods",
+      "source": "apps/forestry4-docs/src/examples/store-basics/multiple-field-updates.ts",
+      "target": "apps/forestry4-docs/public/snippets/StoreBasics/multipleFieldUpdates.ts",
+      "extractMode": "full",
+      "language": "typescript"
+    },
+    {
+      "name": "complexUpdates",
+      "description": "Complex update patterns using mutate() with Immer",
+      "source": "apps/forestry4-docs/src/examples/store-basics/complex-updates.ts",
+      "target": "apps/forestry4-docs/public/snippets/StoreBasics/complexUpdates.ts",
+      "extractMode": "full",
+      "language": "typescript"
+    },
+    {
+      "name": "validationPatterns",
+      "description": "Validation patterns and test function examples",
+      "source": "apps/forestry4-docs/src/examples/store-basics/validation-patterns.ts",
+      "target": "apps/forestry4-docs/public/snippets/StoreBasics/validationPatterns.ts",
+      "extractMode": "full",
+      "language": "typescript"
+    },
+    {
+      "name": "liveExampleStoreDefinition",
+      "description": "Complete store definition for live example demo",
+      "source": "apps/forestry4-docs/src/examples/store-basics/live-example-store-definition.ts",
+      "target": "apps/forestry4-docs/public/snippets/StoreBasics/liveExampleStoreDefinition.ts",
+      "extractMode": "full",
+      "language": "typescript"
+    },
+    {
+      "name": "reactIntegration",
+      "description": "React integration example for live demo",
+      "source": "apps/forestry4-docs/src/examples/store-basics/react-integration.tsx",
+      "target": "apps/forestry4-docs/public/snippets/StoreBasics/reactIntegration.tsx",
+      "extractMode": "full",
+      "language": "tsx"
+    },
+    {
+      "name": "formComponent",
+      "description": "Form component JSX example with store integration",
+      "source": "apps/forestry4-docs/src/examples/store-basics/form-component.tsx",
+      "target": "apps/forestry4-docs/public/snippets/StoreBasics/formComponent.tsx",
+      "extractMode": "full",
+      "language": "tsx"
     }
   ]
 }

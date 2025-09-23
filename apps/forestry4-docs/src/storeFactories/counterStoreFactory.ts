@@ -6,7 +6,7 @@ const CounterStateSchema = z.object({
   count: z.number().int(),
   history: z.array(z.string()),
   multiplier: z.number().int().min(0), // Allow 0 for testing, prep function will provide quality feedback
-  qualityMessage: z.string()
+  qualityMessage: z.string(),
 });
 
 type CounterState = z.infer<typeof CounterStateSchema>;

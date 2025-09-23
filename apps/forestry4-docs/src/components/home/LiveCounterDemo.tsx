@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, Button, Text, HStack } from '@chakra-ui/react';
+import { Box, Button, HStack, Text } from '@chakra-ui/react';
 import useForestryLocal from '../../hooks/useForestryLocal';
 import { homeDemoStoreFactory } from '../../storeFactories/homeDemoStoreFactory';
 

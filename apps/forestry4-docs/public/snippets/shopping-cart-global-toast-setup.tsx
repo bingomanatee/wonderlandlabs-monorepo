@@ -1,6 +1,6 @@
 // Auto-generated snippet from: apps/forestry4-docs/src/examples/shopping-cart/global-toast-setup.tsx
 // Description: Global toast configuration for shopping cart error handling
-// Last synced: Sun Sep 21 14:32:36 PDT 2025
+// Last synced: Mon Sep 22 17:07:22 PDT 2025
 // DO NOT EDIT - This file is automatically synced from the source
 
 // main.tsx - Global toast configuration
@@ -16,8 +16,8 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
     toastOptions={{
       defaultOptions: {
         position: 'top-right',
-        duration: 4000
-      }
+        duration: 4000,
+      },
     }}
   >
     <App />

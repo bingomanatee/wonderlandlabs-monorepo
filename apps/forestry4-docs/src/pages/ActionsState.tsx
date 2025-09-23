@@ -11,9 +11,8 @@ import {
   VStack,
 } from '@chakra-ui/react';
 import CodeTabs from '../components/CodeTabs.tsx';
-import SnippetBlock from '../components/SnippetBlock';
-import CounterDemo from '../components/ActionsState/CounterDemo';
 import CodeBlock from '../components/CodeBlock';
+import CounterDemo from '../components/ActionsState/CounterDemo';
 import ItemDef from '../components/ItemDef';
 import Section from '../components/Section';
 
@@ -135,7 +134,7 @@ const ActionsState: React.FC = () => {
                 You <i>must</i> add it as the first parameter in your action, but when you{' '}
                 <i>call</i> your action, you don't have to add it in - Forestry will automatically
                 prepend it to any input arguments internally.
-                <SnippetBlock
+                <CodeBlock
                   snippetName="counter-example"
                   folder="actions-state"
                   language="typescript"
@@ -210,7 +209,11 @@ const ActionsState: React.FC = () => {
               <Text color="gray.600" mb={4}>
                 High-level actions that orchestrate multiple tactical operations.
               </Text>
-              <SnippetBlock snippetName="strategicActions" folder="ActionsState" />
+              <CodeBlock
+                language="typescript"
+                snippetName="strategicActions"
+                folder="ActionsState"
+              />
             </Box>
 
             <Box>
@@ -220,7 +223,11 @@ const ActionsState: React.FC = () => {
               <Text color="gray.600" mb={4}>
                 Low-level, reusable utilities that handle specific mutations.
               </Text>
-              <SnippetBlock snippetName="tacticalActions" folder="ActionsState" />
+              <CodeBlock
+                language="typescript"
+                snippetName="tacticalActions"
+                folder="ActionsState"
+              />
             </Box>
           </SimpleGrid>
         </Section>
@@ -322,7 +329,7 @@ const ActionsState: React.FC = () => {
                   <Text fontSize="sm" color="gray.600">
                     you cannot bind or change a lambdas' definiton of this so actions cannot be
                     bound to state from the constructor definitions: eg.,
-                    <SnippetBlock
+                    <CodeBlock
                       snippetName="arrow-function-antipattern"
                       folder="actions-state"
                       language="typescript"

@@ -1,11 +1,5 @@
 import React from 'react';
-import {
-  FormControl,
-  FormLabel,
-  Input,
-  Select,
-  FormErrorMessage,
-} from '@chakra-ui/react';
+import { FormControl, FormErrorMessage, FormLabel, Input, Select } from '@chakra-ui/react';
 
 interface FormFieldProps {
   name: string;

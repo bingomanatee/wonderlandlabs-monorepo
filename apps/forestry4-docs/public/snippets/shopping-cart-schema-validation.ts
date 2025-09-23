@@ -1,6 +1,6 @@
 // Auto-generated snippet from: apps/forestry4-docs/src/examples/shopping-cart/schema-validation.ts
 // Description: Zod schema definitions and custom business logic tests for shopping cart validation
-// Last synced: Sun Sep 21 14:32:36 PDT 2025
+// Last synced: Mon Sep 22 17:07:22 PDT 2025
 // DO NOT EDIT - This file is automatically synced from the source
 
 import { z } from 'zod';
@@ -27,15 +27,13 @@ const ShoppingCartSchema = z.object({
 const cartTests = [
   (cart: CartState) => {
     // Check inventory availability
-    const outOfStock = cart.items.find(item => 
-      getInventory(item.id) < item.quantity
-    );
+    const outOfStock = cart.items.find((item) => getInventory(item.id) < item.quantity);
     if (outOfStock) {
       return `${outOfStock.name} is out of stock`;
     }
     return null;
   },
-  
+
   (cart: CartState) => {
     // Validate discount eligibility
     if (cart.discount > 0 && cart.subtotal < 50) {
@@ -43,14 +41,14 @@ const cartTests = [
     }
     return null;
   },
-  
+
   (cart: CartState) => {
     // Check maximum cart size
     if (cart.items.length > 20) {
       return 'Maximum 20 items allowed in cart';
     }
     return null;
-  }
+  },
 ];
 
 export { CartItemSchema, ShoppingCartSchema, cartTests };

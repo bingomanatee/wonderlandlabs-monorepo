@@ -1,12 +1,13 @@
 // Auto-generated snippet from: apps/forestry4-docs/src/storeFactories/homeDemoStoreFactory.ts
 // Description: Demo store definition for home page live demo
-// Last synced: Sun Sep 21 14:32:36 PDT 2025
+// Last synced: Mon Sep 22 17:07:21 PDT 2025
 // DO NOT EDIT - This file is automatically synced from the source
 
 import { Forest } from '@wonderlandlabs/forestry4';
 
+export type CountType = { count: number };
 // Modern Forestry 4.1.x class extension pattern
-class HomeDemoForest extends Forest<{ count: number }> {
+class HomeDemoForest extends Forest<CountType> {
   constructor() {
     super({
       name: 'demo-counter',
@@ -15,19 +16,19 @@ class HomeDemoForest extends Forest<{ count: number }> {
   }
 
   increment() {
-    this.mutate(draft => {
+    this.mutate((draft: CountType) => {
       draft.count += 1;
     });
   }
 
   decrement() {
-    this.mutate(draft => {
+    this.mutate((draft: CountType) => {
       draft.count -= 1;
     });
   }
 
   reset() {
-    this.mutate(draft => {
+    this.mutate((draft) => {
       draft.count = 0;
     });
   }

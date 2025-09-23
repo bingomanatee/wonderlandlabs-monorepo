@@ -1,22 +1,7 @@
 import React from 'react';
-import {
-  Alert,
-  AlertIcon,
-  Box,
-  Card,
-  CardBody,
-  Code,
-  Heading,
-  Tab,
-  TabList,
-  TabPanel,
-  TabPanels,
-  Tabs,
-  Text,
-  VStack,
-} from '@chakra-ui/react';
-import SnippetBlock from '@/components/SnippetBlock';
+import { Box, Code, Heading, Text, VStack } from '@chakra-ui/react';
 import Section from '@/components/Section.tsx';
+import CodeBlock from '@/components/CodeBlock.tsx';
 
 const ValidationGuide: React.FC = () => {
   return (
@@ -100,11 +85,15 @@ const ValidationGuide: React.FC = () => {
             A shopping cart that uses Zod for structure, tests for business rules, and prep for UI
             state:
           </Text>
-          <SnippetBlock snippetName="shoppingCartValidation" folder="ValidationSystem" />
+          <CodeBlock
+            snippetName="shoppingCartValidation"
+            language="typescript"
+            folder=" ValidationSystem"
+          />
         </Box>
 
-        <Box layerStyle="infoBox" bg="gray.50">
-          <Heading size="sm">Do I have to use Zod?</Heading>
+        <Box layerStyle=" infoBox" bg=" gray.50">
+          <Heading size=" sm">Do I have to use Zod?</Heading>
           <Text>
             Technically the schema parameter expects an object with a parse(value) method that
             throws on bad code. If you don't want to pull in Zod you can put any other / a custom

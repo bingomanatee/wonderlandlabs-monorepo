@@ -1,11 +1,11 @@
 import React from 'react';
-import { Box, Button, Text, HStack } from '@chakra-ui/react';
+import { Box, Button, HStack, Text } from '@chakra-ui/react';
 import useForestryLocal from '../../hooks/useForestryLocal';
-import { homeDemoStoreFactory } from '../../storeFactories/homeDemoStoreFactory';
+import homeDemoStoreFactory, { CountType } from '@/storeFactories/homeDemoStoreFactory.ts';
 
 const CompleteCounterDemo: React.FC = () => {
   // Hook usage - connects store to React component
-  const [value, store] = useForestryLocal<{ count: number }>(homeDemoStoreFactory);
+  const [value, store] = useForestryLocal<CountType>(homeDemoStoreFactory);
   const { count } = value;
 
   return (

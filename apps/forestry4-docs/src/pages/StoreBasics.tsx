@@ -1,27 +1,10 @@
-import React, { useState } from 'react';
-import {
-  Container,
-  Heading,
-  Text,
-  Box,
-  SimpleGrid,
-  Button,
-  VStack,
-  HStack,
-  Input,
-  FormControl,
-  FormLabel,
-  Alert,
-  AlertIcon,
-  Badge,
-  Image,
-} from '@chakra-ui/react';
+import React from 'react';
+import { Badge, Box, Container, Heading, Image, SimpleGrid, Text, VStack } from '@chakra-ui/react';
 import CodeTabs from '../components/CodeTabs.tsx';
-import SnippetBlock from '../components/SnippetBlock';
+import CodeBlock from '../components/CodeBlock';
 import { Link } from 'react-router-dom';
-import useForestryLocal from '../hooks/useForestryLocal';
-import userProfileFactory from '../storeFactories/userProfileFactory';
 import Section from '../components/Section';
+import UserProfileDemo from '../components/examples/UserProfileDemo';
 
 const constructorTabs = [
   {
@@ -45,39 +28,80 @@ const constructorTabs = [
 ];
 
 const StoreBasics: React.FC = () => {
-  return ''; // TEMPORARILY DISABLED FOR 4.1.3 MIGRATION
-  const [userValue, store] = useForestryLocal(userProfileFactory);
-  const [error, setError] = useState('');
-
   return (
     <Container maxW="container.xl" py={8}>
       <VStack spacing={8} align="stretch">
         {/* Header */}
         <Box>
-          <Heading size="xl" mb={4}>
-            Store Overview
-          </Heading>
+          <Heading variant="page">Forest Overview</Heading>
           <Text fontSize="lg" color="gray.600">
-            The Store class is the core of Forestry 4, providing reactive state management with
-            validation and transaction support.
+            The Forest class is the core of Forestry 4, providing reactive state management with
+            validation and transaction support. Stores extend off of this class to decorate it with
+            actions and property selectors
           </Text>
         </Box>
 
         {/* Constructor Section */}
-        <Section title="Store Constructor">
+        <Section title="Constructor">
           <Text color="gray.600">
-            Create a new Store instance with configuration options. They are all optional except for
-            value
+            Create a new Forest class for the root Store, with configuration options and{' '}
+            <Link to="actions">methods for modifying state</Link>. They are all optional except for
+            value.
           </Text>
 
-          <SnippetBlock
+          <CodeBlock
             language="typescript"
             snippetName="storeConstructorSignature"
             folder="StoreBasics"
             ts={true}
           />
-          <Heading size="sm">Config properties</Heading>
+          <Heading variant="subtle">Config properties</Heading>
           <SimpleGrid columns={{ base: 1, md: 2 }} spacing={6}>
+            <Box>
+              <Heading size="md" mb={3}>
+                value <Badge colorScheme="red">Required</Badge>
+              </Heading>
+              <Text color="gray.600" mb={3}>
+                Initial state value for the store. It can be an object, static (number, string),
+                Map, Set, Array, etc.; it is an Immerable value; in short any JSON-able entity with
+                the addition of Map and Set options.
+              </Text>
+              <CodeBlock
+                language="typescript"
+                snippetName="valueExample"
+                folder="StoreBasics"
+                ts={true}
+              />
+            </Box>
+            <Box>
+              <Heading size="md" mb={3}>
+                tests <Badge colorScheme="orange">Function | Function[]</Badge> and schema{' '}
+                <Badge colorScheme="orange">Zod instance</Badge>
+              </Heading>
+              <Text color="gray.600" mb={3}>
+                <ul>
+                  <li>
+                    <b>Schema</b>
+                    <br /> (a la Zod) defines the required structure of data in the value.
+                  </li>
+                  <li>
+                    <b>tests</b>
+                    <br />A function (or an array of functions) to ensure state integrity.
+                  </li>
+                </ul>
+              </Text>
+              <CodeBlock
+                language="typescript"
+                snippetName="testsExample"
+                folder="StoreBasics"
+                ts={true}
+              />
+
+              <Text size="sm">
+                See <Link to="/validation">Validation</Link> for more details on Vaidation
+                parameters
+              </Text>
+            </Box>
             <Box>
               <Heading size="md" mb={3}>
                 name <Badge colorScheme="blue">string</Badge>
@@ -85,72 +109,23 @@ const StoreBasics: React.FC = () => {
               <Text color="gray.600" mb={3}>
                 Unique identifier for the store instance.
               </Text>
-              <SnippetBlock
+              <CodeBlock
                 language="typescript"
                 snippetName="nameExample"
                 folder="StoreBasics"
                 ts={true}
               />
             </Box>
-
-            <Box>
-              <Heading size="md" mb={3}>
-                value <Badge colorScheme="green">T</Badge> <Badge colorScheme="red">Required</Badge>
-              </Heading>
-              <Text color="gray.600" mb={3}>
-                Initial state value for the store.
-              </Text>
-              <SnippetBlock
-                language="typescript"
-                snippetName="valueExample"
-                folder="StoreBasics"
-                ts={true}
-              />
-            </Box>
-
-            <Box>
-              <Heading size="md" mb={3}>
-                actions <Badge colorScheme="purple">Record&lt;string, Function&gt;</Badge>
-              </Heading>
-              <Text color="gray.600" mb={3}>
-                Object containing action functions for state updates.
-              </Text>
-              <SnippetBlock
-                language="typescript"
-                snippetName="actionsExample"
-                folder="StoreBasics"
-                ts={true}
-              />
-            </Box>
-
-            <Box>
-              <Heading size="md" mb={3}>
-                tests <Badge colorScheme="orange">Function | Function[]</Badge>
-              </Heading>
-              <Text color="gray.600" mb={3}>
-                Validation function to ensure state integrity. expects candidateValue as first
-                argument - bound to store.
-              </Text>
-              <SnippetBlock
-                language="typescript"
-                snippetName="testsExample"
-                folder="StoreBasics"
-                ts={true}
-              />
-            </Box>
           </SimpleGrid>
-          <Text size="sm">
-            See <Link to="/validation">Validation</Link> for more details on Vaidation parameters
-          </Text>
         </Section>
 
         <Section>
           <Heading>The Forestry Lifecycle</Heading>
-          <Image src="/flowchart.svg" width="full" mx={8} maxHeight="80vh" />
+          <Image src="/img/forstry-flowchart-simple.svg" width="full" mx={8} maxHeight="80vh" />
           <Text>
-            The forestry state has a deep update cycle; understanding the nuances and order of how
-            values are curated and validated is important to recognize why Forestry is more than a
-            repackaged Redux or a RxJS decorator.
+            Instead of an unregulated update (as is the case with useState/Redux) Forest offers
+            optional interrupts to both sanitize and validate the data before it is committed. This
+            includes comparing it to the defined schema and running any manual test functions.
           </Text>
         </Section>
 
@@ -165,83 +140,7 @@ const StoreBasics: React.FC = () => {
             Try updating the user profile below to see validation in action:
           </Text>
 
-          <SimpleGrid columns={{ base: 1, lg: 2 }} spacing={8}>
-            {/* Form */}
-            <VStack spacing={4} align="stretch">
-              <Heading size="md">Update Profile</Heading>
-
-              <FormControl>
-                <FormLabel>Name</FormLabel>
-                <Input name="name" value={userValue.name} onChange={store?.$.onChange} />
-              </FormControl>
-
-              <FormControl>
-                <FormLabel>Age</FormLabel>
-                <Input
-                  name="age"
-                  type="number"
-                  value={userValue.age.toString()}
-                  onChange={store?.$.onChange}
-                />
-              </FormControl>
-
-              <FormControl>
-                <FormLabel>Email</FormLabel>
-                <Input
-                  name="email"
-                  type="email"
-                  value={userValue.email}
-                  onChange={store?.$.onChange}
-                />
-              </FormControl>
-
-              <HStack>
-                <Button variant="outline" onClick={() => store?.$.reset()}>
-                  Reset to Defaults
-                </Button>
-              </HStack>
-
-              {error && (
-                <Alert status="error">
-                  <AlertIcon />
-                  {error}
-                </Alert>
-              )}
-            </VStack>
-
-            {/* Current State */}
-            <VStack spacing={4} align="stretch">
-              <Heading size="md">Current State</Heading>
-              <Box bg="gray.50" p={4} borderRadius="md">
-                <pre>{JSON.stringify(userValue, null, 2)}</pre>
-              </Box>
-
-              <Box>
-                <Text fontWeight="semibold" mb={2}>
-                  Profile Stats:
-                </Text>
-                <VStack align="start" spacing={1} fontSize="sm">
-                  <Text>
-                    Name length: <Badge>{userValue.name.length}</Badge>
-                  </Text>
-                  <Text>
-                    Valid email:{' '}
-                    <Badge colorScheme={userValue.email.includes('@') ? 'green' : 'red'}>
-                      {userValue.email.includes('@') ? 'Yes' : 'No'}
-                    </Badge>
-                  </Text>
-                  <Text>
-                    Age range:{' '}
-                    <Badge
-                      colorScheme={userValue.age >= 0 && userValue.age <= 150 ? 'green' : 'red'}
-                    >
-                      {userValue.age >= 0 && userValue.age <= 150 ? 'Valid' : 'Invalid'}
-                    </Badge>
-                  </Text>
-                </VStack>
-              </Box>
-            </VStack>
-          </SimpleGrid>
+          <UserProfileDemo />
         </Section>
 
         {/* Update Patterns */}

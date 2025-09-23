@@ -1,5 +1,5 @@
-import React from 'react'
-import { Container, Heading, Text, Box, Badge } from '@chakra-ui/react'
+import React from 'react';
+import { Badge, Box, Container, Heading, Text } from '@chakra-ui/react';
 
 const AdvancedPatterns: React.FC = () => {
   return (
@@ -7,7 +7,9 @@ const AdvancedPatterns: React.FC = () => {
       <Box>
         <Heading size="xl" mb={4}>
           Advanced Patterns
-          <Badge ml={3} colorScheme="purple">Power Tool</Badge>
+          <Badge ml={3} colorScheme="purple">
+            Power Tool
+          </Badge>
         </Heading>
         <Text fontSize="lg" color="gray.600">
           Advanced patterns, debugging techniques, and performance optimization.
@@ -17,7 +19,7 @@ const AdvancedPatterns: React.FC = () => {
         </Text>
       </Box>
     </Container>
-  )
-}
+  );
+};
 
-export default AdvancedPatterns
+export default AdvancedPatterns;

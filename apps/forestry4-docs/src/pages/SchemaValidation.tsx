@@ -1,17 +1,17 @@
 import React from 'react';
 import {
-  Box,
-  Heading,
-  Text,
-  VStack,
-  SimpleGrid,
   Alert,
   AlertIcon,
+  Box,
   Code,
-  UnorderedList,
+  Heading,
   ListItem,
+  SimpleGrid,
+  Text,
+  UnorderedList,
+  VStack,
 } from '@chakra-ui/react';
-import SnippetBlock from '../components/SnippetBlock';
+import CodeBlock from '../components/CodeBlock';
 import CodeTabs from '../components/CodeTabs.tsx';
 import Section from '../components/Section';
 
@@ -88,7 +88,11 @@ const SchemaValidation: React.FC = () => {
               constructor. Forestry will automatically validate state changes against this schema.
             </Text>
 
-            <SnippetBlock snippetName="zodSchemaValidation" folder="ActionsState" />
+            <CodeBlock
+              language="typescript"
+              snippetName="zodSchemaValidation"
+              folder="ActionsState"
+            />
           </VStack>
         </Section>
 
@@ -152,7 +156,11 @@ const SchemaValidation: React.FC = () => {
               </Box>
             </Alert>
 
-            <SnippetBlock snippetName="schemaPrepIntegration" folder="SchemaValidation" />
+            <CodeBlock
+              language="typescript"
+              snippetName="schemaPrepIntegration"
+              folder="SchemaValidation"
+            />
           </VStack>
         </Section>
 

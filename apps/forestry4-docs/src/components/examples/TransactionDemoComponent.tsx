@@ -1,27 +1,27 @@
 import React from 'react';
 import {
+  Badge,
   Box,
   Button,
-  HStack,
-  SimpleGrid,
-  Input,
+  Divider,
   FormControl,
   FormLabel,
+  HStack,
+  Input,
   Select,
-  useToast,
+  SimpleGrid,
   Stat,
+  StatHelpText,
   StatLabel,
   StatNumber,
-  StatHelpText,
-  Divider,
-  Text,
   Table,
-  Thead,
   Tbody,
-  Tr,
-  Th,
   Td,
-  Badge,
+  Text,
+  Th,
+  Thead,
+  Tr,
+  useToast,
 } from '@chakra-ui/react';
 import useForestryLocal from '../../hooks/useForestryLocal';
 import { transactionDemoStoreFactory } from '../../storeFactories/transactionDemoStoreFactory';
@@ -112,7 +112,9 @@ const TransactionDemoComponent: React.FC = () => {
 
       {/* Bank Transfer Demo */}
       <Box mb={6}>
-        <Text fontSize="md" fontWeight="semibold" mb={3}>Bank Transfer</Text>
+        <Text fontSize="md" fontWeight="semibold" mb={3}>
+          Bank Transfer
+        </Text>
         <SimpleGrid columns={{ base: 1, md: 4 }} spacing={3} mb={3}>
           <FormControl>
             <FormLabel fontSize="sm">From Account</FormLabel>
@@ -142,7 +144,9 @@ const TransactionDemoComponent: React.FC = () => {
               colorScheme="blue"
               onClick={handleTransfer}
               w="full"
-              isDisabled={fromAccount === toAccount || !transferAmount || parseFloat(transferAmount) <= 0}
+              isDisabled={
+                fromAccount === toAccount || !transferAmount || parseFloat(transferAmount) <= 0
+              }
             >
               Transfer
             </Button>
@@ -181,7 +185,9 @@ const TransactionDemoComponent: React.FC = () => {
         <>
           <Divider mt={6} mb={4} />
           <Box>
-            <Text fontSize="md" fontWeight="semibold" mb={3}>Transaction History</Text>
+            <Text fontSize="md" fontWeight="semibold" mb={3}>
+              Transaction History
+            </Text>
             <Table size="sm" variant="simple">
               <Thead>
                 <Tr>

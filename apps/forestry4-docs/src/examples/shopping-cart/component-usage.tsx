@@ -8,15 +8,13 @@ import shoppingCartStoreFactory from '../../storeFactories/ValidationSystem/shop
 const ShoppingCartDemo: React.FC = () => {
   const { handleError } = useErrorHandler();
   // Pass error handler to factory function
-  const [cartState, cartStore] = useForestryLocal(() =>
-    shoppingCartStoreFactory(handleError)
-  );
+  const [cartState, cartStore] = useForestryLocal(() => shoppingCartStoreFactory(handleError));
 
   return (
     <Button
       data-product-id="invalid-product"
       data-quantity="1"
-      onClick={cartStore.$.safeAddItemFromEvent}  // Use safe action directly
+      onClick={cartStore.$.safeAddItemFromEvent} // Use safe action directly
     >
       Add Invalid Product
     </Button>

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, Text, Input, NumberInput, NumberInputField } from '@chakra-ui/react';
+import { Box, Input, Text } from '@chakra-ui/react';
 import type { StoreIF } from '@wonderlandlabs/forestry4';
 import useForestBranch from '../../hooks/useForestBranch';
 

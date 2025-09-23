@@ -1,6 +1,5 @@
 import React from 'react';
-import { Container, Heading, Text, Box, Badge, VStack } from '@chakra-ui/react';
-import Section from '../Section';
+import { Box, Container, Heading, Text, VStack } from '@chakra-ui/react';
 import IntegrationPatternsCard from '../components/ReactIntegration/IntegrationPatternsCard';
 import LiveTodoDemoCard from '../components/ReactIntegration/LiveTodoDemoCard';
 import ReactHookPatternsCard from '../components/ReactIntegration/ReactHookPatternsCard';

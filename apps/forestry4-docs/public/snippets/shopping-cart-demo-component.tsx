@@ -1,6 +1,6 @@
 // Auto-generated snippet from: apps/forestry4-docs/src/examples/shopping-cart/ShoppingCartDemoComponent.tsx
 // Description: Complete shopping cart demo component with validation and error handling
-// Last synced: Sun Sep 21 14:32:36 PDT 2025
+// Last synced: Mon Sep 22 17:07:22 PDT 2025
 // DO NOT EDIT - This file is automatically synced from the source
 
 import React from 'react';
@@ -23,8 +23,8 @@ import shoppingCartStoreFactory, {
   ShoppingCart,
 } from '../../storeFactories/ValidationSystem/shoppingCartStore';
 import { PRODUCTS } from '@/constants.ts';
+import { dollar } from '@/components/dollar.tsx';
 
-const dollar = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' });
 const ShoppingCartDemoComponent: React.FC = () => {
   const { handleError } = useErrorHandler();
   const [cartState, cartStore] = useForestryLocal<ShoppingCart>(

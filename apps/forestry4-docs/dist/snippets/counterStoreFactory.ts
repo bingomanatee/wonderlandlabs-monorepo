@@ -1,6 +1,6 @@
 // Auto-generated snippet from: apps/forestry4-docs/src/storeFactories/counterStoreFactory.ts
 // Description: Counter store factory example
-// Last synced: Sun Sep 21 14:32:35 PDT 2025
+// Last synced: Mon Sep 22 17:07:21 PDT 2025
 // DO NOT EDIT - This file is automatically synced from the source
 
 import { Forest } from '@wonderlandlabs/forestry4';
@@ -11,7 +11,7 @@ const CounterStateSchema = z.object({
   count: z.number().int(),
   history: z.array(z.string()),
   multiplier: z.number().int().min(0), // Allow 0 for testing, prep function will provide quality feedback
-  qualityMessage: z.string()
+  qualityMessage: z.string(),
 });
 
 type CounterState = z.infer<typeof CounterStateSchema>;

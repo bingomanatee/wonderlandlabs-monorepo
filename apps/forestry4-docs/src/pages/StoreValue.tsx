@@ -1,19 +1,17 @@
 import React from 'react';
 import {
-  Box,
-  Heading,
-  Text,
-  VStack,
-  Card,
-  CardBody,
-  SimpleGrid,
   Alert,
   AlertIcon,
+  Box,
   Code,
-  UnorderedList,
+  Heading,
   ListItem,
+  SimpleGrid,
+  Text,
+  UnorderedList,
+  VStack,
 } from '@chakra-ui/react';
-import SnippetBlock from '../components/SnippetBlock';
+import CodeBlock from '../components/CodeBlock';
 import CodeTabs from '../components/CodeTabs.tsx';
 import Section from '../components/Section';
 
@@ -149,7 +147,7 @@ const StoreValue: React.FC = () => {
               </Box>
             </Alert>
 
-            <SnippetBlock snippetName="valueLimitations" folder="StoreValue" />
+            <CodeBlock language="typescript" snippetName="valueLimitations" folder="StoreValue" />
           </VStack>
         </Section>
 
@@ -185,7 +183,7 @@ const StoreValue: React.FC = () => {
               </Box>
             </SimpleGrid>
 
-            <SnippetBlock snippetName="resMapUsage" folder="StoreValue" />
+            <CodeBlock language="typescript" snippetName="resMapUsage" folder="StoreValue" />
           </VStack>
         </Section>
 

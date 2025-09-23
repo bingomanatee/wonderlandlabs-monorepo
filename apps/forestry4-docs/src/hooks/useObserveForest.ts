@@ -4,15 +4,14 @@ import type { CollectionIF } from '@wonderlandlabs/forestry/build/src/types/type
 export default function useObserveForest<ValueType>(
   collection: CollectionIF<ValueType>
 ): ValueType {
-
   const [value, setValue] = useState(collection);
   useEffect(() => {
-      let sub = collection.observe(setValue);
+    let sub = collection.observe(setValue);
 
-      return () => {
-        sub?.unsubscribe();
-      }
-  },[collection]);
+    return () => {
+      sub?.unsubscribe();
+    };
+  }, [collection]);
 
   return value;
 }

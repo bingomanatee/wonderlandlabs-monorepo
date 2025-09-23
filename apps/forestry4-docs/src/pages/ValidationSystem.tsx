@@ -1,5 +1,5 @@
 import React from 'react';
-import { Container, VStack, Heading, Text, Box, Alert, AlertIcon } from '@chakra-ui/react';
+import { Alert, AlertIcon, Box, Container, Heading, Text, VStack } from '@chakra-ui/react';
 import ShoppingCartDemo from '@/components/ValidationSystem/ShoppingCartDemo.tsx';
 import AdvancedFormDemo from '@/components/ValidationSystem/AdvancedFormDemo.tsx';
 import ValidationGuide from '@/components/ValidationSystem/ValidationGuide.tsx';

@@ -8,12 +8,10 @@ import {
   Heading,
   HStack,
   List,
-  ListIcon,
   ListItem,
   Text,
   VStack,
 } from '@chakra-ui/react';
-import { CheckCircleIcon } from '@chakra-ui/icons';
 import TodoAppDemo from '@/components/ReactIntegration/TodoAppDemo';
 import CodeTabs from '@/components/CodeTabs.tsx';
 import PageTitle from '@/components/PageTitle';

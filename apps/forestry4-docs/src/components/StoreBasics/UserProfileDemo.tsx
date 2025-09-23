@@ -1,17 +1,17 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
-  Box,
-  Button,
-  VStack,
-  HStack,
-  Input,
-  FormControl,
-  FormLabel,
   Alert,
   AlertIcon,
+  Badge,
+  Box,
+  Button,
+  FormControl,
+  FormLabel,
+  HStack,
+  Input,
   SimpleGrid,
   Text,
-  Badge,
+  VStack,
 } from '@chakra-ui/react';
 import { Store } from '@wonderlandlabs/forestry4';
 
@@ -36,24 +36,32 @@ const UserProfileDemo: React.FC = () => {
       },
       actions: {
         // Tactical form handler using event target name
-        onChange: function(this: Store<UserState>, value: UserState, event: React.ChangeEvent<HTMLInputElement>) {
+        onChange: function (
+          this: Store<UserState>,
+          value: UserState,
+          event: React.ChangeEvent<HTMLInputElement>
+        ) {
           const { name, value: fieldValue, type } = event.target;
           const processedValue = type === 'number' ? parseInt(fieldValue) || 0 : fieldValue;
           this.set(name, processedValue);
         },
-        setName: function(this: Store<UserState>, value: UserState, name: string) {
+        setName: function (this: Store<UserState>, value: UserState, name: string) {
           this.set('name', name);
         },
-        setAge: function(this: Store<UserState>, value: UserState, age: number) {
+        setAge: function (this: Store<UserState>, value: UserState, age: number) {
           this.set('age', age);
         },
-        setEmail: function(this: Store<UserState>, value: UserState, email: string) {
+        setEmail: function (this: Store<UserState>, value: UserState, email: string) {
           this.set('email', email);
         },
-        updateProfile: function(this: Store<UserState>, value: UserState, profile: Partial<UserState>) {
+        updateProfile: function (
+          this: Store<UserState>,
+          value: UserState,
+          profile: Partial<UserState>
+        ) {
           this.next({ ...value, ...profile });
         },
-        reset: function(this: Store<UserState>) {
+        reset: function (this: Store<UserState>) {
           this.next({
             name: 'John Doe',
             age: 30,
@@ -62,10 +70,10 @@ const UserProfileDemo: React.FC = () => {
         },
       },
       tests: [
-        (value: UserState) => value.age < 0 ? 'Age cannot be negative' : null,
-        (value: UserState) => value.age > 150 ? 'Age seems unrealistic' : null,
-        (value: UserState) => !value.email.includes('@') ? 'Invalid email format' : null,
-        (value: UserState) => value.name.length === 0 ? 'Name cannot be empty' : null,
+        (value: UserState) => (value.age < 0 ? 'Age cannot be negative' : null),
+        (value: UserState) => (value.age > 150 ? 'Age seems unrealistic' : null),
+        (value: UserState) => (!value.email.includes('@') ? 'Invalid email format' : null),
+        (value: UserState) => (value.name.length === 0 ? 'Name cannot be empty' : null),
       ],
     });
 
@@ -136,18 +144,19 @@ const UserProfileDemo: React.FC = () => {
         <HStack>
           <Button
             colorScheme="forest"
-            onClick={() => handleAction(() => store?.$.updateProfile({
-              name: 'Jane Smith',
-              age: 25,
-              email: 'jane@example.com'
-            }))}
+            onClick={() =>
+              handleAction(() =>
+                store?.$.updateProfile({
+                  name: 'Jane Smith',
+                  age: 25,
+                  email: 'jane@example.com',
+                })
+              )
+            }
           >
             Load Jane's Profile
           </Button>
-          <Button
-            variant="outline"
-            onClick={() => handleAction(() => store?.$.reset())}
-          >
+          <Button variant="outline" onClick={() => handleAction(() => store?.$.reset())}>
             Reset to John
           </Button>
         </HStack>
@@ -162,16 +171,26 @@ const UserProfileDemo: React.FC = () => {
 
       <VStack spacing={4} align="stretch">
         <Box>
-          <Text fontSize="lg" fontWeight="semibold" mb={3}>Current State:</Text>
+          <Text fontSize="lg" fontWeight="semibold" mb={3}>
+            Current State:
+          </Text>
           <Box p={4} bg="gray.50" borderRadius="md" fontFamily="mono" fontSize="sm">
-            <Text><strong>Name:</strong> "{userState.name}"</Text>
-            <Text><strong>Age:</strong> {userState.age}</Text>
-            <Text><strong>Email:</strong> "{userState.email}"</Text>
+            <Text>
+              <strong>Name:</strong> "{userState.name}"
+            </Text>
+            <Text>
+              <strong>Age:</strong> {userState.age}
+            </Text>
+            <Text>
+              <strong>Email:</strong> "{userState.email}"
+            </Text>
           </Box>
         </Box>
 
         <Box>
-          <Text fontSize="lg" fontWeight="semibold" mb={3}>Validation Status:</Text>
+          <Text fontSize="lg" fontWeight="semibold" mb={3}>
+            Validation Status:
+          </Text>
           <VStack spacing={2} align="stretch">
             <HStack>
               <Text>Name:</Text>
@@ -196,8 +215,8 @@ const UserProfileDemo: React.FC = () => {
 
         <Box>
           <Text fontSize="sm" color="gray.600">
-            <strong>Try:</strong> Enter invalid values (negative age, empty name, invalid email) 
-            to see validation errors in action.
+            <strong>Try:</strong> Enter invalid values (negative age, empty name, invalid email) to
+            see validation errors in action.
           </Text>
         </Box>
       </VStack>

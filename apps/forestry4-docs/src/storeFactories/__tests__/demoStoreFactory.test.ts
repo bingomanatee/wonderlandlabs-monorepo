@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import demoStoreFactory from '../demoStoreFactory';
 
 describe('demoStoreFactory', () => {
@@ -28,7 +28,7 @@ describe('demoStoreFactory', () => {
   describe('handleInputChange', () => {
     it('should handle text input changes', () => {
       const event = {
-        target: { name: 'name', value: 'John Doe', type: 'text' }
+        target: { name: 'name', value: 'John Doe', type: 'text' },
       } as React.ChangeEvent<HTMLInputElement>;
 
       store.$.handleInputChange(event);
@@ -39,7 +39,7 @@ describe('demoStoreFactory', () => {
 
     it('should handle number input changes', () => {
       const event = {
-        target: { name: 'age', value: '25', type: 'number' }
+        target: { name: 'age', value: '25', type: 'number' },
       } as React.ChangeEvent<HTMLInputElement>;
 
       store.$.handleInputChange(event);
@@ -50,7 +50,7 @@ describe('demoStoreFactory', () => {
 
     it('should validate age limits', () => {
       const invalidEvent = {
-        target: { name: 'age', value: '200', type: 'number' }
+        target: { name: 'age', value: '200', type: 'number' },
       } as React.ChangeEvent<HTMLInputElement>;
 
       store.$.handleInputChange(invalidEvent);
@@ -61,7 +61,7 @@ describe('demoStoreFactory', () => {
 
     it('should validate negative age', () => {
       const negativeEvent = {
-        target: { name: 'age', value: '-5', type: 'number' }
+        target: { name: 'age', value: '-5', type: 'number' },
       } as React.ChangeEvent<HTMLInputElement>;
 
       store.$.handleInputChange(negativeEvent);
@@ -72,7 +72,7 @@ describe('demoStoreFactory', () => {
 
     it('should validate minimum age', () => {
       const youngEvent = {
-        target: { name: 'age', value: '10', type: 'number' }
+        target: { name: 'age', value: '10', type: 'number' },
       } as React.ChangeEvent<HTMLInputElement>;
 
       store.$.handleInputChange(youngEvent);
@@ -85,7 +85,7 @@ describe('demoStoreFactory', () => {
   describe('validation', () => {
     it('should validate required name', () => {
       const event = {
-        target: { name: 'name', value: '', type: 'text' }
+        target: { name: 'name', value: '', type: 'text' },
       } as React.ChangeEvent<HTMLInputElement>;
 
       store.$.handleInputChange(event);
@@ -95,7 +95,7 @@ describe('demoStoreFactory', () => {
 
     it('should validate name length', () => {
       const event = {
-        target: { name: 'name', value: 'A', type: 'text' }
+        target: { name: 'name', value: 'A', type: 'text' },
       } as React.ChangeEvent<HTMLInputElement>;
 
       store.$.handleInputChange(event);
@@ -105,7 +105,7 @@ describe('demoStoreFactory', () => {
 
     it('should validate email format', () => {
       const event = {
-        target: { name: 'email', value: 'invalid-email', type: 'text' }
+        target: { name: 'email', value: 'invalid-email', type: 'text' },
       } as React.ChangeEvent<HTMLInputElement>;
 
       store.$.handleInputChange(event);
@@ -116,14 +116,14 @@ describe('demoStoreFactory', () => {
     it('should clear errors for valid input', () => {
       // First set invalid input
       const invalidEvent = {
-        target: { name: 'name', value: '', type: 'text' }
+        target: { name: 'name', value: '', type: 'text' },
       } as React.ChangeEvent<HTMLInputElement>;
       store.$.handleInputChange(invalidEvent);
       expect(store.value.errors.name).toBe('Name is required');
 
       // Then set valid input
       const validEvent = {
-        target: { name: 'name', value: 'John Doe', type: 'text' }
+        target: { name: 'name', value: 'John Doe', type: 'text' },
       } as React.ChangeEvent<HTMLInputElement>;
       store.$.handleInputChange(validEvent);
       expect(store.value.errors.name).toBeNull();
@@ -150,7 +150,7 @@ describe('demoStoreFactory', () => {
   describe('handleThemeChange', () => {
     it('should handle theme selection change', () => {
       const event = {
-        target: { value: 'dark' }
+        target: { value: 'dark' },
       } as React.ChangeEvent<HTMLSelectElement>;
 
       store.$.handleThemeChange(event);
@@ -163,7 +163,7 @@ describe('demoStoreFactory', () => {
     it('should setup user with profile and preferences', () => {
       store.$.setupUser({
         profile: { name: 'Test User', email: 'test@example.com' },
-        preferences: { theme: 'dark' }
+        preferences: { theme: 'dark' },
       });
 
       expect(store.value.name).toBe('Test User');
@@ -190,7 +190,7 @@ describe('demoStoreFactory', () => {
       store.$.updateProfile({
         name: 'Valid User',
         age: 25,
-        email: 'valid@example.com'
+        email: 'valid@example.com',
       });
 
       const result = store.$.validateAndSave();
@@ -202,7 +202,7 @@ describe('demoStoreFactory', () => {
       store.$.updateProfile({
         name: '',
         age: 10,
-        email: 'invalid-email'
+        email: 'invalid-email',
       });
 
       expect(() => store.$.validateAndSave()).toThrow('Validation failed');

@@ -1,7 +1,6 @@
 import type { CartItem, ShoppingCart } from '@/types.ts';
 import { PRODUCTS } from '@/constants.ts';
 import { Forest } from '@wonderlandlabs/forestry4';
-import { z } from 'zod';
 
 // Modern Forestry 4.1.x class extension pattern
 class CarForest extends Forest<ShoppingCart> {

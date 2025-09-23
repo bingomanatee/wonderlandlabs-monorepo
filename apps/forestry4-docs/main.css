@@ -45,3 +45,21 @@ pre *, code *, [class*="language-"] * {
 pre[class*="language-"] {
     margin-top: 0 !important;
 }
+
+body {
+    /* image source */
+    background-image: url("/img/background-timberline.png");
+
+    /* repeat only on the Y axis */
+    background-repeat: no-repeat !important;
+
+    /* scroll with the page (this is the default, but set it explicitly) */
+    background-attachment: scroll;
+
+    /* usually you’ll want to control the X alignment */
+    background-position: center top; /* or left top / right top */
+
+    /* keep natural size (or tweak if needed) */
+    background-size: auto;
+}
+

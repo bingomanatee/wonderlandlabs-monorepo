@@ -1,19 +1,17 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
-  Container,
-  Heading,
-  Text,
-  Box,
-  SimpleGrid,
-  Card,
-  CardBody,
-  Button,
-  VStack,
-  HStack,
-  Badge,
   Alert,
   AlertIcon,
+  Badge,
+  Box,
+  Button,
+  Container,
   Divider,
+  Heading,
+  HStack,
+  SimpleGrid,
+  Text,
+  VStack,
 } from '@chakra-ui/react';
 import { Store } from '@wonderlandlabs/forestry4';
 import CodeTabs from '../components/CodeTabs.tsx';

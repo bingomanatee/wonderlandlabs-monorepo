@@ -1,19 +1,10 @@
 // Auto-generated snippet from: apps/forestry4-docs/src/components/WhyForestry/InteractiveDemo.tsx
 // Description: Interactive demo component showing Forestry in action
-// Last synced: Sun Sep 21 14:32:35 PDT 2025
+// Last synced: Mon Sep 22 17:07:21 PDT 2025
 // DO NOT EDIT - This file is automatically synced from the source
 
 import React from 'react';
-import {
-  VStack,
-  HStack,
-  Text,
-  Button,
-  Alert,
-  AlertIcon,
-  Box,
-  SimpleGrid,
-} from '@chakra-ui/react';
+import { Alert, AlertIcon, Box, Button, HStack, SimpleGrid, Text, VStack } from '@chakra-ui/react';
 import useForestryLocal from '../../hooks/useForestryLocal';
 import demoStoreFactory from '../../storeFactories/demoStoreFactory';
 import FormField from '../FormField';
@@ -30,7 +21,7 @@ const InteractiveDemo: React.FC = () => {
     try {
       const testStore1 = demoStoreFactory();
       testStore1.$.updateProfile({ name: 'John Doe', age: 30 });
-      
+
       // Check if validation passed (no errors)
       if (!testStore1.value.errors.name && !testStore1.value.errors.age) {
         results.push('✅ Profile update - validation passed');
@@ -44,8 +35,10 @@ const InteractiveDemo: React.FC = () => {
     // Test 2: Invalid age validation
     try {
       const testStore2 = demoStoreFactory();
-      testStore2.$.handleInputChange({ target: { name: 'age', value: '200', type: 'number' } } as any);
-      
+      testStore2.$.handleInputChange({
+        target: { name: 'age', value: '200', type: 'number' },
+      } as any);
+
       // Should have age error
       if (testStore2.value.errors.age) {
         results.push('✅ Age validation - correctly caught invalid age');
@@ -59,8 +52,10 @@ const InteractiveDemo: React.FC = () => {
     // Test 3: Email validation
     try {
       const testStore3 = demoStoreFactory();
-      testStore3.$.handleInputChange({ target: { name: 'email', value: 'invalid-email', type: 'text' } } as any);
-      
+      testStore3.$.handleInputChange({
+        target: { name: 'email', value: 'invalid-email', type: 'text' },
+      } as any);
+
       // Should have email error
       if (testStore3.value.errors.email) {
         results.push('✅ Email validation - correctly caught invalid email');
@@ -76,7 +71,7 @@ const InteractiveDemo: React.FC = () => {
       const testStore4 = demoStoreFactory();
       testStore4.$.updateProfile({ name: 'Valid User', age: 25, email: 'user@example.com' });
       const result = testStore4.$.validateAndSave();
-      
+
       if (result === 'Profile saved successfully!') {
         results.push('✅ validateAndSave - success case');
       } else {
@@ -93,7 +88,9 @@ const InteractiveDemo: React.FC = () => {
     <SimpleGrid columns={{ base: 1, lg: 2 }} spacing={6}>
       {/* Interactive Demo */}
       <VStack spacing={4} align="stretch">
-        <Text fontSize="lg" fontWeight="bold">Interactive Demo</Text>
+        <Text fontSize="lg" fontWeight="bold">
+          Interactive Demo
+        </Text>
 
         <VStack spacing={4} align="stretch">
           <HStack spacing={4}>
@@ -141,25 +138,19 @@ const InteractiveDemo: React.FC = () => {
         </VStack>
 
         <HStack spacing={4}>
-          <Button 
-            colorScheme="blue" 
-            onClick={() => store.$.validateAndSave()}
-            size="sm"
-          >
+          <Button colorScheme="blue" onClick={() => store.$.validateAndSave()} size="sm">
             Save Profile
           </Button>
-          <Button 
-            colorScheme="green" 
-            onClick={runTests}
-            size="sm"
-          >
+          <Button colorScheme="green" onClick={runTests} size="sm">
             Run Tests
           </Button>
         </HStack>
 
         {testResults.length > 0 && (
           <Box>
-            <Text fontWeight="bold" mb={2}>Test Results:</Text>
+            <Text fontWeight="bold" mb={2}>
+              Test Results:
+            </Text>
             <VStack spacing={1} align="stretch">
               {testResults.map((result, index) => (
                 <Text key={index} fontSize="sm" fontFamily="mono">
@@ -173,10 +164,14 @@ const InteractiveDemo: React.FC = () => {
 
       {/* Current State Display */}
       <VStack spacing={4} align="stretch">
-        <Text fontSize="lg" fontWeight="bold">Current State</Text>
-        
+        <Text fontSize="lg" fontWeight="bold">
+          Current State
+        </Text>
+
         <Box bg="gray.50" p={4} borderRadius="md" fontSize="sm" fontFamily="mono">
-          <Text fontWeight="bold" mb={2}>Store Value:</Text>
+          <Text fontWeight="bold" mb={2}>
+            Store Value:
+          </Text>
           <pre>{JSON.stringify(state, null, 2)}</pre>
         </Box>
 
@@ -184,8 +179,8 @@ const InteractiveDemo: React.FC = () => {
           <AlertIcon />
           <Box>
             <Text fontSize="sm">
-              This demo shows real-time Forestry state management with validation, 
-              universal input handlers, and reactive updates.
+              This demo shows real-time Forestry state management with validation, universal input
+              handlers, and reactive updates.
             </Text>
           </Box>
         </Alert>

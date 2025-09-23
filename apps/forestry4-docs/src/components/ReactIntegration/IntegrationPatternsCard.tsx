@@ -1,25 +1,24 @@
 import React from 'react';
-import {   VStack, Heading, Text, SimpleGrid, Box } from '@chakra-ui/react';
-import Section from '../Section';import SnippetBlock from '../SnippetBlock';
+import { Box, Heading, Text, VStack } from '@chakra-ui/react';
+import Section from '../Section';
+import CodeBlock from '../CodeBlock';
 
 const IntegrationPatternsCard: React.FC = () => {
   return (
     <Section>
-      
-        <VStack layerStyle="section">
-          <Heading size="lg">Integration Patterns</Heading>
-          <Text textStyle="body">
-            Forestry 4 integrates seamlessly with React using standard hooks and patterns.
-          </Text>
-          <Box width="full">
-            <Heading size="md" mb={3}>
-              Hook Usage
-            </Heading>
-            <Text textStyle="body">Use Forestry hooks to connect stores to React components.</Text>
-            <SnippetBlock snippetName="forestryHooks" folder="ReactIntegration" />
-          </Box>
-        </VStack>
-      
+      <VStack layerStyle="section">
+        <Heading size="lg">Integration Patterns</Heading>
+        <Text textStyle="body">
+          Forestry 4 integrates seamlessly with React using standard hooks and patterns.
+        </Text>
+        <Box width="full">
+          <Heading size="md" mb={3}>
+            Hook Usage
+          </Heading>
+          <Text textStyle="body">Use Forestry hooks to connect stores to React components.</Text>
+          <CodeBlock language="typescript" snippetName="forestryHooks" folder="ReactIntegration" />
+        </Box>
+      </VStack>
     </Section>
   );
 };

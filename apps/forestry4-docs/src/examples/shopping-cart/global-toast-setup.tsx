@@ -11,8 +11,8 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
     toastOptions={{
       defaultOptions: {
         position: 'top-right',
-        duration: 4000
-      }
+        duration: 4000,
+      },
     }}
   >
     <App />

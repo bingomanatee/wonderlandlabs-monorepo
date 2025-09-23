@@ -1,32 +1,21 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
-  Box,
-  Button,
-  VStack,
-  HStack,
-  Text,
-  Badge,
   Alert,
   AlertIcon,
-  Input,
-  FormControl,
-  FormLabel,
-  Select,
-  Divider,
-  SimpleGrid,
+  Box,
   Heading,
-  Tabs,
-  TabList,
-  TabPanels,
   Tab,
+  TabList,
   TabPanel,
+  TabPanels,
+  Tabs,
+  Text,
+  VStack,
 } from '@chakra-ui/react';
 import CodeBlock from '../CodeBlock';
-import SnippetBlock from '../SnippetBlock';
 import InteractiveDemo from './InteractiveDemo';
 
 const LiveDemo: React.FC = () => {
-
   return (
     <Box layerStyle="card" bg="blue.50">
       <VStack spacing={6} align="stretch">
@@ -35,7 +24,8 @@ const LiveDemo: React.FC = () => {
             Try Forestry Live
           </Heading>
           <Text color="gray.600">
-            Interact with a real Forestry store. See the source code and try the live demo side by side.
+            Interact with a real Forestry store. See the source code and try the live demo side by
+            side.
           </Text>
         </Box>
 
@@ -56,7 +46,7 @@ const LiveDemo: React.FC = () => {
             {/* Store Factory Tab */}
             <TabPanel>
               <CodeBlock language="typescript" title="Store Factory (demoStoreFactory.ts)">
-{`import { Forest } from '@wonderlandlabs/forestry4';
+                {`import { Forest } from '@wonderlandlabs/forestry4';
 
 interface UserProfile {
   name: string;
@@ -210,21 +200,16 @@ export default function demoStoreFactory() {
 
             {/* Component Code Tab */}
             <TabPanel>
-              <SnippetBlock
+              <CodeBlock
                 snippetName="InteractiveDemo"
                 language="typescript"
                 title="InteractiveDemo Component Source"
               />
             </TabPanel>
-            
 
             {/* Vitest Tests Tab */}
             <TabPanel>
-              <SnippetBlock
-                snippetName="demoStoreFactory-tests"
-                language="typescript"
-                ts={true}
-              />
+              <CodeBlock snippetName="demoStoreFactory-tests" language="typescript" ts={true} />
             </TabPanel>
           </TabPanels>
         </Tabs>
@@ -234,8 +219,8 @@ export default function demoStoreFactory() {
           <Box>
             <Text fontWeight="semibold">Live Forestry Store in Action</Text>
             <Text fontSize="sm" mt={1}>
-              This demo uses useForestryLocal hook for reactive updates.
-              Switch between tabs to see the source code and try the interactive demo.
+              This demo uses useForestryLocal hook for reactive updates. Switch between tabs to see
+              the source code and try the interactive demo.
             </Text>
           </Box>
         </Alert>

@@ -1,5 +1,5 @@
 import React from 'react';
-import { VStack, Heading, Text } from '@chakra-ui/react';
+import { Heading, Text, VStack } from '@chakra-ui/react';
 import Section from '../Section';
 import CodeTabs from '../CodeTabs.tsx';
 

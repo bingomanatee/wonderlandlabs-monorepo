@@ -1,15 +1,15 @@
 import React from 'react';
 import {
-  Container,
-  VStack,
-  Heading,
-  Text,
-  Box,
   Alert,
   AlertIcon,
+  Box,
+  Container,
+  Heading,
   List,
-  ListItem,
   ListIcon,
+  ListItem,
+  Text,
+  VStack,
 } from '@chakra-ui/react';
 import { CheckCircleIcon } from '@chakra-ui/icons';
 import Section from '@/components/Section.tsx';
@@ -17,7 +17,6 @@ import CodeTabs from '@/components/CodeTabs.tsx';
 import TransactionDemoComponent from '../../components/examples/TransactionDemoComponent';
 
 const TransactionDemo: React.FC = () => {
-
   return (
     <Container maxW="container.xl" py={8}>
       <Heading variant="page"> Transaction System Example</Heading>
@@ -63,7 +62,8 @@ const TransactionDemo: React.FC = () => {
         {/* Live Interactive Demo */}
         <Section title="Live Transaction Demo">
           <Text color="gray.600" mb={4}>
-            Try the interactive demo below to see transactions in action. Notice how operations are atomic - they either complete successfully or roll back completely.
+            Try the interactive demo below to see transactions in action. Notice how operations are
+            atomic - they either complete successfully or roll back completely.
           </Text>
 
           <TransactionDemoComponent />
@@ -121,7 +121,8 @@ const TransactionDemo: React.FC = () => {
         {/* Source Code */}
         <Section title="Source Code">
           <Text color="gray.600" mb={4}>
-            Here's the complete implementation showing modern Forestry 4.1.x transaction patterns with comprehensive testing:
+            Here's the complete implementation showing modern Forestry 4.1.x transaction patterns
+            with comprehensive testing:
           </Text>
 
           <CodeTabs
@@ -144,8 +145,6 @@ const TransactionDemo: React.FC = () => {
             ]}
           />
         </Section>
-
-
 
         {/* Best Practices */}
         <Box layerStyle="methodCard" w="full">

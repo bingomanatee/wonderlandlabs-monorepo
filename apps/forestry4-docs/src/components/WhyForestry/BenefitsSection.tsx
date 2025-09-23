@@ -1,14 +1,14 @@
 import React from 'react';
 import {
-  SimpleGrid,
   Box,
   Heading,
-  Text,
   Icon,
-  VStack,
   List,
-  ListItem,
   ListIcon,
+  ListItem,
+  SimpleGrid,
+  Text,
+  VStack,
 } from '@chakra-ui/react';
 import { CheckIcon, StarIcon } from '@chakra-ui/icons';
 
@@ -16,17 +16,21 @@ const BenefitsSection: React.FC = () => {
   return (
     <VStack spacing={8} align="stretch">
       <Box textAlign="center">
-        <Heading size="xl" mb={4}>Why Choose Forestry?</Heading>
+        <Heading size="xl" mb={4}>
+          Why Choose Forestry?
+        </Heading>
         <Text fontSize="lg" color="gray.600" maxW="3xl" mx="auto">
-          Forestry provides a powerful, type-safe, and intuitive approach to state management
-          that scales from simple components to complex applications.
+          Forestry provides a powerful, type-safe, and intuitive approach to state management that
+          scales from simple components to complex applications.
         </Text>
       </Box>
 
       <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} spacing={6}>
         <Box layerStyle="card" bg="blue.50">
           <Icon as={StarIcon} color="blue.500" boxSize={8} mb={4} />
-          <Heading variant="card" color="blue.700">Type Safety First</Heading>
+          <Heading variant="card" color="blue.700">
+            Type Safety First
+          </Heading>
           <List spacing={2}>
             <ListItem>
               <ListIcon as={CheckIcon} color="blue.500" />
@@ -49,7 +53,9 @@ const BenefitsSection: React.FC = () => {
 
         <Box layerStyle="card" bg="green.50">
           <Icon as={StarIcon} color="green.500" boxSize={8} mb={4} />
-          <Heading variant="card" color="green.700">Reactive by Design</Heading>
+          <Heading variant="card" color="green.700">
+            Reactive by Design
+          </Heading>
           <List spacing={2}>
             <ListItem>
               <ListIcon as={CheckIcon} color="green.500" />
@@ -72,7 +78,9 @@ const BenefitsSection: React.FC = () => {
 
         <Box layerStyle="card" bg="purple.50">
           <Icon as={StarIcon} color="purple.500" boxSize={8} mb={4} />
-          <Heading variant="card" color="purple.700">Developer Experience</Heading>
+          <Heading variant="card" color="purple.700">
+            Developer Experience
+          </Heading>
           <List spacing={2}>
             <ListItem>
               <ListIcon as={CheckIcon} color="purple.500" />
@@ -95,7 +103,9 @@ const BenefitsSection: React.FC = () => {
 
         <Box layerStyle="card" bg="orange.50">
           <Icon as={StarIcon} color="orange.500" boxSize={8} mb={4} />
-          <Heading variant="card" color="orange.700">Validation & Quality</Heading>
+          <Heading variant="card" color="orange.700">
+            Validation & Quality
+          </Heading>
           <List spacing={2}>
             <ListItem>
               <ListIcon as={CheckIcon} color="orange.500" />
@@ -118,7 +128,9 @@ const BenefitsSection: React.FC = () => {
 
         <Box layerStyle="card" bg="teal.50">
           <Icon as={StarIcon} color="teal.500" boxSize={8} mb={4} />
-          <Heading variant="card" color="teal.700">Scalable Architecture</Heading>
+          <Heading variant="card" color="teal.700">
+            Scalable Architecture
+          </Heading>
           <List spacing={2}>
             <ListItem>
               <ListIcon as={CheckIcon} color="teal.500" />
@@ -141,7 +153,9 @@ const BenefitsSection: React.FC = () => {
 
         <Box layerStyle="card" bg="red.50">
           <Icon as={StarIcon} color="red.500" boxSize={8} mb={4} />
-          <Heading variant="card" color="red.700">React Integration</Heading>
+          <Heading variant="card" color="red.700">
+            React Integration
+          </Heading>
           <List spacing={2}>
             <ListItem>
               <ListIcon as={CheckIcon} color="red.500" />

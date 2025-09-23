@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, VStack, Text, Heading } from '@chakra-ui/react';
+import { Box, Heading, Text, VStack } from '@chakra-ui/react';
 import ShoppingCartDemoComponent from '../../examples/shopping-cart/ShoppingCartDemoComponent';
 import CodeTabs from '@/components/CodeTabs.tsx';
 import Section from '../Section';

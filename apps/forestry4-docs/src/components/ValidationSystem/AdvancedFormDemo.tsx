@@ -1,16 +1,5 @@
 import React from 'react';
-import {
-  Alert,
-  AlertIcon,
-  Badge,
-  Box,
-  Button,
-  Heading,
-  HStack,
-  SimpleGrid,
-  Text,
-  VStack,
-} from '@chakra-ui/react';
+import { Badge, Box, Button, Heading, HStack, SimpleGrid, Text, VStack } from '@chakra-ui/react';
 import useForestryLocal from '@/hooks/useForestryLocal.ts';
 import useErrorHandler from '@/hooks/useErrorHandler.ts';
 
@@ -18,7 +7,6 @@ import formStateFactory, { FormState } from '@/storeFactories/ValidationSystem/f
 import { usernameBranchConfig } from '@/storeFactories/ValidationSystem/form/usernameBranch.ts';
 import { emailBranchConfig } from '@/storeFactories/ValidationSystem/form/emailBranch.ts';
 import { ageBranchConfig } from '@/storeFactories/ValidationSystem/form/ageBranch.ts';
-import CodeTabs from '@/components/CodeTabs.tsx';
 import Field from '@/components/ValidationSystem/Field';
 import Section from '../Section';
 

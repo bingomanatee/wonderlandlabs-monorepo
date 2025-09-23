@@ -17,28 +17,6 @@ import Section from '../components/Section';
 import LiveCounterDemo from '../components/home/LiveCounterDemo';
 
 const Home: React.FC = () => {
-  const quickStartTabs = [
-    {
-      label: 'Installation',
-      language: 'bash',
-      snippet: 'installation',
-      folder: 'home',
-    },
-    {
-      label: 'Basic Usage',
-      language: 'typescript',
-      snippet: 'basic-usage',
-      folder: 'home',
-      ts: true,
-    },
-    {
-      label: 'React Integration',
-      language: 'tsx',
-      snippet: 'react-integration',
-      folder: 'home',
-    },
-  ];
-
   return (
     <Container maxW="container.xl" py={8}>
       {/* Hero Section */}{' '}
@@ -47,20 +25,25 @@ const Home: React.FC = () => {
           Why Forestry?
         </Button>
         <VStack spacing={2} textAlign="center" mb={6}>
-          <HStack>
-            <Image w="64px" h="64px" src="/logo.png" />
-            <Heading size="2xl" color="gray.800">
+          <HStack align="center" gap={6}>
+            <Image w="64px" h="64px" src="/img/logo.png" />
+            <Heading size="2xl" color="gray.800" m={0}>
               Forestry 4.0
             </Heading>
           </HStack>
 
-          <Text fontSize="xl" color="gray.600" maxW="2xl">
-            A simple, powerful state management library for React. Forestry allows you to collect
-            instances that manage values with predefined schema and modify them with custom methods.
-            It allows you to create control systems that are faster, more consistent, and more
-            reliable update systems. It is designed not just to enhance short term work, but to
-            facilitate easy maintenance, testing and upgrading of long term projects.
-          </Text>
+          <Box>
+            <Text textStyle="hero">A simple, powerful state management library for React.</Text>
+            <Text textStyle="hero">
+              Forestry allows you to collect instances that manage values with predefined schema and
+              modify them with custom methods. It allows you to create control systems that are
+              faster, more consistent, and more reliable update systems.
+            </Text>
+            <Text textStyle="hero">
+              It is designed not only to supercharge short term execution but to enhance project
+              evolution including testing, variation, and delegation.
+            </Text>
+          </Box>
         </VStack>
         <Button as={RouterLink} to="/store" variant="outline" size="lg">
           Get Started
@@ -184,13 +167,6 @@ const Home: React.FC = () => {
           </VStack>
         </Section>
       </SimpleGrid>
-      {/* Quick Start */}
-      <Box mb={12}>
-        <Heading size="lg" mb={6}>
-          Quick Start
-        </Heading>
-        <CodeTabs tabs={quickStartTabs} />
-      </Box>
       {/* Live Demo */}
       <Section title="Example - basic counter">
         <LiveCounterDemo />
@@ -204,8 +180,8 @@ const Home: React.FC = () => {
               language: 'typescript',
               snippet: 'demo-store-definition',
               folder: 'home',
-              ts: true,
             },
+
             {
               label: 'Component',
               language: 'tsx',

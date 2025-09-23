@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import { Forest } from '@wonderlandlabs/forestry4';
 
 // Simple test to understand branch behavior
@@ -9,8 +9,8 @@ describe('Branch Diagnostic', () => {
       name: 'parent',
       value: {
         user: { name: 'John', age: 30 },
-        settings: { theme: 'light' }
-      }
+        settings: { theme: 'light' },
+      },
     });
 
     console.log('Initial parent state:', parent.value);
@@ -24,7 +24,7 @@ describe('Branch Diagnostic', () => {
     console.log('Parent user value:', parent.value.user);
 
     // Update through branch
-    userBranch.mutate(draft => {
+    userBranch.mutate((draft) => {
       draft.name = 'Jane';
       draft.age = 25;
     });
@@ -43,7 +43,7 @@ describe('Branch Diagnostic', () => {
   it('should test with custom subclass', () => {
     class UserBranch extends Forest<{ name: string; age: number }> {
       updateName(name: string) {
-        this.mutate(draft => {
+        this.mutate((draft) => {
           draft.name = name;
         });
       }
@@ -53,12 +53,12 @@ describe('Branch Diagnostic', () => {
       name: 'parent',
       value: {
         user: { name: 'John', age: 30 },
-        settings: { theme: 'light' }
-      }
+        settings: { theme: 'light' },
+      },
     });
 
     const userBranch = parent.$branch<{ name: string; age: number }, UserBranch>(['user'], {
-      subclass: UserBranch
+      subclass: UserBranch,
     });
 
     console.log('Custom branch parent:', userBranch.$parent === parent);
@@ -120,14 +120,14 @@ describe('Branch Diagnostic', () => {
       name: 'parent',
       value: {
         username: { value: '', isDirty: false, error: null },
-        email: { value: '', isDirty: false, error: null }
-      }
+        email: { value: '', isDirty: false, error: null },
+      },
     });
 
     console.log('Initial parent state:', parent.value);
 
     const usernameBranch = parent.$branch<FieldValue, FieldBranch>(['username'], {
-      subclass: FieldBranch
+      subclass: FieldBranch,
     });
 
     console.log('Field branch parent:', usernameBranch.$parent === parent);

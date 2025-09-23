@@ -22,15 +22,13 @@ const ShoppingCartSchema = z.object({
 const cartTests = [
   (cart: CartState) => {
     // Check inventory availability
-    const outOfStock = cart.items.find(item => 
-      getInventory(item.id) < item.quantity
-    );
+    const outOfStock = cart.items.find((item) => getInventory(item.id) < item.quantity);
     if (outOfStock) {
       return `${outOfStock.name} is out of stock`;
     }
     return null;
   },
-  
+
   (cart: CartState) => {
     // Validate discount eligibility
     if (cart.discount > 0 && cart.subtotal < 50) {
@@ -38,14 +36,14 @@ const cartTests = [
     }
     return null;
   },
-  
+
   (cart: CartState) => {
     // Check maximum cart size
     if (cart.items.length > 20) {
       return 'Maximum 20 items allowed in cart';
     }
     return null;
-  }
+  },
 ];
 
 export { CartItemSchema, ShoppingCartSchema, cartTests };

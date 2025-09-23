@@ -1,6 +1,6 @@
 // Auto-generated snippet from: apps/forestry4-docs/src/storeFactories/transactionDemoStoreFactory.ts
 // Description: Transaction demo store factory with bank, order, and migration examples
-// Last synced: Sun Sep 21 14:32:35 PDT 2025
+// Last synced: Mon Sep 22 17:07:21 PDT 2025
 // DO NOT EDIT - This file is automatically synced from the source
 
 import { Forest } from '@wonderlandlabs/forestry4';
@@ -40,17 +40,17 @@ const TransactionDemoStateSchema = z.object({
   // Bank example
   bankAccounts: z.record(z.string(), BankAccountSchema),
   bankTransactions: z.array(TransactionSchema),
-  
+
   // Order processing example
   orders: z.record(z.string(), OrderSchema),
   inventory: z.record(z.string(), z.number().min(0)),
   paymentStatus: z.enum(['pending', 'processing', 'completed', 'failed']),
-  
+
   // Migration example
   migrationStatus: z.enum(['idle', 'running', 'completed', 'failed']),
   migrationProgress: z.number().min(0).max(100),
   migrationError: z.string().optional(),
-  
+
   // General state
   isProcessing: z.boolean(),
   lastError: z.string().optional(),
@@ -73,7 +73,7 @@ class TransactionDemoForest extends Forest<TransactionDemoState> {
           savings: { id: 'savings', name: 'Savings Account', balance: 5000 },
         },
         bankTransactions: [],
-        
+
         // Order processing initial state
         orders: {},
         inventory: {
@@ -82,15 +82,18 @@ class TransactionDemoForest extends Forest<TransactionDemoState> {
           keyboard: 15,
         },
         paymentStatus: 'pending',
-        
+
         // Migration initial state
         migrationStatus: 'idle',
         migrationProgress: 0,
-        
+
         // General state
         isProcessing: false,
       },
-      prep: (input: Partial<TransactionDemoState>, current: TransactionDemoState): TransactionDemoState => {
+      prep: (
+        input: Partial<TransactionDemoState>,
+        current: TransactionDemoState
+      ): TransactionDemoState => {
         // Use Zod schema for validation in prep
         const result = TransactionDemoStateSchema.safeParse({ ...current, ...input });
         if (!result.success) {
@@ -128,12 +131,12 @@ class TransactionDemoForest extends Forest<TransactionDemoState> {
         }
 
         // Step 1: Withdraw from source account
-        this.mutate(draft => {
+        this.mutate((draft) => {
           draft.bankAccounts[fromAccountId].balance -= amount;
         });
 
         // Step 2: Deposit to destination account
-        this.mutate(draft => {
+        this.mutate((draft) => {
           draft.bankAccounts[toAccountId].balance += amount;
         });
 
@@ -145,7 +148,7 @@ class TransactionDemoForest extends Forest<TransactionDemoState> {
           timestamp: Date.now(),
         };
 
-        this.mutate(draft => {
+        this.mutate((draft) => {
           draft.bankTransactions.push(transaction);
         });
       },
@@ -158,7 +161,7 @@ class TransactionDemoForest extends Forest<TransactionDemoState> {
       suspendValidation: false,
       action: () => {
         const orderId = `order_${Date.now()}`;
-        
+
         // Step 1: Validate inventory (inner transaction)
         this.$transact({
           suspendValidation: true,
@@ -169,7 +172,7 @@ class TransactionDemoForest extends Forest<TransactionDemoState> {
                 throw new Error(`Insufficient inventory for ${item.name}`);
               }
               // Reserve inventory
-              this.mutate(draft => {
+              this.mutate((draft) => {
                 draft.inventory[item.productId] -= item.quantity;
               });
             }
@@ -181,7 +184,7 @@ class TransactionDemoForest extends Forest<TransactionDemoState> {
           suspendValidation: true,
           action: () => {
             this.set('paymentStatus', 'processing');
-            
+
             // Simulate payment processing
             const paymentResult = this.processPayment(order.totalAmount);
             if (!paymentResult.success) {
@@ -192,7 +195,7 @@ class TransactionDemoForest extends Forest<TransactionDemoState> {
         });
 
         // Step 3: Create order
-        this.mutate(draft => {
+        this.mutate((draft) => {
           draft.orders[orderId] = {
             ...order,
             id: orderId,
@@ -266,8 +269,8 @@ class TransactionDemoForest extends Forest<TransactionDemoState> {
           if (update.quantity < 0) {
             throw new Error(`Invalid quantity for ${update.productId}`);
           }
-          
-          this.mutate(draft => {
+
+          this.mutate((draft) => {
             draft.inventory[update.productId] = update.quantity;
           });
         }
@@ -277,7 +280,7 @@ class TransactionDemoForest extends Forest<TransactionDemoState> {
 
   // Reset all state
   reset() {
-    this.mutate(draft => {
+    this.mutate((draft) => {
       draft.bankAccounts = {
         checking: { id: 'checking', name: 'Checking Account', balance: 1000 },
         savings: { id: 'savings', name: 'Savings Account', balance: 5000 },

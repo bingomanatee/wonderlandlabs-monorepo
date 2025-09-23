@@ -1,7 +1,6 @@
 import React, { useEffect } from 'react';
-import { Box, Heading, Text, Code, VStack } from '@chakra-ui/react';
+import { Box, Code, Heading, Text } from '@chakra-ui/react';
 import CodeBlock from './CodeBlock';
-import SnippetBlock from './SnippetBlock';
 
 interface ItemDefProps {
   /** The method signature or parameter name */
@@ -78,20 +77,14 @@ const ItemDef: React.FC<ItemDefProps> = ({
       {hasCode && (
         <Box mt={4}>
           {snippetName ? (
-            // Use SnippetBlock for external files
-            <Box>
-              {codeTitle && (
-                <Text fontSize="sm" fontWeight="medium" mb={2} color="gray.700">
-                  {codeTitle}
-                </Text>
-              )}
-              <SnippetBlock
-                snippetName={snippetName}
-                folder={snippetFolder}
-                language={language}
-                ts={ts}
-              />
-            </Box>
+            // Use CodeBlock for external files
+            <CodeBlock
+              title={codeTitle}
+              language={language}
+              snippetName={snippetName}
+              folder={snippetFolder}
+              ts={ts}
+            />
           ) : (
             // Use inline CodeBlock
             <CodeBlock language={language} title={codeTitle}>

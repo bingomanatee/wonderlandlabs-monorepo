@@ -1,6 +1,6 @@
 // Auto-generated snippet from: apps/forestry4-docs/src/storeFactories/userProfileFactory.ts
 // Description: User profile store factory
-// Last synced: Sun Sep 21 14:32:35 PDT 2025
+// Last synced: Mon Sep 22 17:07:21 PDT 2025
 // DO NOT EDIT - This file is automatically synced from the source
 
 import { Forest } from '@wonderlandlabs/forestry4';
@@ -11,7 +11,6 @@ export interface UserState {
   age: number;
   email: string;
 }
-import { z } from 'zod';
 
 const User = z.object({
   name: z.string(),

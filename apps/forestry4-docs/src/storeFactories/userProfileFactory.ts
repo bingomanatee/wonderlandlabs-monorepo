@@ -6,7 +6,6 @@ export interface UserState {
   age: number;
   email: string;
 }
-import { z } from 'zod';
 
 const User = z.object({
   name: z.string(),

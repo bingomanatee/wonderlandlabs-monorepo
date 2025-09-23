@@ -1,5 +1,5 @@
-import React from 'react'
-import { Container, Heading, Text, Box } from '@chakra-ui/react'
+import React from 'react';
+import { Box, Container, Heading, Text } from '@chakra-ui/react';
 
 const Methods: React.FC = () => {
   return (
@@ -16,7 +16,7 @@ const Methods: React.FC = () => {
         </Text>
       </Box>
     </Container>
-  )
-}
+  );
+};
 
-export default Methods
+export default Methods;

@@ -1,8 +1,8 @@
-import { describe, it, expect, beforeEach } from 'vitest';
-import formStateFactory, { FormStateForest, FormState } from '../form/formState.ts';
-import { usernameBranchConfig, UsernameBranch } from '../form/usernameBranch.ts';
-import { emailBranchConfig, EmailBranch } from '../form/emailBranch.ts';
-import { ageBranchConfig, AgeBranch } from '../form/ageBranch.ts';
+import { beforeEach, describe, expect, it } from 'vitest';
+import formStateFactory, { FormStateForest } from '../form/formState.ts';
+import { UsernameBranch, usernameBranchConfig } from '../form/usernameBranch.ts';
+import { EmailBranch, emailBranchConfig } from '../form/emailBranch.ts';
+import { AgeBranch, ageBranchConfig } from '../form/ageBranch.ts';
 
 describe('FormState Branch Synchronization', () => {
   let formForest: FormStateForest;
@@ -276,7 +276,10 @@ describe('FormState Branch Synchronization', () => {
 
   describe('Submission Blocking', () => {
     it('should block branch value changes when form is submitting', () => {
-      const usernameBranch = formForest.$branch<any, UsernameBranch>(['username'], usernameBranchConfig());
+      const usernameBranch = formForest.$branch<any, UsernameBranch>(
+        ['username'],
+        usernameBranchConfig()
+      );
       const emailBranch = formForest.$branch<any, EmailBranch>(['email'], emailBranchConfig());
       const ageBranch = formForest.$branch<any, AgeBranch>(['age'], ageBranchConfig());
 
@@ -318,7 +321,7 @@ describe('FormState Branch Synchronization', () => {
 
       // Test setFromEvent is also blocked
       const mockEvent = {
-        target: { value: 'eventblocked' }
+        target: { value: 'eventblocked' },
       } as React.ChangeEvent<HTMLInputElement>;
 
       usernameBranch.setFromEvent(mockEvent);
@@ -334,7 +337,10 @@ describe('FormState Branch Synchronization', () => {
     });
 
     it('should block event-based changes when form is submitting', () => {
-      const usernameBranch = formForest.$branch<any, UsernameBranch>(['username'], usernameBranchConfig());
+      const usernameBranch = formForest.$branch<any, UsernameBranch>(
+        ['username'],
+        usernameBranchConfig()
+      );
 
       // Set initial value
       usernameBranch.setValue('initial');
@@ -345,7 +351,7 @@ describe('FormState Branch Synchronization', () => {
 
       // Try to change via event - should be blocked
       const mockEvent = {
-        target: { value: 'eventchange' }
+        target: { value: 'eventchange' },
       } as React.ChangeEvent<HTMLInputElement>;
 
       usernameBranch.setFromEvent(mockEvent);

@@ -18,8 +18,8 @@ import shoppingCartStoreFactory, {
   ShoppingCart,
 } from '../../storeFactories/ValidationSystem/shoppingCartStore';
 import { PRODUCTS } from '@/constants.ts';
+import { dollar } from '@/components/dollar.tsx';
 
-const dollar = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' });
 const ShoppingCartDemoComponent: React.FC = () => {
   const { handleError } = useErrorHandler();
   const [cartState, cartStore] = useForestryLocal<ShoppingCart>(

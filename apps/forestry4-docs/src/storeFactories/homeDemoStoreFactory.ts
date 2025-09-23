@@ -1,7 +1,8 @@
 import { Forest } from '@wonderlandlabs/forestry4';
 
+export type CountType = { count: number };
 // Modern Forestry 4.1.x class extension pattern
-class HomeDemoForest extends Forest<{ count: number }> {
+class HomeDemoForest extends Forest<CountType> {
   constructor() {
     super({
       name: 'demo-counter',
@@ -10,19 +11,19 @@ class HomeDemoForest extends Forest<{ count: number }> {
   }
 
   increment() {
-    this.mutate(draft => {
+    this.mutate((draft: CountType) => {
       draft.count += 1;
     });
   }
 
   decrement() {
-    this.mutate(draft => {
+    this.mutate((draft: CountType) => {
       draft.count -= 1;
     });
   }
 
   reset() {
-    this.mutate(draft => {
+    this.mutate((draft) => {
       draft.count = 0;
     });
   }

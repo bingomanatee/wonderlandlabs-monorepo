@@ -3,10 +3,7 @@ import { useNavigate } from 'react-router';
 import { useEffect, useState } from 'react';
 import messageState, { messageLevels } from '@/state/messageState.ts';
 
-export function useRequireAuth(
-  redirectTo: string = '/',
-  validateToken: boolean = false
-) {
+export function useRequireAuth(redirectTo: string = '/', validateToken: boolean = false) {
   const { isSignedIn, isLoaded, getToken } = useAuth();
   const navigate = useNavigate();
   const [tokenValid, setTokenValid] = useState<boolean | null>(null);
@@ -52,7 +49,8 @@ export function useRequireAuth(
             'Your session cannot be validated; please (re) log in ',
             messageLevels.WARNING,
             3000
-          );          navigate(redirectTo, { replace: true });
+          );
+          navigate(redirectTo, { replace: true });
           setTokenValid(false);
         }
       } else {
@@ -66,8 +64,7 @@ export function useRequireAuth(
   return {
     isLoaded,
     isSignedIn,
-    isAuthenticated:
-      isLoaded && isSignedIn && (validateToken ? tokenValid === true : true),
+    isAuthenticated: isLoaded && isSignedIn && (validateToken ? tokenValid === true : true),
     tokenValid,
   };
 }

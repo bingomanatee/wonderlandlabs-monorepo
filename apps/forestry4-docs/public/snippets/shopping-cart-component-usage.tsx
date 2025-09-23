@@ -1,6 +1,6 @@
 // Auto-generated snippet from: apps/forestry4-docs/src/examples/shopping-cart/component-usage.tsx
 // Description: Shopping cart component usage with error handling
-// Last synced: Sun Sep 21 14:32:36 PDT 2025
+// Last synced: Mon Sep 22 17:07:22 PDT 2025
 // DO NOT EDIT - This file is automatically synced from the source
 
 // Component with error handling - pass handleError to factory
@@ -13,15 +13,13 @@ import shoppingCartStoreFactory from '../../storeFactories/ValidationSystem/shop
 const ShoppingCartDemo: React.FC = () => {
   const { handleError } = useErrorHandler();
   // Pass error handler to factory function
-  const [cartState, cartStore] = useForestryLocal(() =>
-    shoppingCartStoreFactory(handleError)
-  );
+  const [cartState, cartStore] = useForestryLocal(() => shoppingCartStoreFactory(handleError));
 
   return (
     <Button
       data-product-id="invalid-product"
       data-quantity="1"
-      onClick={cartStore.$.safeAddItemFromEvent}  // Use safe action directly
+      onClick={cartStore.$.safeAddItemFromEvent} // Use safe action directly
     >
       Add Invalid Product
     </Button>

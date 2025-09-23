@@ -1,38 +1,16 @@
 // Auto-generated snippet from: apps/forestry4-docs/src/examples/home/react-integration.tsx
 // Description: React integration example for Forestry 4
-// Last synced: Sun Sep 21 14:32:36 PDT 2025
+// Last synced: Mon Sep 22 17:07:21 PDT 2025
 // DO NOT EDIT - This file is automatically synced from the source
 
 import React from 'react';
 import { Forest } from '@wonderlandlabs/forestry4';
 import useForestryLocal from '../../hooks/useForestryLocal';
-
-// Modern Forestry 4.1.x class extension pattern
-class CounterForest extends Forest<{ count: number }> {
-  constructor() {
-    super({
-      name: 'counter',
-      value: { count: 0 },
-    });
-  }
-
-  increment() {
-    this.mutate(draft => {
-      draft.count += 1;
-    });
-  }
-
-  decrement() {
-    this.mutate(draft => {
-      draft.count -= 1;
-    });
-  }
-}
-
+import { CounterForest, CounterValue } from './basic-usage';
 const counterForestFactory = () => new CounterForest();
 
 const Counter: React.FC = () => {
-  const [value, forest] = useForestryLocal(counterForestFactory);
+  const [value, forest] = useForestryLocal<CounterValue>(counterForestFactory);
   const { count } = value;
 
   return (

@@ -18,13 +18,15 @@ import { Link as RouterLink, useLocation } from 'react-router-dom';
 import { ChevronDownIcon, ExternalLinkIcon } from '@chakra-ui/icons';
 import { FaGithub } from 'react-icons/fa';
 import useForestryLocal from '../hooks/useForestryLocal';
+import { NavigationState, navigationStoreFactory } from '../storeFactories/navigationStoreFactory';
+
 const menuItems: Record<string, MenuItem[]> = {
   'Getting Started': [
     { label: 'Quick Start', path: '/' },
     { label: 'Why Forestry?', path: '/why' },
   ],
   'Essential Features': [
-    { label: 'Basics', path: '/store' },
+    { label: 'Basics', path: '/forest' },
     { label: 'Actions', path: '/actions' },
     { label: 'With React', path: '/react' },
   ],
@@ -49,14 +51,9 @@ const menuItems: Record<string, MenuItem[]> = {
     { label: 'Branching Methods', path: '/api#forest-branching' },
     { label: 'Transactions', path: '/api#forest-transactions' },
     { label: 'Validation', path: '/api#forest-validation' },
-    { label: 'ForestBranch', path: '/api#forestbranch' },
-    { label: 'Configuration Types', path: '/api#types-config' },
-    { label: 'Action Types', path: '/api#types-actions' },
-    { label: 'Validation Types', path: '/api#types-validation' },
-    { label: 'Utility Types', path: '/api#types-utility' },
+    { label: 'Types', path: '/api#types-config' },
   ],
 };
-import { NavigationState, navigationStoreFactory } from '../storeFactories/navigationStoreFactory';
 
 interface MenuItem {
   label: string;
@@ -66,8 +63,8 @@ interface MenuItem {
 
 const Navigation: React.FC = () => {
   const location = useLocation();
-  const bg = useColorModeValue('white', 'gray.800');
-  const borderColor = useColorModeValue('gray.200', 'gray.700');
+  const bg = useColorModeValue('black', 'gray.500');
+  const fg = useColorModeValue('white', 'black');
 
   // Navigation state management with Forestry
   const [navState, navStore] = useForestryLocal<NavigationState>(navigationStoreFactory);
@@ -76,24 +73,14 @@ const Navigation: React.FC = () => {
   const isActive = (path: string) => location.pathname === path;
 
   return (
-    <Box
-      position="fixed"
-      top={0}
-      left={0}
-      right={0}
-      zIndex={1000}
-      bg={bg}
-      borderBottom="1px"
-      borderColor={borderColor}
-      shadow="sm"
-    >
+    <Box position="fixed" top={0} left={0} right={0} zIndex={1000} bg={bg} shadow="sm">
       <Container maxW="container.xl">
         <Flex alignItems="center" justifyContent="space-between">
           {/* Logo */}
           <HStack as={Link} spacing={2} to="/" mr={10}>
-            <Image w="32px" h="32px" src="/logo.png" />
+            <Image w="32px" h="32px" src="/img/logo-dark.png" />
 
-            <Text fontSize="xl" fontWeight="bold" color="gray.800" whiteSpace="nowrap">
+            <Text fontSize="xl" fontWeight="bold" color={fg} whiteSpace="nowrap">
               Forestry 4.0
             </Text>
           </HStack>
@@ -110,8 +97,11 @@ const Navigation: React.FC = () => {
                   as={Button}
                   variant="ghost"
                   colorScheme="green"
-                  _hover={{ bg: 'green.100' }}
-                  _active={{ bg: 'green.200' }}
+                  color="green.300"
+                  _hover={{ bg: 'green.700', color: 'white' }}
+                  _active={{ bg: 'green.600', color: 'white' }}
+                  _focus={{ boxShadow: 'none', outline: 'none' }}
+                  _focusVisible={{ boxShadow: 'none', outline: 'none' }}
                   rightIcon={<ChevronDownIcon />}
                   onMouseEnter={() => navStore.handleMenuEnter(category)}
                   onClick={() => {
@@ -127,6 +117,8 @@ const Navigation: React.FC = () => {
                 <MenuList
                   onMouseLeave={() => navStore.handleMenuLeave()}
                   onMouseEnter={() => navStore.setHoveredMenu(category)}
+                  py={0}
+                  overflow="hidden"
                 >
                   {items.map((item) => (
                     <MenuItem
@@ -156,13 +148,12 @@ const Navigation: React.FC = () => {
               href="https://github.com/bingomanatee/wonderlandlabs-monorepo"
               isExternal
               variant="ghost"
-              colorScheme="gray"
               size="sm"
-              _hover={{ bg: 'gray.100' }}
-              leftIcon={<FaGithub />}
               aria-label="View source on GitHub"
             >
-              <ExternalLinkIcon ml={1} boxSize={3} />
+              <Text color="white">
+                <FaGithub />
+              </Text>
             </Button>
           </HStack>
         </Flex>

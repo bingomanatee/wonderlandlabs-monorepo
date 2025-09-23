@@ -12,7 +12,7 @@ interface SectionProps extends CardBodyProps {
 const Section: React.FC<SectionProps> = ({
   children,
   title,
-  titleSize = 'lg',
+  titleSize = 'xl',
   spacing = 6,
   noVStack = false,
   ...props

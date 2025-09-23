@@ -66,7 +66,7 @@ class TransactionDemoForest extends Forest<BankState> {
       timestamp: Date.now(),
     };
 
-    this.mutate(draft => {
+    this.mutate((draft) => {
       draft.balance = newBalance;
       draft.transactions.push(transaction);
     });
@@ -85,7 +85,7 @@ class TransactionDemoForest extends Forest<BankState> {
       timestamp: Date.now(),
     };
 
-    this.mutate(draft => {
+    this.mutate((draft) => {
       draft.balance += amount;
       draft.transactions.push(transaction);
     });
@@ -97,7 +97,7 @@ class TransactionDemoForest extends Forest<BankState> {
       suspendValidation: true,
       action: () => {
         // Track pending operations
-        this.mutate(draft => {
+        this.mutate((draft) => {
           draft.pendingOperations = employees.length;
         });
 
@@ -127,7 +127,7 @@ class TransactionDemoForest extends Forest<BankState> {
         }
 
         // Apply all changes atomically
-        this.mutate(draft => {
+        this.mutate((draft) => {
           draft.balance -= totalPayout;
           draft.transactions.push(...newTransactions);
           draft.pendingOperations = 0;
@@ -202,11 +202,13 @@ class TransactionDemoForest extends Forest<BankState> {
         const totalAmount = amount + fee;
 
         if (this.value.balance < totalAmount) {
-          throw new Error(`Insufficient funds. Need $${totalAmount} (including $${fee} fee), have $${this.value.balance}`);
+          throw new Error(
+            `Insufficient funds. Need $${totalAmount} (including $${fee} fee), have $${this.value.balance}`
+          );
         }
 
         // Step 1: Deduct main amount
-        this.mutate(draft => {
+        this.mutate((draft) => {
           draft.balance -= amount;
           draft.transactions.push({
             id: Math.random().toString(36).substr(2, 9),
@@ -217,7 +219,7 @@ class TransactionDemoForest extends Forest<BankState> {
         });
 
         // Step 2: Deduct fee
-        this.mutate(draft => {
+        this.mutate((draft) => {
           draft.balance -= fee;
           draft.transactions.push({
             id: Math.random().toString(36).substr(2, 9),
@@ -238,7 +240,9 @@ class TransactionDemoForest extends Forest<BankState> {
         const totalAmount = transfers.reduce((sum, t) => sum + t.amount, 0);
 
         if (this.value.balance < totalAmount) {
-          throw new Error(`Insufficient funds for batch transfer. Need $${totalAmount}, have $${this.value.balance}`);
+          throw new Error(
+            `Insufficient funds for batch transfer. Need $${totalAmount}, have $${this.value.balance}`
+          );
         }
 
         // Process all transfers atomically
@@ -255,7 +259,7 @@ class TransactionDemoForest extends Forest<BankState> {
           });
         }
 
-        this.mutate(draft => {
+        this.mutate((draft) => {
           draft.balance = runningBalance;
           draft.transactions.push(...newTransactions);
         });
@@ -265,7 +269,7 @@ class TransactionDemoForest extends Forest<BankState> {
 
   // Reset to initial state
   reset() {
-    this.mutate(draft => {
+    this.mutate((draft) => {
       draft.balance = 1000;
       draft.transactions = [];
       draft.pendingOperations = 0;

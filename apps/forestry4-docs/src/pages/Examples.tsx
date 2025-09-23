@@ -1,21 +1,21 @@
 import React from 'react';
 import {
-  Container,
-  Heading,
-  Text,
+  Badge,
   Box,
-  SimpleGrid,
+  Button,
   Card,
   CardBody,
-  Badge,
-  VStack,
+  Container,
+  Heading,
   HStack,
   Icon,
   Link,
-  Button,
+  SimpleGrid,
+  Text,
+  VStack,
 } from '@chakra-ui/react';
 import { Link as RouterLink } from 'react-router-dom';
-import { CheckCircleIcon, StarIcon, SettingsIcon, LockIcon } from '@chakra-ui/icons';
+import { CheckCircleIcon, LockIcon, SettingsIcon, StarIcon } from '@chakra-ui/icons';
 
 const Examples: React.FC = () => {
   const examples = [

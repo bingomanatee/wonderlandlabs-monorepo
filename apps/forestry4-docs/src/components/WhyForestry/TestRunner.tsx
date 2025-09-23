@@ -1,31 +1,23 @@
 import React from 'react';
-import {
-  Box,
-  Button,
-  VStack,
-  Text,
-  Alert,
-  AlertIcon,
-  Code
-} from '@chakra-ui/react';
+import { Alert, AlertIcon, Box, Button, Code, Text, VStack } from '@chakra-ui/react';
 import useForestryLocal from '../../hooks/useForestryLocal';
 import demoStoreFactory from '../../storeFactories/demoStoreFactory';
 
 const TestRunner: React.FC = () => {
   return ''; // TEMPORARILY DISABLED FOR 4.1.3 MIGRATION
   const [testResults, setTestResults] = useForestryLocal(() =>
-    demoStoreFactory({ 
+    demoStoreFactory({
       value: { results: [] as string[] },
       actions: {
-        addResult: function(value, result: string) {
-          this.mutate(draft => {
+        addResult: function (value, result: string) {
+          this.mutate((draft) => {
             draft.results.push(result);
           });
         },
-        clearResults: function() {
+        clearResults: function () {
           this.next({ results: [] });
-        }
-      }
+        },
+      },
     })
   );
 
@@ -56,7 +48,7 @@ const TestRunner: React.FC = () => {
       const store3 = demoStoreFactory();
       store3.$.setupUser({
         profile: { name: 'Jane Smith', email: 'jane@example.com' },
-        preferences: { theme: 'light' }
+        preferences: { theme: 'light' },
       });
       testStore.$.addResult('✅ Test 3: Nested action successful');
     } catch (error) {
@@ -76,10 +68,10 @@ const TestRunner: React.FC = () => {
     try {
       const storeA = demoStoreFactory();
       const storeB = demoStoreFactory();
-      
+
       storeA.$.updateProfile({ name: 'Alice' });
       storeB.$.updateProfile({ name: 'Bob' });
-      
+
       if (storeA.value.profile.name === 'Alice' && storeB.value.profile.name === 'Bob') {
         testStore.$.addResult('✅ Test 5: Store isolation working correctly');
       } else {
@@ -96,17 +88,15 @@ const TestRunner: React.FC = () => {
         <Button onClick={runTests} colorScheme="blue" size="sm">
           Run Forestry Tests
         </Button>
-        
+
         {testResults[0].results.length > 0 && (
           <Box>
-            <Text fontWeight="bold" mb={2}>Test Results:</Text>
+            <Text fontWeight="bold" mb={2}>
+              Test Results:
+            </Text>
             <VStack spacing={2} align="stretch">
               {testResults[0].results.map((result, index) => (
-                <Alert
-                  key={index}
-                  status={result.startsWith('✅') ? 'success' : 'error'}
-                  size="sm"
-                >
+                <Alert key={index} status={result.startsWith('✅') ? 'success' : 'error'} size="sm">
                   <AlertIcon />
                   <Code fontSize="sm">{result}</Code>
                 </Alert>

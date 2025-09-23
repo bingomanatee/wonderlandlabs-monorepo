@@ -1,7 +1,22 @@
 import { extendTheme } from '@chakra-ui/react';
 
 const theme = extendTheme({
+  styles: {
+    global: (props) => ({
+      body: {
+        bg: props.colorMode === 'light' ? 'tree-light' : 'gray.800',
+        ...(props.colorMode === 'light' && {
+          backgroundImage: 'url("/img/background-timberline.png")',
+          backgroundRepeat: 'repeat-x !important',
+          backgroundAttachment: 'scroll',
+          backgroundPosition: 'center top',
+          backgroundSize: '80%',
+        }),
+      },
+    }),
+  },
   colors: {
+    'tree-light': 'hsl(179,80%,89%)',
     brand: {
       50: '#e6f7ff',
       100: '#bae7ff',
@@ -28,9 +43,9 @@ const theme = extendTheme({
     },
   },
   fonts: {
-    heading: `'Poppins', -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif`,
+    heading: `'Urbanist', -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif`,
     body: `'Poppins', -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif`,
-    mono: `'JetBrains Mono', 'Monaco', 'Menlo', 'Ubuntu Mono', monospace`,
+    mono: `'Fira Sans', 'Monaco', 'Menlo', 'Ubuntu Mono', monospace`,
   },
   layerStyles: {
     card: {
@@ -127,6 +142,7 @@ const theme = extendTheme({
       color: 'gray.600',
       maxW: '4xl',
       mx: 'auto',
+      mb: 3,
     },
   },
   components: {
@@ -143,7 +159,7 @@ const theme = extendTheme({
     },
     Heading: {
       baseStyle: {
-        fontWeight: 'semibold',
+        fontWeight: 'bold',
         fontFamily: 'heading',
         lineHeight: 'shorter',
         color: 'gray.800',
@@ -206,7 +222,7 @@ const theme = extendTheme({
           fontWeight: 'semibold',
         }),
         page: (props) => ({
-          ...props.theme.components.Heading.sizes.xl,
+          ...props.theme.components.Heading.sizes['3xl'],
           color: 'gray.900',
           fontWeight: 'bold',
           textAlign: 'center',

@@ -1,6 +1,6 @@
 // Auto-generated snippet from: apps/forestry4-docs/src/pages/examples/FormValidation.tsx
 // Description: Form validation example page
-// Last synced: Sun Sep 21 14:32:35 PDT 2025
+// Last synced: Mon Sep 22 17:07:21 PDT 2025
 // DO NOT EDIT - This file is automatically synced from the source
 
 import React from 'react';
@@ -17,7 +17,7 @@ import {
   VStack,
 } from '@chakra-ui/react';
 import AdvancedFormDemo from '../../components/ValidationSystem/AdvancedFormDemo';
-import SnippetBlock from '../../components/SnippetBlock';
+import CodeBlock from '../../components/CodeBlock';
 import Section from '@/components/Section.tsx';
 import CodeTabs from '@/components/CodeTabs.tsx';
 
@@ -25,7 +25,7 @@ const FormValidation: React.FC = () => {
   return (
     <Container maxW="container.xl" py={8}>
       <Heading variant="page">Form Validation</Heading>
-      <Text fontSize="lg" color="gray.600" maxW="2xl">
+      <Text textStyle="hero">
         A comprehensive form validation example demonstrating field-level validation, cross-field
         dependencies, async validation, and error handling patterns.
       </Text>
@@ -39,7 +39,7 @@ const FormValidation: React.FC = () => {
           </Text>
           <AdvancedFormDemo />
         </Section>
-        <Section title="source Code">
+        <Section title="Source Code">
           <Box>
             <Text color="gray.600" mb={4}>
               Here's how to implement advanced form validation using Forest branches with individual
@@ -64,14 +64,12 @@ const FormValidation: React.FC = () => {
                   language: 'typescript',
                   snippet: 'usernameBranchConfig',
                   folder: 'ValidationSystem',
-                  ts: true,
                 },
                 {
                   label: 'Form State Factory',
                   language: 'typescript',
                   snippet: 'formStateFactory',
                   folder: 'ValidationSystem',
-                  ts: true,
                 },
               ]}
             />
@@ -104,11 +102,10 @@ const FormValidation: React.FC = () => {
           </List>
         </Section>
         <Section title="Branched Stores">
-          <Heading size="lg">Advanced Form - Using Forest with Branches</Heading>
           <Text color="gray.600">
-            This example showcases Forestry 4's branch system. Only <strong>Forests</strong> can
-            create branches - each form field is managed by its own branch with independent
-            validation, while the parent forest coordinates overall form state.
+            This example showcases Forestry 4's branch system. Each form field is managed by its own
+            branch with independent validation, while the parent forest coordinates overall form
+            state.
           </Text>
 
           <Box p={4} bg="blue.50" borderRadius="md">
@@ -134,16 +131,6 @@ const FormValidation: React.FC = () => {
               </Text>
             </VStack>
           </Box>
-
-          <Alert status="info">
-            <AlertIcon />
-            <Text fontSize="sm">
-              <strong>Key Points:</strong> Only <code>Forest</code> instances can create branches.
-              Form submission state (<code>canSubmit</code>, <code>submitError</code>) is calculated
-              in prep functions as data state, not validation errors. This allows the UI to show why
-              submission is disabled without throwing exceptions.
-            </Text>
-          </Alert>
         </Section>
         {/* Validation Architecture */}
         <Box layerStyle="methodCard" w="full">
@@ -205,7 +192,7 @@ const FormValidation: React.FC = () => {
           <Heading size="md" mb={4}>
             Validation Schema
           </Heading>
-          <SnippetBlock
+          <CodeBlock
             snippetName="UserRegistrationSchema"
             language="typescript"
             title="Form Schema with Complex Rules"
@@ -217,7 +204,7 @@ const FormValidation: React.FC = () => {
           <Heading size="md" mb={4}>
             Store Implementation
           </Heading>
-          <SnippetBlock
+          <CodeBlock
             snippetName="formValidationStoreFactory"
             language="typescript"
             title="Form Store with Advanced Validation"

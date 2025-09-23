@@ -7,31 +7,24 @@ import {
   Flex,
   Heading,
   HStack,
-  List,
   Link as LinkChakra,
+  List,
   ListItem,
   Text,
   VStack,
 } from '@chakra-ui/react';
-import { InfoIcon } from '@chakra-ui/icons';
 import ItemDef from '@/components/ItemDef';
 import { Link } from 'react-router-dom';
+import Section from '@/components/Section.tsx';
 
 const APIReference: React.FC = () => {
   return (
     <Box>
       <Flex>
         {/* Fixed Sidebar Navigation */}
-        <Box layerStyle="sidebar">
+        <Box layerStyle="sidebar" mt={8}>
           <VStack spacing={6} align="stretch">
-            <Box>
-              <Heading size="md" mb={4}>
-                API Reference
-              </Heading>
-              <Text fontSize="sm" color="gray.600">
-                Navigate to any section
-              </Text>
-            </Box>
+            <Heading>API</Heading>
 
             <VStack spacing={4} align="stretch">
               <Box>
@@ -41,9 +34,6 @@ const APIReference: React.FC = () => {
                 <VStack spacing={1} align="stretch" pl={2}>
                   <LinkChakra href="#forest" layerStyle="navLink">
                     Forest
-                  </LinkChakra>
-                  <LinkChakra href="#forestbranch" layerStyle="navLink">
-                    ForestBranch
                   </LinkChakra>
                 </VStack>
               </Box>
@@ -72,36 +62,19 @@ const APIReference: React.FC = () => {
               </Box>
 
               <Box>
-                <Text fontWeight="semibold" color="purple.600" mb={2}>
-                  ForestBranch Methods
-                </Text>
-                <VStack spacing={1} align="stretch" pl={2}>
-                  <LinkChakra href="#branch-properties" layerStyle="navLink">
-                    Branch Properties
-                  </LinkChakra>
-                  <LinkChakra href="#branch-methods" layerStyle="navLink">
-                    Overridden Methods
-                  </LinkChakra>
-                </VStack>
-              </Box>
-
-              <Box>
                 <Text fontWeight="semibold" color="orange.600" mb={2}>
                   Types
                 </Text>
                 <VStack spacing={1} align="stretch" pl={2}>
-                  <Link href="#types-config" layerStyle="navLink">
+                  <LinkChakra href="#types-config" layerStyle="navLink">
                     Configuration Types
-                  </Link>
-                  <Link href="#types-actions" layerStyle="navLink">
-                    Action Types
-                  </Link>
-                  <Link href="#types-validation" layerStyle="navLink">
+                  </LinkChakra>
+                  <LinkChakra href="#types-validation" layerStyle="navLink">
                     Validation Types
-                  </Link>
-                  <Link href="#types-utility" layerStyle="navLink">
+                  </LinkChakra>
+                  <LinkChakra href="#types-utility" layerStyle="navLink">
                     Utility Types
-                  </Link>
+                  </LinkChakra>
                 </VStack>
               </Box>
             </VStack>
@@ -114,88 +87,76 @@ const APIReference: React.FC = () => {
             <VStack spacing={12} align="stretch">
               {/* Header */}
               <Box>
-                <Heading size="xl" mb={4}>
-                  API Reference
-                  <Badge ml={3} colorScheme="blue">
-                    Reference
-                  </Badge>
-                </Heading>
+                <Heading variant="page">Forest API</Heading>
                 <Text textStyle="hero">
                   Complete API documentation for Forest and ForestBranch classes.
                 </Text>
               </Box>
 
               {/* Forest Class */}
-              <Box id="forest">
-                <HStack mb={4}>
-                  <Heading size="lg">Forest</Heading>
-                  <Badge colorScheme="green">Class</Badge>
-                  <Link to="/store" style={{ marginLeft: '12px' }}>
-                    <Badge colorScheme="teal" fontSize="xs">
-                      See Store Basics →
-                    </Badge>
-                  </Link>
-                </HStack>
+              <Section title="Forest class" id="forest">
                 <Text textStyle="body">
-                  The primary reactive state management class that supports branching and
-                  hierarchical state management. Forest includes all core store functionality plus
-                  advanced features for managing complex nested data structures.
+                  The state management class that supports branching and hierarchical state
+                  management. Forest includes all core store functionality plus advanced features
+                  for managing complex nested data structures. In general you will subclass this
+                  class to add custom action / method utility but it can be used directly
                 </Text>
-              </Box>
+              </Section>
 
               {/* Forest Constructor & Properties */}
-              <Box id="forest-constructor" layerStyle="methodCard">
-                <Heading size="md" mb={4}>
-                  Constructor & Properties
-                </Heading>
-
+              <Section id="forest-constructor" title="Construtcor and properties">
                 <Box mb={6}>
-                  <ItemDef title="new Forest&lt;DataType, Actions&gt;(params: StoreParams)">
-                    Creates a new Forest instance with the specified data type and actions. Forest
-                    is the root store that can create branches.
+                  <ItemDef title="new Forest&lt;DataType&gt;(params: StoreParams)">
+                    Creates a new Forest instance with the specified data type and actions. In
+                    general you will subclass Forest to enable custom methods, but you can
+                    instantiate a Forest directly if you only wish to use base methods.
                   </ItemDef>
                 </Box>
 
-                <Heading size="sm" mb={3}>
-                  Properties
-                </Heading>
-                <List spacing={3}>
-                  <ListItem>
-                    <Code>value: DataType</Code> - Current forest value (readonly)
-                  </ListItem>
-                  <ListItem>
-                    <Code>name: string</Code> - Forest identifier
-                  </ListItem>
-                  <ListItem>
-                    <Code>$: Actions</Code> - Exposed <Link to="/actions'">action</Link> methods.
-                  </ListItem>
-                  <ListItem>
-                    <Code>acts: Actions</Code> - Alias for $ property
-                  </ListItem>
-                  <ListItem>
-                    <Code>res: Map&lt;string, any&gt;</Code> - container for external resources such
-                    as database connectors, DOM references. Changing res entries does not trigger
-                    any subscriber updates.
-                  </ListItem>
-                  <ListItem>
-                    <Code>isActive: boolean</Code> - Whether forest accepts updates; set to false
-                    when <code>complete()</code> is called
-                  </ListItem>
-                  <ListItem>
-                    <Code>path: Path</Code> - the path between this store and its parent; is empty
-                    array [] for root Forest
-                  </ListItem>
-                  <ListItem>
-                    <Code>parent?: StoreBranch</Code> - null for root Forest
-                  </ListItem>
-                  <ListItem>
-                    <Code>isRoot: boolean</Code> - Always true for Forest
-                  </ListItem>
-                  <ListItem>
-                    <Code>root: Forest</Code> - Returns self (this)
-                  </ListItem>
-                </List>
-              </Box>
+                <Box>
+                  <Heading size="sm" mb={3}>
+                    Properties
+                  </Heading>
+                  <List spacing={3}>
+                    <ListItem>
+                      <Code>value: DataType</Code> - Current forest value (readonly)
+                    </ListItem>
+                    <ListItem>
+                      <Code>name: string</Code> - Forest identifier
+                    </ListItem>
+                    <ListItem>
+                      <Code>$: Actions</Code> - Exposed <Link to="/actions'">action</Link> methods.
+                    </ListItem>
+                    <ListItem>
+                      <Code>acts: Actions</Code> - Alias for $ property
+                    </ListItem>
+                    <ListItem>
+                      <Code>res: Map&lt;string, any&gt;</Code> - container for external resources
+                      such as database connectors, DOM references. Changing res entries does not
+                      trigger any subscriber updates. Mainly useful for direct Forest instances that
+                      need un-storable values (Dom references etc.)
+                    </ListItem>
+                    <ListItem>
+                      <Code>isActive: boolean</Code> - Whether forest accepts updates; set to false
+                      when <code>complete()</code> is called
+                    </ListItem>
+                    <ListItem>
+                      <Code>path: Path</Code> - the path between this store and its parent; is empty
+                      array [] for root Forest
+                    </ListItem>
+                    <ListItem>
+                      <Code>parent?: StoreBranch</Code> - null for root Forest
+                    </ListItem>
+                    <ListItem>
+                      <Code>isRoot: boolean</Code> - whether the branch has a parent or is the root.
+                    </ListItem>
+                    <ListItem>
+                      <Code>root: Forest</Code> - Returns self (this) for a root Forest
+                      implementation, and topmost forest on a branch
+                    </ListItem>
+                  </List>
+                </Box>
+              </Section>
 
               {/* Forest Core Methods */}
               <Box id="forest-core" layerStyle="methodCard">
@@ -258,13 +219,19 @@ const APIReference: React.FC = () => {
 
                 <VStack spacing={6} align="stretch">
                   <ItemDef
-                    title="branch&lt;Type, Actions&gt;(path: Path, params: BranchParams): ForestBranch"
+                    title="$branch&lt;Type, Actions&gt;(path: Path, params: StoreParams&lt;Type&gt;): ForestBranch"
                     snippetName="branchCreationExample"
                     snippetFolder="APIReference"
                     codeTitle="Branch Creation Example"
                   >
                     Creates a new branch at the specified path with its own actions and validation.
-                    This is the key feature that makes Forest powerful for managing nested state.
+                    The utility of a branch is that it focuses on a subsection of state and can have
+                    focused methods that target specific elements of the store.
+                    <br /> <br />
+                    The params have an optional parameter <code>subclass</code> that defines a class
+                    that will be returned by the $branch method. Also, <code>value</code> is neither
+                    required nor used as a parameter; value is inferred by the path from the parent
+                    Forest.
                   </ItemDef>
                 </VStack>
               </Box>
@@ -336,57 +303,6 @@ const APIReference: React.FC = () => {
                 </VStack>
               </Box>
 
-              {/* ForestBranch */}
-              <Box id="forestbranch" layerStyle="methodCard">
-                <HStack mb={4}>
-                  <Heading size="lg">ForestBranch</Heading>
-                  <Badge colorScheme="purple">Class</Badge>
-                </HStack>
-                <Text textStyle="body" mb={6}>
-                  ForestBranch provides a focused interface for managing a specific part of a
-                  Forest's data. It inherits all Forest methods but operates on a specific path
-                  within the parent Forest, automatically synchronizing changes bidirectionally. You
-                  can create a transient branch to do a focused operation on a subset of the store
-                  or to observe specific subsets of the store hierarchy. It is the output of the
-                  <code>branch(path)</code> method of Forest or ForestBranch.
-                </Text>
-
-                <Heading size="md" mb={4}>
-                  Key Properties
-                </Heading>
-
-                <List spacing={3}>
-                  <ListItem>
-                    <Code>path: Path</Code> - Path from parent to this branch.
-                  </ListItem>
-                  <ListItem>
-                    <Code>parent: Forest | ForestBranch</Code> - Parent forest or branch that
-                    created this branch
-                  </ListItem>
-                  <ListItem>
-                    <Code>root: Forest</Code> - Reference to the root Forest instance
-                  </ListItem>
-                  <ListItem>
-                    <Code>isRoot: boolean</Code> - Always false for branches
-                  </ListItem>
-                  <ListItem>
-                    <Code>value: DataType</Code> - Current value at this branch's path (computed
-                    from parent)
-                  </ListItem>
-                  <ListItem>
-                    <Code>$: Actions</Code> - Branch-specific action methods that operate on this
-                    path
-                  </ListItem>
-                </List>
-
-                <Text textStyle="body" mt={4}>
-                  ForestBranch inherits all Forest methods (next, get, set, mutate, subscribe, etc.)
-                  but they operate on the branch's specific path within the parent Forest, not on
-                  independent state. also completing a branch completes it and its sub-items but not
-                  the parent / or upwwards stores, including the root.
-                </Text>
-              </Box>
-
               {/* Type Definitions */}
               <Box>
                 <HStack mb={4}>
@@ -405,46 +321,17 @@ const APIReference: React.FC = () => {
                 </Heading>
 
                 <VStack spacing={6} align="stretch">
-                  <ItemDef title="StoreParams&lt;DataType, Actions&gt;">
+                  <ItemDef title="StoreParams&lt;DataType&gt;">
                     Configuration object for creating Forest instances. Contains:
                     <ul>
                       <li>
                         value <Badge colorScheme="red">Required</Badge>{' '}
                       </li>
-                      <li>actions</li>
                       <li>schema</li>
                       <li>tests</li>
                       <li>prep</li>
                       <li>name</li>
                     </ul>
-                  </ItemDef>
-
-                  <ItemDef title="BranchParams&lt;DataType, Actions&gt;">
-                    Identical to StoreParams except it has no value, and has a <code>path</code>
-                    parameter; branches' parameter is read from the root Forest instance via chained
-                    path between the branch and the root Forestry
-                  </ItemDef>
-                </VStack>
-              </Box>
-
-              {/* Action Types */}
-              <Box id="types-actions" layerStyle="methodCard">
-                <Heading size="md" mb={4}>
-                  Action Types
-                  <Link to="/actions" style={{ marginLeft: '12px' }}>
-                    <Badge colorScheme="orange" fontSize="xs">
-                      See Actions guide →
-                    </Badge>
-                  </Link>
-                </Heading>
-
-                <VStack spacing={6} align="stretch">
-                  <ItemDef title="ActionParamsFn&lt;DataType, Args, Returned&gt;">
-                    Function signature for action definitions (with value parameter).
-                  </ItemDef>
-
-                  <ItemDef title="ActionExposedFn&lt;Args, Returned&gt;">
-                    Function signature for exposed actions (without value parameter).
                   </ItemDef>
                 </VStack>
               </Box>
@@ -463,6 +350,7 @@ const APIReference: React.FC = () => {
                 <VStack spacing={6} align="stretch">
                   <ItemDef title="ValueTestFn&lt;DataType&gt;">
                     Function that tests a value and returns error message or null -- or throws.
+                    valid values should return falsy value or not return anything.
                   </ItemDef>
 
                   <ItemDef title="Validity">
@@ -501,38 +389,6 @@ const APIReference: React.FC = () => {
                     Map for storing external resources (DOM, WebGL, etc.).
                   </ItemDef>
                 </VStack>
-              </Box>
-
-              {/* Usage Examples */}
-              <Box>
-                <HStack mb={4}>
-                  <Heading size="lg">Examples</Heading>
-                  <Badge colorScheme="teal">Examples</Badge>
-                </HStack>
-                <Text textStyle="body">Common usage patterns and examples for each API.</Text>
-
-                <HStack spacing={4} wrap="wrap" mt={4}>
-                  <Link to="/basic">
-                    <Badge colorScheme="blue" p={2}>
-                      <InfoIcon mr={2} />
-                      Store Basics
-                    </Badge>
-                  </Link>
-
-                  <Link to="/react">
-                    <Badge colorScheme="green" p={2}>
-                      <InfoIcon mr={2} />
-                      React Integration
-                    </Badge>
-                  </Link>
-
-                  <Link to="integration">
-                    <Badge colorScheme="purple" p={2}>
-                      <InfoIcon mr={2} />
-                      Validation System
-                    </Badge>
-                  </Link>
-                </HStack>
               </Box>
             </VStack>
           </Container>

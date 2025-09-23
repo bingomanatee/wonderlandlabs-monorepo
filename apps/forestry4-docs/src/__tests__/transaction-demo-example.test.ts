@@ -1,5 +1,8 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { transactionDemoStoreFactory, TransactionDemoForest } from '../storeFactories/transactionDemoStoreFactory';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import {
+  TransactionDemoForest,
+  transactionDemoStoreFactory,
+} from '../storeFactories/transactionDemoStoreFactory';
 
 describe('Transaction Demo Store', () => {
   let store: TransactionDemoForest;
@@ -45,7 +48,9 @@ describe('Transaction Demo Store', () => {
       expect(store.value.bankAccounts.savings.balance).toBe(5200);
       expect(store.value.bankTransactions).toHaveLength(1);
       expect(store.value.bankTransactions[0].amount).toBe(200);
-      expect(store.value.bankTransactions[0].description).toContain('Transfer from Checking Account to Savings Account');
+      expect(store.value.bankTransactions[0].description).toContain(
+        'Transfer from Checking Account to Savings Account'
+      );
     });
 
     it('should fail transfer with insufficient funds', () => {
@@ -119,7 +124,7 @@ describe('Transaction Demo Store', () => {
       // Check order was created
       const orderIds = Object.keys(store.value.orders);
       expect(orderIds).toHaveLength(1);
-      
+
       const createdOrder = store.value.orders[orderIds[0]];
       expect(createdOrder.status).toBe('confirmed');
       expect(createdOrder.items).toHaveLength(2);
@@ -225,8 +230,12 @@ describe('Transaction Demo Store', () => {
       }).toThrow('Insufficient funds');
 
       // State should be exactly the same as before
-      expect(store.value.bankAccounts.checking.balance).toBe(initialState.bankAccounts.checking.balance);
-      expect(store.value.bankAccounts.savings.balance).toBe(initialState.bankAccounts.savings.balance);
+      expect(store.value.bankAccounts.checking.balance).toBe(
+        initialState.bankAccounts.checking.balance
+      );
+      expect(store.value.bankAccounts.savings.balance).toBe(
+        initialState.bankAccounts.savings.balance
+      );
       expect(store.value.bankTransactions).toEqual(initialState.bankTransactions);
     });
   });

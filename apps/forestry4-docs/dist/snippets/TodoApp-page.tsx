@@ -1,6 +1,6 @@
 // Auto-generated snippet from: apps/forestry4-docs/src/pages/examples/TodoApp.tsx
 // Description: TodoApp example page component
-// Last synced: Sun Sep 21 14:32:35 PDT 2025
+// Last synced: Mon Sep 22 17:07:21 PDT 2025
 // DO NOT EDIT - This file is automatically synced from the source
 
 import React from 'react';
@@ -13,12 +13,10 @@ import {
   Heading,
   HStack,
   List,
-  ListIcon,
   ListItem,
   Text,
   VStack,
 } from '@chakra-ui/react';
-import { CheckCircleIcon } from '@chakra-ui/icons';
 import TodoAppDemo from '@/components/ReactIntegration/TodoAppDemo';
 import CodeTabs from '@/components/CodeTabs.tsx';
 import PageTitle from '@/components/PageTitle';

@@ -1,6 +1,6 @@
 // Auto-generated snippet from: apps/forestry4-docs/src/hooks/useForestryLocal.ts
 // Description: useForestryLocal hook implementation for React integration
-// Last synced: Sun Sep 21 14:32:35 PDT 2025
+// Last synced: Mon Sep 22 17:07:21 PDT 2025
 // DO NOT EDIT - This file is automatically synced from the source
 
 import { useEffect, useRef, useState } from 'react';

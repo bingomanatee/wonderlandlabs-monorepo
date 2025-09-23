@@ -1,5 +1,5 @@
-import { describe, it, expect, beforeEach } from 'vitest';
-import counterForestFactory, { CounterForest, type CounterState } from '../counterStoreFactory';
+import { beforeEach, describe, expect, it } from 'vitest';
+import counterForestFactory, { CounterForest } from '../counterStoreFactory';
 
 describe('Counter Store Factory (Modern 4.1.x)', () => {
   let counterStore: CounterForest;
@@ -14,7 +14,7 @@ describe('Counter Store Factory (Modern 4.1.x)', () => {
         count: 0,
         history: [],
         multiplier: 1,
-        qualityMessage: ''
+        qualityMessage: '',
       });
     });
 
@@ -44,14 +44,14 @@ describe('Counter Store Factory (Modern 4.1.x)', () => {
   describe('Basic Actions', () => {
     it('should increment count by multiplier', () => {
       counterStore.$.increment();
-      
+
       expect(counterStore.value.count).toBe(1);
       expect(counterStore.value.history).toContain('Incremented to 1');
     });
 
     it('should decrement count by multiplier', () => {
       counterStore.$.decrement();
-      
+
       expect(counterStore.value.count).toBe(-1);
       expect(counterStore.value.history).toContain('Decremented to -1');
     });
@@ -59,10 +59,10 @@ describe('Counter Store Factory (Modern 4.1.x)', () => {
     it('should respect multiplier in increment/decrement', () => {
       counterStore.$.setMultiplier(5);
       counterStore.$.increment();
-      
+
       expect(counterStore.value.count).toBe(5);
       expect(counterStore.value.history).toContain('Incremented to 5');
-      
+
       counterStore.$.decrement();
       expect(counterStore.value.count).toBe(0);
       expect(counterStore.value.history).toContain('Decremented to 0');
@@ -74,7 +74,7 @@ describe('Counter Store Factory (Modern 4.1.x)', () => {
       counterStore.$.setMultiplier(3);
       counterStore.$.increment(); // count = 3
       counterStore.$.doubleAndLog(); // count = 6
-      
+
       expect(counterStore.value.count).toBe(6);
       expect(counterStore.value.history).toContain('Doubled from 3 to 6');
     });
@@ -82,7 +82,7 @@ describe('Counter Store Factory (Modern 4.1.x)', () => {
     it('should increment twice using $ binding', () => {
       counterStore.$.setMultiplier(2);
       counterStore.$.incrementTwice();
-      
+
       expect(counterStore.value.count).toBe(4); // 2 * 2 = 4
       expect(counterStore.value.history).toHaveLength(2);
       expect(counterStore.value.history).toContain('Incremented to 2');
@@ -93,14 +93,14 @@ describe('Counter Store Factory (Modern 4.1.x)', () => {
       counterStore.$.increment();
       counterStore.$.increment();
       counterStore.$.setMultiplier(5);
-      
+
       counterStore.$.reset();
-      
+
       expect(counterStore.value).toEqual({
         count: 0,
         history: ['Reset to 0'],
         multiplier: 1,
-        qualityMessage: ''
+        qualityMessage: '',
       });
     });
 
@@ -108,7 +108,7 @@ describe('Counter Store Factory (Modern 4.1.x)', () => {
       counterStore.$.increment();
       counterStore.$.decrement();
       expect(counterStore.value.history).toHaveLength(2);
-      
+
       counterStore.$.clearHistory();
       expect(counterStore.value.history).toHaveLength(0);
     });
@@ -118,20 +118,20 @@ describe('Counter Store Factory (Modern 4.1.x)', () => {
     it('should show quality message for very low count', () => {
       // Set count to below -100
       counterStore.set('count', -150);
-      
+
       expect(counterStore.value.qualityMessage).toBe('Count is getting very low');
     });
 
     it('should show quality message for very high count', () => {
       // Set count to above 100
       counterStore.set('count', 150);
-      
+
       expect(counterStore.value.qualityMessage).toBe('Count is getting very high');
     });
 
     it('should show quality message for low multiplier', () => {
       counterStore.$.setMultiplier(0);
-      
+
       expect(counterStore.value.qualityMessage).toBe('Multiplier works best at 1 or higher');
     });
 
@@ -139,7 +139,7 @@ describe('Counter Store Factory (Modern 4.1.x)', () => {
       // First set a problematic value
       counterStore.set('count', 150);
       expect(counterStore.value.qualityMessage).toBe('Count is getting very high');
-      
+
       // Then set a normal value
       counterStore.set('count', 50);
       expect(counterStore.value.qualityMessage).toBe('');
@@ -152,7 +152,7 @@ describe('Counter Store Factory (Modern 4.1.x)', () => {
       counterStore.$.increment(); // count = 3
       counterStore.$.doubleAndLog(); // count = 6
       counterStore.$.decrement(); // count = 3
-      
+
       expect(counterStore.value.count).toBe(3);
       expect(counterStore.value.multiplier).toBe(3);
       expect(counterStore.value.history).toHaveLength(3);
@@ -165,7 +165,7 @@ describe('Counter Store Factory (Modern 4.1.x)', () => {
       // Test with zero multiplier (should still work but show quality message)
       counterStore.$.setMultiplier(0);
       counterStore.$.increment();
-      
+
       expect(counterStore.value.count).toBe(0); // 0 + 0 = 0
       expect(counterStore.value.qualityMessage).toBe('Multiplier works best at 1 or higher');
     });
@@ -174,10 +174,10 @@ describe('Counter Store Factory (Modern 4.1.x)', () => {
   describe('Method Context and Binding', () => {
     it('should maintain proper this context in bound methods', () => {
       const boundIncrement = counterStore.$.increment;
-      
+
       // Should work even when called as standalone function
       boundIncrement();
-      
+
       expect(counterStore.value.count).toBe(1);
       expect(counterStore.value.history).toContain('Incremented to 1');
     });
@@ -185,7 +185,7 @@ describe('Counter Store Factory (Modern 4.1.x)', () => {
     it('should allow method chaining through $ binding', () => {
       // incrementTwice calls this.$.increment() twice
       counterStore.$.incrementTwice();
-      
+
       expect(counterStore.value.count).toBe(2);
       expect(counterStore.value.history).toHaveLength(2);
     });
@@ -199,7 +199,7 @@ describe('Counter Store Factory (Modern 4.1.x)', () => {
           count: 10,
           history: ['test'],
           multiplier: 2,
-          qualityMessage: 'test message'
+          qualityMessage: 'test message',
         });
       }).not.toThrow();
     });
@@ -211,7 +211,7 @@ describe('Counter Store Factory (Modern 4.1.x)', () => {
           count: 'invalid', // Should be number
           history: ['test'],
           multiplier: 2,
-          qualityMessage: 'test'
+          qualityMessage: 'test',
         });
       }).toThrow();
     });

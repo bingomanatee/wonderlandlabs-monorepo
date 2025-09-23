@@ -1,19 +1,16 @@
 import React from 'react';
 import {
-  Box,
-  Heading,
-  Text,
-  VStack,
-  Card,
-  CardBody,
-  SimpleGrid,
   Alert,
   AlertIcon,
-  Code,
-  UnorderedList,
+  Box,
+  Heading,
   ListItem,
+  SimpleGrid,
+  Text,
+  UnorderedList,
+  VStack,
 } from '@chakra-ui/react';
-import SnippetBlock from '../components/SnippetBlock';
+import CodeBlock from '../components/CodeBlock';
 import CodeTabs from '../components/CodeTabs.tsx';
 import Section from '../components/Section';
 
@@ -72,14 +69,22 @@ const IntegrationHooks: React.FC = () => {
                 <Heading size="md" mb={3}>
                   useForestryLocal - Example
                 </Heading>
-                <SnippetBlock snippetName="useForestryLocalExample" folder="IntegrationHooks" />
+                <CodeBlock
+                  language="typescript"
+                  snippetName="useForestryLocalExample"
+                  folder="IntegrationHooks"
+                />
               </Box>
 
               <Box>
                 <Heading size="md" mb={3}>
                   useForestryLocal - source
                 </Heading>
-                <SnippetBlock snippetName="useForestryLocalSource" folder="IntegrationHooks" />
+                <CodeBlock
+                  language="typescript"
+                  snippetName="useForestryLocalSource"
+                  folder="IntegrationHooks"
+                />
               </Box>
             </SimpleGrid>
           </VStack>

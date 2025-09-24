@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg version="1.1" xmlns:xl="http://www.w3.org/1999/xlink" xmlns="http://www.w3.org/2000/svg" xmlns:dc="http://purl.org/dc/elements/1.1/" viewBox="1282 604 601 540" width="601" height="540">
+  <defs>
+    <clipPath id="artboard_clip_path">
+      <path d="M 1883 1144 L 1282 1144 L 1282 604 L 1883 604 Z"/>
+    </clipPath>
+    <marker orient="auto" overflow="visible" markerUnits="strokeWidth" id="StickArrow_Marker" stroke-linejoin="miter" stroke-miterlimit="10" viewBox="-1 -4 10 8" markerWidth="10" markerHeight="8" color="black">
+      <g>
+        <path d="M 8 0 L 0 0 M 0 -3 L 8 0 L 0 3" fill="none" stroke="currentColor" stroke-width="1"/>
+      </g>
+    </marker>
+  </defs>
+  <g id="Canvas_1" stroke-opacity="1" stroke="none" stroke-dasharray="none" fill="none" fill-opacity="1">
+    <title>Canvas 1</title>
+    <rect fill="white" x="1282" y="604" width="601" height="540"/>
+    <g id="Canvas_1_Layer_1" clip-path="url(#artboard_clip_path)">
+      <title>Layer 1</title>
+      <g id="Graphic_108">
+        <path d="M 1465.7154 622.18075 L 1675.7154 622.18075 L 1633.7154 697.9884 L 1507.7154 697.9884 Z" fill="white"/>
+        <path d="M 1465.7154 622.18075 L 1675.7154 622.18075 L 1633.7154 697.9884 L 1507.7154 697.9884 Z" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+        <text transform="translate(1485.4154 649.3444)" fill="black">
+          <tspan font-family="Helvetica Neue" font-size="16" fill="black" x="35.412" y="15" xml:space="preserve">Value Changed</tspan>
+        </text>
+      </g>
+      <g id="Line_112">
+        <path d="M 1576.7988 800.782 L 1576.7988 845 L 1383.411 845 L 1383.411 889.9628" stroke="black" stroke-linecap="round" stroke-linejoin="miter" stroke-width="1"/>
+      </g>
+      <g id="Line_156">
+        <path d="M 1576.7988 800.782 L 1576.7988 807.782 L 1577.0966 882.9628 L 1577.0966 889.9628" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+      </g>
+      <g id="Line_119">
+        <line x1="1574.0434" y1="698.4865" x2="1575.944" y2="720.419" marker-end="url(#StickArrow_Marker)" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+      </g>
+      <g id="Line_117">
+        <path d="M 1576.7988 800.782 L 1576.7988 845 L 1780.7564 845 L 1780.7564 889.9628" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+      </g>
+      <g id="Graphic_141">
+        <rect x="1707.5884" y="889.9628" width="146.336" height="79.03724" fill="white"/>
+        <text transform="translate(1712.5884 911.0334)" fill="black">
+          <tspan font-family="Helvetica Neue" font-size="16" fill="black" x="9.031999" y="15" xml:space="preserve">Block them from </tspan>
+          <tspan font-family="Helvetica Neue" font-size="16" fill="black" x="3.2559993" y="33.448" xml:space="preserve">updating the state</tspan>
+        </text>
+      </g>
+      <g id="Line_142">
+        <line x1="1780.7564" y1="969" x2="1780.7564" y2="1010.603" marker-end="url(#StickArrow_Marker)" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+      </g>
+      <g id="Graphic_143">
+        <rect x="1310.243" y="889.9628" width="146.336" height="79.03724" fill="white"/>
+        <text transform="translate(1315.243 920.2574)" fill="black">
+          <tspan font-family="Helvetica Neue" font-size="16" fill="black" x="21.504" y="15" xml:space="preserve">fix/filter them</tspan>
+        </text>
+      </g>
+      <g id="Line_144">
+        <line x1="1383.411" y1="969" x2="1383.411" y2="1010.103" marker-end="url(#StickArrow_Marker)" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+      </g>
+      <g id="Graphic_145">
+        <rect x="1503.9286" y="889.9628" width="146.336" height="79.03724" fill="white"/>
+        <text transform="translate(1508.9286 911.0334)" fill="black">
+          <tspan font-family="Helvetica Neue" font-size="16" fill="black" x="9.471999" y="15" xml:space="preserve">accept them but </tspan>
+          <tspan font-family="Helvetica Neue" font-size="16" fill="black" x="8.295999" y="33.448" xml:space="preserve">flag them as bad</tspan>
+        </text>
+      </g>
+      <g id="Line_146">
+        <line x1="1576.9673" y1="969" x2="1576.8332" y2="1010.1031" marker-end="url(#StickArrow_Marker)" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+      </g>
+      <g id="Graphic_109">
+        <path d="M 1576.7988 730.282 L 1654.2428 765.532 L 1576.7988 800.782 L 1499.3548 765.532 Z" fill="#ccc"/>
+        <text transform="translate(1525.2647 727.931)" fill="black">
+          <tspan font-family="Helvetica Neue" font-size="16" fill="black" x="7.586993" y="15" xml:space="preserve">What do you </tspan>
+          <tspan font-family="Helvetica Neue" font-size="16" fill="black" x="26.418993" y="33.448" xml:space="preserve">want to </tspan>
+          <tspan font-family="Helvetica Neue" font-size="16" fill="black" x="9.074993" y="51.895996" xml:space="preserve">happen with </tspan>
+          <tspan font-family="Helvetica Neue" font-size="16" fill="black" x="14.258993" y="70.34399" xml:space="preserve">bad values</tspan>
+        </text>
+      </g>
+      <g id="Graphic_110">
+        <rect x="1310.243" y="1020.503" width="146.336" height="108.92052" fill="white"/>
+        <rect x="1310.243" y="1020.503" width="146.336" height="108.92052" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+        <text transform="translate(1315.243 1065.2312)" fill="black">
+          <tspan font-family="Helvetica Neue" font-weight="bold" font-size="16" fill="black" x="38.096" y="16" xml:space="preserve">pre</tspan>
+          <tspan font-family="Helvetica Neue" font-size="16" fill="black" y="16" xml:space="preserve"> filter</tspan>
+        </text>
+      </g>
+      <g id="Graphic_111">
+        <rect x="1466.5976" y="1020.503" width="220.40244" height="108.92052" fill="white"/>
+        <rect x="1466.5976" y="1020.503" width="220.40244" height="108.92052" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+        <text transform="translate(1471.5976 1046.7832)" fill="black">
+          <tspan font-family="Helvetica Neue" font-weight="bold" font-size="16" fill="black" x="75.12922" y="16" xml:space="preserve">pre</tspan>
+          <tspan font-family="Helvetica Neue" font-size="16" fill="black" y="16" xml:space="preserve"> filter </tspan>
+          <tspan font-family="Helvetica Neue" font-size="16" fill="black" x="29.489218" y="34.46411" xml:space="preserve">to record status/error </tspan>
+          <tspan font-family="Helvetica Neue" font-size="16" fill="black" x="72.45722" y="52.91211" xml:space="preserve">per value</tspan>
+        </text>
+      </g>
+      <g id="Graphic_116">
+        <rect x="1697.0186" y="1020.503" width="167.47557" height="108.92052" fill="white"/>
+        <rect x="1697.0186" y="1020.503" width="167.47557" height="108.92052" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+        <text transform="translate(1702.0186 1065.7393)" fill="black">
+          <tspan font-family="Helvetica Neue" font-size="16" fill="black" x="21.537785" y="15" xml:space="preserve">tests or schema</tspan>
+        </text>
+      </g>
+    </g>
+  </g>
+</svg>

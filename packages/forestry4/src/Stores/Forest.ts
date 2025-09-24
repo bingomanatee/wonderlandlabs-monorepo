@@ -1,6 +1,6 @@
 import { Store } from './Store';
 import { ForestMessage, Listener, Path, StoreIF, StoreParams } from '../types';
-import { map, Subject, Subscription } from 'rxjs';
+import { map, Observable, Subject } from 'rxjs';
 import combinePaths, { pathString } from '../lib/combinePaths';
 import { produce } from 'immer';
 import { getPath, setPath } from '../lib/path';
@@ -13,7 +13,7 @@ export class Forest<DataType>
   extends Store<DataType>
   implements StoreIF<DataType>
 {
-  #parentSub?: Subscription;
+  #parentSub?: any;
 
   constructor(p: StoreParams<DataType>) {
     const { path, parent } = p;
@@ -37,8 +37,10 @@ export class Forest<DataType>
       this.$path = path;
       this.$parent = parent;
       // Subscribe to parent messages
-      this.#parentSub = parent.receiver.subscribe((message) => {
-        this.handleMessage(message);
+      this.#parentSub = parent.receiver.subscribe({
+        next: (message: unknown) => {
+          this.handleMessage(message as ForestMessage);
+        }
       });
     } else {
       // Handle root construction - no subject needed for branches
@@ -47,7 +49,6 @@ export class Forest<DataType>
   }
 
   readonly $path?: Path = [];
-  readonly $parent?: StoreIF<unknown>;
 
   get $isRoot() {
     return !this.$parent;
@@ -78,11 +79,11 @@ export class Forest<DataType>
     }
   }
 
-  get $root(): StoreIF<unknown> | undefined {
+  get $root(): this {
     if (this.$isRoot) {
       return this;
     }
-    return this.$parent?.$root;
+    return this.$parent!.$root as this;
   }
 
   // Override complete to handle forest-wide completion
@@ -119,9 +120,7 @@ export class Forest<DataType>
     }
 
     // Apply prep function if it exists to transform partial input to complete data
-    const preparedValue = this.prep
-      ? this.prep(value, this.value!)
-      : (value as DataType);
+    const preparedValue = this.prep(value);
 
     // First validate using Store's validation
     const { isValid, error } = this.$validate(preparedValue);
@@ -191,13 +190,13 @@ export class Forest<DataType>
     }
   }
 
-  set(path: Path, value: unknown): boolean {
+  set(path: Path, value: unknown): void {
     const pathArray = Array.isArray(path) ? path : pathString(path).split('.');
     const newValue = produce(this.value, (draft) => {
       // Use Immer to safely set nested values
       setPath(draft, pathArray, value);
     });
-    return this.next(newValue);
+    this.next(newValue);
   }
 
   $branch<Type, Subclass extends StoreIF<Type> = StoreIF<Type>>(
@@ -210,13 +209,13 @@ export class Forest<DataType>
         name,
         ...params,
         path,
-        parent: this,
+        parent: this as StoreIF<unknown>,
       });
     }
     return new Forest<Type>({
       name,
       ...params,
-      parent: this,
+      parent: this as StoreIF<unknown>,
       path,
     }) as unknown as Subclass;
   }
@@ -238,7 +237,7 @@ export class Forest<DataType>
     }
   }
 
-  get $subject() {
+  get $subject(): Observable<DataType> {
     if (this.$isRoot) {
       return super.$subject;
     }

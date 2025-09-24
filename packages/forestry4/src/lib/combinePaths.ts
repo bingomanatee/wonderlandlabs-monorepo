@@ -1,14 +1,11 @@
 import { Path } from '../types';
 
-function toPathArray(p: Path): (string | RegExp)[] {
+function toPathArray(p: Path): string[] {
   if (Array.isArray(p)) {
     return p;
   }
   if (typeof p === 'string') {
     return p.split('.');
-  }
-  if (p instanceof RegExp) {
-    return [p];
   }
   console.log('unparsable $path: ', p);
   throw new Error('cannot parse $path');
@@ -18,7 +15,7 @@ export function pathString(path: Path): string {
   return Array.isArray(path) ? path.join('.') : `${path}`;
 }
 
-export default function combinePaths(p: Path, p2: Path) {
+export default function combinePaths(p: Path, p2: Path): string[] {
   if (!Array.isArray(p)) {
     return combinePaths(toPathArray(p), p2);
   }
@@ -28,10 +25,10 @@ export default function combinePaths(p: Path, p2: Path) {
   }
 
   if (!p.length) {
-    return p2;
+    return p2 as string[];
   }
   if (!p2.length) {
-    return p;
+    return p as string[];
   }
   return [...p, ...p2];
 }

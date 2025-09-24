@@ -598,9 +598,6 @@ function toPathArray(p) {
   if (typeof p === "string") {
     return p.split(".");
   }
-  if (p instanceof RegExp) {
-    return [p];
-  }
   console.log("unparsable $path: ", p);
   throw new Error("cannot parse $path");
 }
@@ -728,7 +725,12 @@ class Store {
       return;
     }
     if (this.debug) {
-      this.$broadcast({ action: "next-error", error, value: preparedValue });
+      this.$broadcast({
+        action: "next-error",
+        error,
+        input: value,
+        value: preparedValue
+      });
     }
     throw asError(error);
   }
@@ -872,7 +874,7 @@ class Store {
   get $isRoot() {
     return true;
   }
-  $parent;
+  $parent = void 0;
   $broadcast(message, fromRoot) {
     if (fromRoot || !this.$parent) {
       this.receiver.next(message);
@@ -999,15 +1001,16 @@ class Forest extends Store {
       );
       this.$path = path;
       this.$parent = parent;
-      this.#parentSub = parent.receiver.subscribe((message) => {
-        this.handleMessage(message);
+      this.#parentSub = parent.receiver.subscribe({
+        next: (message) => {
+          this.handleMessage(message);
+        }
       });
     } else {
       super(p);
     }
   }
   $path = [];
-  $parent;
   get $isRoot() {
     return !this.$parent;
   }
@@ -1034,7 +1037,7 @@ class Forest extends Store {
     if (this.$isRoot) {
       return this;
     }
-    return this.$parent?.$root;
+    return this.$parent.$root;
   }
   // Override complete to handle forest-wide completion
   complete() {
@@ -1059,7 +1062,7 @@ class Forest extends Store {
     if (!this.isActive) {
       throw new Error("Cannot update completed store");
     }
-    const preparedValue = this.prep ? this.prep(value, this.value) : value;
+    const preparedValue = this.prep(value);
     const { isValid, error } = this.$validate(preparedValue);
     if (!isValid) {
       if (this.debug) {
@@ -1121,7 +1124,7 @@ class Forest extends Store {
     const newValue = produce(this.value, (draft) => {
       setPath(draft, pathArray, value);
     });
-    return this.next(newValue);
+    this.next(newValue);
   }
   $branch(path, params) {
     const name = this.$name + "." + pathString(path);

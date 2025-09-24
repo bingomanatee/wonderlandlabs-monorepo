@@ -20,6 +20,9 @@ pattern for observables Subject fields (value, next, complete...) are not $-pref
 
 Adding $ back as a "bound" mirror of the base class for ease of use in React. 
 
+## 4.1.7
+
+Fixed type issues - exposing a d.ts file
 
 
 

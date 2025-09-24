@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-import { Observer, SubjectLike, Subscription } from 'rxjs';
+import { Observable, Observer, SubjectLike, Subscription } from 'rxjs';
 import { ZodParser } from './typeguards';
 
 export type TransParams = {
@@ -49,7 +49,8 @@ export interface ForestMessage {
     | '$validate-all'
     | 'validation-failure'
     | 'validation-complete'
-    | 'complete';
+    | 'complete'
+    | 'set-pending';
   payload?: any;
   branchPath?: Path;
   error?: string;
@@ -85,6 +86,7 @@ export interface StoreIF<DataType> {
   $root: StoreIF<unknown>;
 
   $schema?: ZodParser;
+  $subject: Observable<DataType>;
 
   $test(value: unknown): Validity;
 
@@ -124,18 +126,14 @@ export type StoreParams<DataType, SubClass = StoreIF<DataType>> = {
   value: DataType;
   schema?: z.ZodSchema<DataType>;
   tests?: ValueTestFn<DataType> | ValueTestFn<DataType>[];
-  prep?: (
-    input: Partial<DataType>,
-    current: DataType,
-    initial: DataType,
-  ) => DataType;
+  prep?: (input: Partial<DataType>, current: DataType) => DataType;
   resources?: ResourceMap;
   name?: string;
   debug?: boolean;
   res?: Map<string, any>;
   path?: Path;
   parent?: StoreIF<unknown>;
-  subclass?: SubClass;
+  subclass?: new (...args: any[]) => SubClass;
 };
 
 type PathElement = string;

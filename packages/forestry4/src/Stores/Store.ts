@@ -294,7 +294,7 @@ export class Store<DataType> implements StoreIF<DataType> {
     return true;
   }
 
-  $parent: undefined;
+  $parent?: StoreIF<unknown> = undefined;
 
   public $broadcast(message: unknown, fromRoot?: boolean) {
     if (fromRoot || !this.$parent) {

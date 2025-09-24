@@ -2,3 +2,4 @@ node_modules/
 /.yarn/
 /.yarn/
 demos/matter-tree-2/*
+/.idea/AugmentWebviewStateStore.xml

@@ -5,16 +5,14 @@ import { DoDont, DoList, DoItem, DontList, DontItem } from '../DoDont';
 
 const BestPracticesCard: React.FC = () => {
   return (
-    <Section>
-      <VStack layerStyle="section">
-        <Heading size="lg">React Integration Best Practices</Heading>
-        <Text>
-          React is "quirky" about some features; the hooks above take care of all these concerns but
-          if you plan to integrate Forestry with your own code or custom hooks follow these
-          guidelines.
-        </Text>
+    <>
+      <Text mb={4}>
+        React is "quirky" about some features; the hooks above take care of all these concerns but
+        if you plan to integrate Forestry with your own code or custom hooks follow these
+        guidelines.
+      </Text>
 
-        <DoDont>
+      <DoDont title="React Integration Best Practices">
           <DoList>
             <DoItem title="Use Forestry hooks to reduce blend boilerplate">
               You can subscribe in useEffect and store stores in ref -- but the hooks take care
@@ -72,9 +70,8 @@ myStore.$subject.pipe(
               gives you access to nuance from RxJS including debounce and throttle.
             </DontItem>
           </DontList>
-        </DoDont>
-      </VStack>
-    </Section>
+      </DoDont>
+    </>
   );
 };
 

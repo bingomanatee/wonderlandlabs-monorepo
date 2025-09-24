@@ -108,14 +108,63 @@ export class CodeTabsForest extends Forest<CodeTabsState> {
         return '.js';
       case 'jsx':
         return '.jsx';
+      case 'vue':
+        return '.vue';
+      case 'html':
+        return '.html';
+      case 'css':
+        return '.css';
+      case 'scss':
+      case 'sass':
+        return '.scss';
+      case 'python':
+        return '.py';
+      case 'java':
+        return '.java';
+      case 'c':
+        return '.c';
+      case 'cpp':
+      case 'c++':
+        return '.cpp';
+      case 'csharp':
+      case 'c#':
+        return '.cs';
+      case 'php':
+        return '.php';
+      case 'ruby':
+        return '.rb';
+      case 'go':
+        return '.go';
+      case 'rust':
+        return '.rs';
+      case 'swift':
+        return '.swift';
+      case 'kotlin':
+        return '.kt';
+      case 'dart':
+        return '.dart';
       case 'bash':
       case 'shell':
         return '.sh';
+      case 'powershell':
+        return '.ps1';
       case 'json':
         return '.json';
+      case 'yaml':
+      case 'yml':
+        return '.yml';
+      case 'xml':
+        return '.xml';
+      case 'markdown':
+      case 'md':
+        return '.md';
+      case 'sql':
+        return '.sql';
+      case 'dockerfile':
+        return '.dockerfile';
       default:
         throw new Error(
-          `Unsupported language: ${language}. Must be one of: typescript, tsx, javascript, jsx, bash, json`
+          `Unsupported language: ${language}. Supported languages: typescript, tsx, javascript, jsx, vue, html, css, scss, python, java, c, cpp, csharp, php, ruby, go, rust, swift, kotlin, dart, bash, powershell, json, yaml, xml, markdown, sql, dockerfile`
         );
     }
   }

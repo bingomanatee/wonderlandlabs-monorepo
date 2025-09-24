@@ -1,0 +1,193 @@
+<!-- Vue.js Component with Forestry Integration -->
+<!-- Uses Forestry's $ methods directly in event handlers for cleaner code -->
+<template>
+  <div class="user-form">
+    <h2>User Profile</h2>
+
+    <form @submit.prevent="handleSubmit">
+      <!-- Name Field -->
+      <div class="field">
+        <label for="name">Name:</label>
+        <input
+          id="name"
+          v-model="userState.name"
+          type="text"
+          @input="e => userStore.$.updateName(e.target.value)"
+          :class="{ error: nameError }"
+        />
+        <span v-if="nameError" class="error-message">{{ nameError }}</span>
+      </div>
+
+      <!-- Email Field -->
+      <div class="field">
+        <label for="email">Email:</label>
+        <input
+          id="email"
+          v-model="userState.email"
+          type="email"
+          @input="e => userStore.$.updateEmail(e.target.value)"
+          :class="{ error: emailError }"
+        />
+        <span v-if="emailError" class="error-message">{{ emailError }}</span>
+      </div>
+
+      <!-- Age Field -->
+      <div class="field">
+        <label for="age">Age:</label>
+        <input
+          id="age"
+          v-model.number="userState.age"
+          type="number"
+          @input="e => userStore.$.updateAge(parseInt(e.target.value) || 0)"
+          :class="{ error: ageError }"
+        />
+        <span v-if="ageError" class="error-message">{{ ageError }}</span>
+      </div>
+
+      <!-- Active Checkbox -->
+      <div class="field">
+        <label>
+          <input
+            v-model="userState.isActive"
+            type="checkbox"
+            @change="userStore.$.toggleActive"
+          />
+          Active User
+        </label>
+      </div>
+
+      <button type="submit" :disabled="!isFormValid">
+        Save User
+      </button>
+    </form>
+
+    <!-- Preview Section -->
+    <div class="preview">
+      <h3>Preview</h3>
+      <p><strong>Display Name:</strong> {{ displayName }}</p>
+      <p><strong>Status:</strong> {{ userState.isActive ? 'Active' : 'Inactive' }}</p>
+      <p><strong>Form Valid:</strong> {{ isFormValid ? 'Yes' : 'No' }}</p>
+    </div>
+  </div>
+</template>
+
+<script>
+import { userStore } from './userStore';
+
+export default {
+  name: 'UserForm',
+  data() {
+    return {
+      userState: userStore.value,
+      errors: [],
+      userStore, // Make store available in template
+    };
+  },
+  computed: {
+    isFormValid() {
+      return userStore.isValid;
+    },
+    displayName() {
+      return userStore.displayName;
+    },
+    nameError() {
+      return this.getFieldError('name');
+    },
+    emailError() {
+      return this.getFieldError('email');
+    },
+    ageError() {
+      return this.getFieldError('age');
+    },
+  },
+  mounted() {
+    // Subscribe to store changes
+    this.subscription = userStore.$subject.subscribe((newState) => {
+      this.userState = newState;
+    });
+
+    // Subscribe to validation errors
+    this.errorSubscription = userStore.$quality.subscribe((errors) => {
+      this.errors = errors;
+    });
+  },
+  beforeUnmount() {
+    // Clean up subscriptions
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
+    if (this.errorSubscription) {
+      this.errorSubscription.unsubscribe();
+    }
+  },
+  methods: {
+    getFieldError(fieldName) {
+      const error = this.errors.find(err => err.path?.includes(fieldName));
+      return error?.message || '';
+    },
+    handleSubmit() {
+      if (this.isFormValid) {
+        console.log('Saving user:', this.userState);
+        // Handle form submission
+      }
+    },
+  },
+};
+</script>
+
+<style scoped>
+.user-form {
+  max-width: 500px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.field {
+  margin-bottom: 15px;
+}
+
+.field label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: bold;
+}
+
+.field input {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.field input.error {
+  border-color: #e53e3e;
+}
+
+.error-message {
+  color: #e53e3e;
+  font-size: 0.875rem;
+  margin-top: 5px;
+  display: block;
+}
+
+button {
+  background-color: #3182ce;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+button:disabled {
+  background-color: #a0aec0;
+  cursor: not-allowed;
+}
+
+.preview {
+  margin-top: 30px;
+  padding: 15px;
+  background-color: #f7fafc;
+  border-radius: 4px;
+}
+</style>

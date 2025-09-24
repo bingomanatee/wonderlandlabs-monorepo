@@ -176,41 +176,35 @@ const IntegrationHooks: React.FC = () => {
         </Section>
 
         {/* Best Practices */}
-        <Section>
-          <VStack spacing={6} align="stretch">
-            <Heading size="lg">Integration Hook Best Practices</Heading>
+        <DoDont title="Integration Hook Best Practices">
+          <DoList title="✅ Do">
+            <DoItem title="Use useForestryLocal for stores">
+              Primary hook for store subscriptions in components
+            </DoItem>
 
-            <DoDont>
-              <DoList title="✅ Do">
-                <DoItem title="Use useForestryLocal for stores">
-                  Primary hook for store subscriptions in components
-                </DoItem>
+            <DoItem title="Use useForestBranch for forms">
+              Perfect for field-level state management and validation
+            </DoItem>
 
-                <DoItem title="Use useForestBranch for forms">
-                  Perfect for field-level state management and validation
-                </DoItem>
+            <DoItem title="Memoize store creation">
+              Use useMemo to prevent store recreation on re-renders
+            </DoItem>
+          </DoList>
 
-                <DoItem title="Memoize store creation">
-                  Use useMemo to prevent store recreation on re-renders
-                </DoItem>
-              </DoList>
+          <DontList title="❌ These will not work">
+            <DontItem title="Create stores in render">
+              Always memoize store creation, or attach it to a ref, to avoid memory leaks.
+            </DontItem>
 
-              <DontList title="❌ These will not work">
-                <DontItem title="Create stores in render">
-                  Always memoize store creation, or attach it to a ref, to avoid memory leaks.
-                </DontItem>
+            <DontItem title="Mix hook types unnecessarily">
+              Choose the right hook for your use case
+            </DontItem>
 
-                <DontItem title="Mix hook types unnecessarily">
-                  Choose the right hook for your use case
-                </DontItem>
-
-                <DontItem title="Forget dependency arrays">
-                  Include store in useEffect dependencies when needed
-                </DontItem>
-              </DontList>
-            </DoDont>
-          </VStack>
-        </Section>
+            <DontItem title="Forget dependency arrays">
+              Include store in useEffect dependencies when needed
+            </DontItem>
+          </DontList>
+        </DoDont>
       </VStack>
 
       {/* useForestBranch Hook */}

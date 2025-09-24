@@ -5,7 +5,7 @@ A set of reusable components for creating consistent "Do's and Don'ts" sections 
 ## Components
 
 ### `DoDont`
-Container component that provides responsive grid layout for side-by-side Do and Don't lists.
+Container component that provides a Section wrapper with responsive grid layout for side-by-side Do and Don't lists. Includes automatic Section styling and optional title.
 
 ### `DoList` 
 Container for positive recommendations with green styling and check mark emoji.
@@ -35,7 +35,7 @@ import { DoDont, DoList, DoItem, DontList, DontItem, DoDontItem, TradeoffList, T
 
 const MyBestPractices = () => {
   return (
-    <DoDont>
+    <DoDont title="Best Practices">
       <DoList title="✅ Best Practices">
         <DoItem title="Use meaningful names">
           Choose descriptive variable and function names that clearly indicate their purpose.
@@ -62,18 +62,18 @@ const MyBestPractices = () => {
 // Example with trade-offs
 const MyComparison = () => {
   return (
-    <DoDont>
+    <DoDont title="Framework Comparison">
       <DoList title="✅ Advantages">
         <DoItem title="Great performance">
           Optimized for speed and efficiency.
         </DoItem>
       </DoList>
 
-      <TradeoffList title="⚠️ Considerations">
-        <TradeoffItem title="Learning curve">
+      <DontList title="⚠️ Considerations">
+        <DontItem title="Learning curve">
           Requires time to master the concepts.
-        </TradeoffItem>
-      </TradeoffList>
+        </DontItem>
+      </DontList>
     </DoDont>
   );
 };
@@ -81,7 +81,7 @@ const MyComparison = () => {
 // Example using DoDontItem directly
 const MyDirectUsage = () => {
   return (
-    <DoDont>
+    <DoDont title="Direct Usage Example">
       <DoList>
         <DoDontItem title="Good practice" isDont={false}>
           This is a positive recommendation.
@@ -100,6 +100,7 @@ const MyDirectUsage = () => {
 ### DoDont Props
 Extends `SimpleGridProps` from Chakra UI.
 - `children`: React.ReactNode - DoList and DontList components
+- `title?`: string - Optional section title
 
 ### DoList/DontList/TradeoffList Props
 Extends `VStackProps` from Chakra UI (excluding 'title').

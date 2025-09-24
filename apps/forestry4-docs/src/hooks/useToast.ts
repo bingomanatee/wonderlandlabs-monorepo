@@ -1,10 +1,10 @@
-import { useToast } from '@chakra-ui/react';
+import { useToast as useToastChakra } from '@chakra-ui/react';
 import { useCallback } from 'react';
 
 export type FeedbackFn = (err: Error | string, title?: string) => void;
 
 export function useToast() {
-  const toast = useToast();
+  const toast = useToastChakra();
 
   const handleError = useCallback(
     (error: Error | string, title?: string) => {

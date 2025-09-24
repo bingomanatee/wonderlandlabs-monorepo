@@ -92,11 +92,11 @@ const BenefitsSection: React.FC = () => {
             </ListItem>
             <ListItem>
               <ListIcon as={CheckIcon} color="purple.500" />
-              Built-in testing tools
+              Designed for easy testing
             </ListItem>
             <ListItem>
               <ListIcon as={CheckIcon} color="purple.500" />
-              Excellent debugging
+              Easy to leverage working pattens through extension
             </ListItem>
           </List>
         </Box>

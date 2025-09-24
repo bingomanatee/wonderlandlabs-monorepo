@@ -15,7 +15,7 @@ import {
 } from '@chakra-ui/react';
 import { Link } from 'react-router-dom';
 import Section from '@/components/Section.tsx';
-import { DoDont, DoList, DoItem, TradeoffList, TradeoffItem } from '@/components/DoDont';
+import { DoDont, DoItem, DoList, DontItem, DontList } from '@/components/DoDont';
 
 const ComparisonSection: React.FC = () => {
   return (
@@ -312,40 +312,27 @@ const ComparisonSection: React.FC = () => {
             Three-layer validation system with runtime checks
           </DoItem>
 
-          <DoItem title="RxJS Integration">
-            Powerful reactive programming capabilities
-          </DoItem>
+          <DoItem title="RxJS Integration">Powerful reactive programming capabilities</DoItem>
 
-          <DoItem title="Forest Branching">
-            Unique field-level state management for forms
-          </DoItem>
+          <DoItem title="Forest Branching">Unique field-level state management for forms</DoItem>
 
-          <DoItem title="Quality Feedback">
-            User-friendly validation messages
-          </DoItem>
+          <DoItem title="Quality Feedback">User-friendly validation messages</DoItem>
 
-          <DoItem title="Factory Pattern">
-            Dependency injection and reusable store creation
+          <DoItem title="Very Testable">
+            States can easily be tested without magical test library as it is self contained and
+            synchronous
           </DoItem>
         </DoList>
 
-        <TradeoffList>
-          <TradeoffItem title="Learning Curve">
+        <DontList title="Potential Costs">
+          <DontItem title="Learning Curve">
             New concepts like Forest branching and validation layers
-          </TradeoffItem>
+          </DontItem>
 
-          <TradeoffItem title="Bundle Size">
-            RxJS dependency adds to bundle size
-          </TradeoffItem>
+          <DontItem title="Bundle Size">RxJS dependency adds to bundle size</DontItem>
 
-          <TradeoffItem title="Ecosystem">
-            Newer library with smaller community
-          </TradeoffItem>
-
-          <TradeoffItem title="Documentation">
-            Still growing compared to established solutions
-          </TradeoffItem>
-        </TradeoffList>
+          <DontItem title="Ecosystem">Newer library with smaller community</DontItem>
+        </DontList>
       </DoDont>
     </VStack>
   );

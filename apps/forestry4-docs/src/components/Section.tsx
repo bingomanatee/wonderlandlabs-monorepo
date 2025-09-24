@@ -25,7 +25,6 @@ const Section: React.FC<SectionProps> = ({
     ''
   );
 
-  console.log('section:', title, 'content:', children);
   return (
     <Card width="full" mb={3}>
       <CardBody {...props}>

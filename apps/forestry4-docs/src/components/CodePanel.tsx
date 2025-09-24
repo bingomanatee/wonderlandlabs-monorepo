@@ -13,6 +13,39 @@ import { CopyIcon } from '@chakra-ui/icons';
 import useForestryLocal from '../hooks/useForestryLocal';
 import { createCodePanelStore, CodePanelState } from '../storeFactories/codePanelStoreFactory';
 
+// Map language names to Prism.js language identifiers
+function getPrismLanguage(language: string): string {
+  switch (language.toLowerCase()) {
+    case 'tsx':
+      return 'typescript';
+    case 'jsx':
+      return 'javascript';
+    case 'vue':
+      return 'markup'; // Vue files are treated as HTML with embedded JS/CSS
+    case 'html':
+      return 'markup';
+    case 'scss':
+    case 'sass':
+      return 'scss';
+    case 'c++':
+    case 'cpp':
+      return 'cpp';
+    case 'csharp':
+    case 'c#':
+      return 'csharp';
+    case 'shell':
+      return 'bash';
+    case 'yml':
+      return 'yaml';
+    case 'md':
+      return 'markdown';
+    case 'dockerfile':
+      return 'docker';
+    default:
+      return language.toLowerCase();
+  }
+}
+
 export interface CodePanelProps {
   // Core required props
   language: string;
@@ -198,7 +231,7 @@ const CodePanel: React.FC<CodePanelProps> = ({
         >
           <Code
             as="code"
-            className={`language-${state.language === 'tsx' ? 'typescript' : state.language}`}
+            className={`language-${getPrismLanguage(state.language)}`}
             bg="transparent"
             color="inherit"
             p={0}

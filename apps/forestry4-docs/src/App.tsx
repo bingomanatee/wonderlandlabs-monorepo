@@ -11,6 +11,7 @@ import WhyForestry from './pages/WhyForestry';
 import StoreBasics from './pages/StoreBasics';
 import ChangeValue from './pages/ChangeValue.tsx';
 import ReactIntegration from './pages/ReactIntegration';
+import OtherFrameworks from './pages/OtherFrameworks';
 
 // Power Tools
 import ValidationSystem from './pages/ValidationSystem';
@@ -43,6 +44,7 @@ function App() {
           <Route path="/forest" element={<StoreBasics />} />
           <Route path="/change" element={<ChangeValue />} />
           <Route path="/react" element={<ReactIntegration />} />
+          <Route path="/other-frameworks" element={<OtherFrameworks />} />
 
           {/* Power Tools */}
           <Route path="/validation" element={<ValidationSystem />} />

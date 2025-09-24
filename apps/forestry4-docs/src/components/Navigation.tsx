@@ -29,6 +29,7 @@ const menuItems: Record<string, MenuItem[]> = {
     { label: 'Basics', path: '/forest' },
     { label: 'Value Change', path: '/change' },
     { label: 'With React', path: '/react' },
+    { label: 'Other Frameworks', path: '/other-frameworks' },
   ],
   'Power Tools': [
     { label: 'Validation', path: '/validation' },

@@ -182,9 +182,80 @@ export class CodePanelForest extends Forest<CodePanelState> {
     });
   }
 
+  // Get file extension based on language - comprehensive mapping
+  private getFileExtension(language: string): string {
+    switch (language.toLowerCase()) {
+      case 'typescript':
+        return 'ts';
+      case 'tsx':
+        return 'tsx';
+      case 'javascript':
+        return 'js';
+      case 'jsx':
+        return 'jsx';
+      case 'vue':
+        return 'vue';
+      case 'html':
+        return 'html';
+      case 'css':
+        return 'css';
+      case 'scss':
+      case 'sass':
+        return 'scss';
+      case 'python':
+        return 'py';
+      case 'java':
+        return 'java';
+      case 'c':
+        return 'c';
+      case 'cpp':
+      case 'c++':
+        return 'cpp';
+      case 'csharp':
+      case 'c#':
+        return 'cs';
+      case 'php':
+        return 'php';
+      case 'ruby':
+        return 'rb';
+      case 'go':
+        return 'go';
+      case 'rust':
+        return 'rs';
+      case 'swift':
+        return 'swift';
+      case 'kotlin':
+        return 'kt';
+      case 'dart':
+        return 'dart';
+      case 'bash':
+      case 'shell':
+        return 'sh';
+      case 'powershell':
+        return 'ps1';
+      case 'json':
+        return 'json';
+      case 'yaml':
+      case 'yml':
+        return 'yml';
+      case 'xml':
+        return 'xml';
+      case 'markdown':
+      case 'md':
+        return 'md';
+      case 'sql':
+        return 'sql';
+      case 'dockerfile':
+        return 'dockerfile';
+      default:
+        // Fallback to the language name as extension
+        return language.toLowerCase();
+    }
+  }
+
   get path() {
     const { folder, snippetName, language } = this.value;
-    const extension = language === 'tsx' ? 'tsx' : 'ts';
+    const extension = this.getFileExtension(language);
 
     return folder
       ? `/snippets/${folder}/${snippetName}.${extension}`

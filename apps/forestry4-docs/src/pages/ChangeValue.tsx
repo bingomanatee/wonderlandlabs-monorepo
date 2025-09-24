@@ -114,7 +114,7 @@ const ChangeValue: React.FC = () => {
               produce function. <code>mudate(fn)</code> is a wrapper for{' '}
               <a target="_new" href="https://immerjs.github.io/immer/produce/">
                 Immer's produce(fn)
-              </a>{' '}
+              </a>
               utility.
             </ItemDef>
 
@@ -142,20 +142,20 @@ const ChangeValue: React.FC = () => {
             </DoItem>
 
             <DoItem title="Replace useState and callbacks">
-              Forestry can replace most callbacks and useState artifacts in react; this makes
-              your code cleaner and more testable.
+              Forestry can replace most callbacks and useState artifacts in react; this makes your
+              code cleaner and more testable.
             </DoItem>
 
             <DoItem title="Use the simplest change method available">
-              Prefer using set to change a single property. If you want to change several
-              properties or modify a complex type (eg pushing into an array) use mutate. On
-              the rare case where you want to completely change every element of the state use
-              next; but the less you use next the more maintainable your code is.
+              Prefer using set to change a single property. If you want to change several properties
+              or modify a complex type (eg pushing into an array) use mutate. On the rare case where
+              you want to completely change every element of the state use next; but the less you
+              use next the more maintainable your code is.
             </DoItem>
 
             <DoItem title="Use $.method in event listeners">
-              There is no reason to wrap state methods - the "$" object has your custom
-              methods pre-bound to your state and can be used directly in event listeners.
+              There is no reason to wrap state methods - the "$" object has your custom methods
+              pre-bound to your state and can be used directly in event listeners.
             </DoItem>
           </DoList>
 
@@ -164,17 +164,16 @@ const ChangeValue: React.FC = () => {
               the value parameter <i>and</i> <code>this.value</code> are both
               <a href="https://immerjs.github.io/immer/">Immer</a> immutables that{' '}
               <i>cannot be edited</i> - this is even "more const than const";
-              <code>Map.set</code> or <code>array.push/pop/etc</code> do not work on values.
-              (this by the way is also true of Redux Toolkit actions).
+              <code>Map.set</code> or <code>array.push/pop/etc</code> do not work on values. (this
+              by the way is also true of Redux Toolkit actions).
               <br />
               <br />
-              The <code>.mutate(lambda)</code> method is how you can directly edit state
-              value.
+              The <code>.mutate(lambda)</code> method is how you can directly edit state value.
             </DontItem>
 
             <DontItem title="Actions cannot be arrow functions (lambdas)">
-              you cannot bind or change a lambdas' definiton of this so actions cannot be
-              bound to state from the constructor definitions: eg.,
+              you cannot bind or change a lambdas' definiton of this so actions cannot be bound to
+              state from the constructor definitions: eg.,
               <CodePanel
                 snippetName="arrow-function-antipattern"
                 folder="actions-state"

@@ -6,7 +6,6 @@ import {
   Flex,
   HStack,
   Image,
-  Link,
   Menu,
   MenuButton,
   MenuItem,
@@ -14,7 +13,7 @@ import {
   Text,
   useColorModeValue,
 } from '@chakra-ui/react';
-import { Link as RouterLink, useLocation } from 'react-router-dom';
+import { Link, Link as RouterLink, useLocation } from 'react-router-dom';
 import { ChevronDownIcon, ExternalLinkIcon } from '@chakra-ui/icons';
 import { FaGithub } from 'react-icons/fa';
 import useForestryLocal from '../hooks/useForestryLocal';

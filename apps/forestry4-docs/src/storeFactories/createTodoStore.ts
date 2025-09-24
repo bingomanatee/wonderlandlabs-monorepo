@@ -132,15 +132,7 @@ class TodoForest extends Forest<TodoState> {
     }
   }
 
-  // Create bound toggle function for specific todo
-  createToggleTodo(id: number) {
-    return () => this.toggleTodo(id);
-  }
 
-  // Create bound remove function for specific todo
-  createRemoveTodo(id: number) {
-    return () => this.removeTodo(id);
-  }
 
   // Tactical form handler using event target name
   onChange(event: React.ChangeEvent<HTMLInputElement>) {

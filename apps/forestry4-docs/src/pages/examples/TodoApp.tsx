@@ -123,10 +123,7 @@ const TodoApp: React.FC = () => {
                     <strong>Selector Actions:</strong> filteredTodos, completedCount, activeCount,
                     isAddDisabled
                   </ListItem>
-                  <ListItem>
-                    <strong>Factory Actions:</strong> createToggleTodo, createRemoveTodo (for
-                    parameterized handlers)
-                  </ListItem>
+
                 </List>
               </Box>
 

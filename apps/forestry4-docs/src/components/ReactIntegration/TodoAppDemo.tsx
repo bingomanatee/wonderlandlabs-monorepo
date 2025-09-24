@@ -69,7 +69,7 @@ const TodoAppDemo: React.FC = () => {
                   <Checkbox
                     isChecked={todo.completed}
                     title="click to complete task"
-                    onChange={todoStore.$.createToggleTodo(todo.id)}
+                    onChange={() => todoStore.$.toggleTodo(todo.id)}
                   />
                   <Text
                     flex={1}
@@ -82,7 +82,7 @@ const TodoAppDemo: React.FC = () => {
                     size="sm"
                     colorScheme="red"
                     variant="ghost"
-                    onClick={todoStore.$.createRemoveTodo(todo.id)}
+                    onClick={() => todoStore.$.removeTodo(todo.id)}
                   />
                 </HStack>
               ))}

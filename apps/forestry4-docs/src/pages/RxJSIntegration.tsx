@@ -14,14 +14,15 @@ const RxJSIntegration: React.FC = () => {
       <Section title="Leverage RxJS operators and reactive programming patterns with Forestry 4">
         <Box>
           <Text mt={4}>
-            Every store exposes an rxjs subject. you can observe or <code>.pipe(...)</code>a stores'
-            output to throttle it, or conbine or modify store stream(s).
+            Every Forest instance exposes an rxjs <code>$subject</code>. You can observe or{' '}
+            <code>.pipe(...)</code> a stores' output to throttle it, or combine or modify store
+            stream(s).
           </Text>
 
           <Text>
             Stores follow the observable pattern closely; they don't immediately derive from
-            BehaviorSubjects but they do follow the pattern - methods like{' '}
-            <code>next(candidate), complete, subscribe</code>
+            BehaviorSubjects but they do follow the pattern - methods like
+            <code>next(.candidate), .complete(), .subscribe(listener)</code>
             behave as you would expect for an RxJS Observable.
           </Text>
         </Box>
@@ -40,7 +41,11 @@ const RxJSIntegration: React.FC = () => {
           </Text>
 
           <Text>
-            the <code>.mutate()</code> method in stores are in fact wrappers for immer providers.
+            the <code>.mutate(fn)</code> method in stores are in fact wrappers for
+            <a target="_new" href="https://immerjs.github.io/immer/produce/">
+              Immer's produce(fn)
+            </a>{' '}
+            utility.
           </Text>
         </Box>
       </Section>

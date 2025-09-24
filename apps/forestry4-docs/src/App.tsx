@@ -39,6 +39,7 @@ function App() {
           {/* Getting Started */}
           <Route path="/" element={<Home />} />
           <Route path="/why" element={<WhyForestry />} />
+          <Route path="/store" element={<StoreBasics />} />
 
           {/* Essential Features */}
           <Route path="/forest" element={<StoreBasics />} />

@@ -17,7 +17,7 @@ import {
   VStack,
 } from '@chakra-ui/react';
 import useForestryLocal from '../../hooks/useForestryLocal';
-import useErrorHandler from '../../hooks/useErrorHandler';
+import useErrorHandler from '../../hooks/useToast';
 import shoppingCartStoreFactory, {
   CartItem,
   ShoppingCart,

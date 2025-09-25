@@ -7,7 +7,7 @@
 import React from 'react';
 import { Button } from '@chakra-ui/react';
 import { useForestryLocal } from '../../hooks/useForestryLocal';
-import useErrorHandler from '../../hooks/useErrorHandler';
+import useErrorHandler from '../../hooks/useToast';
 import shoppingCartStoreFactory from '../../storeFactories/ValidationSystem/shoppingCartStore';
 
 const ShoppingCartDemo: React.FC = () => {

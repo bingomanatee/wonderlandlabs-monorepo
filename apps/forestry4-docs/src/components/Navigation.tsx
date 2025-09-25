@@ -31,6 +31,7 @@ const menuItems: Record<string, MenuItem[]> = {
     { label: 'Other Frameworks', path: '/other-frameworks' },
   ],
   'Power Tools': [
+    { label: 'Branching', path: '/branching' },
     { label: 'Validation', path: '/validation' },
     { label: 'Schema', path: '/schemas' },
     { label: 'Transactions', path: '/transactions' },

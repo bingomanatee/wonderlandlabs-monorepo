@@ -1,5 +1,5 @@
-// Auto-generated snippet from: apps/forestry4-docs/src/hooks/useErrorHandler.ts
-// Description: useErrorHandler hook for toast-based error handling
+// Auto-generated snippet from: apps/forestry4-docs/src/hooks/useToast.ts
+// Description: useToast hook for toast-based error handling
 // Last synced: Mon Sep 22 17:07:21 PDT 2025
 // DO NOT EDIT - This file is automatically synced from the source
 

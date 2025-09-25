@@ -84,6 +84,7 @@ const ComparisonSection: React.FC = () => {
               require some tooling.
             </Text>
           </Box>
+
           <Box>
             <Heading variant="subtle">
               Simplicity that doesn't scale is a net loss in productivity
@@ -119,6 +120,26 @@ const ComparisonSection: React.FC = () => {
           </Box>
         </Section>
       </Box>
+
+      <Section title="The problem with deep data">
+        <Text textStyle="body">
+          Most store systems are simply not set up to handle "Deep" data structrures; they are
+          optimized to flat or flattish key value stores and when the data gets significantly
+          complex and detailed -- and it is a <i>when</i>, not if -- you end up either dealing with
+          artificially managing detail in a cluttered "Top down" manner or balkanizing your data int
+          a set of interrelated states that access each others content in a somewhat sloppy "ad hock
+          graph DB" manner.
+        </Text>
+        <Text textStyle="body">
+          Forestry allows you to manage deep structures through <b>branching</b>: creating
+          arbitrarily deep sub-objects to manage any level of sub-scopes with custom methods
+          appropriate to their scope. The complete tree is maintained by the "root" forest but the
+          branch instances can give you focused methods for managing any level of detail in the
+          structure you want. These sub-objects can be used temporarily to affect change at a
+          detailed level or persist within a sub-component to provide a more focused access to the
+          part of the state the component is concerned with.
+        </Text>
+      </Section>
 
       {/* Feature Comparison Table */}
       <Box layerStyle="card" bg="gray.50">

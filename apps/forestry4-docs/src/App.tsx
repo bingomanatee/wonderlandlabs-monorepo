@@ -10,6 +10,7 @@ import WhyForestry from './pages/WhyForestry';
 // Essential Features
 import StoreBasics from './pages/StoreBasics';
 import ChangeValue from './pages/ChangeValue.tsx';
+import Branching from './pages/Branching';
 import ReactIntegration from './pages/ReactIntegration';
 import OtherFrameworks from './pages/OtherFrameworks';
 
@@ -48,6 +49,7 @@ function App() {
           <Route path="/other-frameworks" element={<OtherFrameworks />} />
 
           {/* Power Tools */}
+          <Route path="/branching" element={<Branching />} />
           <Route path="/validation" element={<ValidationSystem />} />
           <Route path="/schemas" element={<SchemaValidation />} />
           <Route path="/transactions" element={<Transactions />} />

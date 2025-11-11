@@ -16,7 +16,7 @@ export declare class Forest<DataType> extends Store<DataType> implements StoreIF
     complete(): DataType;
     next(value: Partial<DataType>): void;
     set(path: Path, value: unknown): void;
-    $branch<Type, Subclass extends StoreIF<Type> = StoreIF<Type>>(path: Path, params: StoreParams<Type, Subclass>): Subclass;
+    $branch<Type, Subclass extends StoreIF<Type> = StoreIF<Type>>(path: Path, params: StoreParams<Type, Subclass>, ...rest: unknown[]): Subclass;
     private handleMessage;
     get $subject(): Observable<DataType>;
     subscribe(listener: Listener<DataType>): Subscription;
@@ -47,7 +47,89 @@ declare type PendingValue<DataType = unknown> = {
 
 export declare type ResourceMap = Map<string, any>;
 
-/* Excluded from this release type: Store */
+/**
+ * Base implementation class for Forestry stores.
+ *
+ * While you can use Store directly, it's recommended to extend Forest instead
+ * for most use cases, as Forest provides additional features like branching
+ * and hierarchical state management.
+ *
+ * @example Basic Store usage (advanced)
+ * ```typescript
+ * const store = new Store({ value: { count: 0 } });
+ * store.mutate(draft => { draft.count += 1; });
+ * ```
+ *
+ * @example Recommended Forest usage
+ * ```typescript
+ * class CounterStore extends Forest<{ count: number }> {
+ *   constructor() {
+ *     super({ value: { count: 0 } });
+ *   }
+ *
+ *   increment() {
+ *     this.mutate(draft => { draft.count += 1; });
+ *   }
+ * }
+ * ```
+ */
+export declare class Store<DataType> implements StoreIF<DataType> {
+    #private;
+    constructor(p: StoreParams<DataType>, noSubject?: boolean);
+    get $subject(): Observable<DataType>;
+    debug: boolean;
+    prep(value: Partial<DataType>): DataType;
+    $res: Map<string, any>;
+    get $name(): string;
+    complete(): DataType;
+    isActive: boolean;
+    next(value: Partial<DataType>): void;
+    get suspendValidation(): boolean;
+    $transact(params: TransParams | TransFn, suspend?: boolean): void;
+    observeTransStack(listener: Listener<PendingValue<DataType>[]>): Subscription;
+    _$?: Record<string, (...args: any[]) => unknown>;
+    get $(): Record<string, (...args: any[]) => unknown>;
+    queuePendingValue(value: DataType): string;
+    dequeuePendingValue(id: string): PendingValue<DataType> | undefined;
+    get $root(): this;
+    get $isRoot(): boolean;
+    $parent?: StoreIF<unknown>;
+    $broadcast(message: unknown, fromRoot?: boolean): void;
+    receiver: Subject<unknown>;
+    $validate(value: DataType): {
+        isValid: boolean;
+        value: DataType;
+        error: Error;
+        testFn: ValueTestFn<DataType> | undefined;
+    } | {
+        isValid: boolean;
+        value?: undefined;
+        error?: undefined;
+        testFn?: undefined;
+    } | {
+        isValid: boolean;
+        error: Error;
+        source: string;
+    };
+    $isValid(value: DataType): boolean;
+    $schema?: ZodParser;
+    $test(value: DataType): {
+        isValid: boolean;
+        value: DataType;
+        error: Error;
+        testFn: ValueTestFn<DataType> | undefined;
+    } | {
+        isValid: boolean;
+        value?: undefined;
+        error?: undefined;
+        testFn?: undefined;
+    };
+    get value(): DataType;
+    subscribe(listener: Listener<DataType>): Subscription;
+    get(path?: Path): any;
+    set(path: Path, value: unknown): void;
+    mutate(producerFn: (draft: any) => void, path?: Path): any;
+}
 
 export declare interface StoreIF<DataType> {
     $broadcast: (message: unknown, down?: boolean) => void;

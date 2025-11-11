@@ -23,7 +23,30 @@ import bindActions, { FnRecord } from '../lib/bindActions';
 enableMapSet();
 
 /**
- * @internal Base implementation class - not intended for direct use
+ * Base implementation class for Forestry stores.
+ *
+ * While you can use Store directly, it's recommended to extend Forest instead
+ * for most use cases, as Forest provides additional features like branching
+ * and hierarchical state management.
+ *
+ * @example Basic Store usage (advanced)
+ * ```typescript
+ * const store = new Store({ value: { count: 0 } });
+ * store.mutate(draft => { draft.count += 1; });
+ * ```
+ *
+ * @example Recommended Forest usage
+ * ```typescript
+ * class CounterStore extends Forest<{ count: number }> {
+ *   constructor() {
+ *     super({ value: { count: 0 } });
+ *   }
+ *
+ *   increment() {
+ *     this.mutate(draft => { draft.count += 1; });
+ *   }
+ * }
+ * ```
  */
 export class Store<DataType> implements StoreIF<DataType> {
   constructor(p: StoreParams<DataType>, noSubject = false) {

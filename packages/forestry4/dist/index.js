@@ -1126,15 +1126,18 @@ class Forest extends Store {
     });
     this.next(newValue);
   }
-  $branch(path, params) {
+  $branch(path, params, ...rest) {
     const name = this.$name + "." + pathString(path);
     if (params.subclass) {
-      return new params.subclass({
-        name,
-        ...params,
-        path,
-        parent: this
-      });
+      return new params.subclass(
+        {
+          name,
+          ...params,
+          path,
+          parent: this
+        },
+        ...rest
+      );
     }
     return new Forest({
       name,

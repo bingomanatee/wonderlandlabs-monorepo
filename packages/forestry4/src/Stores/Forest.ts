@@ -40,7 +40,7 @@ export class Forest<DataType>
       this.#parentSub = parent.receiver.subscribe({
         next: (message: unknown) => {
           this.handleMessage(message as ForestMessage);
-        }
+        },
       });
     } else {
       // Handle root construction - no subject needed for branches
@@ -202,16 +202,21 @@ export class Forest<DataType>
   $branch<Type, Subclass extends StoreIF<Type> = StoreIF<Type>>(
     path: Path,
     params: StoreParams<Type, Subclass>,
+    ...rest: unknown[]
   ): Subclass {
     const name = this.$name + '.' + pathString(path);
     if (params.subclass) {
-      return new params.subclass({
-        name,
-        ...params,
-        path,
-        parent: this as StoreIF<unknown>,
-      });
+      return new params.subclass(
+        {
+          name,
+          ...params,
+          path,
+          parent: this as StoreIF<unknown>,
+        },
+        ...rest,
+      );
     }
+    // note -- will not have rest props
     return new Forest<Type>({
       name,
       ...params,

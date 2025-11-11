@@ -95,7 +95,7 @@ class TransactionDemoForest extends Forest<BankState> {
   processPayroll(employees: Array<{ name: string; salary: number }>) {
     this.$transact({
       suspendValidation: true,
-      action: () => {
+      action() {
         // Track pending operations
         this.mutate((draft) => {
           draft.pendingOperations = employees.length;
@@ -197,7 +197,7 @@ class TransactionDemoForest extends Forest<BankState> {
   transferWithFee(amount: number, description: string, feePercentage: number = 0.02) {
     this.$transact({
       suspendValidation: true,
-      action: () => {
+      action() {
         const fee = Math.round(amount * feePercentage * 100) / 100;
         const totalAmount = amount + fee;
 
@@ -236,7 +236,7 @@ class TransactionDemoForest extends Forest<BankState> {
   batchTransfer(transfers: Array<{ amount: number; description: string }>) {
     this.$transact({
       suspendValidation: true,
-      action: () => {
+      action() {
         const totalAmount = transfers.reduce((sum, t) => sum + t.amount, 0);
 
         if (this.value.balance < totalAmount) {

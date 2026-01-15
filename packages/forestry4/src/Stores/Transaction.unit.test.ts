@@ -365,6 +365,144 @@ describe('Transaction System with observeTransStack', () => {
     });
   });
 
+  describe('Map Operations in Transactions', () => {
+    interface MapTestState {
+      records: Map<string, { id: string; value: number }>;
+      count: number;
+    }
+
+    let mapStore: Store<MapTestState>;
+
+    beforeEach(() => {
+      mapStore = new Store({
+        value: {
+          records: new Map(),
+          count: 0,
+        },
+      });
+    });
+
+    it('should handle single Map.set operation in transaction', () => {
+      const valueEvents: MapTestState[] = [];
+      
+      const valueSub = mapStore.subscribe((value) => {
+        valueEvents.push({
+          records: new Map(value.records),
+          count: value.count,
+        });
+      });
+
+      // Clear initial event
+      valueEvents.length = 0;
+
+      mapStore.$transact({
+        suspendValidation: true,
+        action: function() {
+          const newRecords = new Map(this.value.records);
+          newRecords.set('item1', { id: 'item1', value: 100 });
+          this.set('records', newRecords);
+        },
+      });
+
+      // Should have one emission with the new Map
+      expect(valueEvents).toHaveLength(1);
+      expect(valueEvents[0].records.size).toBe(1);
+      expect(valueEvents[0].records.get('item1')).toEqual({ id: 'item1', value: 100 });
+
+      valueSub.unsubscribe();
+    });
+
+    it('should handle multiple Map operations in single transaction', () => {
+      const valueEvents: MapTestState[] = [];
+      
+      const valueSub = mapStore.subscribe((value) => {
+        valueEvents.push({
+          records: new Map(value.records),
+          count: value.count,
+        });
+      });
+
+      // Clear initial event
+      valueEvents.length = 0;
+
+      mapStore.$transact({
+        suspendValidation: true,
+        action: function() {
+          // Multiple Map operations
+          const records1 = new Map(this.value.records);
+          records1.set('item1', { id: 'item1', value: 100 });
+          this.set('records', records1);
+
+          const records2 = new Map(this.value.records);
+          records2.set('item2', { id: 'item2', value: 200 });
+          this.set('records', records2);
+
+          // Also update count
+          this.set('count', 2);
+        },
+      });
+
+      // Should have one emission with final state
+      expect(valueEvents).toHaveLength(1);
+      expect(valueEvents[0].records.size).toBe(2);
+      expect(valueEvents[0].records.get('item1')).toEqual({ id: 'item1', value: 100 });
+      expect(valueEvents[0].records.get('item2')).toEqual({ id: 'item2', value: 200 });
+      expect(valueEvents[0].count).toBe(2);
+
+      valueSub.unsubscribe();
+    });
+
+    it('should maintain Map state through transaction commit', () => {
+      const stackEvents: any[] = [];
+      const valueEvents: MapTestState[] = [];
+      
+      const stackSub = mapStore.observeTransStack((stack) => {
+        stackEvents.push([...stack]);
+      });
+
+      const valueSub = mapStore.subscribe((value) => {
+        valueEvents.push({
+          records: new Map(value.records),
+          count: value.count,
+        });
+      });
+
+      // Clear initial events
+      stackEvents.length = 0;
+      valueEvents.length = 0;
+
+      // Add items to Map within transaction
+      mapStore.$transact({
+        suspendValidation: true,
+        action: function() {
+          // Build up Map incrementally like our failing case
+          let records = new Map(this.value.records);
+          
+          // Add multiple items one by one
+          records.set('item1', { id: 'item1', value: 100 });
+          records.set('item2', { id: 'item2', value: 200 });
+          records.set('item3', { id: 'item3', value: 300 });
+          
+          // Final set operation
+          this.set('records', records);
+        },
+      });
+
+      // Final state should have all 3 items
+      expect(mapStore.value.records.size).toBe(3);
+      expect(mapStore.value.records.get('item1')).toEqual({ id: 'item1', value: 100 });
+      expect(mapStore.value.records.get('item2')).toEqual({ id: 'item2', value: 200 });
+      expect(mapStore.value.records.get('item3')).toEqual({ id: 'item3', value: 300 });
+
+      // Should have exactly one value emission
+      expect(valueEvents).toHaveLength(1);
+      expect(valueEvents[0].records.size).toBe(3);
+
+      stackSub.unsubscribe();
+      valueSub.unsubscribe();
+    });
+  });
+
   describe('Nested Transactions with Error Handling', () => {
     it('should handle multiple item additions with partial failures', () => {
       const stackEvents: PendingValue<ShoppingCartState>[][] = [];

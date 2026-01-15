@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import {
   Box,
   Button,
@@ -14,7 +14,7 @@ import {
   useColorModeValue,
 } from '@chakra-ui/react';
 import { Link, Link as RouterLink, useLocation } from 'react-router-dom';
-import { ChevronDownIcon, ExternalLinkIcon } from '@chakra-ui/icons';
+import { ChevronDownIcon } from '@chakra-ui/icons';
 import { FaGithub } from 'react-icons/fa';
 import useForestryLocal from '../hooks/useForestryLocal';
 import { NavigationState, navigationStoreFactory } from '../storeFactories/navigationStoreFactory';
@@ -73,6 +73,9 @@ const Navigation: React.FC = () => {
 
   const isActive = (path: string) => location.pathname === path;
 
+  const goGithub = useCallback(() => {
+    window.open('https://github.com/bingomanatee/wonderlandlabs-monorepo/tree/main/packages/forestry4', '_blank');
+  }, []);
   return (
     <Box position="fixed" top={0} left={0} right={0} zIndex={1000} bg={bg} shadow="sm">
       <Container maxW="container.xl">
@@ -152,7 +155,7 @@ const Navigation: React.FC = () => {
               size="sm"
               aria-label="View source on GitHub"
             >
-              <Text color="white">
+              <Text color="white" onClick={goGithub}>
                 <FaGithub />
               </Text>
             </Button>

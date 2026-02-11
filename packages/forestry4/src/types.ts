@@ -134,6 +134,7 @@ export type StoreParams<DataType, SubClass = StoreIF<DataType>> = {
   path?: Path;
   parent?: StoreIF<unknown>;
   subclass?: new (...args: any[]) => SubClass;
+  branchClasses?: Map<Path, new (...args: any[]) => StoreIF<unknown> | undefined>;
 };
 
 type PathElement = string;

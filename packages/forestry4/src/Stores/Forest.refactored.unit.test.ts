@@ -1,22 +1,43 @@
 import { describe, it, expect, vi } from 'vitest';
 import { z } from 'zod';
 import { Forest } from './Forest';
+import type { StoreParams } from '../types';
 
-interface UserProfile {
-  name: string;
-  email: string;
-  age: number;
-}
+const basicBranchStateSchema = z.object({
+  user: z.object({
+    name: z.string(),
+    age: z.number(),
+  }),
+  settings: z.object({
+    theme: z.literal('light'),
+  }),
+});
+type BasicBranchState = z.infer<typeof basicBranchStateSchema>;
 
-interface AppState {
-  user: UserProfile;
-  settings: {
-    theme: 'light' | 'dark';
-    notifications: boolean;
-  };
-}
+const userProfileSchema = z.object({
+  name: z.string().min(1),
+  email: z.string().email(),
+  age: z.number().min(0),
+});
+type UserProfile = z.infer<typeof userProfileSchema>;
+
+const appStateSchema = z.object({
+  user: userProfileSchema,
+  settings: z.object({
+    theme: z.enum(['light', 'dark']),
+    notifications: z.boolean(),
+  }),
+});
+type AppState = z.infer<typeof appStateSchema>;
 
 class UserProfileBranch extends Forest<UserProfile> {
+  constructor(params: StoreParams<UserProfile>) {
+    super({
+      ...params,
+      schema: params.schema ?? userProfileSchema,
+    });
+  }
+
   updateName(name: string) {
     this.mutate((draft) => {
       draft.name = name;
@@ -40,26 +61,72 @@ class UserProfileBranch extends Forest<UserProfile> {
   }
 }
 
+const windowSchema = z.object({
+  title: z.string(),
+});
+type WindowValue = z.infer<typeof windowSchema>;
+
+class WindowBranch extends Forest<WindowValue> {
+  upperTitle() {
+    return this.value.title.toUpperCase();
+  }
+}
+
+const pointSchema = z.object({
+  x: z.number(),
+  y: z.number(),
+});
+type PointValue = z.infer<typeof pointSchema>;
+
+const rectSchema = z.object({
+  topLeft: pointSchema,
+  widthHeight: pointSchema,
+});
+type RectValue = z.infer<typeof rectSchema>;
+
+class PointBranch extends Forest<PointValue> {
+  toTuple() {
+    return [this.value.x, this.value.y];
+  }
+
+  moveBy(dx: number, dy: number) {
+    this.mutate((draft) => {
+      draft.x += dx;
+      draft.y += dy;
+    });
+  }
+}
+
+class RectStore extends Forest<RectValue> {
+  constructor() {
+    super({
+      value: rectSchema.parse({
+        topLeft: { x: 10, y: 20 },
+        widthHeight: { x: 100, y: 50 },
+      }),
+      branchClasses: new Map([['*', PointBranch]]),
+    });
+  }
+
+  rectPoint(which: 'topLeft' | 'widthHeight') {
+    return this.$br.$get(which) as PointBranch;
+  }
+}
+
 class AppForest extends Forest<AppState> {
   constructor() {
     super({
-      value: {
+      value: appStateSchema.parse({
         user: { name: 'John', email: 'john@example.com', age: 30 },
         settings: { theme: 'light', notifications: true },
-      },
+      }),
       name: 'app',
+      branchClasses: new Map([['user', UserProfileBranch]]),
     });
   }
 
   getUserBranch(): UserProfileBranch {
-    return this.$branch<UserProfile, UserProfileBranch>(['user'], {
-      subclass: UserProfileBranch,
-      schema: z.object({
-        name: z.string().min(1),
-        email: z.string().email(),
-        age: z.number().min(0),
-      }),
-    });
+    return this.$br.$get('user') as UserProfileBranch;
   }
 
   toggleTheme() {
@@ -117,13 +184,16 @@ describe('Forest Refactored', () => {
   describe('Branch creation', () => {
     it('should create basic branches', () => {
       const forest = new Forest({
-        value: {
+        value: basicBranchStateSchema.parse({
           user: { name: 'John', age: 30 },
           settings: { theme: 'light' },
-        },
+        }),
       });
 
-      const userBranch = forest.$branch(['user'], {});
+      const userBranch = forest.$br.$add<BasicBranchState['user']>(
+        ['user'],
+        {},
+      );
 
       expect(userBranch.value.name).toBe('John');
       expect(userBranch.value.age).toBe(30);
@@ -150,6 +220,216 @@ describe('Forest Refactored', () => {
       expect(app.value.user.name).toBe('Jane');
       expect(app.value.user.age).toBe(31);
       expect(userBranch.getDisplayName()).toBe('Jane (31)');
+    });
+
+    it('should warn that $branch is deprecated', () => {
+      const forest = new Forest({
+        value: { user: { name: 'John' } },
+      });
+      const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+      forest.$branch(['user'], {});
+
+      expect(warnSpy).toHaveBeenCalledWith(
+        '$branch is deprecated; use this.$branches.$add',
+      );
+      warnSpy.mockRestore();
+    });
+
+    it('should keep branch references and return them from $getBranch', () => {
+      const forest = new Forest({
+        value: { user: { name: 'John' } },
+      });
+
+      const userBranch = forest.$br.$add(['user'], {});
+      const foundBranch = forest.$getBranch(['user']);
+
+      expect(foundBranch).toBe(userBranch);
+    });
+
+    it('should throw when creating a duplicate branch for the same path', () => {
+      const forest = new Forest({
+        value: { user: { name: 'John' } },
+      });
+
+      forest.$br.$add(['user'], {});
+      expect(() => forest.$br.$add(['user'], {})).toThrow(
+        'Branch already exists at user',
+      );
+    });
+
+    it('should complete and eject a branch when its value becomes undefined', () => {
+      const forest = new Forest({
+        value: { user: { name: 'John' } },
+      });
+
+      const userBranch = forest.$br.$add(['user'], {});
+      const completeSpy = vi.spyOn(userBranch, 'complete');
+
+      forest.next({} as { user: { name: string } });
+
+      expect(completeSpy).toHaveBeenCalledTimes(1);
+      expect(forest.$getBranch(['user'])).toBeUndefined();
+    });
+
+    it('should complete and eject branch immediately when created on undefined data', () => {
+      const forest = new Forest({
+        value: {} as { user?: { name: string } },
+      });
+
+      const userBranch = forest.$br.$add(['user'], {});
+      expect(userBranch.isActive).toBe(false);
+      expect(forest.$getBranch(['user'])).toBeUndefined();
+    });
+
+    it('should support $removeBranch for manual ejection', () => {
+      const forest = new Forest({
+        value: { user: { name: 'John' } },
+      });
+
+      const userBranch = forest.$br.$add(['user'], {});
+      const completeSpy = vi.spyOn(userBranch, 'complete');
+
+      expect(forest.$removeBranch(['user'])).toBe(true);
+      expect(completeSpy).toHaveBeenCalledTimes(1);
+      expect(forest.$getBranch(['user'])).toBeUndefined();
+      expect(forest.$removeBranch(['user'])).toBe(false);
+
+      expect(() => forest.$br.$add(['user'], {})).not.toThrow();
+    });
+
+    it('should normalize path keys in $branches map operations', () => {
+      const forest = new Forest({
+        value: {
+          windows: {
+            'window-id': { title: 'Main' },
+          },
+        },
+      });
+
+      const branch = forest.$branches.$add(['windows', 'window-id'], {});
+
+      expect(forest.$branches.get('windows.window-id')).toBe(branch);
+      expect(forest.$branches.$get(['windows', 'window-id'])).toBe(branch);
+      expect(forest.$branches.has(['windows', 'window-id'])).toBe(true);
+      expect(forest.$branches.delete(['windows', 'window-id'])).toBe(true);
+      expect(branch.isActive).toBe(false);
+    });
+
+    it('should expose $br as shorthand for $branches', () => {
+      const forest = new Forest({
+        value: {
+          windows: {
+            'window-id': { title: 'Main' },
+          },
+        },
+      });
+      const branch = forest.$br.$add(['windows', 'window-id'], {});
+
+      expect(forest.$br).toBe(forest.$branches);
+      expect(forest.$br.$get(['windows', 'window-id'])).toBe(branch);
+    });
+
+    it('should prevent overriding existing values via $branches.set', () => {
+      const forest = new Forest({
+        value: {
+          one: { id: 1 },
+          two: { id: 2 },
+        },
+      });
+
+      const branchOne = forest.$branches.$add(['one'], {});
+      const branchTwo = forest.$branches.$add(['two'], {});
+
+      expect(() => forest.$branches.set(['one'], branchTwo)).toThrow(
+        'Branch already exists at one',
+      );
+      expect(forest.$branches.get('one')).toBe(branchOne);
+    });
+
+    it('should lazy-create branch in $br.get using path class definitions', () => {
+      const forest = new Forest({
+        value: {
+          windows: {
+            'window-id': { title: 'Main' },
+          },
+        },
+        branchClasses: new Map([['windows.window-id', WindowBranch]]),
+      });
+
+      const branch = forest.$br.$get(['windows', 'window-id']);
+
+      expect(branch).toBeInstanceOf(WindowBranch);
+      expect((branch as WindowBranch).upperTitle()).toBe('MAIN');
+      expect(forest.$getBranch(['windows', 'window-id'])).toBe(branch);
+    });
+
+    it('should inject wildcard branch class for adds without subclass', () => {
+      const forest = new Forest({
+        value: {
+          panel: { title: 'Overview' },
+        },
+        branchClasses: new Map([['*', WindowBranch]]),
+      });
+
+      const branch = forest.$br.$add(['panel'], {});
+
+      expect(branch).toBeInstanceOf(WindowBranch);
+      expect((branch as WindowBranch).upperTitle()).toBe('OVERVIEW');
+    });
+
+    it('should always derive branch value from parent even if value is forced in params', () => {
+      const forest = new Forest({
+        value: {
+          panel: { title: 'Overview' },
+        },
+      });
+
+      const branch = forest.$br.$add(['panel'], {
+        value: { title: 'Injected' },
+      } as any);
+
+      expect((branch as Forest<{ title: string }>).value.title).toBe(
+        'Overview',
+      );
+    });
+
+    it('should warn when branch class is provided but missing', () => {
+      const forest = new Forest({
+        value: {
+          panel: { title: 'Overview' },
+        },
+        branchClasses: new Map([['panel', undefined]]),
+      });
+      const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+      const branch = forest.$br.$add(['panel'], {});
+
+      expect(branch).toBeInstanceOf(Forest);
+      expect(warnSpy).toHaveBeenCalledWith(
+        'Branch class provided for "panel" in branchClasses["panel"] but does not exist',
+      );
+      warnSpy.mockRestore();
+    });
+
+    it('should let a rect method lazy-create Point branches for topLeft and widthHeight', () => {
+      const rect = new RectStore();
+
+      expect(rect.$getBranch(['topLeft'])).toBeUndefined();
+      expect(rect.$getBranch(['widthHeight'])).toBeUndefined();
+
+      const topLeft = rect.rectPoint('topLeft');
+      expect(topLeft).toBeInstanceOf(PointBranch);
+      expect(topLeft.toTuple()).toEqual([10, 20]);
+      expect(rect.$getBranch(['topLeft'])).toBe(topLeft);
+
+      const widthHeight = rect.rectPoint('widthHeight');
+      expect(widthHeight).toBeInstanceOf(PointBranch);
+      expect(widthHeight.toTuple()).toEqual([100, 50]);
+      expect(rect.$getBranch(['widthHeight'])).toBe(widthHeight);
+
+      widthHeight.moveBy(5, 10);
+      expect(rect.value.widthHeight).toEqual({ x: 105, y: 60 });
     });
   });
 
@@ -193,7 +473,7 @@ describe('Forest Refactored', () => {
         value: { user: { name: 'John' }, other: 'data' },
       });
 
-      const userBranch = forest.$branch(['user'], {});
+      const userBranch = forest.$br.$add(['user'], {});
       const listener = vi.fn();
 
       userBranch.subscribe(listener);
@@ -211,7 +491,7 @@ describe('Forest Refactored', () => {
         value: { user: { name: 'John' }, count: 0 },
       });
 
-      const userBranch = forest.$branch(['user'], {});
+      const userBranch = forest.$br.$add(['user'], {});
       const parentListener = vi.fn();
 
       forest.subscribe(parentListener);

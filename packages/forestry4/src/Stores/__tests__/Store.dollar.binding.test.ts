@@ -11,20 +11,20 @@ describe('Method Enumeration Debug', () => {
       }
 
       increment() {
-        this.mutate(draft => {
+        this.mutate((draft) => {
           draft.count += 1;
         });
       }
 
       decrement() {
-        this.mutate(draft => {
+        this.mutate((draft) => {
           draft.count -= 1;
         });
       }
     }
 
     const store = new TestStore();
-
+    /*
     console.log('=== Method Enumeration Debug ===');
     console.log('Object.keys(store):', Object.keys(store));
     console.log('Object.getOwnPropertyNames(store):', Object.getOwnPropertyNames(store));
@@ -41,7 +41,7 @@ describe('Method Enumeration Debug', () => {
     const proto = Object.getPrototypeOf(store);
     console.log('increment descriptor:', Object.getOwnPropertyDescriptor(proto, 'increment'));
     console.log('decrement descriptor:', Object.getOwnPropertyDescriptor(proto, 'decrement'));
-
+*/
     // This test will help us understand the enumeration issue
     expect(typeof store.increment).toBe('function');
     expect(typeof store.decrement).toBe('function');
@@ -57,26 +57,26 @@ describe('Store $ Binding', () => {
         }
 
         increment() {
-          this.mutate(draft => {
+          this.mutate((draft) => {
             draft.count += 1;
           });
         }
 
         decrement() {
-          this.mutate(draft => {
+          this.mutate((draft) => {
             draft.count -= 1;
           });
         }
 
         setCount(newCount: number) {
-          this.mutate(draft => {
+          this.mutate((draft) => {
             draft.count = newCount;
           });
         }
 
         // Method with multiple parameters
         addAmount(amount: number, description?: string) {
-          this.mutate(draft => {
+          this.mutate((draft) => {
             draft.count += amount;
           });
           if (description) {
@@ -175,21 +175,21 @@ describe('Store $ Binding', () => {
         }
 
         increment() {
-          this.mutate(draft => {
+          this.mutate((draft) => {
             draft.count += 1;
             draft.history.push(`Incremented to ${draft.count}`);
           });
         }
 
         setCount(newCount: number) {
-          this.mutate(draft => {
+          this.mutate((draft) => {
             draft.count = newCount;
             draft.history.push(`Set to ${newCount}`);
           });
         }
 
         addMultiple(amount: number, times: number) {
-          this.mutate(draft => {
+          this.mutate((draft) => {
             const total = amount * times;
             draft.count += total;
             draft.history.push(`Added ${amount} x ${times} = ${total}`);
@@ -226,7 +226,7 @@ describe('Store $ Binding', () => {
           expect(this).toBeInstanceOf(ContextStore);
           expect(this.value).toBeDefined();
 
-          this.mutate(draft => {
+          this.mutate((draft) => {
             draft.name = newName;
             draft.callCount += 1;
           });
@@ -261,7 +261,7 @@ describe('Store $ Binding', () => {
         }
 
         setDataAndReturn(newData: string) {
-          this.mutate(draft => {
+          this.mutate((draft) => {
             draft.data = newData;
           });
           return `Set to: ${newData}`;
@@ -316,7 +316,7 @@ describe('Store $ Binding', () => {
         }
 
         increment() {
-          this.mutate(draft => {
+          this.mutate((draft) => {
             draft.counter += 1;
           });
         }
@@ -338,20 +338,23 @@ describe('Store $ Binding', () => {
 
   describe('$ Binding with Complex Scenarios', () => {
     it('should work with async methods', async () => {
-      class AsyncStore extends Forest<{ status: string; result: string | null }> {
+      class AsyncStore extends Forest<{
+        status: string;
+        result: string | null;
+      }> {
         constructor() {
           super({ value: { status: 'idle', result: null } });
         }
 
         async fetchData(url: string) {
-          this.mutate(draft => {
+          this.mutate((draft) => {
             draft.status = 'loading';
           });
 
           // Simulate async operation
-          await new Promise(resolve => setTimeout(resolve, 10));
+          await new Promise((resolve) => setTimeout(resolve, 10));
 
-          this.mutate(draft => {
+          this.mutate((draft) => {
             draft.status = 'success';
             draft.result = `Data from ${url}`;
           });
@@ -380,7 +383,7 @@ describe('Store $ Binding', () => {
           if (newValue < 0) {
             throw new Error('Value cannot be negative');
           }
-          this.mutate(draft => {
+          this.mutate((draft) => {
             draft.value = newValue;
           });
         }
@@ -398,20 +401,24 @@ describe('Store $ Binding', () => {
     });
 
     it('should work with methods that call other methods', () => {
-      class ChainStore extends Forest<{ x: number; y: number; history: string[] }> {
+      class ChainStore extends Forest<{
+        x: number;
+        y: number;
+        history: string[];
+      }> {
         constructor() {
           super({ value: { x: 0, y: 0, history: [] } });
         }
 
         setX(value: number) {
-          this.mutate(draft => {
+          this.mutate((draft) => {
             draft.x = value;
             draft.history.push(`Set X to ${value}`);
           });
         }
 
         setY(value: number) {
-          this.mutate(draft => {
+          this.mutate((draft) => {
             draft.y = value;
             draft.history.push(`Set Y to ${value}`);
           });
@@ -421,7 +428,7 @@ describe('Store $ Binding', () => {
           // Call other methods through $ binding
           this.$.setX(x);
           this.$.setY(y);
-          this.mutate(draft => {
+          this.mutate((draft) => {
             draft.history.push(`Position set to (${x}, ${y})`);
           });
         }
@@ -466,14 +473,14 @@ describe('Store $ Binding', () => {
 
         // Method with underscore
         set_value(newValue: number) {
-          this.mutate(draft => {
+          this.mutate((draft) => {
             draft.value = newValue;
           });
         }
 
         // Method with dollar sign (should still work)
         $setValue(newValue: number) {
-          this.mutate(draft => {
+          this.mutate((draft) => {
             draft.value = newValue;
           });
         }

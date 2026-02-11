@@ -5,8 +5,24 @@ import { SubjectLike } from 'rxjs';
 import { Subscription } from 'rxjs';
 import { z } from 'zod';
 
+declare class Branches extends Map<string, StoreIF<unknown>> {
+    #private;
+    constructor(forest: Forest<unknown>, branchClasses: Map<string, unknown>);
+    $get<ValueType, Subclass extends StoreIF<ValueType> = StoreIF<ValueType>>(path: Path): Subclass | undefined;
+    has(path: Path): boolean;
+    set(path: Path, value: StoreIF<unknown>): this;
+    delete(path: Path): boolean;
+    clear(): void;
+    $add<ValueType, Subclass extends StoreIF<ValueType> = StoreIF<ValueType>>(path: Path, params: BranchParams<ValueType, Subclass>, ...rest: unknown[]): Subclass;
+    $detach(path: Path, expected?: StoreIF<unknown>): boolean;
+    $completeAll(): void;
+}
+
+declare type BranchParams<ValueType, Subclass extends StoreIF<ValueType> = StoreIF<ValueType>> = Omit<StoreParams<ValueType, Subclass>, 'value'>;
+
 export declare class Forest<DataType> extends Store<DataType> implements StoreIF<DataType> {
     #private;
+    readonly $branches: Branches;
     constructor(p: StoreParams<DataType>);
     readonly $path?: Path;
     get $isRoot(): boolean;
@@ -16,8 +32,10 @@ export declare class Forest<DataType> extends Store<DataType> implements StoreIF
     complete(): DataType;
     next(value: Partial<DataType>): void;
     set(path: Path, value: unknown): void;
-    $branch<Type, Subclass extends StoreIF<Type> = StoreIF<Type>>(path: Path, params: StoreParams<Type, Subclass>, ...rest: unknown[]): Subclass;
-    private handleMessage;
+    $branch<Type, Subclass extends StoreIF<Type> = StoreIF<Type>>(path: Path, params: BranchParams<Type, Subclass>, ...rest: unknown[]): Subclass;
+    $getBranch<Type, Subclass extends StoreIF<Type> = StoreIF<Type>>(path: Path): Subclass | undefined;
+    $removeBranch(path: Path): boolean;
+    get $br(): Branches;
     get $subject(): Observable<DataType>;
     subscribe(listener: Listener<DataType>): Subscription;
     receiver: Subject<unknown>;
@@ -168,6 +186,7 @@ export declare type StoreParams<DataType, SubClass = StoreIF<DataType>> = {
     path?: Path;
     parent?: StoreIF<unknown>;
     subclass?: new (...args: any[]) => SubClass;
+    branchClasses?: Map<Path, new (...args: any[]) => StoreIF<unknown> | undefined>;
 };
 
 declare type TransFn<DataType = unknown> = (value: DataType) => void;

@@ -1,5 +1,5 @@
 import { BehaviorSubject, Subject, map } from "rxjs";
-import { isEqual, get } from "lodash-es";
+import { isEqual } from "lodash-es";
 import { enableMapSet, produce } from "immer";
 import { type, TypeEnum } from "@wonderlandlabs/walrus";
 function isFunction(value) {
@@ -981,8 +981,199 @@ class Store {
     }
   }
 }
+class Branches extends Map {
+  #forest;
+  #$branchClasses;
+  #sub;
+  constructor(forest, branchClasses) {
+    super();
+    this.#forest = forest;
+    this.#$branchClasses = branchClasses;
+  }
+  #key(path) {
+    return pathString(path);
+  }
+  $get(path) {
+    const key = this.#key(path);
+    const existing = super.get(key);
+    if (existing) {
+      return existing;
+    }
+    if (this.#forest.get(key) === void 0) {
+      return void 0;
+    }
+    this.$add(key, {});
+    return super.get(key);
+  }
+  has(path) {
+    return super.has(this.#key(path));
+  }
+  set(path, value) {
+    const key = this.#key(path);
+    const existing = super.get(key);
+    if (existing && existing !== value) {
+      throw new Error(`Branch already exists at ${key}`);
+    }
+    super.set(key, value);
+    this.#ensureSub();
+    return this;
+  }
+  delete(path) {
+    const key = this.#key(path);
+    const branch = super.get(key);
+    if (!branch) {
+      return false;
+    }
+    const deleted = this.$detach(key, branch);
+    if (deleted && branch.isActive) {
+      branch.complete();
+    }
+    return deleted;
+  }
+  clear() {
+    super.clear();
+    this.#clearSubIfEmpty();
+  }
+  $add(path, params, ...rest) {
+    const key = this.#key(path);
+    const existing = super.get(key);
+    if (existing) {
+      throw new Error(`Branch already exists at ${key}`);
+    }
+    const paramsWithoutValue = {
+      ...params
+    };
+    if (Object.hasOwn(paramsWithoutValue, "value")) {
+      delete paramsWithoutValue.value;
+    }
+    const subclass = this.#resolveSubclass(path, paramsWithoutValue);
+    const nextParams = subclass && !paramsWithoutValue.subclass ? {
+      ...paramsWithoutValue,
+      subclass
+    } : paramsWithoutValue;
+    const name = this.#forest.$name + "." + key;
+    const branchValue = getPath(this.#forest.value, key);
+    let branch;
+    if (nextParams.subclass) {
+      branch = new nextParams.subclass(
+        {
+          name,
+          value: branchValue,
+          ...nextParams,
+          path,
+          parent: this.#forest
+        },
+        ...rest
+      );
+    } else {
+      branch = new Forest({
+        name,
+        value: branchValue,
+        ...nextParams,
+        parent: this.#forest,
+        path
+      });
+    }
+    this.set(key, branch);
+    if (this.#forest.get(key) === void 0) {
+      this.delete(key);
+    }
+    return branch;
+  }
+  $detach(path, expected) {
+    const key = this.#key(path);
+    const current = super.get(key);
+    if (!current) {
+      return false;
+    }
+    if (expected && expected !== current) {
+      return false;
+    }
+    const deleted = super.delete(key);
+    this.#clearSubIfEmpty();
+    return deleted;
+  }
+  $completeAll() {
+    for (const key of [...super.keys()]) {
+      this.delete(key);
+    }
+  }
+  #resolveSubclass(path, params) {
+    const key = this.#key(path);
+    const hasExplicitSubclass = Object.hasOwn(params, "subclass");
+    if (hasExplicitSubclass) {
+      const provided2 = params.subclass;
+      if (!provided2) {
+        console.warn(`Branch class provided for "${key}" but does not exist`);
+        return void 0;
+      }
+      if (typeof provided2 !== "function") {
+        console.warn(`Branch class provided for "${key}" is invalid`);
+        return void 0;
+      }
+      return provided2;
+    }
+    let source = "";
+    let branchClass = void 0;
+    let provided = false;
+    if (this.#$branchClasses.has(key)) {
+      source = `branchClasses["${key}"]`;
+      branchClass = this.#$branchClasses.get(key);
+      provided = true;
+    } else if (this.#$branchClasses.has("*")) {
+      source = 'branchClasses["*"]';
+      branchClass = this.#$branchClasses.get("*");
+      provided = true;
+    }
+    if (!provided) {
+      return void 0;
+    }
+    if (!branchClass) {
+      console.warn(
+        `Branch class provided for "${key}" in ${source} but does not exist`
+      );
+      return void 0;
+    }
+    if (typeof branchClass !== "function") {
+      console.warn(`Branch class provided for "${key}" in ${source} is invalid`);
+      return void 0;
+    }
+    return branchClass;
+  }
+  #ensureSub() {
+    if (this.#sub || !this.size) {
+      return;
+    }
+    this.#sub = this.#forest.$subject.subscribe(() => {
+      this.#pruneUndefined();
+    });
+  }
+  #pruneUndefined() {
+    if (!this.size) {
+      this.#clearSubIfEmpty();
+      return;
+    }
+    for (const key of [...super.keys()]) {
+      if (this.#forest.get(key) === void 0) {
+        this.delete(key);
+      }
+    }
+    this.#clearSubIfEmpty();
+  }
+  #clearSubIfEmpty() {
+    if (this.size) {
+      return;
+    }
+    if (this.#sub) {
+      this.#sub.unsubscribe();
+      this.#sub = void 0;
+    }
+  }
+}
 class Forest extends Store {
   #parentSub;
+  #$branchClasses = /* @__PURE__ */ new Map();
+  $branches;
   constructor(p) {
     const { path, parent } = p;
     const isBranch = path !== void 0 && parent !== void 0;
@@ -1003,12 +1194,21 @@ class Forest extends Store {
       this.$parent = parent;
       this.#parentSub = parent.receiver.subscribe({
         next: (message) => {
-          this.handleMessage(message);
+          this.#handleMessage(message);
         }
       });
     } else {
       super(p);
     }
+    if (p.branchClasses instanceof Map) {
+      p.branchClasses.forEach((branchClass, path2) => {
+        this.#$branchClasses.set(pathString(path2), branchClass);
+      });
+    }
+    this.$branches = new Branches(
+      this,
+      this.#$branchClasses
+    );
   }
   $path = [];
   get $isRoot() {
@@ -1047,6 +1247,10 @@ class Forest extends Store {
     if (this.#parentSub) {
       this.#parentSub.unsubscribe();
     }
+    if (!this.$isRoot) {
+      this.$branches.$completeAll();
+    }
+    this.#removeFromParentRegistry();
     if (this.$isRoot) {
       const completionMessage = {
         type: "complete",
@@ -1055,6 +1259,7 @@ class Forest extends Store {
       this.$broadcast(completionMessage, true);
       this.receiver.complete();
     }
+    this.$branches.clear();
     return super.complete();
   }
   // Override next to implement validation messaging system
@@ -1127,28 +1332,21 @@ class Forest extends Store {
     this.next(newValue);
   }
   $branch(path, params, ...rest) {
-    const name = this.$name + "." + pathString(path);
-    if (params.subclass) {
-      return new params.subclass(
-        {
-          name,
-          ...params,
-          path,
-          parent: this
-        },
-        ...rest
-      );
-    }
-    return new Forest({
-      name,
-      ...params,
-      parent: this,
-      path
-    });
+    console.warn("$branch is deprecated; use this.$branches.$add");
+    return this.$branches.$add(path, params, ...rest);
+  }
+  $getBranch(path) {
+    return this.$branches.get(pathString(path));
+  }
+  $removeBranch(path) {
+    return this.$branches.delete(path);
+  }
+  get $br() {
+    return this.$branches;
   }
   // Branch-specific methods (from ForestBranch)
   // Handle messages from parent/root
-  handleMessage(message) {
+  #handleMessage(message) {
     if (message.type === "complete") {
       this.complete();
     } else if (message.type === "set-pending") {
@@ -1160,13 +1358,24 @@ class Forest extends Store {
       }
     }
   }
+  #removeFromParentRegistry() {
+    if (!this.$path || !(this.$parent instanceof Forest)) {
+      return;
+    }
+    const parent = this.$parent;
+    const key = pathString(this.$path);
+    const sibling = parent.$branches.get(key);
+    if (sibling === this) {
+      parent.$branches.$detach(key, sibling);
+    }
+  }
   get $subject() {
     if (this.$isRoot) {
       return super.$subject;
     }
-    const path = pathString(this.fullPath);
+    const self = this;
     return this.$root.$subject.pipe(
-      map((value) => path ? get(value, path) : value),
+      map(() => self.value),
       distinctUntilChanged(isEqual)
     );
   }

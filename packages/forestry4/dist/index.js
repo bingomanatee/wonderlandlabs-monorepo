@@ -983,12 +983,12 @@ class Store {
 }
 class Branches extends Map {
   #forest;
-  #$branchClasses;
+  #$branchParams;
   #sub;
-  constructor(forest, branchClasses) {
+  constructor(forest, branchParams) {
     super();
     this.#forest = forest;
-    this.#$branchClasses = branchClasses;
+    this.#$branchParams = branchParams;
   }
   #key(path) {
     return pathString(path);
@@ -1040,19 +1040,14 @@ class Branches extends Map {
     if (existing) {
       throw new Error(`Branch already exists at ${key}`);
     }
-    const paramsWithoutValue = {
-      ...params
-    };
-    if (Object.hasOwn(paramsWithoutValue, "value")) {
-      delete paramsWithoutValue.value;
+    const sourceValue = this.#forest.get(key);
+    if (sourceValue === void 0) {
+      throw new Error(`Cannot create branch at ${key}; value is undefined`);
     }
-    const subclass = this.#resolveSubclass(path, paramsWithoutValue);
-    const nextParams = subclass && !paramsWithoutValue.subclass ? {
-      ...paramsWithoutValue,
-      subclass
-    } : paramsWithoutValue;
+    const paramsWithoutRuntime = this.#omitRuntimeParams(params);
+    const nextParams = this.#resolveBranchParams(path, paramsWithoutRuntime);
     const name = this.#forest.$name + "." + key;
-    const branchValue = getPath(this.#forest.value, key);
+    const branchValue = sourceValue;
     let branch;
     if (nextParams.subclass) {
       branch = new nextParams.subclass(
@@ -1075,9 +1070,6 @@ class Branches extends Map {
       });
     }
     this.set(key, branch);
-    if (this.#forest.get(key) === void 0) {
-      this.delete(key);
-    }
     return branch;
   }
   $detach(path, expected) {
@@ -1098,47 +1090,92 @@ class Branches extends Map {
       this.delete(key);
     }
   }
-  #resolveSubclass(path, params) {
+  #resolveBranchParams(path, params) {
     const key = this.#key(path);
     const hasExplicitSubclass = Object.hasOwn(params, "subclass");
+    const configured = this.#resolveConfiguredParams(path);
+    const merged = {
+      ...configured?.params ?? {},
+      ...params
+    };
     if (hasExplicitSubclass) {
-      const provided2 = params.subclass;
-      if (!provided2) {
-        console.warn(`Branch class provided for "${key}" but does not exist`);
-        return void 0;
-      }
-      if (typeof provided2 !== "function") {
-        console.warn(`Branch class provided for "${key}" is invalid`);
-        return void 0;
-      }
-      return provided2;
+      merged.subclass = this.#validateSubclass(params.subclass, key);
+      return merged;
     }
+    if (configured && Object.hasOwn(configured.params, "subclass")) {
+      merged.subclass = this.#validateSubclass(
+        merged.subclass,
+        key,
+        configured.source
+      );
+    }
+    return merged;
+  }
+  #resolveConfiguredParams(path) {
+    const key = this.#key(path);
     let source = "";
-    let branchClass = void 0;
-    let provided = false;
-    if (this.#$branchClasses.has(key)) {
-      source = `branchClasses["${key}"]`;
-      branchClass = this.#$branchClasses.get(key);
-      provided = true;
-    } else if (this.#$branchClasses.has("*")) {
-      source = 'branchClasses["*"]';
-      branchClass = this.#$branchClasses.get("*");
-      provided = true;
-    }
-    if (!provided) {
+    let rawParams;
+    if (this.#$branchParams.has(key)) {
+      source = `branchParams["${key}"]`;
+      rawParams = this.#$branchParams.get(key);
+    } else if (this.#$branchParams.has("*")) {
+      source = 'branchParams["*"]';
+      rawParams = this.#$branchParams.get("*");
+    } else {
       return void 0;
     }
-    if (!branchClass) {
+    if (!rawParams) {
       console.warn(
-        `Branch class provided for "${key}" in ${source} but does not exist`
+        `Branch params provided for "${key}" in ${source} but do not exist`
       );
+      return { params: {}, source };
+    }
+    if (typeof rawParams !== "object" || Array.isArray(rawParams)) {
+      console.warn(`Branch params provided for "${key}" in ${source} are invalid`);
+      return { params: {}, source };
+    }
+    return {
+      params: this.#omitRuntimeParams(
+        rawParams
+      ),
+      source
+    };
+  }
+  #validateSubclass(branchClass, key, source) {
+    if (!branchClass) {
+      if (source) {
+        console.warn(
+          `Branch class provided for "${key}" in ${source} but does not exist`
+        );
+      } else {
+        console.warn(`Branch class provided for "${key}" but does not exist`);
+      }
       return void 0;
     }
     if (typeof branchClass !== "function") {
-      console.warn(`Branch class provided for "${key}" in ${source} is invalid`);
+      if (source) {
+        console.warn(`Branch class provided for "${key}" in ${source} is invalid`);
+      } else {
+        console.warn(`Branch class provided for "${key}" is invalid`);
+      }
       return void 0;
     }
     return branchClass;
+  }
+  #omitRuntimeParams(params) {
+    const next = {
+      ...params
+    };
+    if (Object.hasOwn(next, "value")) {
+      delete next.value;
+    }
+    if (Object.hasOwn(next, "path")) {
+      delete next.path;
+    }
+    if (Object.hasOwn(next, "parent")) {
+      delete next.parent;
+    }
+    return next;
   }
   #ensureSub() {
     if (this.#sub || !this.size) {
@@ -1172,7 +1209,7 @@ class Branches extends Map {
 }
 class Forest extends Store {
   #parentSub;
-  #$branchClasses = /* @__PURE__ */ new Map();
+  #$branchParams = /* @__PURE__ */ new Map();
   $branches;
   constructor(p) {
     const { path, parent } = p;
@@ -1201,14 +1238,25 @@ class Forest extends Store {
       super(p);
     }
     if (p.branchClasses instanceof Map) {
-      p.branchClasses.forEach((branchClass, path2) => {
-        this.#$branchClasses.set(pathString(path2), branchClass);
+      p.branchClasses.forEach((subclass, path2) => {
+        this.#$branchParams.set(pathString(path2), { subclass });
       });
     }
-    this.$branches = new Branches(
-      this,
-      this.#$branchClasses
-    );
+    if (p.branchParams instanceof Map) {
+      p.branchParams.forEach((branchParam, path2) => {
+        const key = pathString(path2);
+        const existing = this.#$branchParams.get(key);
+        if (existing && typeof existing === "object" && !Array.isArray(existing) && branchParam && typeof branchParam === "object" && !Array.isArray(branchParam)) {
+          this.#$branchParams.set(key, {
+            ...existing,
+            ...branchParam
+          });
+          return;
+        }
+        this.#$branchParams.set(key, branchParam);
+      });
+    }
+    this.$branches = new Branches(this, this.#$branchParams);
   }
   $path = [];
   get $isRoot() {
@@ -1334,12 +1382,6 @@ class Forest extends Store {
   $branch(path, params, ...rest) {
     console.warn("$branch is deprecated; use this.$branches.$add");
     return this.$branches.$add(path, params, ...rest);
-  }
-  $getBranch(path) {
-    return this.$branches.get(pathString(path));
-  }
-  $removeBranch(path) {
-    return this.$branches.delete(path);
   }
   get $br() {
     return this.$branches;

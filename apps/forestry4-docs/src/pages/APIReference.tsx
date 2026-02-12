@@ -77,6 +77,7 @@ const APIReference: React.FC = () => {
                   </LinkChakra>
                 </VStack>
               </Box>
+
             </VStack>
           </VStack>
         </Box>
@@ -390,6 +391,7 @@ const APIReference: React.FC = () => {
                   </ItemDef>
                 </VStack>
               </Box>
+
             </VStack>
           </Container>
         </Box>

@@ -46,6 +46,7 @@ const menuItems: Record<string, MenuItem[]> = {
   ],
   'API Reference': [
     { label: 'Overview', path: '/api' },
+    { label: 'Changelog', path: '/changelog' },
     { label: 'Forest Class', path: '/api#forest' },
     { label: 'Constructor & Properties', path: '/api#forest-constructor' },
     { label: 'Core Methods', path: '/api#forest-core' },

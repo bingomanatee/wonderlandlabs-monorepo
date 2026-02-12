@@ -108,7 +108,7 @@ class TransactionDemoForest extends Forest<TransactionDemoState> {
   transferFunds(fromAccountId: string, toAccountId: string, amount: number) {
     this.$transact({
       suspendValidation: true,
-      action: () => {
+      action() {
         // Block same-account transfers
         if (fromAccountId === toAccountId) {
           throw new Error('Cannot transfer to the same account');
@@ -159,13 +159,13 @@ class TransactionDemoForest extends Forest<TransactionDemoState> {
   processOrder(order: Omit<Order, 'id' | 'status' | 'processedAt'>) {
     this.$transact({
       suspendValidation: false,
-      action: () => {
+      action() {
         const orderId = `order_${Date.now()}`;
 
         // Step 1: Validate inventory (inner transaction)
         this.$transact({
           suspendValidation: true,
-          action: () => {
+          action() {
             for (const item of order.items) {
               const inventory = this.value.inventory[item.productId];
               if (inventory < item.quantity) {
@@ -182,7 +182,7 @@ class TransactionDemoForest extends Forest<TransactionDemoState> {
         // Step 2: Process payment (inner transaction)
         this.$transact({
           suspendValidation: true,
-          action: () => {
+          action() {
             this.set('paymentStatus', 'processing');
 
             // Simulate payment processing
@@ -224,7 +224,7 @@ class TransactionDemoForest extends Forest<TransactionDemoState> {
     try {
       this.$transact({
         suspendValidation: true,
-        action: () => {
+        action() {
           this.set('migrationStatus', 'running');
           this.set('migrationProgress', 0);
           this.set('migrationError', undefined);
@@ -264,7 +264,7 @@ class TransactionDemoForest extends Forest<TransactionDemoState> {
   batchUpdateInventory(updates: Array<{ productId: string; quantity: number }>) {
     this.$transact({
       suspendValidation: true,
-      action: () => {
+      action() {
         for (const update of updates) {
           if (update.quantity < 0) {
             throw new Error(`Invalid quantity for ${update.productId}`);

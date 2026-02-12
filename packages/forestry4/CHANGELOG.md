@@ -1,43 +1,52 @@
 # Changelog
 
-## 4.0 
+## 4.0
 
-redesigned Forestry to hve a slimmer profile; got rid of the "context" forest 
-and using one base class for all types of values. 
+- Redesigned Forestry with a slimmer profile.
+- Removed the separate "context" forest pattern.
+- Moved to one base class for all value types.
 
-## 4.1 
+## 4.1
 
-Radical refactor - using classes and class methods over the $ / act form for 
-much simpler/ better type safe forests
+- Refactored to class-first usage with class methods instead of the older `$ / act` style.
+- Improved type safety and simplified store authoring.
 
-## 4.1.2 .. 4.1.4
+## 4.1.2 - 4.1.4
 
-Compressing classes to make a single base class (Forest); renaming key methods with 
-"$" prefix to make custom functions less intrusive. note - to keep in the RxJS 
-pattern for observables Subject fields (value, next, complete...) are not $-prefixed.
+- Consolidated classes to a single base class: `Forest`.
+- Prefixed core Forestry methods with `$` to reduce custom-method collisions.
+- Kept RxJS-style subject fields (`value`, `next`, `complete`, etc.) unprefixed.
 
-## 4.1.5 ..6
+## 4.1.5 - 4.1.6
 
-Adding $ back as a "bound" mirror of the base class for ease of use in React. 
+- Added `.$` as a bound mirror of class methods for easier React usage.
 
-## 4.1.7..8
+## 4.1.7 - 4.1.8
 
-Fixed type issues - exposing a d.ts file
+- Fixed typing issues and improved `.d.ts` exposure.
 
 ## 4.1.9
 
-added rest params on branch. 
+- Added rest params on branching call: `$branch(path, params, ...rest)`.
 
 ## 4.1.12
 
-in an attempt to resolve a bug in a client project simplifying subject - getting new content
-directly from the current store instead of with getPath. however -- our content _also_ uses getPath
-so the bug persists. May involve map indexing??
+- Attempted to simplify subject updates to resolve a client bug by reading directly from current
+  store content rather than relying on `getPath` during that flow.
+- The bug persisted and likely involves map indexing.
 
-## 4.1.13
+## 4.1.13 - 4.1.14
 
-added a more dynamic $branches / $br subproperty that keeps references to child branches. 
-- the new branchClasses constructor property defines the base class for future branches
-- the '*' value defines the default subclass for new branches 
-- `.$branches.$get` lazy-creates a new branch based on branchClasses if none exists. 
-- `.$branches.$add` creates a new branch; if a subclass is not defined will refer to the classes stored in branchClasses
+- Added `$branches` / `$br` registry to keep referential child-branch instances.
+- Added `branchParams` constructor option to define per-path defaults for branches, including:
+  `subclass`, `schema`, `prep`, and other branch options.
+- `'*'` in `branchParams` acts as wildcard defaults for unresolved paths.
+- `branchClasses` remains supported as legacy shorthand for subclass defaults.
+- `$br.$get(path)` lazy-creates a branch when no instance exists and the parent path value is
+  defined.
+- `$br.$add(path, params)` explicitly creates a branch:
+  throws when a branch already exists at the path, and throws when the parent path value is
+  `undefined`.
+- `$br.get(pathKey)` is lookup-only (no lazy creation).
+- `$br.delete(path)` completes and ejects a branch instance from the registry.
+- Removed overloaded helpers `$getBranch` and `$removeBranch`; use `$br.get` and `$br.delete`.

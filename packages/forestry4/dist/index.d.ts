@@ -5,9 +5,20 @@ import { SubjectLike } from 'rxjs';
 import { Subscription } from 'rxjs';
 import { z } from 'zod';
 
+declare type BranchConfigParams<DataType = unknown, SubClass = StoreIF<DataType>> = {
+    schema?: z.ZodSchema<DataType>;
+    tests?: ValueTestFn<DataType> | ValueTestFn<DataType>[];
+    prep?: (input: Partial<DataType>, current: DataType) => DataType;
+    resources?: ResourceMap;
+    name?: string;
+    debug?: boolean;
+    res?: Map<string, any>;
+    subclass?: new (...args: any[]) => SubClass;
+};
+
 declare class Branches extends Map<string, StoreIF<unknown>> {
     #private;
-    constructor(forest: Forest<unknown>, branchClasses: Map<string, unknown>);
+    constructor(forest: Forest<unknown>, branchParams: Map<string, BranchConfigParams<unknown, StoreIF<unknown>> | undefined>);
     $get<ValueType, Subclass extends StoreIF<ValueType> = StoreIF<ValueType>>(path: Path): Subclass | undefined;
     has(path: Path): boolean;
     set(path: Path, value: StoreIF<unknown>): this;
@@ -33,8 +44,6 @@ export declare class Forest<DataType> extends Store<DataType> implements StoreIF
     next(value: Partial<DataType>): void;
     set(path: Path, value: unknown): void;
     $branch<Type, Subclass extends StoreIF<Type> = StoreIF<Type>>(path: Path, params: BranchParams<Type, Subclass>, ...rest: unknown[]): Subclass;
-    $getBranch<Type, Subclass extends StoreIF<Type> = StoreIF<Type>>(path: Path): Subclass | undefined;
-    $removeBranch(path: Path): boolean;
     get $br(): Branches;
     get $subject(): Observable<DataType>;
     subscribe(listener: Listener<DataType>): Subscription;
@@ -186,7 +195,8 @@ export declare type StoreParams<DataType, SubClass = StoreIF<DataType>> = {
     path?: Path;
     parent?: StoreIF<unknown>;
     subclass?: new (...args: any[]) => SubClass;
-    branchClasses?: Map<Path, new (...args: any[]) => StoreIF<unknown> | undefined>;
+    branchClasses?: Map<Path, (new (...args: any[]) => StoreIF<unknown>) | undefined>;
+    branchParams?: Map<Path, BranchConfigParams<unknown, StoreIF<unknown>> | undefined>;
 };
 
 declare type TransFn<DataType = unknown> = (value: DataType) => void;

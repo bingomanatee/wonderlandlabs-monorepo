@@ -122,6 +122,20 @@ export type ValueTestFn<DataType> = (
   store: StoreIF<DataType>,
 ) => null | void | string;
 
+export type BranchConfigParams<
+  DataType = unknown,
+  SubClass = StoreIF<DataType>,
+> = {
+  schema?: z.ZodSchema<DataType>;
+  tests?: ValueTestFn<DataType> | ValueTestFn<DataType>[];
+  prep?: (input: Partial<DataType>, current: DataType) => DataType;
+  resources?: ResourceMap;
+  name?: string;
+  debug?: boolean;
+  res?: Map<string, any>;
+  subclass?: new (...args: any[]) => SubClass;
+};
+
 export type StoreParams<DataType, SubClass = StoreIF<DataType>> = {
   value: DataType;
   schema?: z.ZodSchema<DataType>;
@@ -134,7 +148,11 @@ export type StoreParams<DataType, SubClass = StoreIF<DataType>> = {
   path?: Path;
   parent?: StoreIF<unknown>;
   subclass?: new (...args: any[]) => SubClass;
-  branchClasses?: Map<Path, new (...args: any[]) => StoreIF<unknown> | undefined>;
+  branchClasses?: Map<
+    Path,
+    (new (...args: any[]) => StoreIF<unknown>) | undefined
+  >;
+  branchParams?: Map<Path, BranchConfigParams<unknown, StoreIF<unknown>> | undefined>;
 };
 
 type PathElement = string;

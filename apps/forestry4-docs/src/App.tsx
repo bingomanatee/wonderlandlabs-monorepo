@@ -23,6 +23,7 @@ import AdvancedPatterns from './pages/AdvancedPatterns';
 
 // Reference
 import APIReference from './pages/APIReference';
+import Changelog from './pages/Changelog';
 import Examples from './pages/Examples';
 
 // Practical Examples
@@ -64,6 +65,7 @@ function App() {
 
           {/* Reference */}
           <Route path="/api" element={<APIReference />} />
+          <Route path="/changelog" element={<Changelog />} />
           <Route path="/examples" element={<Examples />} />
         </Routes>
       </Box>

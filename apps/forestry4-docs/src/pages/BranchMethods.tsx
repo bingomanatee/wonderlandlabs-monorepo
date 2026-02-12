@@ -5,6 +5,7 @@ import {
   Box,
   Container,
   Heading,
+  HStack,
   ListItem,
   Table,
   TableContainer,
@@ -22,7 +23,7 @@ import CodePanel from '../components/CodePanel';
 import ItemDef from '../components/ItemDef';
 import Section from '../components/Section';
 
-const Branching: React.FC = () => {
+const BranchMethods: React.FC = () => {
   return (
     <Container maxW="container.xl" py={8}>
       <VStack spacing={8} align="stretch">
@@ -34,60 +35,63 @@ const Branching: React.FC = () => {
           </Text>
         </Box>
 
-        <Section>
-          <UnorderedList
-            spacing={2}
-            fontSize="sm"
-            styleType="none"
-            m={0}
-            p={0}
-            sx={{
-              '> li': { position: 'relative', paddingLeft: '1.5rem' },
-              '> li::before': {
-                content: '"✓"',
-                color: 'green.500',
-                fontWeight: 'bold',
-                position: 'absolute',
-                left: 0,
-                top: '0.1rem',
-              },
-            }}
-          >
-            <ListItem>
+        <VStack align="start" spacing={2} fontSize="sm">
+          <HStack align="start">
+            <Text>✅</Text>
+            <Text>
               Branches allow you to write methods specific to subsets of the branch data. Stores can
               be arbitrarily deep - you never <i>have</i> to create branches to manage deep data
               states. However you may find it useful to have subset-centric Branch stores to allow
               focused attention and distribute the code in your store to focus on relevant data.
-            </ListItem>
-            <ListItem>
+            </Text>
+          </HStack>
+          <HStack align="start">
+            <Text>✅</Text>
+            <Text>
               Branches are intended for "stable" stores where their paths are modified but never
-              deleted in practice. Deleting a branches' basis path will lock (
-              <code>complete()</code>) the store and create usage issues. Similarly a branch whose
-              path is undefined will not function and may be unpredictable.
-            </ListItem>
-            <ListItem>
+              deleted in practice. Deleting a branches' basis path will lock (<code>complete()</code>)
+              the store and create usage issues. Similarly a branch whose path is undefined will not
+              function and may be unpredictable.
+            </Text>
+          </HStack>
+          <HStack align="start">
+            <Text>✅</Text>
+            <Text>
               Updating a branch will cause its parent to broadcast but not (necessarily) the other
               way around.
-            </ListItem>
-            <ListItem>
+            </Text>
+          </HStack>
+          <HStack align="start">
+            <Text>✅</Text>
+            <Text>
               The subset of data managed by a branch is identical - in value and in reference - to
               the subset of data in the parent that the branch references.
-            </ListItem>
-            <ListItem>
+            </Text>
+          </HStack>
+          <HStack align="start">
+            <Text>✅</Text>
+            <Text>
               Branches can be several levels deep; i.e., you can branch on{' '}
               <code>['contents','intro']</code>to branch on a subset of the parent data two levels
               down.
-            </ListItem>
-            <ListItem>
+            </Text>
+          </HStack>
+          <HStack align="start">
+            <Text>✅</Text>
+            <Text>
               None of the methods of <code>.$br</code> should <i>change</i> the data it wraps;
               adding or deleting branches add functionality but should not transform data.
-            </ListItem>
-            <ListItem>
+            </Text>
+          </HStack>
+          <HStack align="start">
+            <Text>✅</Text>
+            <Text>
               A branch can be created without a specific sub-class. It will be a generic Forest
               instance; its not a great use of branches but it is acceptable.
-            </ListItem>
-          </UnorderedList>
-        </Section>
+            </Text>
+          </HStack>
+        </VStack>
+
         <Section title="Quick Start">
           <Text textStyle="body">
             Use <code>$br.$add(path, params)</code> for explicit branch creation and{' '}
@@ -293,4 +297,4 @@ const Branching: React.FC = () => {
   );
 };
 
-export default Branching;
+export default BranchMethods;

@@ -335,6 +335,13 @@ const APIReference: React.FC = () => {
                     </ul>
                   </ItemDef>
                 </VStack>
+                <Box>
+                  Note - for branches, content is always determined by the path;
+                  <code>Path</code> is an argument to branch cration; the value
+                  of a branch is the value of the parent filtered by the path definition.
+                  So the consctructor of branches do not require -- and ignore --
+                  the value do be defined.
+                </Box>
               </Box>
 
               {/* Validation Types */}

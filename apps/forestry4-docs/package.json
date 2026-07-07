@@ -19,6 +19,7 @@
     "sync-snippets": "cd ../.. && ./scripts/sync-snippets.sh",
     "build:with-sync": "npm run sync-snippets && npm run build"
   },
+  "packageManager": "yarn@4.3.1",
   "dependencies": {
     "@chakra-ui/icons": "^2.2.4",
     "@chakra-ui/react": "^2.8.0",

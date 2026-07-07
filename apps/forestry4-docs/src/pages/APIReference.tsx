@@ -123,16 +123,19 @@ const APIReference: React.FC = () => {
                       <Code>value: DataType</Code> - Current forest value (readonly)
                     </ListItem>
                     <ListItem>
-                      <Code>name: string</Code> - Forest identifier
+                      <Code>$name: string</Code> - Forest identifier
                     </ListItem>
                     <ListItem>
-                      <Code>$: Actions</Code> - Exposed <Link to="/change">action</Link> methods.
+                      <Code>$bound: BoundStoreMethods</Code> - Bound
+                      <Link to="/bound-methods"> method</Link> mirror for
+                      event listeners.
                     </ListItem>
                     <ListItem>
-                      <Code>acts: Actions</Code> - Alias for $ property
+                      <Code>$: BoundStoreMethods</Code> - Short alias for
+                      <Code>$bound</Code>.
                     </ListItem>
                     <ListItem>
-                      <Code>res: Map&lt;string, any&gt;</Code> - container for external resources
+                      <Code>$res: Map&lt;string, any&gt;</Code> - container for external resources
                       such as database connectors, DOM references. Changing res entries does not
                       trigger any subscriber updates. Mainly useful for direct Forest instances that
                       need un-storable values (Dom references etc.)
@@ -142,17 +145,17 @@ const APIReference: React.FC = () => {
                       when <code>complete()</code> is called
                     </ListItem>
                     <ListItem>
-                      <Code>path: Path</Code> - the path between this store and its parent; is empty
+                      <Code>$path: Path</Code> - the path between this store and its parent; is empty
                       array [] for root Forest
                     </ListItem>
                     <ListItem>
-                      <Code>parent?: StoreBranch</Code> - null for root Forest
+                      <Code>$parent?: StoreIF</Code> - null for root Forest
                     </ListItem>
                     <ListItem>
-                      <Code>isRoot: boolean</Code> - whether the branch has a parent or is the root.
+                      <Code>$isRoot: boolean</Code> - whether the branch has a parent or is the root.
                     </ListItem>
                     <ListItem>
-                      <Code>root: Forest</Code> - Returns self (this) for a root Forest
+                      <Code>$root: Forest</Code> - Returns self (this) for a root Forest
                       implementation, and topmost forest on a branch
                     </ListItem>
                   </List>
@@ -250,7 +253,7 @@ const APIReference: React.FC = () => {
 
                 <VStack spacing={6} align="stretch">
                   <ItemDef
-                    title="transact(params: TransParams | TransFn, suspendValidation?: boolean): void"
+                    title="$transact(params: TransParams | TransFn, suspendValidation?: boolean): void"
                     snippetName="transactMethodExamples"
                     snippetFolder="Transactions"
                     codeTitle="Transaction Examples"
@@ -281,7 +284,7 @@ const APIReference: React.FC = () => {
 
                 <VStack spacing={6} align="stretch">
                   <ItemDef
-                    title="validate(value: unknown): Validity"
+                    title="$validate(value: unknown): Validity"
                     snippetName="validateMethod"
                     snippetFolder="APIReference"
                     codeTitle="Validation Examples"
@@ -293,7 +296,7 @@ const APIReference: React.FC = () => {
                   </ItemDef>
 
                   <ItemDef
-                    title="test(value: unknown): Validity"
+                    title="$test(value: unknown): Validity"
                     snippetName="testMethod"
                     snippetFolder="APIReference"
                     codeTitle="Test Function Examples"
@@ -331,6 +334,7 @@ const APIReference: React.FC = () => {
                       <li>schema</li>
                       <li>tests</li>
                       <li>prep</li>
+                      <li>filterPath</li>
                       <li>name</li>
                     </ul>
                   </ItemDef>
@@ -383,8 +387,16 @@ const APIReference: React.FC = () => {
 
                 <VStack spacing={6} align="stretch">
                   <ItemDef title="Path">
-                    String (<code>user.id</code>) array (<code>['user', 'id']</code>) of strings
-                    representing object path.
+                    String (<code>user.id</code>) or array
+                    (<code>['user', 'id']</code>) representing a path.
+                    Path arrays may include non-string keys for Maps.
+                  </ItemDef>
+
+                  <ItemDef title="PathFilterFn&lt;DataType&gt;">
+                    Function that normalizes paths before <Code>get</Code>,
+                    <Code>set</Code>, and path-scoped <Code>mutate</Code>.
+                    Use this to convert aliases to array indexes or
+                    referential Map keys.
                   </ItemDef>
 
                   <ItemDef title="Listener&lt;DataType&gt;">

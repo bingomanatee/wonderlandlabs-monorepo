@@ -1,6 +1,8 @@
 import {
   Listener,
+  BoundStoreMethods,
   Path,
+  PathFilterFn,
   PendingValue,
   StoreIF,
   StoreParams,
@@ -8,8 +10,13 @@ import {
   TransParams,
   ValueTestFn,
 } from '../types';
-import { BehaviorSubject, Observable, Subject, Subscription } from 'rxjs';
-import { distinctUntilChanged } from 'rxjs/operators';
+import {
+  BehaviorSubject,
+  distinctUntilChanged,
+  Observable,
+  Subject,
+  Subscription,
+} from 'rxjs';
 import { isEqual } from 'lodash-es';
 import asError from '../lib/asError';
 import { isZodParser, ZodParser } from '../typeguards';
@@ -75,6 +82,9 @@ export class Store<DataType> implements StoreIF<DataType> {
     if (p.res && p.res instanceof Map) {
       p.res.forEach((value, key) => this.$res.set(key, value));
     }
+    if (p.filterPath) {
+      this.#filterPath = p.filterPath;
+    }
   }
 
   /**
@@ -83,8 +93,13 @@ export class Store<DataType> implements StoreIF<DataType> {
    * @private
    */
   #subject?: BehaviorSubject<DataType>;
+  #filterPath?: PathFilterFn<DataType>;
   get $subject(): Observable<DataType> {
     return this.#subject!;
+  }
+
+  protected filterPath(path: Path): Path {
+    return this.#filterPath ? this.#filterPath(path, this) : path;
   }
 
   public debug: boolean; // more alerts on validation failures;
@@ -237,13 +252,17 @@ export class Store<DataType> implements StoreIF<DataType> {
     }
   }
 
-  _$?: Record<string, (...args: any[]) => unknown>;
+  _$?: BoundStoreMethods;
 
-  get $() {
+  get $(): BoundStoreMethods {
     if (!this._$) {
       this._$ = bindActions(this as unknown as FnRecord);
     }
     return this._$;
+  }
+
+  get $bound(): BoundStoreMethods {
+    return this.$;
   }
 
   queuePendingValue(value: DataType): string {
@@ -408,13 +427,17 @@ export class Store<DataType> implements StoreIF<DataType> {
     if (!path || (Array.isArray(path) && path.length === 0)) {
       return this.value;
     }
-    const pathArray = Array.isArray(path) ? path : pathString(path).split('.');
+    const filteredPath = this.filterPath(path);
+    const pathArray = Array.isArray(filteredPath)
+      ? filteredPath
+      : pathString(filteredPath).split('.');
     return getPath(this.value, pathArray);
   }
 
   set(path: Path, value: unknown) {
+    const filteredPath = this.filterPath(path);
     const next = produce(this.value, (draft) => {
-      setPath(draft, path, value);
+      setPath(draft, filteredPath, value);
     });
     this.next(next);
   }
@@ -427,9 +450,10 @@ export class Store<DataType> implements StoreIF<DataType> {
       return this.value;
     } else {
       // Mutate a specific $path within the state
-      const pathArray = Array.isArray(path)
-        ? path
-        : pathString(path).split('.');
+      const filteredPath = this.filterPath(path);
+      const pathArray = Array.isArray(filteredPath)
+        ? filteredPath
+        : pathString(filteredPath).split('.');
       const newValue = produce(this.value, (draft) => {
         // Get the target object at the specified $path
         const target = getPath(draft, pathArray);

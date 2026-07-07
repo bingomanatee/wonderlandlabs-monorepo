@@ -7,6 +7,6 @@
       }
     ]
   },
-  "testRegex": "(/__tests__/.*|(\\.|/)(test|spec))\\.(t|j)s$",
+  "testRegex": "src/.*(/__tests__/.*|(\\.|/)(test|spec))\\.(t|j)s$",
   "moduleFileExtensions": ["ts", "js", "json", "node"]
 }

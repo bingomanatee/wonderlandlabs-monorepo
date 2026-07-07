@@ -247,7 +247,7 @@ describe('Forest Refactored', () => {
       expect(foundBranch).toBe(userBranch);
     });
 
-    it('should throw when creating a duplicate branch for the same path', () => {
+    it('should throw for duplicate branch paths', () => {
       const forest = new Forest({
         value: { user: { name: 'John' } },
       });
@@ -258,7 +258,7 @@ describe('Forest Refactored', () => {
       );
     });
 
-    it('should complete and eject a branch when its value becomes undefined', () => {
+    it('should complete and eject undefined branches', () => {
       const forest = new Forest({
         value: { user: { name: 'John' } },
       });
@@ -348,7 +348,7 @@ describe('Forest Refactored', () => {
       expect(forest.$branches.get('one')).toBe(branchOne);
     });
 
-    it('should lazy-create branch in $br.$get using branchParams path definitions', () => {
+    it('should lazy-create branch from branchParams paths', () => {
       const forest = new Forest({
         value: {
           windows: {
@@ -381,7 +381,7 @@ describe('Forest Refactored', () => {
       expect((branch as WindowBranch).upperTitle()).toBe('OVERVIEW');
     });
 
-    it('should always derive branch value from parent even if value is forced in params', () => {
+    it('should derive branch value from parent', () => {
       const forest = new Forest({
         value: {
           panel: { title: 'Overview' },
@@ -397,6 +397,26 @@ describe('Forest Refactored', () => {
       );
     });
 
+    it('should cache derived branch subjects', () => {
+      const forest = new Forest({
+        value: {
+          panel: { title: 'Overview' },
+        },
+      });
+      const branch = forest.$br.$add<{ title: string }>('panel', {});
+      const seen: string[] = [];
+
+      expect(branch.$subject).toBe(branch.$subject);
+
+      const sub = branch.subscribe((value) => {
+        seen.push(value.title);
+      });
+      forest.set('panel', { title: 'Updated' });
+      sub.unsubscribe();
+
+      expect(seen).toEqual(['Overview', 'Updated']);
+    });
+
     it('should warn when branch class is provided but missing', () => {
       const forest = new Forest({
         value: {
@@ -410,7 +430,10 @@ describe('Forest Refactored', () => {
 
       expect(branch).toBeInstanceOf(Forest);
       expect(warnSpy).toHaveBeenCalledWith(
-        'Branch class provided for "panel" in branchParams["panel"] but does not exist',
+        [
+          'Branch class provided for "panel" in',
+          'branchParams["panel"] but does not exist',
+        ].join(' '),
       );
       warnSpy.mockRestore();
     });
@@ -451,7 +474,7 @@ describe('Forest Refactored', () => {
       expect(forest.value.panel.title).toBe('Updated Title');
     });
 
-    it('should let a rect method lazy-create Point branches for topLeft and widthHeight', () => {
+    it('should lazy-create rect Point branches', () => {
       const rect = new RectStore();
 
       expect(rect.$br.get('topLeft')).toBeUndefined();
@@ -556,6 +579,110 @@ describe('Forest Refactored', () => {
 
       // Invalid email should throw
       expect(() => userBranch.updateEmail('invalid-email')).toThrow();
+    });
+
+    it('should reject root updates that fail branch validation', () => {
+      const forest = new Forest({
+        value: {
+          user: {
+            email: 'jane@example.com',
+          },
+        },
+        branchParams: new Map([
+          [
+            'user',
+            {
+              schema: z.object({
+                email: z.string().email(),
+              }),
+            },
+          ],
+        ]),
+      });
+
+      forest.$br.$add('user', {});
+
+      expect(() => {
+        forest.mutate((draft) => {
+          draft.user.email = 'invalid-email';
+        });
+      }).toThrow('Validation failed');
+      expect(forest.value.user.email).toBe('jane@example.com');
+    });
+
+    it('should validate nested branches during root updates', () => {
+      type UserValue = {
+        profile: {
+          email: string;
+        };
+      };
+      const forest = new Forest({
+        value: {
+          user: {
+            profile: {
+              email: 'jane@example.com',
+            },
+          },
+        },
+      });
+      const userBranch = forest.$br.$add<UserValue, Forest<UserValue>>(
+        'user',
+        {},
+      );
+      userBranch.$br.$add('profile', {
+        schema: z.object({
+          email: z.string().email(),
+        }),
+      });
+
+      expect(() => {
+        forest.mutate((draft) => {
+          draft.user.profile.email = 'invalid-email';
+        });
+      }).toThrow('Validation failed');
+      expect(forest.value.user.profile.email).toBe('jane@example.com');
+    });
+
+    it('should defer branch validation during suspended transactions', () => {
+      type RootValue = {
+        user: {
+          email: string;
+        };
+      };
+      const forest = new Forest<RootValue>({
+        value: {
+          user: {
+            email: 'jane@example.com',
+          },
+        },
+        branchParams: new Map([
+          [
+            'user',
+            {
+              schema: z.object({
+                email: z.string().email(),
+              }),
+            },
+          ],
+        ]),
+      });
+
+      forest.$br.$add('user', {});
+
+      expect(() => {
+        forest.$transact({
+          suspendValidation: true,
+          action: () => {
+            forest.mutate((draft) => {
+              draft.user.email = 'invalid-email';
+            });
+            forest.mutate((draft) => {
+              draft.user.email = 'updated@example.com';
+            });
+          },
+        });
+      }).not.toThrow();
+      expect(forest.value.user.email).toBe('updated@example.com');
     });
   });
 });

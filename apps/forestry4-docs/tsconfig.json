@@ -8,6 +8,7 @@
     "moduleResolution": "bundler",
     "allowImportingTsExtensions": true,
     "resolveJsonModule": true,
+    "types": ["react", "react-dom"],
     "isolatedModules": true,
     "noEmit": true,
     "jsx": "react-jsx",
@@ -20,7 +21,13 @@
       "@/*": ["src/*"]
     }
   },
-  "include": ["src"],
-  "exclude": ["src/snippets/**/*"],
+  "include": ["src/main.tsx"],
+  "exclude": [
+    "src/**/__tests__/**/*",
+    "src/**/*.test.ts",
+    "src/**/*.test.tsx",
+    "src/examples/**/*",
+    "src/snippets/**/*"
+  ],
   "references": [{ "path": "./tsconfig.node.json" }]
 }

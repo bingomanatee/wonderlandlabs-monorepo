@@ -11,29 +11,30 @@ export function getPath(source: any, pathArray: Path): unknown {
     return getPath(source, pathArray.split('.'));
   }
   // Navigate through all $path elements using reduce
-  const result = pathArray.reduce((current, pathSegment) => {
+  const result = pathArray.reduce<unknown>((current, pathSegment) => {
     if (current === undefined || current === null) {
       return undefined;
     }
 
     const currentType = type.describe(current, true);
+    const node = current as any;
 
     switch (currentType) {
       case TypeEnum.map:
-        return current.get(pathSegment);
+        return node.get(pathSegment);
 
       case TypeEnum.array: {
         if (typeof pathSegment === 'number') {
-          return current[pathSegment];
+          return node[pathSegment];
         }
-        const index = parseInt(pathSegment, 10);
+        const index = Number.parseInt(String(pathSegment), 10);
         if (isNaN(index)) {
           return undefined;
         }
-        return current[index];
+        return node[index];
       }
       case TypeEnum.object:
-        return current[pathSegment];
+        return node[pathSegment as any];
 
       default:
         return undefined;
@@ -53,69 +54,73 @@ export function setPath(draft: any, path: Path, value: unknown): void {
   if (!Array.isArray(path)) {
     return setPath(draft, path.split('.'), value);
   }
-  const [target] = path.slice(0, path.length - 1).reduce(
-    ([current], pathSegment) => {
-      const currentType = type.describe(current, true);
+  let target = draft;
+  for (const pathSegment of path.slice(0, path.length - 1)) {
+    const currentType = type.describe(target, true);
+    const node = target as any;
 
-      switch (currentType) {
-        case TypeEnum.map:
-          if (!current.has(pathSegment)) {
-            current.set(pathSegment, {});
-          }
-          return [current.get(pathSegment)];
-
-        case TypeEnum.array: {
-          if (typeof pathSegment === 'number') {
-            return current[pathSegment];
-          }
-          const index = parseInt(pathSegment, 10);
-          if (isNaN(index)) {
-            throw new Error(`Invalid array index: ${pathSegment}`);
-          }
-          if (current[index] === undefined) {
-            current[index] = {};
-          }
-          return [current[index]];
+    switch (currentType) {
+      case TypeEnum.map:
+        if (!node.has(pathSegment)) {
+          node.set(pathSegment, {});
         }
-        case TypeEnum.object:
-          if (
-            current[pathSegment] === undefined ||
-            current[pathSegment] === null
-          ) {
-            current[pathSegment] = {};
-          }
-          return [current[pathSegment]];
+        target = node.get(pathSegment);
+        break;
 
-        default:
-          throw new Error(`Cannot set nested value on type: ${currentType}`);
+      case TypeEnum.array: {
+        const index =
+          typeof pathSegment === 'number'
+            ? pathSegment
+            : Number.parseInt(String(pathSegment), 10);
+        if (isNaN(index)) {
+          throw new Error(`Invalid array index: ${pathSegment}`);
+        }
+        if (node[index] === undefined) {
+          node[index] = {};
+        }
+        target = node[index];
+        break;
       }
-    },
-    [draft],
-  );
+
+      case TypeEnum.object:
+        if (
+          node[pathSegment as any] === undefined ||
+          node[pathSegment as any] === null
+        ) {
+          node[pathSegment as any] = {};
+        }
+        target = node[pathSegment as any];
+        break;
+
+      default:
+        throw new Error(`Cannot set nested value on type: ${currentType}`);
+    }
+  }
 
   // Final assignment based on target type
   const finalKey = path[path.length - 1];
   const finalType = type.describe(target, true);
+  const node = target as any;
 
   switch (finalType) {
     case TypeEnum.map:
-      target.set(finalKey, value);
+      node.set(finalKey, value);
       break;
 
     case TypeEnum.array:
       if (typeof finalKey === 'number') {
-        target[finalKey] = value;
+        node[finalKey] = value;
       } else {
-        const index = parseInt(finalKey, 10);
+        const index = Number.parseInt(String(finalKey), 10);
         if (isNaN(index)) {
           throw new Error(`Invalid array index: ${finalKey}`);
         }
-        target[index] = value;
+        node[index] = value;
       }
       break;
 
     case TypeEnum.object:
-      target[finalKey] = value;
+      node[finalKey as any] = value;
       break;
 
     default:

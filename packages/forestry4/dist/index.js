@@ -1,471 +1,7 @@
-import { BehaviorSubject, Subject, map } from "rxjs";
+import { BehaviorSubject, Subject, distinctUntilChanged, map } from "rxjs";
 import { isEqual } from "lodash-es";
 import { enableMapSet, produce } from "immer";
 import { type, TypeEnum } from "@wonderlandlabs/walrus";
-function isFunction(value) {
-  return typeof value === "function";
-}
-function hasLift(source) {
-  return isFunction(source === null || source === void 0 ? void 0 : source.lift);
-}
-function operate(init) {
-  return function(source) {
-    if (hasLift(source)) {
-      return source.lift(function(liftedSource) {
-        try {
-          return init(liftedSource, this);
-        } catch (err) {
-          this.error(err);
-        }
-      });
-    }
-    throw new TypeError("Unable to lift unknown Observable type");
-  };
-}
-var extendStatics = function(d, b) {
-  extendStatics = Object.setPrototypeOf || { __proto__: [] } instanceof Array && function(d2, b2) {
-    d2.__proto__ = b2;
-  } || function(d2, b2) {
-    for (var p in b2) if (Object.prototype.hasOwnProperty.call(b2, p)) d2[p] = b2[p];
-  };
-  return extendStatics(d, b);
-};
-function __extends(d, b) {
-  if (typeof b !== "function" && b !== null)
-    throw new TypeError("Class extends value " + String(b) + " is not a constructor or null");
-  extendStatics(d, b);
-  function __() {
-    this.constructor = d;
-  }
-  d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-}
-function __values(o) {
-  var s = typeof Symbol === "function" && Symbol.iterator, m = s && o[s], i = 0;
-  if (m) return m.call(o);
-  if (o && typeof o.length === "number") return {
-    next: function() {
-      if (o && i >= o.length) o = void 0;
-      return { value: o && o[i++], done: !o };
-    }
-  };
-  throw new TypeError(s ? "Object is not iterable." : "Symbol.iterator is not defined.");
-}
-function __read(o, n) {
-  var m = typeof Symbol === "function" && o[Symbol.iterator];
-  if (!m) return o;
-  var i = m.call(o), r, ar = [], e;
-  try {
-    while ((n === void 0 || n-- > 0) && !(r = i.next()).done) ar.push(r.value);
-  } catch (error) {
-    e = { error };
-  } finally {
-    try {
-      if (r && !r.done && (m = i["return"])) m.call(i);
-    } finally {
-      if (e) throw e.error;
-    }
-  }
-  return ar;
-}
-function __spreadArray(to, from, pack) {
-  if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
-    if (ar || !(i in from)) {
-      if (!ar) ar = Array.prototype.slice.call(from, 0, i);
-      ar[i] = from[i];
-    }
-  }
-  return to.concat(ar || Array.prototype.slice.call(from));
-}
-typeof SuppressedError === "function" ? SuppressedError : function(error, suppressed, message) {
-  var e = new Error(message);
-  return e.name = "SuppressedError", e.error = error, e.suppressed = suppressed, e;
-};
-function createErrorClass(createImpl) {
-  var _super = function(instance) {
-    Error.call(instance);
-    instance.stack = new Error().stack;
-  };
-  var ctorFunc = createImpl(_super);
-  ctorFunc.prototype = Object.create(Error.prototype);
-  ctorFunc.prototype.constructor = ctorFunc;
-  return ctorFunc;
-}
-var UnsubscriptionError = createErrorClass(function(_super) {
-  return function UnsubscriptionErrorImpl(errors) {
-    _super(this);
-    this.message = errors ? errors.length + " errors occurred during unsubscription:\n" + errors.map(function(err, i) {
-      return i + 1 + ") " + err.toString();
-    }).join("\n  ") : "";
-    this.name = "UnsubscriptionError";
-    this.errors = errors;
-  };
-});
-function arrRemove(arr, item) {
-  if (arr) {
-    var index = arr.indexOf(item);
-    0 <= index && arr.splice(index, 1);
-  }
-}
-var Subscription = function() {
-  function Subscription2(initialTeardown) {
-    this.initialTeardown = initialTeardown;
-    this.closed = false;
-    this._parentage = null;
-    this._finalizers = null;
-  }
-  Subscription2.prototype.unsubscribe = function() {
-    var e_1, _a, e_2, _b;
-    var errors;
-    if (!this.closed) {
-      this.closed = true;
-      var _parentage = this._parentage;
-      if (_parentage) {
-        this._parentage = null;
-        if (Array.isArray(_parentage)) {
-          try {
-            for (var _parentage_1 = __values(_parentage), _parentage_1_1 = _parentage_1.next(); !_parentage_1_1.done; _parentage_1_1 = _parentage_1.next()) {
-              var parent_1 = _parentage_1_1.value;
-              parent_1.remove(this);
-            }
-          } catch (e_1_1) {
-            e_1 = { error: e_1_1 };
-          } finally {
-            try {
-              if (_parentage_1_1 && !_parentage_1_1.done && (_a = _parentage_1.return)) _a.call(_parentage_1);
-            } finally {
-              if (e_1) throw e_1.error;
-            }
-          }
-        } else {
-          _parentage.remove(this);
-        }
-      }
-      var initialFinalizer = this.initialTeardown;
-      if (isFunction(initialFinalizer)) {
-        try {
-          initialFinalizer();
-        } catch (e) {
-          errors = e instanceof UnsubscriptionError ? e.errors : [e];
-        }
-      }
-      var _finalizers = this._finalizers;
-      if (_finalizers) {
-        this._finalizers = null;
-        try {
-          for (var _finalizers_1 = __values(_finalizers), _finalizers_1_1 = _finalizers_1.next(); !_finalizers_1_1.done; _finalizers_1_1 = _finalizers_1.next()) {
-            var finalizer = _finalizers_1_1.value;
-            try {
-              execFinalizer(finalizer);
-            } catch (err) {
-              errors = errors !== null && errors !== void 0 ? errors : [];
-              if (err instanceof UnsubscriptionError) {
-                errors = __spreadArray(__spreadArray([], __read(errors)), __read(err.errors));
-              } else {
-                errors.push(err);
-              }
-            }
-          }
-        } catch (e_2_1) {
-          e_2 = { error: e_2_1 };
-        } finally {
-          try {
-            if (_finalizers_1_1 && !_finalizers_1_1.done && (_b = _finalizers_1.return)) _b.call(_finalizers_1);
-          } finally {
-            if (e_2) throw e_2.error;
-          }
-        }
-      }
-      if (errors) {
-        throw new UnsubscriptionError(errors);
-      }
-    }
-  };
-  Subscription2.prototype.add = function(teardown) {
-    var _a;
-    if (teardown && teardown !== this) {
-      if (this.closed) {
-        execFinalizer(teardown);
-      } else {
-        if (teardown instanceof Subscription2) {
-          if (teardown.closed || teardown._hasParent(this)) {
-            return;
-          }
-          teardown._addParent(this);
-        }
-        (this._finalizers = (_a = this._finalizers) !== null && _a !== void 0 ? _a : []).push(teardown);
-      }
-    }
-  };
-  Subscription2.prototype._hasParent = function(parent) {
-    var _parentage = this._parentage;
-    return _parentage === parent || Array.isArray(_parentage) && _parentage.includes(parent);
-  };
-  Subscription2.prototype._addParent = function(parent) {
-    var _parentage = this._parentage;
-    this._parentage = Array.isArray(_parentage) ? (_parentage.push(parent), _parentage) : _parentage ? [_parentage, parent] : parent;
-  };
-  Subscription2.prototype._removeParent = function(parent) {
-    var _parentage = this._parentage;
-    if (_parentage === parent) {
-      this._parentage = null;
-    } else if (Array.isArray(_parentage)) {
-      arrRemove(_parentage, parent);
-    }
-  };
-  Subscription2.prototype.remove = function(teardown) {
-    var _finalizers = this._finalizers;
-    _finalizers && arrRemove(_finalizers, teardown);
-    if (teardown instanceof Subscription2) {
-      teardown._removeParent(this);
-    }
-  };
-  Subscription2.EMPTY = function() {
-    var empty = new Subscription2();
-    empty.closed = true;
-    return empty;
-  }();
-  return Subscription2;
-}();
-Subscription.EMPTY;
-function isSubscription(value) {
-  return value instanceof Subscription || value && "closed" in value && isFunction(value.remove) && isFunction(value.add) && isFunction(value.unsubscribe);
-}
-function execFinalizer(finalizer) {
-  if (isFunction(finalizer)) {
-    finalizer();
-  } else {
-    finalizer.unsubscribe();
-  }
-}
-var timeoutProvider = {
-  setTimeout: function(handler, timeout) {
-    var args = [];
-    for (var _i = 2; _i < arguments.length; _i++) {
-      args[_i - 2] = arguments[_i];
-    }
-    return setTimeout.apply(void 0, __spreadArray([handler, timeout], __read(args)));
-  },
-  clearTimeout: function(handle) {
-    return clearTimeout(handle);
-  },
-  delegate: void 0
-};
-function reportUnhandledError(err) {
-  timeoutProvider.setTimeout(function() {
-    {
-      throw err;
-    }
-  });
-}
-function noop() {
-}
-var Subscriber = function(_super) {
-  __extends(Subscriber2, _super);
-  function Subscriber2(destination) {
-    var _this = _super.call(this) || this;
-    _this.isStopped = false;
-    if (destination) {
-      _this.destination = destination;
-      if (isSubscription(destination)) {
-        destination.add(_this);
-      }
-    } else {
-      _this.destination = EMPTY_OBSERVER;
-    }
-    return _this;
-  }
-  Subscriber2.create = function(next, error, complete) {
-    return new SafeSubscriber(next, error, complete);
-  };
-  Subscriber2.prototype.next = function(value) {
-    if (this.isStopped) ;
-    else {
-      this._next(value);
-    }
-  };
-  Subscriber2.prototype.error = function(err) {
-    if (this.isStopped) ;
-    else {
-      this.isStopped = true;
-      this._error(err);
-    }
-  };
-  Subscriber2.prototype.complete = function() {
-    if (this.isStopped) ;
-    else {
-      this.isStopped = true;
-      this._complete();
-    }
-  };
-  Subscriber2.prototype.unsubscribe = function() {
-    if (!this.closed) {
-      this.isStopped = true;
-      _super.prototype.unsubscribe.call(this);
-      this.destination = null;
-    }
-  };
-  Subscriber2.prototype._next = function(value) {
-    this.destination.next(value);
-  };
-  Subscriber2.prototype._error = function(err) {
-    try {
-      this.destination.error(err);
-    } finally {
-      this.unsubscribe();
-    }
-  };
-  Subscriber2.prototype._complete = function() {
-    try {
-      this.destination.complete();
-    } finally {
-      this.unsubscribe();
-    }
-  };
-  return Subscriber2;
-}(Subscription);
-var ConsumerObserver = function() {
-  function ConsumerObserver2(partialObserver) {
-    this.partialObserver = partialObserver;
-  }
-  ConsumerObserver2.prototype.next = function(value) {
-    var partialObserver = this.partialObserver;
-    if (partialObserver.next) {
-      try {
-        partialObserver.next(value);
-      } catch (error) {
-        handleUnhandledError(error);
-      }
-    }
-  };
-  ConsumerObserver2.prototype.error = function(err) {
-    var partialObserver = this.partialObserver;
-    if (partialObserver.error) {
-      try {
-        partialObserver.error(err);
-      } catch (error) {
-        handleUnhandledError(error);
-      }
-    } else {
-      handleUnhandledError(err);
-    }
-  };
-  ConsumerObserver2.prototype.complete = function() {
-    var partialObserver = this.partialObserver;
-    if (partialObserver.complete) {
-      try {
-        partialObserver.complete();
-      } catch (error) {
-        handleUnhandledError(error);
-      }
-    }
-  };
-  return ConsumerObserver2;
-}();
-var SafeSubscriber = function(_super) {
-  __extends(SafeSubscriber2, _super);
-  function SafeSubscriber2(observerOrNext, error, complete) {
-    var _this = _super.call(this) || this;
-    var partialObserver;
-    if (isFunction(observerOrNext) || !observerOrNext) {
-      partialObserver = {
-        next: observerOrNext !== null && observerOrNext !== void 0 ? observerOrNext : void 0,
-        error: error !== null && error !== void 0 ? error : void 0,
-        complete: complete !== null && complete !== void 0 ? complete : void 0
-      };
-    } else {
-      {
-        partialObserver = observerOrNext;
-      }
-    }
-    _this.destination = new ConsumerObserver(partialObserver);
-    return _this;
-  }
-  return SafeSubscriber2;
-}(Subscriber);
-function handleUnhandledError(error) {
-  {
-    reportUnhandledError(error);
-  }
-}
-function defaultErrorHandler(err) {
-  throw err;
-}
-var EMPTY_OBSERVER = {
-  closed: true,
-  next: noop,
-  error: defaultErrorHandler,
-  complete: noop
-};
-function identity(x) {
-  return x;
-}
-function createOperatorSubscriber(destination, onNext, onComplete, onError, onFinalize) {
-  return new OperatorSubscriber(destination, onNext, onComplete, onError, onFinalize);
-}
-var OperatorSubscriber = function(_super) {
-  __extends(OperatorSubscriber2, _super);
-  function OperatorSubscriber2(destination, onNext, onComplete, onError, onFinalize, shouldUnsubscribe) {
-    var _this = _super.call(this, destination) || this;
-    _this.onFinalize = onFinalize;
-    _this.shouldUnsubscribe = shouldUnsubscribe;
-    _this._next = onNext ? function(value) {
-      try {
-        onNext(value);
-      } catch (err) {
-        destination.error(err);
-      }
-    } : _super.prototype._next;
-    _this._error = onError ? function(err) {
-      try {
-        onError(err);
-      } catch (err2) {
-        destination.error(err2);
-      } finally {
-        this.unsubscribe();
-      }
-    } : _super.prototype._error;
-    _this._complete = onComplete ? function() {
-      try {
-        onComplete();
-      } catch (err) {
-        destination.error(err);
-      } finally {
-        this.unsubscribe();
-      }
-    } : _super.prototype._complete;
-    return _this;
-  }
-  OperatorSubscriber2.prototype.unsubscribe = function() {
-    var _a;
-    if (!this.shouldUnsubscribe || this.shouldUnsubscribe()) {
-      var closed_1 = this.closed;
-      _super.prototype.unsubscribe.call(this);
-      !closed_1 && ((_a = this.onFinalize) === null || _a === void 0 ? void 0 : _a.call(this));
-    }
-  };
-  return OperatorSubscriber2;
-}(Subscriber);
-function distinctUntilChanged(comparator, keySelector) {
-  if (keySelector === void 0) {
-    keySelector = identity;
-  }
-  comparator = comparator !== null && comparator !== void 0 ? comparator : defaultCompare;
-  return operate(function(source, subscriber) {
-    var previousKey;
-    var first = true;
-    source.subscribe(createOperatorSubscriber(subscriber, function(value) {
-      var currentKey = keySelector(value);
-      if (first || !comparator(previousKey, currentKey)) {
-        first = false;
-        previousKey = currentKey;
-        subscriber.next(value);
-      }
-    }));
-  });
-}
-function defaultCompare(a, b) {
-  return a === b;
-}
 function asError(value) {
   if (value instanceof Error) {
     return value;
@@ -509,21 +45,22 @@ function getPath(source, pathArray) {
       return void 0;
     }
     const currentType = type.describe(current, true);
+    const node = current;
     switch (currentType) {
       case TypeEnum.map:
-        return current.get(pathSegment);
+        return node.get(pathSegment);
       case TypeEnum.array: {
         if (typeof pathSegment === "number") {
-          return current[pathSegment];
+          return node[pathSegment];
         }
-        const index = parseInt(pathSegment, 10);
+        const index = Number.parseInt(String(pathSegment), 10);
         if (isNaN(index)) {
           return void 0;
         }
-        return current[index];
+        return node[index];
       }
       case TypeEnum.object:
-        return current[pathSegment];
+        return node[pathSegment];
       default:
         return void 0;
     }
@@ -534,58 +71,58 @@ function setPath(draft, path, value) {
   if (!Array.isArray(path)) {
     return setPath(draft, path.split("."), value);
   }
-  const [target] = path.slice(0, path.length - 1).reduce(
-    ([current], pathSegment) => {
-      const currentType = type.describe(current, true);
-      switch (currentType) {
-        case TypeEnum.map:
-          if (!current.has(pathSegment)) {
-            current.set(pathSegment, {});
-          }
-          return [current.get(pathSegment)];
-        case TypeEnum.array: {
-          if (typeof pathSegment === "number") {
-            return current[pathSegment];
-          }
-          const index = parseInt(pathSegment, 10);
-          if (isNaN(index)) {
-            throw new Error(`Invalid array index: ${pathSegment}`);
-          }
-          if (current[index] === void 0) {
-            current[index] = {};
-          }
-          return [current[index]];
+  let target = draft;
+  for (const pathSegment of path.slice(0, path.length - 1)) {
+    const currentType = type.describe(target, true);
+    const node2 = target;
+    switch (currentType) {
+      case TypeEnum.map:
+        if (!node2.has(pathSegment)) {
+          node2.set(pathSegment, {});
         }
-        case TypeEnum.object:
-          if (current[pathSegment] === void 0 || current[pathSegment] === null) {
-            current[pathSegment] = {};
-          }
-          return [current[pathSegment]];
-        default:
-          throw new Error(`Cannot set nested value on type: ${currentType}`);
+        target = node2.get(pathSegment);
+        break;
+      case TypeEnum.array: {
+        const index = typeof pathSegment === "number" ? pathSegment : Number.parseInt(String(pathSegment), 10);
+        if (isNaN(index)) {
+          throw new Error(`Invalid array index: ${pathSegment}`);
+        }
+        if (node2[index] === void 0) {
+          node2[index] = {};
+        }
+        target = node2[index];
+        break;
       }
-    },
-    [draft]
-  );
+      case TypeEnum.object:
+        if (node2[pathSegment] === void 0 || node2[pathSegment] === null) {
+          node2[pathSegment] = {};
+        }
+        target = node2[pathSegment];
+        break;
+      default:
+        throw new Error(`Cannot set nested value on type: ${currentType}`);
+    }
+  }
   const finalKey = path[path.length - 1];
   const finalType = type.describe(target, true);
+  const node = target;
   switch (finalType) {
     case TypeEnum.map:
-      target.set(finalKey, value);
+      node.set(finalKey, value);
       break;
     case TypeEnum.array:
       if (typeof finalKey === "number") {
-        target[finalKey] = value;
+        node[finalKey] = value;
       } else {
-        const index = parseInt(finalKey, 10);
+        const index = Number.parseInt(String(finalKey), 10);
         if (isNaN(index)) {
           throw new Error(`Invalid array index: ${finalKey}`);
         }
-        target[index] = value;
+        node[index] = value;
       }
       break;
     case TypeEnum.object:
-      target[finalKey] = value;
+      node[finalKey] = value;
       break;
     default:
       throw new Error(`Cannot set value on type: ${finalType}`);
@@ -602,7 +139,7 @@ function toPathArray(p) {
   throw new Error("cannot parse $path");
 }
 function pathString(path) {
-  return Array.isArray(path) ? path.join(".") : `${path}`;
+  return Array.isArray(path) ? path.map(String).join(".") : path;
 }
 function combinePaths(p, p2) {
   if (!Array.isArray(p)) {
@@ -620,6 +157,10 @@ function combinePaths(p, p2) {
   return [...p, ...p2];
 }
 const exclude = "next,isActive,value,complete".split(",");
+const requiredMethod = {
+  get: "get",
+  set: "set"
+};
 function getAllMethodNames(obj) {
   const methods = /* @__PURE__ */ new Set();
   let current = obj;
@@ -636,8 +177,11 @@ function getAllMethodNames(obj) {
   return Array.from(methods);
 }
 function bindActions(target) {
-  const methodNames = getAllMethodNames(target);
-  return methodNames.reduce(($, key) => {
+  const methodNames = /* @__PURE__ */ new Set([
+    ...getAllMethodNames(target),
+    ...Object.values(requiredMethod)
+  ]);
+  return Array.from(methodNames).reduce(($, key) => {
     if (/^\$/.test(key) || exclude.includes(key) || typeof target[key] !== "function") {
       return $;
     }
@@ -668,6 +212,9 @@ class Store {
     if (p.res && p.res instanceof Map) {
       p.res.forEach((value, key) => this.$res.set(key, value));
     }
+    if (p.filterPath) {
+      this.#filterPath = p.filterPath;
+    }
   }
   /**
    * note - for consistency with the types $subject is a generic $subject;
@@ -675,8 +222,12 @@ class Store {
    * @private
    */
   #subject;
+  #filterPath;
   get $subject() {
     return this.#subject;
+  }
+  filterPath(path) {
+    return this.#filterPath ? this.#filterPath(path, this) : path;
   }
   debug;
   // more alerts on validation failures;
@@ -812,6 +363,9 @@ class Store {
       this._$ = bindActions(this);
     }
     return this._$;
+  }
+  get $bound() {
+    return this.$;
   }
   queuePendingValue(value) {
     const digits = `${Math.random()}`.replace("0.", "");
@@ -954,12 +508,14 @@ class Store {
     if (!path || Array.isArray(path) && path.length === 0) {
       return this.value;
     }
-    const pathArray = Array.isArray(path) ? path : pathString(path).split(".");
+    const filteredPath = this.filterPath(path);
+    const pathArray = Array.isArray(filteredPath) ? filteredPath : pathString(filteredPath).split(".");
     return getPath(this.value, pathArray);
   }
   set(path, value) {
+    const filteredPath = this.filterPath(path);
     const next = produce(this.value, (draft) => {
-      setPath(draft, path, value);
+      setPath(draft, filteredPath, value);
     });
     this.next(next);
   }
@@ -969,7 +525,8 @@ class Store {
       this.next(newValue);
       return this.value;
     } else {
-      const pathArray = Array.isArray(path) ? path : pathString(path).split(".");
+      const filteredPath = this.filterPath(path);
+      const pathArray = Array.isArray(filteredPath) ? filteredPath : pathString(filteredPath).split(".");
       const newValue = produce(this.value, (draft) => {
         const target = getPath(draft, pathArray);
         if (target !== void 0) {
@@ -1131,7 +688,9 @@ class Branches extends Map {
       return { params: {}, source };
     }
     if (typeof rawParams !== "object" || Array.isArray(rawParams)) {
-      console.warn(`Branch params provided for "${key}" in ${source} are invalid`);
+      console.warn(
+        `Branch params provided for "${key}" in ${source} are invalid`
+      );
       return { params: {}, source };
     }
     return {
@@ -1154,7 +713,9 @@ class Branches extends Map {
     }
     if (typeof branchClass !== "function") {
       if (source) {
-        console.warn(`Branch class provided for "${key}" in ${source} is invalid`);
+        console.warn(
+          `Branch class provided for "${key}" in ${source} is invalid`
+        );
       } else {
         console.warn(`Branch class provided for "${key}" is invalid`);
       }
@@ -1210,6 +771,7 @@ class Branches extends Map {
 class Forest extends Store {
   #parentSub;
   #$branchParams = /* @__PURE__ */ new Map();
+  #$subject;
   $branches;
   constructor(p) {
     const { path, parent } = p;
@@ -1344,10 +906,15 @@ class Forest extends Store {
     }
   }
   #validatePending(preparedValue) {
-    let validationError = null;
+    if (this.suspendValidation) {
+      return;
+    }
+    const validationErrors = [];
     const transientSub = this.receiver.subscribe((message) => {
       if (message && message.type === "validation-failure") {
-        validationError = `Branch ${pathString(message.branchPath)}: ${message.error}`;
+        validationErrors.push(
+          `Branch ${pathString(message.branchPath)}: ${message.error}`
+        );
       }
     });
     try {
@@ -1359,23 +926,25 @@ class Forest extends Store {
       this.$broadcast(setPendingMessage, true);
       const validateMessage = {
         type: "$validate-all",
+        payload: preparedValue,
         timestamp: Date.now()
       };
       this.$broadcast(validateMessage, true);
-      if (validationError) {
+      if (validationErrors.length) {
+        const message = validationErrors.join("; ");
         if (this.debug) {
-          console.error("Branch validation failed:", validationError);
+          console.error("Branch validation failed:", message);
         }
-        throw new Error(`Validation failed: ${validationError}`);
+        throw new Error(`Validation failed: ${message}`);
       }
     } finally {
       transientSub.unsubscribe();
     }
   }
   set(path, value) {
-    const pathArray = Array.isArray(path) ? path : pathString(path).split(".");
+    const filteredPath = this.filterPath(path);
     const newValue = produce(this.value, (draft) => {
-      setPath(draft, pathArray, value);
+      setPath(draft, filteredPath, value);
     });
     this.next(newValue);
   }
@@ -1398,7 +967,31 @@ class Forest extends Store {
           super.next(newValue);
         }
       }
+    } else if (message.type === "$validate-all") {
+      this.#validateBranch(message);
+      this.receiver.next(message);
     }
+  }
+  #validateBranch(message) {
+    if (this.$isRoot) {
+      return;
+    }
+    const rootValue = Object.hasOwn(message, "payload") ? message.payload : this.$root.value;
+    const branchValue = getPath(rootValue, this.fullPath);
+    if (branchValue === void 0) {
+      return;
+    }
+    const { isValid, error } = this.$validate(branchValue);
+    if (isValid) {
+      return;
+    }
+    const validationMessage = {
+      type: "validation-failure",
+      branchPath: this.fullPath,
+      error: asError(error).message,
+      timestamp: Date.now()
+    };
+    this.$root.receiver.next(validationMessage);
   }
   #removeFromParentRegistry() {
     if (!this.$path || !(this.$parent instanceof Forest)) {
@@ -1415,11 +1008,14 @@ class Forest extends Store {
     if (this.$isRoot) {
       return super.$subject;
     }
-    const self = this;
-    return this.$root.$subject.pipe(
-      map(() => self.value),
+    if (this.#$subject) {
+      return this.#$subject;
+    }
+    this.#$subject = this.$root.$subject.pipe(
+      map(() => this.value),
       distinctUntilChanged(isEqual)
     );
+    return this.#$subject;
   }
   subscribe(listener) {
     return this.$subject.subscribe(listener);

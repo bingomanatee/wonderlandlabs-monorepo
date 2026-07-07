@@ -18,7 +18,7 @@ export function useRequireAuth(redirectTo: string = '/', validateToken: boolean 
       // If user is not signed in, redirect them
       if (!isSignedIn) {
         navigate(redirectTo, { replace: true });
-        messageState.acts.addMessage(
+        messageState.$bound.addMessage(
           'Unauthorized',
           'You must be logged in to view this page; please (re) log in ',
           messageLevels.WARNING,
@@ -34,7 +34,7 @@ export function useRequireAuth(redirectTo: string = '/', validateToken: boolean 
           if (!token) {
             navigate(redirectTo, { replace: true });
             setTokenValid(false);
-            messageState.acts.addMessage(
+            messageState.$bound.addMessage(
               'Unauthorized',
               'Your session has expired; please (re) log in ',
               messageLevels.WARNING,
@@ -44,7 +44,7 @@ export function useRequireAuth(redirectTo: string = '/', validateToken: boolean 
           }
           setTokenValid(true);
         } catch (error) {
-          messageState.acts.addMessage(
+          messageState.$bound.addMessage(
             'Unauthorized',
             'Your session cannot be validated; please (re) log in ',
             messageLevels.WARNING,

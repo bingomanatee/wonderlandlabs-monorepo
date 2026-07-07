@@ -4,6 +4,6 @@ import { MutatorArgs, BranchIF } from '../../types';
  * Some intitializers may $validate their data.
  */
 export declare const initializer: {
-  name: string;
-  delta(_: BranchIF, args: MutatorArgs): unknown;
+    name: string;
+    delta(_: BranchIF, args: MutatorArgs): unknown;
 };

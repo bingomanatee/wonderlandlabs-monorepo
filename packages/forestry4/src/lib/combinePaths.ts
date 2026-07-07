@@ -1,6 +1,6 @@
-import { Path } from '../types';
+import { Path, PathElement } from '../types';
 
-function toPathArray(p: Path): string[] {
+function toPathArray(p: Path): PathElement[] {
   if (Array.isArray(p)) {
     return p;
   }
@@ -12,10 +12,10 @@ function toPathArray(p: Path): string[] {
 }
 
 export function pathString(path: Path): string {
-  return Array.isArray(path) ? path.join('.') : `${path}`;
+  return Array.isArray(path) ? path.map(String).join('.') : path;
 }
 
-export default function combinePaths(p: Path, p2: Path): string[] {
+export default function combinePaths(p: Path, p2: Path): PathElement[] {
   if (!Array.isArray(p)) {
     return combinePaths(toPathArray(p), p2);
   }
@@ -25,10 +25,10 @@ export default function combinePaths(p: Path, p2: Path): string[] {
   }
 
   if (!p.length) {
-    return p2 as string[];
+    return p2;
   }
   if (!p2.length) {
-    return p as string[];
+    return p;
   }
   return [...p, ...p2];
 }

@@ -1,5 +1,4 @@
 import Forest from "../../Forest";
-import "@types/jest";
 
 import { engineMap } from "../../engines/engineMap";
 import { GenericMap } from "../../engines/engineTypes";

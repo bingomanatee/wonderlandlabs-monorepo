@@ -27,15 +27,23 @@ const DEFAULT_INITIALIZER: MutatorIF = {
   },
 };
 
-export class Tree implements TreeIF<ValueType = unknown> {
-  constructor(public forest: ForestIF, public name: TreeName, seed?: TreeSeed) {
+export class Tree<ValueType = unknown> implements TreeIF<ValueType> {
+  constructor(
+    public forest: ForestIF,
+    public name: TreeName,
+    seed: TreeSeed<ValueType>,
+  ) {
     this.engineName = seed.engineName;
     const init = [seed.val];
     if (seed.validators) this.validators = seed.validators;
     const action = this.engine.actions.has(ACTION_NAME_INITIALIZER)
       ? this.engine.actions.get(ACTION_NAME_INITIALIZER)!
       : DEFAULT_INITIALIZER;
-    this.root = new Branch(this, action, init);
+    this.root = new Branch<ValueType>(
+      this,
+      action as MutatorIF<ValueType>,
+      init,
+    );
     this.engineInput = seed.engineInput;
     this.mut = this.makeMut();
     this.mutValidators = seed.mutatorValidators || [];
@@ -46,7 +54,7 @@ export class Tree implements TreeIF<ValueType = unknown> {
   public engineInput?: unknown;
 
   root: BranchIF<ValueType>;
-  public get top(): BranchIF {
+  public get top(): BranchIF<ValueType> {
     let b = this.root;
     while (b) {
       if (!b.next) return b;
@@ -56,8 +64,8 @@ export class Tree implements TreeIF<ValueType = unknown> {
   }
   engineName: string;
 
-  private _engine?: EngineIF;
-  get engine(): EngineIF {
+  private _engine?: EngineIF<ValueType>;
+  get engine(): EngineIF<ValueType> {
     if (!this._engine) {
       this._engine = this.forest.engine(this.engineName, this);
     }
@@ -81,7 +89,7 @@ export class Tree implements TreeIF<ValueType = unknown> {
   }
 
   mutate(name: MutatorName, ...input: unknown[]) {
-    // mutation validators $validate input - so they execute before a new $branch is created.
+    // Mutation validators run before a new branch is created.
     this.mutValidators.forEach((val: MutationValidatorIF) => {
       try {
         if (val.onlyFor) {
@@ -114,7 +122,11 @@ export class Tree implements TreeIF<ValueType = unknown> {
     const action = this.engine.actions.get(name)!;
 
     return this.forest.transact(() => {
-      let next: BranchIF = new Branch(this, action, input);
+      let next: BranchIF<ValueType> = new Branch<ValueType>(
+        this,
+        action as MutatorIF<ValueType>,
+        input,
+      );
       join(this.top, next);
       try {
         this.validate();

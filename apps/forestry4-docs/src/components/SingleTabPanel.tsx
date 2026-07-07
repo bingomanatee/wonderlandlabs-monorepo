@@ -1,6 +1,6 @@
 import React from 'react';
 import { TabPanel } from '@chakra-ui/react';
-import type { CodeTab } from '../storeFactories/codeTabsStoreFactory.ts';
+import type { CodeTab } from '@/types/codeTabs';
 import CodePanel from './CodePanel.tsx';
 
 interface SingleTabPanelProps {

@@ -121,6 +121,20 @@ const Changelog: React.FC = () => {
             </ListItem>
           </List>
         </Section>
+
+        <Section title="Current" pt={3}>
+          <List spacing={2} styleType="disc" pl={5}>
+            <ListItem>
+              Added <Code>$bound</Code> as the semantic alias for the bound
+              method mirror. <Code>$</Code> remains the short alias.
+            </ListItem>
+            <ListItem>
+              Added <Code>filterPath</Code> so stores can normalize path input
+              before <Code>get</Code>, <Code>set</Code>, and path-scoped
+              <Code>mutate</Code>.
+            </ListItem>
+          </List>
+        </Section>
       </VStack>
     </Container>
   );

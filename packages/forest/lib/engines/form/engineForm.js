@@ -151,7 +151,7 @@ function updateForm(engine) {
     return action;
 }
 exports.engineForm = {
-    name: "map",
+    name: "form",
     factory(tree) {
         const engine = new Engine_1.default("map", {
             cacheable: constants_1.CACHE_TOP_ONLY,

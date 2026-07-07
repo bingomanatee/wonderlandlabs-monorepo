@@ -8,8 +8,8 @@ export type BranchParams<
   Subclass extends StoreIF<ValueType> = StoreIF<ValueType>,
 > = Omit<StoreParams<ValueType, Subclass>, 'value'>;
 
-export class Branches extends Map<string, StoreIF<unknown>> {
-  #forest: Forest<unknown>;
+export class Branches<RootType> extends Map<string, StoreIF<unknown>> {
+  #forest: Forest<RootType>;
   #$branchParams: Map<
     string,
     BranchConfigParams<unknown, StoreIF<unknown>> | undefined
@@ -17,7 +17,7 @@ export class Branches extends Map<string, StoreIF<unknown>> {
   #sub?: Subscription;
 
   constructor(
-    forest: Forest<unknown>,
+    forest: Forest<RootType>,
     branchParams: Map<
       string,
       BranchConfigParams<unknown, StoreIF<unknown>> | undefined
@@ -108,7 +108,7 @@ export class Branches extends Map<string, StoreIF<unknown>> {
           value: branchValue,
           ...nextParams,
           path,
-          parent: this.#forest as StoreIF<unknown>,
+          parent: this.#forest,
         },
         ...rest,
       );
@@ -118,7 +118,7 @@ export class Branches extends Map<string, StoreIF<unknown>> {
         name,
         value: branchValue,
         ...nextParams,
-        parent: this.#forest as StoreIF<unknown>,
+        parent: this.#forest,
         path,
       }) as unknown as Subclass;
     }
@@ -205,7 +205,9 @@ export class Branches extends Map<string, StoreIF<unknown>> {
     }
 
     if (typeof rawParams !== 'object' || Array.isArray(rawParams)) {
-      console.warn(`Branch params provided for "${key}" in ${source} are invalid`);
+      console.warn(
+        `Branch params provided for "${key}" in ${source} are invalid`,
+      );
       return { params: {} as BranchParams<unknown, StoreIF<unknown>>, source };
     }
 
@@ -234,7 +236,9 @@ export class Branches extends Map<string, StoreIF<unknown>> {
     }
     if (typeof branchClass !== 'function') {
       if (source) {
-        console.warn(`Branch class provided for "${key}" in ${source} is invalid`);
+        console.warn(
+          `Branch class provided for "${key}" in ${source} is invalid`,
+        );
       } else {
         console.warn(`Branch class provided for "${key}" is invalid`);
       }

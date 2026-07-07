@@ -1,14 +1,14 @@
-import { BehaviorSubject } from "rxjs";
-import { ATIDs, EngineFactory, EngineIF, EngineName, TransactionErrorIF, ForestIF, TransactFn, TreeIF, TreeName, TreeSeed } from "./types";
+import { BehaviorSubject } from 'rxjs';
+import { ATIDs, EngineFactory, EngineIF, EngineName, TransactionErrorIF, ForestIF, TransactFn, TreeIF, TreeName, TreeSeed } from './types';
 export type DataEngineFactoryOrEngine = EngineIF | EngineFactory;
-type EngineArgs = EngineName | DataEngineFactoryOrEngine;
+type EngineArgs<ValueType = unknown> = EngineName | EngineIF<ValueType> | EngineFactory;
 export default class Forest implements ForestIF {
     constructor(engines: DataEngineFactoryOrEngine[]);
     readonly errors: TransactionErrorIF[];
     private trees;
     private engines;
-    tree(name: TreeName, seed?: TreeSeed): TreeIF;
-    engine(nameOrEngine: EngineArgs, tree?: TreeIF): EngineIF;
+    tree<ValueType>(name: TreeName, seed?: TreeSeed<ValueType>): TreeIF<ValueType>;
+    engine<ValueType>(nameOrEngine: EngineArgs<ValueType>, tree?: TreeIF<ValueType>): EngineIF<ValueType>;
     private _nextID;
     get nextID(): number;
     activeTransactionIds: BehaviorSubject<ATIDs>;

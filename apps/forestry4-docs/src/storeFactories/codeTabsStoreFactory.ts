@@ -1,12 +1,5 @@
 import { Forest } from '@wonderlandlabs/forestry4';
-
-export interface CodeTab {
-  label: string;
-  language: string; // Required - no default, must be explicit
-  code?: string;
-  snippet?: string;
-  folder?: string;
-}
+import type { CodeTab } from '@/types/codeTabs';
 
 export interface TabContent {
   text: string;

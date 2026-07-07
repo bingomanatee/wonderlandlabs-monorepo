@@ -32,8 +32,7 @@ export interface FieldInfo {
   params?: FieldParams;
   value: unknown;
   disabled?: boolean;
-  // in cases where the value of an object is a complex term such as an object record of a select,
-  // provide discrete fields for the data object and the string representor.
+  // For complex values, provide discrete data and string representor fields.
   data?: unknown;
   errors?: Record<string, string>;
   // any tracking info about the field you want to enable.
@@ -71,8 +70,8 @@ export function isFieldIF(a: unknown): a is FieldIF {
 
   if (!("tree" in o)) return false;
   if (!isTreeIF(o.tree)) return false;
-  if (!["name" in o]) return false;
-  if (!["value" in o]) return false;
+  if (!("name" in o)) return false;
+  if (!("value" in o)) return false;
   if (typeof o.name !== "string") return false;
   return true;
 }

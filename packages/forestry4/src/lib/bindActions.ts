@@ -1,5 +1,11 @@
+import type { BoundStoreMethods } from '../types';
+
 const exclude = 'next,isActive,value,complete'.split(',');
-export type FnRecord = Record<string, () => void>;
+export type FnRecord = Record<string, (...args: any[]) => unknown>;
+const requiredMethod = {
+  get: 'get',
+  set: 'set',
+} as const;
 
 function getAllMethodNames(obj: any): string[] {
   const methods = new Set<string>();
@@ -8,7 +14,7 @@ function getAllMethodNames(obj: any): string[] {
   let current = obj;
   while (current && current !== Object.prototype) {
     // Get all property names (including non-enumerable)
-    Object.getOwnPropertyNames(current).forEach(name => {
+    Object.getOwnPropertyNames(current).forEach((name) => {
       // Skip constructor and properties that might cause circular references
       if (name === 'constructor' || /^\$/.test(name)) return;
 
@@ -24,15 +30,22 @@ function getAllMethodNames(obj: any): string[] {
   return Array.from(methods);
 }
 
-export default function bindActions(target: FnRecord) {
-  const methodNames = getAllMethodNames(target);
+export default function bindActions(target: FnRecord): BoundStoreMethods {
+  const methodNames = new Set([
+    ...getAllMethodNames(target),
+    ...Object.values(requiredMethod),
+  ]);
 
-  return methodNames.reduce(($: FnRecord, key: string) => {
-    if (/^\$/.test(key) || exclude.includes(key) || typeof target[key] !== 'function') {
+  return Array.from(methodNames).reduce(($: FnRecord, key: string) => {
+    if (
+      /^\$/.test(key) ||
+      exclude.includes(key) ||
+      typeof target[key] !== 'function'
+    ) {
       return $;
     }
 
-    $[key] = (...args: unknown[]) => (target[key] as Function).apply(target, args);
+    $[key] = (...args: unknown[]) => target[key].apply(target, args);
     return $;
-  }, {});
+  }, {}) as BoundStoreMethods;
 }

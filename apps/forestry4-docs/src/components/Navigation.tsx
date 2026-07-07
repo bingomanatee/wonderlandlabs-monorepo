@@ -13,7 +13,7 @@ import {
   Text,
   useColorModeValue,
 } from '@chakra-ui/react';
-import { Link, Link as RouterLink, useLocation } from 'react-router-dom';
+import { Link as RouterLink, useLocation } from 'react-router-dom';
 import { ChevronDownIcon } from '@chakra-ui/icons';
 import { FaGithub } from 'react-icons/fa';
 import useForestryLocal from '../hooks/useForestryLocal';
@@ -35,6 +35,7 @@ const menuItems: Record<string, MenuItem[]> = {
     { label: 'Validation', path: '/validation' },
     { label: 'Schema', path: '/schemas' },
     { label: 'Transactions', path: '/transactions' },
+    { label: 'Bound Methods', path: '/bound-methods' },
     { label: 'RxJS / Immer', path: '/rxjs' },
   ],
   'Practical Examples': [
@@ -82,7 +83,7 @@ const Navigation: React.FC = () => {
       <Container maxW="container.xl">
         <Flex alignItems="center" justifyContent="space-between">
           {/* Logo */}
-          <HStack as={Link} spacing={2} to="/" mr={10}>
+          <HStack as={RouterLink} spacing={2} to="/" mr={10}>
             <Image w="32px" h="32px" src="/img/logo-dark.png" />
 
             <Text fontSize="xl" fontWeight="bold" color={fg} whiteSpace="nowrap">
@@ -125,38 +126,40 @@ const Navigation: React.FC = () => {
                   py={0}
                   overflow="hidden"
                 >
-                  {items.map((item) => (
-                    <MenuItem
-                      key={item.path}
-                      as={item.external ? Link : RouterLink}
-                      to={item.external ? undefined : item.path}
-                      href={item.external ? item.path : undefined}
-                      isExternal={item.external}
-                      bg={!item.external && isActive(item.path) ? 'forest.50' : 'transparent'}
-                      color={!item.external && isActive(item.path) ? 'forest.600' : 'gray.700'}
-                      fontWeight={!item.external && isActive(item.path) ? 'semibold' : 'normal'}
-                      _hover={{
-                        bg: !item.external && isActive(item.path) ? 'forest.100' : 'gray.50',
-                      }}
-                      onClick={() => navStore.handleItemClick()}
-                    >
-                      {item.label}
-                    </MenuItem>
-                  ))}
+                  {items.map((item) => {
+                    const active = !item.external && isActive(item.path);
+                    const linkProps = item.external
+                      ? { as: LinkChakra, href: item.path, isExternal: true }
+                      : { as: RouterLink, to: item.path };
+
+                    return (
+                      <MenuItem
+                        key={item.path}
+                        {...linkProps}
+                        bg={active ? 'forest.50' : 'transparent'}
+                        color={active ? 'forest.600' : 'gray.700'}
+                        fontWeight={active ? 'semibold' : 'normal'}
+                        _hover={{
+                          bg: active ? 'forest.100' : 'gray.50',
+                        }}
+                        onClick={() => navStore.handleItemClick()}
+                      >
+                        {item.label}
+                      </MenuItem>
+                    );
+                  })}
                 </MenuList>
               </Menu>
             ))}
 
             {/* GitHub Source Button */}
             <Button
-              as={Link}
-              href="https://github.com/bingomanatee/wonderlandlabs-monorepo"
-              isExternal
               variant="ghost"
               size="sm"
               aria-label="View source on GitHub"
+              onClick={goGithub}
             >
-              <Text color="white" onClick={goGithub}>
+              <Text color="white">
                 <FaGithub />
               </Text>
             </Button>

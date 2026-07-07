@@ -7,14 +7,19 @@ import {
   StoreIF,
   StoreParams,
 } from '../types';
-import { map, Observable, Subject, Unsubscribable } from 'rxjs';
+import {
+  distinctUntilChanged,
+  map,
+  Observable,
+  Subject,
+  Unsubscribable,
+} from 'rxjs';
 import combinePaths, { pathString } from '../lib/combinePaths';
 import { produce } from 'immer';
 import { getPath, setPath } from '../lib/path';
 import asError from '../lib/asError';
 import { isStore } from '../typeguards';
 import { isEqual } from 'lodash-es';
-import { distinctUntilChanged } from 'rxjs/operators';
 import { Branches, BranchParams } from './Branches';
 
 export class Forest<DataType>
@@ -26,7 +31,8 @@ export class Forest<DataType>
     string,
     BranchConfigParams<unknown, StoreIF<unknown>> | undefined
   >();
-  public readonly $branches: Branches;
+  #$subject?: Observable<DataType>;
+  public readonly $branches: Branches<DataType>;
 
   constructor(p: StoreParams<DataType>) {
     const { path, parent } = p;
@@ -85,7 +91,7 @@ export class Forest<DataType>
         this.#$branchParams.set(key, branchParam);
       });
     }
-    this.$branches = new Branches(this as unknown as Forest<unknown>, this.#$branchParams);
+    this.$branches = new Branches(this, this.#$branchParams);
   }
 
   readonly $path?: Path = [];
@@ -103,7 +109,7 @@ export class Forest<DataType>
       throw new Error('Branch requires parent and path');
     }
 
-    // Recursively build the full path by combining parent's fullPath with our relative path
+    // Recursively build the full path through the parent branch chain.
     const parentFullPath = (this.$parent as Forest<unknown>).fullPath;
     return combinePaths(parentFullPath, this.$path);
   }
@@ -167,7 +173,7 @@ export class Forest<DataType>
       throw new Error('Cannot update completed store');
     }
 
-    // Apply prep function if it exists to transform partial input to complete data
+    // Apply prep function if it exists.
     const preparedValue = this.prep(value);
 
     // First validate using Store's validation
@@ -205,11 +211,17 @@ export class Forest<DataType>
   }
 
   #validatePending(preparedValue: DataType) {
+    if (this.suspendValidation) {
+      return;
+    }
+
     // Step 1: Create transient listener for validation failures
-    let validationError: string | null = null;
+    const validationErrors: string[] = [];
     const transientSub = this.receiver.subscribe((message: any) => {
       if (message && message.type === 'validation-failure') {
-        validationError = `Branch ${pathString(message.branchPath)}: ${message.error}`;
+        validationErrors.push(
+          `Branch ${pathString(message.branchPath)}: ${message.error}`,
+        );
       }
     });
 
@@ -224,14 +236,16 @@ export class Forest<DataType>
 
       const validateMessage: ForestMessage = {
         type: '$validate-all',
+        payload: preparedValue,
         timestamp: Date.now(),
       };
       this.$broadcast(validateMessage, true);
-      if (validationError) {
+      if (validationErrors.length) {
+        const message = validationErrors.join('; ');
         if (this.debug) {
-          console.error('Branch validation failed:', validationError);
+          console.error('Branch validation failed:', message);
         }
-        throw new Error(`Validation failed: ${validationError}`);
+        throw new Error(`Validation failed: ${message}`);
       }
     } finally {
       transientSub.unsubscribe();
@@ -239,10 +253,10 @@ export class Forest<DataType>
   }
 
   set(path: Path, value: unknown): void {
-    const pathArray = Array.isArray(path) ? path : pathString(path).split('.');
+    const filteredPath = this.filterPath(path);
     const newValue = produce(this.value, (draft) => {
       // Use Immer to safely set nested values
-      setPath(draft, pathArray, value);
+      setPath(draft, filteredPath, value);
     });
     this.next(newValue);
   }
@@ -274,7 +288,34 @@ export class Forest<DataType>
           super.next(newValue);
         }
       }
+    } else if (message.type === '$validate-all') {
+      this.#validateBranch(message);
+      this.receiver.next(message);
     }
+  }
+
+  #validateBranch(message: ForestMessage) {
+    if (this.$isRoot) {
+      return;
+    }
+    const rootValue = Object.hasOwn(message, 'payload')
+      ? message.payload
+      : this.$root.value;
+    const branchValue = getPath(rootValue, this.fullPath) as DataType;
+    if (branchValue === undefined) {
+      return;
+    }
+    const { isValid, error } = this.$validate(branchValue);
+    if (isValid) {
+      return;
+    }
+    const validationMessage: ForestMessage = {
+      type: 'validation-failure',
+      branchPath: this.fullPath,
+      error: asError(error).message,
+      timestamp: Date.now(),
+    };
+    this.$root.receiver.next(validationMessage);
   }
 
   #removeFromParentRegistry() {
@@ -293,11 +334,14 @@ export class Forest<DataType>
     if (this.$isRoot) {
       return super.$subject;
     }
-    const self = this;
-    return this.$root.$subject.pipe(
-      map(() => self.value),
+    if (this.#$subject) {
+      return this.#$subject;
+    }
+    this.#$subject = this.$root.$subject.pipe(
+      map(() => this.value),
       distinctUntilChanged(isEqual),
     );
+    return this.#$subject;
   }
 
   subscribe(listener: Listener<DataType>) {

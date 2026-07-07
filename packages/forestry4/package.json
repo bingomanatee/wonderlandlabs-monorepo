@@ -1,6 +1,6 @@
 {
   "name": "@wonderlandlabs/forestry4",
-  "version": "4.1.15",
+  "version": "4.1.16",
   "description": "State Management System in Javascript",
   "type": "module",
   "main": "dist/index.js",
@@ -22,6 +22,7 @@
   "devDependencies": {
     "@eslint/js": "~9.10",
     "@types/eslint__js": "~8.42",
+    "@types/lodash-es": "^4.17.12",
     "@types/node": "~20",
     "@typescript-eslint/parser": "~8.5",
     "@vitest/coverage-v8": "~2.1",

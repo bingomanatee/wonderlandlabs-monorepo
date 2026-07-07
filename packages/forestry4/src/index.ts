@@ -13,6 +13,8 @@ export type {
   ForestMessage,
   Validity,
   StoreIF,
+  BoundStoreMethods,
+  PathFilterFn,
   ResourceMap,
   StoreParams,
   Path,

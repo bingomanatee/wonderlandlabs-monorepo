@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { Box, Tab, TabList, TabPanels, Tabs, useColorModeValue } from '@chakra-ui/react';
-import type { CodeTab } from '../storeFactories/codeTabsStoreFactory.ts';
+import type { CodeTab } from '@/types/codeTabs';
 import SingleTabPanel from './SingleTabPanel.tsx';
 import Prism from 'prismjs';
 import 'prismjs/themes/prism-tomorrow.css';

@@ -8,7 +8,10 @@ export function isObj(a: unknown): a is object {
   return !!(a && typeof a === "object");
 }
 
-export type MutatorMap<ValueType> = Map<MutatorName, MutatorIF<ValueType>>;
+export type MutatorMap<ValueType = unknown> = Map<
+  MutatorName,
+  MutatorIF<ValueType>
+>;
 
 export function isDataEngineValidatorFn(
   data: unknown
@@ -26,7 +29,7 @@ export function isEngineIF(a: unknown): a is EngineIF {
   return true;
 }
 
-export interface EngineIF<ValueType> {
+export interface EngineIF<ValueType = unknown> {
   name: EngineName;
   actions: MutatorMap<ValueType>;
   validator?: EngineValidatorFn;
@@ -57,19 +60,19 @@ export type TreeSeed<ValueType = unknown> = {
 };
 
 export type Cacheable = boolean | symbol;
-export interface MutatorIF<ValueType> {
+export interface MutatorIF<ValueType = unknown> {
   name: MutatorName;
   cacheable?: Cacheable;
-  get(branch: BranchIF<ValueType>, ...args: MutatorArgs): ValueType; // how to derive a value for a given $branch
+  mutator(branch: BranchIF<ValueType>, args?: MutatorArgs): ValueType;
 }
 
 export type MutatorArgs = unknown[];
 export interface BranchIF<ValueType = unknown> {
   readonly value: ValueType;
   id: number;
-  prev?: BranchIF;
-  next?: BranchIF;
-  tree: TreeIF;
+  prev?: BranchIF<ValueType>;
+  next?: BranchIF<ValueType>;
+  tree: TreeIF<ValueType>;
   mutator: MutatorIF<ValueType>;
   push(branch: BranchIF<ValueType>): void;
   popMe(): BranchIF<ValueType>;
@@ -99,7 +102,7 @@ export interface TransactionErrorIF {
 
 export type MutatorFn = (...args: MutatorArgs) => unknown;
 export type Mutators = Record<string, MutatorFn>;
-export type TreeIF<ValueType = unknown> {
+export type TreeIF<ValueType = unknown> = {
   name: TreeName;
   root: BranchIF<ValueType>;
   top: BranchIF<ValueType>;
@@ -110,7 +113,7 @@ export type TreeIF<ValueType = unknown> {
   readonly engineInput?: unknown;
   mutate(name: MutatorName, ...args: MutatorArgs): void;
   validate(): void;
-  trim(id: number, errorId: number): BranchIF | undefined;
+  trim(id: number, errorId: number): BranchIF<ValueType> | undefined;
   trimmed: DiscardedBranchIF[];
 }
 
@@ -146,13 +149,13 @@ export type TransactFn = (transId: number) => unknown;
 export interface ForestIF {
   tree<ValueType>(
     name: TreeName,
-    seed?: TreeSeed
+    seed?: TreeSeed<ValueType>
   ): TreeIF<ValueType>;
   nextID: number;
   engine<ValueType>(
-    nameOrEngine: EngineName | EngineIF | EngineFactory,
+    nameOrEngine: EngineName | EngineIF<ValueType> | EngineFactory,
     tree?: TreeIF<ValueType>
-  ): EngineIF;
+  ): EngineIF<ValueType>;
   transact(fn: TransactFn): unknown;
   errors: TransactionErrorIF[];
 }

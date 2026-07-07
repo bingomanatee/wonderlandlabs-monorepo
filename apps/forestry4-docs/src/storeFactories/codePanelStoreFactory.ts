@@ -60,7 +60,8 @@ export class CodePanelForest extends Forest<CodePanelState> {
   private resizing = false;
 
   constructor(config: CodePanelConfig) {
-    if (!(config.snippetName && config.language)) {
+    const content = config.content ?? config.children?.toString() ?? '';
+    if (!(config.language && (config.snippetName || content))) {
       console.log('bad config:', config);
       throw new Error('bad Config on CodePanel');
     }
@@ -75,7 +76,7 @@ export class CodePanelForest extends Forest<CodePanelState> {
         folder: config.folder ?? '',
 
         // Content (derived from loading or fallback)
-        content: `// Loading`,
+        content,
         imports: '',
         mainContent: '',
 
@@ -99,7 +100,9 @@ export class CodePanelForest extends Forest<CodePanelState> {
         error: null,
       },
     });
-    this.loadSnippet();
+    if (config.snippetName) {
+      this.loadSnippet();
+    }
   }
 
   // Computed properties
@@ -119,7 +122,11 @@ export class CodePanelForest extends Forest<CodePanelState> {
 
     // Handle error state
     if (this.value.error) {
-      return `// Failed to load snippet: ${this.path}\n// Error: ${this.value.error}\n// Please check the file path and try again.`;
+      return [
+        `// Failed to load snippet: ${this.path}`,
+        `// Error: ${this.value.error}`,
+        '// Please check the file path and try again.',
+      ].join('\n');
     }
 
     // Handle normal content with imports logic
@@ -265,6 +272,9 @@ export class CodePanelForest extends Forest<CodePanelState> {
   // Snippet loading functionality
   async loadSnippet() {
     const { snippetName } = this.value;
+    if (!snippetName) {
+      return;
+    }
 
     this.setLoading(true);
 
@@ -314,12 +324,12 @@ export class CodePanelForest extends Forest<CodePanelState> {
       return { imports: '', mainContent: code };
     }
 
-    // Find the end of the import section by looking for the last line with quotes after the last import
+    // Find the end of the import section.
     let importSectionEnd = lastImportIndex;
     for (let i = lastImportIndex; i < lines.length; i++) {
       const line = lines[i];
-      // Check if line contains quotes (single or double) and is part of import section
-      if ((line.includes("'") || line.includes('"')) && i <= lastImportIndex + 10) {
+      const quoted = line.includes("'") || line.includes('"');
+      if (quoted && i <= lastImportIndex + 10) {
         // reasonable limit
         importSectionEnd = i;
       } else if (line.trim() === '' && i === importSectionEnd + 1) {
@@ -356,7 +366,10 @@ export class CodePanelForest extends Forest<CodePanelState> {
   }
 
   // DOM interaction methods
-  setRefs(contentRef: React.RefObject<HTMLDivElement>, codeRef: React.RefObject<HTMLElement>) {
+  setRefs(
+    contentRef: React.RefObject<HTMLDivElement>,
+    codeRef: React.RefObject<HTMLElement>,
+  ) {
     this.contentRef = contentRef;
     this.codeRef = codeRef;
   }
@@ -394,7 +407,9 @@ export class CodePanelForest extends Forest<CodePanelState> {
     this.checkExpansionWithHighlight();
 
     // Setup MutationObserver
-    this.mutationObserver = new MutationObserver(this.checkExpansionWithHighlight);
+    this.mutationObserver = new MutationObserver(
+      this.checkExpansionWithHighlight,
+    );
     this.mutationObserver.observe(this.contentRef.current, {
       childList: true,
       subtree: true,
@@ -405,7 +420,9 @@ export class CodePanelForest extends Forest<CodePanelState> {
 
     // Setup ResizeObserver
     if (window.ResizeObserver) {
-      this.resizeObserver = new ResizeObserver(this.checkExpansionWithHighlight);
+      this.resizeObserver = new ResizeObserver(
+        this.checkExpansionWithHighlight,
+      );
       this.resizeObserver.observe(this.contentRef.current);
     }
   }
@@ -435,4 +452,5 @@ export class CodePanelForest extends Forest<CodePanelState> {
 }
 
 // Factory function for useForestryLocal
-export const createCodePanelStore = (config: CodePanelConfig) => new CodePanelForest(config);
+export const createCodePanelStore = (config: CodePanelConfig) =>
+  new CodePanelForest(config);

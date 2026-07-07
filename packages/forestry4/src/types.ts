@@ -41,7 +41,8 @@ interface ForestLike<T> {
 export type ForestSubclass<T> = new (...args: any[]) => ForestLike<T>;
 
 // Validation result type
-export type ValidationResult = string | null; // null = valid, string = error message
+// null = valid, string = error message
+export type ValidationResult = string | null;
 
 // Forest messaging system for validation
 export interface ForestMessage {
@@ -70,7 +71,15 @@ export type PendingValue<DataType = unknown> = {
   suspendValidation?: boolean;
 };
 
+export type BoundStoreMethods = {
+  get(path?: Path): any;
+  set(path: Path, value: unknown): void;
+} & Record<string, (...args: any[]) => unknown>;
+
 export interface StoreIF<DataType> {
+  $: BoundStoreMethods;
+  $bound: BoundStoreMethods;
+
   $broadcast: (message: unknown, down?: boolean) => void;
   $isRoot: boolean;
 
@@ -122,6 +131,11 @@ export type ValueTestFn<DataType> = (
   store: StoreIF<DataType>,
 ) => null | void | string;
 
+export type PathFilterFn<DataType = unknown> = (
+  path: Path,
+  store: StoreIF<DataType>,
+) => Path;
+
 export type BranchConfigParams<
   DataType = unknown,
   SubClass = StoreIF<DataType>,
@@ -130,6 +144,7 @@ export type BranchConfigParams<
   tests?: ValueTestFn<DataType> | ValueTestFn<DataType>[];
   prep?: (input: Partial<DataType>, current: DataType) => DataType;
   resources?: ResourceMap;
+  filterPath?: PathFilterFn<DataType>;
   name?: string;
   debug?: boolean;
   res?: Map<string, any>;
@@ -142,6 +157,7 @@ export type StoreParams<DataType, SubClass = StoreIF<DataType>> = {
   tests?: ValueTestFn<DataType> | ValueTestFn<DataType>[];
   prep?: (input: Partial<DataType>, current: DataType) => DataType;
   resources?: ResourceMap;
+  filterPath?: PathFilterFn<DataType>;
   name?: string;
   debug?: boolean;
   res?: Map<string, any>;
@@ -152,9 +168,12 @@ export type StoreParams<DataType, SubClass = StoreIF<DataType>> = {
     Path,
     (new (...args: any[]) => StoreIF<unknown>) | undefined
   >;
-  branchParams?: Map<Path, BranchConfigParams<unknown, StoreIF<unknown>> | undefined>;
+  branchParams?: Map<
+    Path,
+    BranchConfigParams<unknown, StoreIF<unknown>> | undefined
+  >;
 };
 
-type PathElement = string;
+export type PathElement = unknown;
 
 export type Path = PathElement[] | string;

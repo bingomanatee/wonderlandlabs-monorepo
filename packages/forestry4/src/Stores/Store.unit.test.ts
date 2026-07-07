@@ -37,6 +37,52 @@ describe('Store', () => {
       const store = new Store({ value: 42 });
       expect(store.isActive).toBe(true);
     });
+
+    it('should filter paths before setting array values', () => {
+      const store = new Store({
+        value: {
+          items: [{ label: 'first' }],
+        },
+        filterPath(path) {
+          const parts = Array.isArray(path) ? [...path] : path.split('.');
+          return parts.map((part) => (part === 'first' ? 0 : part));
+        },
+      });
+
+      store.set(['items', 'first', 'label'], 'updated');
+
+      expect(store.value.items[0].label).toBe('updated');
+      expect(store.get(['items', 'first', 'label'])).toBe('updated');
+    });
+
+    it('should filter string aliases to referential map keys', () => {
+      const rowKey = { id: 'row-1' };
+      const aliases = new Map<string, object>([['row-1', rowKey]]);
+      const rows = new Map<object, { label: string }>([
+        [rowKey, { label: 'first' }],
+      ]);
+      const store = new Store({
+        value: {
+          rows,
+        },
+        filterPath(path) {
+          const parts = Array.isArray(path) ? [...path] : path.split('.');
+          if (parts[0] !== 'rows' || typeof parts[1] !== 'string') {
+            return parts;
+          }
+          return [
+            parts[0],
+            aliases.get(parts[1]) ?? parts[1],
+            ...parts.slice(2),
+          ];
+        },
+      });
+
+      store.set(['rows', 'row-1', 'label'], 'updated');
+
+      expect(store.value.rows.get(rowKey)?.label).toBe('updated');
+      expect(store.get(['rows', 'row-1', 'label'])).toBe('updated');
+    });
   });
 
   describe('subscription', () => {
@@ -153,7 +199,7 @@ describe('Store', () => {
       const store = new Store({ value: 10, tests: testFn });
 
       expect(() => store.next(15)).not.toThrowError(); // valid: 15 < 20
-      expect(() => store.next(35)).toThrowError(TOO_BIG); // invalid: 35 > 30 (15 * 2)
+      expect(() => store.next(35)).toThrowError(TOO_BIG);
       expect(() => store.next(-5)).toThrowError(POS); // invalid: negative
     });
 
@@ -175,7 +221,7 @@ describe('Store', () => {
 
       const store = new Store({ value: 'hello', tests });
 
-      expect(() => store.next('hello world')).not.toThrowError(); // valid: longer
+      expect(() => store.next('hello world')).not.toThrowError();
       expect(() => store.next('hi')).toThrowError(); // invalid: shorter
       // @ts-expect-error TS2345
       expect(() => store.next(123)).toThrowError(); // invalid: not string

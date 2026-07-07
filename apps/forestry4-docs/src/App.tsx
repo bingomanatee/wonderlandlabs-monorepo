@@ -18,6 +18,7 @@ import OtherFrameworks from './pages/OtherFrameworks';
 import ValidationSystem from './pages/ValidationSystem';
 import SchemaValidation from './pages/SchemaValidation';
 import Transactions from './pages/Transactions';
+import BoundMethods from './pages/BoundMethods';
 import RxJSIntegration from './pages/RxJSIntegration';
 import AdvancedPatterns from './pages/AdvancedPatterns';
 
@@ -54,6 +55,7 @@ function App() {
           <Route path="/validation" element={<ValidationSystem />} />
           <Route path="/schemas" element={<SchemaValidation />} />
           <Route path="/transactions" element={<Transactions />} />
+          <Route path="/bound-methods" element={<BoundMethods />} />
           <Route path="/rxjs" element={<RxJSIntegration />} />
           <Route path="/advanced" element={<AdvancedPatterns />} />
 

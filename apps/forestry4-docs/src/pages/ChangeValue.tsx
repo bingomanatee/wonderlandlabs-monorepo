@@ -28,16 +28,16 @@ const ChangeValue: React.FC = () => {
 
         <Section
           title="
-              Bound methods on state.$
+              Bound methods on state.$bound
           "
         >
           <Text textStyle="body">
-            The <code>.$</code> parameter gives you access to any custom methods you define in an
-            extended class. (provided they do not start with "$".) This does not include
-            getter/props. If you have a local method{' '}
+            The <code>.$bound</code> parameter gives you access to custom
+            methods you define in an extended class. Methods that start with
+            "$" and getters are excluded. If you have a local method{' '}
             <code>{`onChangeName(e){this.set('name', e.target.value)`}</code> and pass{' '}
-            <code>onChange={'state.$.onChangeName'}</code> it will work as expected; this vastly
-            reduces noisy onCallbacks or lambdas.
+            <code>onChange={'state.$bound.onChangeName'}</code> it will work
+            as expected; this reduces noisy callbacks or lambdas.
           </Text>
         </Section>
 
@@ -154,8 +154,8 @@ const ChangeValue: React.FC = () => {
             </DoItem>
 
             <DoItem title="Use $.method in event listeners">
-              There is no reason to wrap state methods - the "$" object has your custom methods
-              pre-bound to your state and can be used directly in event listeners.
+              Use <code>$bound</code> for event listeners. It has your custom
+              methods pre-bound to your state and can be used directly.
             </DoItem>
           </DoList>
 

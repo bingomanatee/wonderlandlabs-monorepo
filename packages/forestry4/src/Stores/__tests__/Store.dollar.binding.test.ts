@@ -98,6 +98,36 @@ describe('Store $ Binding', () => {
       expect(typeof store.$.addAmount).toBe('function');
     });
 
+    it('should expose bound get and set methods', () => {
+      const store = new Forest<{
+        count: number;
+        profile: { name: string };
+      }>({
+        value: {
+          count: 0,
+          profile: { name: 'Ada' },
+        },
+      });
+
+      const get = store.$.get;
+      const set = store.$.set;
+
+      expect(Object.keys(store.$)).toContain('get');
+      expect(Object.keys(store.$)).toContain('set');
+      expect(typeof get).toBe('function');
+      expect(typeof set).toBe('function');
+      expect(get('profile.name')).toBe('Ada');
+
+      set('profile.name', 'Grace');
+      set('count', 3);
+
+      expect(get('profile.name')).toBe('Grace');
+      expect(store.value).toEqual({
+        count: 3,
+        profile: { name: 'Grace' },
+      });
+    });
+
     it('should exclude specific methods from $ binding', () => {
       class TestStore extends Forest<{ value: string }> {
         constructor() {
@@ -463,6 +493,20 @@ describe('Store $ Binding', () => {
       // Note: $ prefixed methods like $branch are excluded
       expect(boundMethods).toContain('set');
       expect(boundMethods).not.toContain('$branch'); // $ prefixed methods are excluded
+    });
+
+    it('should expose $bound as semantic alias for $', () => {
+      const store = new Forest({
+        value: {
+          count: 0,
+        },
+      });
+
+      expect(store.$bound).toBe(store.$);
+
+      store.$bound.set('count', 3);
+
+      expect(store.value.count).toBe(3);
     });
 
     it('should handle methods with special characters in names', () => {

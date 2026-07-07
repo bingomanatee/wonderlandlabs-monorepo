@@ -39,11 +39,11 @@ export class Branch<ValueType = unknown> implements BranchIF<ValueType> {
       }
     }
 
-    return this.mutator.get(this, this.input);
+    return this.mutator.mutator(this, this.input);
   }
 
   private setCache() {
-    this._cache = this.mutator.get(this, this.input);
+    this._cache = this.mutator.mutator(this, this.input);
     this.isCached = true;
     if (this.mutator.cacheable === CACHE_TOP_ONLY) {
       this.clearPrevCache();
@@ -62,10 +62,10 @@ export class Branch<ValueType = unknown> implements BranchIF<ValueType> {
     this.prev?.clearPrevCache(true);
   }
 
-  prev?: BranchIF | undefined;
-  next?: BranchIF | undefined;
+  prev?: BranchIF<ValueType> | undefined;
+  next?: BranchIF<ValueType> | undefined;
 
-  push(branch: BranchIF): void {
+  push(branch: BranchIF<ValueType>): void {
     if (this.next) {
       this.next.push(branch);
     } else {

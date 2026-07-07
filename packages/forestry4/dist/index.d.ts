@@ -5,20 +5,26 @@ import { SubjectLike } from 'rxjs';
 import { Subscription } from 'rxjs';
 import { z } from 'zod';
 
+export declare type BoundStoreMethods = {
+    get(path?: Path): any;
+    set(path: Path, value: unknown): void;
+} & Record<string, (...args: any[]) => unknown>;
+
 declare type BranchConfigParams<DataType = unknown, SubClass = StoreIF<DataType>> = {
     schema?: z.ZodSchema<DataType>;
     tests?: ValueTestFn<DataType> | ValueTestFn<DataType>[];
     prep?: (input: Partial<DataType>, current: DataType) => DataType;
     resources?: ResourceMap;
+    filterPath?: PathFilterFn<DataType>;
     name?: string;
     debug?: boolean;
     res?: Map<string, any>;
     subclass?: new (...args: any[]) => SubClass;
 };
 
-declare class Branches extends Map<string, StoreIF<unknown>> {
+declare class Branches<RootType> extends Map<string, StoreIF<unknown>> {
     #private;
-    constructor(forest: Forest<unknown>, branchParams: Map<string, BranchConfigParams<unknown, StoreIF<unknown>> | undefined>);
+    constructor(forest: Forest<RootType>, branchParams: Map<string, BranchConfigParams<unknown, StoreIF<unknown>> | undefined>);
     $get<ValueType, Subclass extends StoreIF<ValueType> = StoreIF<ValueType>>(path: Path): Subclass | undefined;
     has(path: Path): boolean;
     set(path: Path, value: StoreIF<unknown>): this;
@@ -33,7 +39,7 @@ declare type BranchParams<ValueType, Subclass extends StoreIF<ValueType> = Store
 
 export declare class Forest<DataType> extends Store<DataType> implements StoreIF<DataType> {
     #private;
-    readonly $branches: Branches;
+    readonly $branches: Branches<DataType>;
     constructor(p: StoreParams<DataType>);
     readonly $path?: Path;
     get $isRoot(): boolean;
@@ -44,7 +50,7 @@ export declare class Forest<DataType> extends Store<DataType> implements StoreIF
     next(value: Partial<DataType>): void;
     set(path: Path, value: unknown): void;
     $branch<Type, Subclass extends StoreIF<Type> = StoreIF<Type>>(path: Path, params: BranchParams<Type, Subclass>, ...rest: unknown[]): Subclass;
-    get $br(): Branches;
+    get $br(): Branches<DataType>;
     get $subject(): Observable<DataType>;
     subscribe(listener: Listener<DataType>): Subscription;
     receiver: Subject<unknown>;
@@ -63,7 +69,9 @@ export declare type Listener<DataType> = Partial<Observer<DataType>> | ((value: 
 
 export declare type Path = PathElement[] | string;
 
-declare type PathElement = string;
+declare type PathElement = unknown;
+
+export declare type PathFilterFn<DataType = unknown> = (path: Path, store: StoreIF<DataType>) => Path;
 
 declare type PendingValue<DataType = unknown> = {
     id: string;
@@ -104,6 +112,7 @@ export declare class Store<DataType> implements StoreIF<DataType> {
     #private;
     constructor(p: StoreParams<DataType>, noSubject?: boolean);
     get $subject(): Observable<DataType>;
+    protected filterPath(path: Path): Path;
     debug: boolean;
     prep(value: Partial<DataType>): DataType;
     $res: Map<string, any>;
@@ -114,8 +123,9 @@ export declare class Store<DataType> implements StoreIF<DataType> {
     get suspendValidation(): boolean;
     $transact(params: TransParams | TransFn, suspend?: boolean): void;
     observeTransStack(listener: Listener<PendingValue<DataType>[]>): Subscription;
-    _$?: Record<string, (...args: any[]) => unknown>;
-    get $(): Record<string, (...args: any[]) => unknown>;
+    _$?: BoundStoreMethods;
+    get $(): BoundStoreMethods;
+    get $bound(): BoundStoreMethods;
     queuePendingValue(value: DataType): string;
     dequeuePendingValue(id: string): PendingValue<DataType> | undefined;
     get $root(): this;
@@ -159,6 +169,8 @@ export declare class Store<DataType> implements StoreIF<DataType> {
 }
 
 export declare interface StoreIF<DataType> {
+    $: BoundStoreMethods;
+    $bound: BoundStoreMethods;
     $broadcast: (message: unknown, down?: boolean) => void;
     $isRoot: boolean;
     $isValid(value: unknown): boolean;
@@ -189,6 +201,7 @@ export declare type StoreParams<DataType, SubClass = StoreIF<DataType>> = {
     tests?: ValueTestFn<DataType> | ValueTestFn<DataType>[];
     prep?: (input: Partial<DataType>, current: DataType) => DataType;
     resources?: ResourceMap;
+    filterPath?: PathFilterFn<DataType>;
     name?: string;
     debug?: boolean;
     res?: Map<string, any>;

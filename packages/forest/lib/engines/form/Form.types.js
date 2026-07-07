@@ -24,9 +24,9 @@ function isFieldIF(a) {
         return false;
     if (!(0, types_1.isTreeIF)(o.tree))
         return false;
-    if (!["name" in o])
+    if (!("name" in o))
         return false;
-    if (!["value" in o])
+    if (!("value" in o))
         return false;
     if (typeof o.name !== "string")
         return false;

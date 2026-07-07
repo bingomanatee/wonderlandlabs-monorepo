@@ -9,9 +9,19 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <ChakraProvider
       theme={theme}
-      toastOptions={{ defaultOptions: { position: 'top-right', duration: 4000 } }}
+      toastOptions={{
+        defaultOptions: {
+          duration: 4000,
+          position: 'top-right',
+        },
+      }}
     >
-      <BrowserRouter>
+      <BrowserRouter
+        future={{
+          v7_relativeSplatPath: true,
+          v7_startTransition: true,
+        }}
+      >
         <App />
       </BrowserRouter>
     </ChakraProvider>

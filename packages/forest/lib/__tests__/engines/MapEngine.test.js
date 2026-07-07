@@ -4,7 +4,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const Forest_1 = __importDefault(require("../../Forest"));
-require("@types/jest");
 const engineMap_1 = require("../../engines/engineMap");
 const FOO_BAR = new Map([
     ["foo", "vey"],
@@ -14,7 +13,7 @@ const NEW_DATA = new Map([
     ["foo", "vey"],
     ["bar", 300],
 ]);
-describe("DistMap", () => {
+describe("engineMap", () => {
     describe("set", () => {
         it("should allow you to set individual values", () => {
             const f = new Forest_1.default([engineMap_1.engineMap]);

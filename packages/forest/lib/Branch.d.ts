@@ -1,22 +1,22 @@
 import { MutatorArgs, MutatorIF, BranchIF, TreeIF } from "./types";
-export declare class Branch implements BranchIF {
-    tree: TreeIF;
-    mutator: MutatorIF;
+export declare class Branch<ValueType = unknown> implements BranchIF<ValueType> {
+    tree: TreeIF<ValueType>;
+    mutator: MutatorIF<ValueType>;
     input?: MutatorArgs | undefined;
-    constructor(tree: TreeIF, mutator: MutatorIF, input?: MutatorArgs | undefined);
+    constructor(tree: TreeIF<ValueType>, mutator: MutatorIF<ValueType>, input?: MutatorArgs | undefined);
     isAlive: boolean;
     isCached: boolean;
     readonly id: number;
     private _cache;
-    get value(): unknown;
+    get value(): ValueType;
     private setCache;
     clearCache(): void;
     clearPrevCache(clear?: boolean): void;
-    prev?: BranchIF | undefined;
-    next?: BranchIF | undefined;
-    push(branch: BranchIF): void;
-    popMe(): BranchIF;
-    cutMe(errorId: number): BranchIF;
+    prev?: BranchIF<ValueType> | undefined;
+    next?: BranchIF<ValueType> | undefined;
+    push(branch: BranchIF<ValueType>): void;
+    popMe(): BranchIF<ValueType>;
+    cutMe(errorId: number): BranchIF<ValueType>;
     destroy(): void;
     get isTop(): boolean;
     get isRoot(): boolean;

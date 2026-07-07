@@ -99,7 +99,12 @@ const ChangeValue: React.FC = () => {
             >
               Sets a property in the state structure with a new value. Path can be a string or
               dot-separated deep path. Path can be the name of a single sub-property or can drill
-              deep down into sub-properties of state.
+              deep down into sub-properties of state. Stores can define{' '}
+              <code>filterPath(path, store)</code> to normalize those paths before{' '}
+              <code>set</code> writes. This is optional. It is useful when
+              components should use stable semantic paths while the stored data
+              uses array indexes or Map keys, including Maps keyed by existing
+              object references.
             </ItemDef>
 
             <ItemDef

@@ -197,13 +197,14 @@ const APIReference: React.FC = () => {
                   </ItemDef>
 
                   <ItemDef
-                    title="set(path: Path, value: unknown): boolean"
+                    title="set(path: Path, value: unknown): void"
                     snippetName="setValueExample"
                     snippetFolder="APIReference"
                     codeTitle="Setting Values Example"
                   >
-                    Sets value at specified path using Immer for immutable updates. Returns true if
-                    successful.
+                    Sets value at specified path using Immer for immutable
+                    updates. If the store defines <Code>filterPath</Code>, the
+                    path is normalized before the write.
                   </ItemDef>
 
                   <ItemDef title="complete(): DataType">
@@ -326,7 +327,10 @@ const APIReference: React.FC = () => {
 
                 <VStack spacing={6} align="stretch">
                   <ItemDef title="StoreParams&lt;DataType&gt;">
-                    Configuration object for creating Forest instances. Contains:
+                    Configuration object for creating root Forest instances. Only
+                    <Code>value</Code> is required. Every other parameter is an
+                    optional layer for validation, path normalization, resources,
+                    debugging, or branch setup.
                     <ul>
                       <li>
                         value <Badge colorScheme="red">Required</Badge>{' '}
@@ -336,15 +340,171 @@ const APIReference: React.FC = () => {
                       <li>prep</li>
                       <li>filterPath</li>
                       <li>name</li>
+                      <li>resources / res</li>
+                      <li>debug</li>
+                      <li>subclass</li>
+                      <li>branchClasses</li>
+                      <li>branchParams</li>
                     </ul>
+                  </ItemDef>
+
+                  <ItemDef title="value: DataType">
+                    Required initial state. Use this for the whole root store
+                    value: object, array, Map, Set, primitive, or any other
+                    Immer-compatible value. Branches do not need a separate
+                    value; branch values come from the parent value at the
+                    branch path. See <Link to="/store">Store Basics</Link> for
+                    constructor examples and <Link to="/change">Changing
+                    Values</Link> for update patterns.
+                  </ItemDef>
+
+                  <ItemDef title="schema?: z.ZodSchema&lt;DataType&gt;">
+                    Optional Zod schema used to validate structural shape before
+                    updates are accepted. Use schema for type and shape rules:
+                    required fields, nested object structure, enums, ranges, and
+                    other constraints that belong to the value itself. See{' '}
+                    <Link to="/schemas">Schemas</Link>,{' '}
+                    <Link to="/validation">Validation</Link>, and the{' '}
+                    <Link to="/examples/form-validation">Form Validation
+                    example</Link>.
+                  </ItemDef>
+
+                  <ItemDef title="tests?: ValueTestFn | ValueTestFn[]">
+                    Optional custom validation functions. Use tests for business
+                    rules that need code: cross-field checks, catalog lookups,
+                    inventory limits, uniqueness checks, or anything too
+                    contextual for schema alone. A test should return a message,
+                    return nothing for valid data, or throw. See{' '}
+                    <Link to="/validation">Validation</Link> and the{' '}
+                    <Link to="/examples/shopping-cart">Shopping Cart
+                    example</Link>.
+                  </ItemDef>
+
+                  <ItemDef title="prep?: (input, current) =&gt; DataType">
+                    Optional normalization step that runs before validation and
+                    commit. Use prep to derive values, fill defaults, trim or
+                    sanitize incoming data, or merge partial input into the
+                    current value. Keep schema focused on structure and prep
+                    focused on transformation. See{' '}
+                    <Link to="/schemas">Schemas</Link> for schema/prep
+                    integration and <Link to="/store">Store Basics</Link> for
+                    lifecycle context.
+                  </ItemDef>
+
+                  <ItemDef
+                    title={
+                      'filterPath?: (path: Path, store: StoreIF<DataType>) => Path'
+                    }
+                  >
+                    Optional path normalization layer used by <Code>get</Code>,{' '}
+                    <Code>set</Code>, and path-scoped <Code>mutate</Code>. Use
+                    it when UI or caller paths should stay semantic while stored
+                    data uses array indexes, Map keys, or another internal
+                    shape. It is optional; it exists to improve the API your UI
+                    uses, not to make every store define a path layer. A common
+                    use is Map data keyed by objects. JavaScript Map compares
+                    object keys by reference, so a new object with the same
+                    fields is not the same key. <Code>filterPath</Code> can map
+                    an input like{' '}
+                    <Code>{`{ name: 'Dave', email: 'd@w.com' }`}</Code> to the
+                    existing key object already held by the Map, so
+                    <Code>get</Code> and <Code>set</Code> return the expected
+                    value. See <Link to="/change">Changing Values</Link> for
+                    update patterns.
+                  </ItemDef>
+
+                  <ItemDef title="name?: string">
+                    Optional store label. Use it for debugging, logging, and
+                    making multiple stores easier to identify. It does not
+                    affect state shape or updates. See{' '}
+                    <Link to="/store">Store Basics</Link> for constructor
+                    examples.
+                  </ItemDef>
+
+                  <ItemDef
+                    title={
+                      'resources?: ResourceMap; res?: Map<string, any>'
+                    }
+                  >
+                    Optional external resource map. Use this for non-stateful
+                    objects a store needs to reach, such as DOM references,
+                    database connectors, browser APIs, workers, or other
+                    services. Resource changes do not publish state updates.
+                    Prefer state for renderable data and resources for
+                    operational handles. See the <Code>$res</Code> property
+                    above and <Link to="/advanced">Advanced Patterns</Link>.
+                  </ItemDef>
+
+                  <ItemDef title="debug?: boolean">
+                    Optional debug flag for development diagnostics. Use it when
+                    tracing store behavior locally. Leave it off for normal
+                    application behavior so default state stays quiet.
+                  </ItemDef>
+
+                  <ItemDef title="subclass?: new (...args: any[]) =&gt; SubClass">
+                    Optional class override for branch creation. Use it when a
+                    branch should be instantiated as a focused Forest subclass
+                    with its own methods. Root stores usually use direct
+                    subclass construction instead. The{' '}
+                    <Link to="/branching">Branching guide</Link> and{' '}
+                    <Link to="/bound-methods">Bound Methods guide</Link> show
+                    the related patterns.
+                  </ItemDef>
+
+                  <ItemDef
+                    title={
+                      'branchClasses?: Map<Path, Subclass | undefined>'
+                    }
+                  >
+                    Optional path-to-subclass map. This is the older shorthand
+                    for assigning branch classes by path. Prefer{' '}
+                    <Code>branchParams</Code> for new work because it can
+                    define subclass, schema, tests, prep, resources, and path
+                    filtering together. The{' '}
+                    <Link to="/branching">Branching guide</Link> shows the
+                    current branch setup API.
+                  </ItemDef>
+
+                  <ItemDef
+                    title={
+                      'branchParams?: Map<Path, BranchConfigParams | undefined>'
+                    }
+                  >
+                    Optional branch defaults by path. Use this when branch setup
+                    should be declared once in the root constructor instead of
+                    repeated every time a branch is created. Path keys may target
+                    specific branches or use <Code>*</Code> as a wildcard
+                    default. The <Link to="/branching">Branching guide</Link>{' '}
+                    and <Link to="/api#forest-branching">Branching Methods</Link>{' '}
+                    API section show the branch creation flow.
+                  </ItemDef>
+
+                  <ItemDef title="path?: Path; parent?: StoreIF&lt;unknown&gt;">
+                    Internal branch linkage. These identify where a branch sits
+                    under its parent store. Application code usually creates
+                    branches through <Code>$br.$add</Code>, <Code>$br.$get</Code>,
+                    or <Code>$branch</Code>, not by passing these directly. The{' '}
+                    <Link to="/branching">Branching guide</Link> covers the
+                    public branch APIs.
+                  </ItemDef>
+
+                  <ItemDef title="BranchConfigParams&lt;DataType, SubClass&gt;">
+                    Branch-specific configuration used inside{' '}
+                    <Code>branchParams</Code>. It supports the same optional
+                    behavior layers as <Code>StoreParams</Code> except
+                    <Code>value</Code>. Supported entries include{' '}
+                    <Code>schema</Code>, <Code>tests</Code>, <Code>prep</Code>,{' '}
+                    <Code>resources</Code>,{' '}
+                    <Code>filterPath</Code>, <Code>name</Code>,{' '}
+                    <Code>debug</Code>, <Code>res</Code>, and{' '}
+                    <Code>subclass</Code>. Branch values always come from the
+                    parent path.
                   </ItemDef>
                 </VStack>
                 <Box>
-                  Note - for branches, content is always determined by the path;
-                  <code>Path</code> is an argument to branch cration; the value
-                  of a branch is the value of the parent filtered by the path definition.
-                  So the consctructor of branches do not require -- and ignore --
-                  the value do be defined.
+                  Note: branch content is always determined by the branch path.
+                  Branch constructors do not require <Code>value</Code>, and
+                  they ignore it when present.
                 </Box>
               </Box>
 
@@ -393,10 +553,11 @@ const APIReference: React.FC = () => {
                   </ItemDef>
 
                   <ItemDef title="PathFilterFn&lt;DataType&gt;">
-                    Function that normalizes paths before <Code>get</Code>,
-                    <Code>set</Code>, and path-scoped <Code>mutate</Code>.
-                    Use this to convert aliases to array indexes or
-                    referential Map keys.
+                    <Code>(path: Path, store: StoreIF&lt;DataType&gt;) =&gt; Path</Code>. Function
+                    that normalizes paths before <Code>get</Code>, <Code>set</Code>, and
+                    path-scoped <Code>mutate</Code>. Optional. Use it to convert
+                    caller-facing aliases to array indexes or referential Map
+                    keys.
                   </ItemDef>
 
                   <ItemDef title="Listener&lt;DataType&gt;">

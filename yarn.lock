@@ -4880,14 +4880,14 @@ __metadata:
   linkType: soft
 
 "@wonderlandlabs/forestry4@file:../../packages/forestry4::locator=forest-matter-tree-demo%40workspace%3Ademos%2Fforest-matter-tree-demo":
-  version: 4.1.15
-  resolution: "@wonderlandlabs/forestry4@file:../../packages/forestry4#../../packages/forestry4::hash=d19dc1&locator=forest-matter-tree-demo%40workspace%3Ademos%2Fforest-matter-tree-demo"
+  version: 4.1.16
+  resolution: "@wonderlandlabs/forestry4@file:../../packages/forestry4#../../packages/forestry4::hash=283307&locator=forest-matter-tree-demo%40workspace%3Ademos%2Fforest-matter-tree-demo"
   dependencies:
     "@wonderlandlabs/walrus": "npm:0.1.3"
     immer: "npm:^10.1.1"
     lodash-es: "npm:^4.17.21"
     rxjs: "npm:^7.8.1"
-  checksum: 10c0/54575d5bce3133c06901b1758e8107893a75a07345d957d9598a90f8789c6249e6d41577bce5a366a7011dc3a2737be41c9ad56b1af873e16c6e7f65d8de37b4
+  checksum: 10c0/afb265c2decea1d47392f11f9b59cce27f55e3355618061df64e00455b7c46f920b773f4328592213b0653fcdb2ca58841fb36cd26d4ab4b3795e38f801aeab9
   languageName: node
   linkType: hard
 

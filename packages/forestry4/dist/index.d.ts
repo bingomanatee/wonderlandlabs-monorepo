@@ -5,10 +5,15 @@ import { SubjectLike } from 'rxjs';
 import { Subscription } from 'rxjs';
 import { z } from 'zod';
 
-export declare type BoundStoreMethods = {
-    get(path?: Path): any;
-    set(path: Path, value: unknown): void;
-} & Record<string, (...args: any[]) => unknown>;
+declare type BoundStoreMethod<TMethod> = TMethod extends (...args: infer Args) => infer Result ? (...args: Args) => Result : never;
+
+declare type BoundStoreMethodKeys<TStore> = {
+    [Key in keyof TStore]-?: Key extends string ? Key extends `$${string}` | `_${string}` | 'complete' | 'next' ? never : TStore[Key] extends StoreMethod ? Key : never : never;
+}[keyof TStore];
+
+export declare type BoundStoreMethods<TStore = Record<string, StoreMethod>> = {
+    [Key in BoundStoreMethodKeys<TStore>]: BoundStoreMethod<TStore[Key]>;
+};
 
 declare type BranchConfigParams<DataType = unknown, SubClass = StoreIF<DataType>> = {
     schema?: z.ZodSchema<DataType>;
@@ -123,9 +128,9 @@ export declare class Store<DataType> implements StoreIF<DataType> {
     get suspendValidation(): boolean;
     $transact(params: TransParams | TransFn, suspend?: boolean): void;
     observeTransStack(listener: Listener<PendingValue<DataType>[]>): Subscription;
-    _$?: BoundStoreMethods;
-    get $(): BoundStoreMethods;
-    get $bound(): BoundStoreMethods;
+    _$?: BoundStoreMethods<this>;
+    get $(): BoundStoreMethods<this>;
+    get $bound(): BoundStoreMethods<this>;
     queuePendingValue(value: DataType): string;
     dequeuePendingValue(id: string): PendingValue<DataType> | undefined;
     get $root(): this;
@@ -169,8 +174,8 @@ export declare class Store<DataType> implements StoreIF<DataType> {
 }
 
 export declare interface StoreIF<DataType> {
-    $: BoundStoreMethods;
-    $bound: BoundStoreMethods;
+    $: BoundStoreMethods<this>;
+    $bound: BoundStoreMethods<this>;
     $broadcast: (message: unknown, down?: boolean) => void;
     $isRoot: boolean;
     $isValid(value: unknown): boolean;
@@ -194,6 +199,8 @@ export declare interface StoreIF<DataType> {
     subscribe(listener: Listener<DataType>): Subscription;
     value: DataType;
 }
+
+declare type StoreMethod = (...args: any[]) => unknown;
 
 export declare type StoreParams<DataType, SubClass = StoreIF<DataType>> = {
     value: DataType;

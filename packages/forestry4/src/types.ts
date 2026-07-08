@@ -71,14 +71,33 @@ export type PendingValue<DataType = unknown> = {
   suspendValidation?: boolean;
 };
 
-export type BoundStoreMethods = {
-  get(path?: Path): any;
-  set(path: Path, value: unknown): void;
-} & Record<string, (...args: any[]) => unknown>;
+export type StoreMethod = (...args: any[]) => unknown;
+
+type BoundStoreMethodKeys<TStore> = {
+  [Key in keyof TStore]-?: Key extends string
+    ? Key extends `$${string}` | `_${string}` | 'complete' | 'next'
+      ? never
+      : TStore[Key] extends StoreMethod
+        ? Key
+        : never
+    : never;
+}[keyof TStore];
+
+type BoundStoreMethod<TMethod> = TMethod extends (
+  ...args: infer Args
+) => infer Result
+  ? (...args: Args) => Result
+  : never;
+
+export type BoundStoreMethods<
+  TStore = Record<string, StoreMethod>,
+> = {
+  [Key in BoundStoreMethodKeys<TStore>]: BoundStoreMethod<TStore[Key]>;
+};
 
 export interface StoreIF<DataType> {
-  $: BoundStoreMethods;
-  $bound: BoundStoreMethods;
+  $: BoundStoreMethods<this>;
+  $bound: BoundStoreMethods<this>;
 
   $broadcast: (message: unknown, down?: boolean) => void;
   $isRoot: boolean;

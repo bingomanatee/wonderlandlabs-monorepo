@@ -24,7 +24,7 @@ import { enableMapSet, produce } from 'immer';
 import { testize } from './helpers';
 import { getPath, setPath } from '../lib/path';
 import { pathString } from '../lib/combinePaths';
-import bindActions, { FnRecord } from '../lib/bindActions';
+import bindActions from '../lib/bindActions';
 
 // Enable Immer support for Map and Set
 enableMapSet();
@@ -252,16 +252,16 @@ export class Store<DataType> implements StoreIF<DataType> {
     }
   }
 
-  _$?: BoundStoreMethods;
+  _$?: BoundStoreMethods<this>;
 
-  get $(): BoundStoreMethods {
+  get $(): BoundStoreMethods<this> {
     if (!this._$) {
-      this._$ = bindActions(this as unknown as FnRecord);
+      this._$ = bindActions(this);
     }
     return this._$;
   }
 
-  get $bound(): BoundStoreMethods {
+  get $bound(): BoundStoreMethods<this> {
     return this.$;
   }
 

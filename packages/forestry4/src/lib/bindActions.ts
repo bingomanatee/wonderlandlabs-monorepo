@@ -1,7 +1,7 @@
-import type { BoundStoreMethods } from '../types';
+import type { BoundStoreMethods, StoreMethod } from '../types';
 
 const exclude = 'next,isActive,value,complete'.split(',');
-export type FnRecord = Record<string, (...args: any[]) => unknown>;
+type FnRecord = Record<string, StoreMethod>;
 const requiredMethod = {
   get: 'get',
   set: 'set',
@@ -30,22 +30,27 @@ function getAllMethodNames(obj: any): string[] {
   return Array.from(methods);
 }
 
-export default function bindActions(target: FnRecord): BoundStoreMethods {
+export default function bindActions<TTarget extends object>(
+  target: TTarget,
+): BoundStoreMethods<TTarget> {
   const methodNames = new Set([
     ...getAllMethodNames(target),
     ...Object.values(requiredMethod),
   ]);
 
+  const callableTarget = target as Record<string, unknown>;
+
   return Array.from(methodNames).reduce(($: FnRecord, key: string) => {
     if (
       /^\$/.test(key) ||
       exclude.includes(key) ||
-      typeof target[key] !== 'function'
+      typeof callableTarget[key] !== 'function'
     ) {
       return $;
     }
 
-    $[key] = (...args: unknown[]) => target[key].apply(target, args);
+    const method = callableTarget[key] as StoreMethod;
+    $[key] = (...args: any[]) => method.apply(target, args);
     return $;
-  }, {}) as BoundStoreMethods;
+  }, {}) as BoundStoreMethods<TTarget>;
 }

@@ -50,3 +50,10 @@
 - `$br.get(pathKey)` is lookup-only (no lazy creation).
 - `$br.delete(path)` completes and ejects a branch instance from the registry.
 - Removed overloaded helpers `$getBranch` and `$removeBranch`; use `$br.get` and `$br.delete`.
+
+## 4.1.15-17
+
+Patched minor validation issues - code cleanup
+- added filterPath to allow for better pathing to sub-states
+- added `$bound` alias for more semantic bindind 
+- fixed bound typing

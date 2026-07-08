@@ -181,11 +181,13 @@ function bindActions(target) {
     ...getAllMethodNames(target),
     ...Object.values(requiredMethod)
   ]);
+  const callableTarget = target;
   return Array.from(methodNames).reduce(($, key) => {
-    if (/^\$/.test(key) || exclude.includes(key) || typeof target[key] !== "function") {
+    if (/^\$/.test(key) || exclude.includes(key) || typeof callableTarget[key] !== "function") {
       return $;
     }
-    $[key] = (...args) => target[key].apply(target, args);
+    const method = callableTarget[key];
+    $[key] = (...args) => method.apply(target, args);
     return $;
   }, {});
 }

@@ -1,6 +1,6 @@
 {
   "name": "@wonderlandlabs/forestry4",
-  "version": "4.1.16",
+  "version": "4.1.17",
   "description": "State Management System in Javascript",
   "type": "module",
   "main": "dist/index.js",

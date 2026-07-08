@@ -1,10 +1,11 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, expectTypeOf, vi } from 'vitest';
 import { Forest } from '../Forest';
 import { Store } from '../Store';
+import type { BoundStoreMethods } from '../../types';
 
 // Test to confirm the enumeration issue
 describe('Method Enumeration Debug', () => {
-  it('should show the difference between Object.keys and other enumeration methods', () => {
+  it('should show the difference between enumeration methods', () => {
     class TestStore extends Forest<{ count: number }> {
       constructor() {
         super({ value: { count: 0 } });
@@ -27,11 +28,20 @@ describe('Method Enumeration Debug', () => {
     /*
     console.log('=== Method Enumeration Debug ===');
     console.log('Object.keys(store):', Object.keys(store));
-    console.log('Object.getOwnPropertyNames(store):', Object.getOwnPropertyNames(store));
+    console.log(
+      'Object.getOwnPropertyNames(store):',
+      Object.getOwnPropertyNames(store),
+    );
 
     // Check prototype chain
-    console.log('Object.keys(Object.getPrototypeOf(store)):', Object.keys(Object.getPrototypeOf(store)));
-    console.log('Object.getOwnPropertyNames(Object.getPrototypeOf(store)):', Object.getOwnPropertyNames(Object.getPrototypeOf(store)));
+    console.log(
+      'Object.keys(Object.getPrototypeOf(store)):',
+      Object.keys(Object.getPrototypeOf(store)),
+    );
+    console.log(
+      'Object.getOwnPropertyNames(Object.getPrototypeOf(store)):',
+      Object.getOwnPropertyNames(Object.getPrototypeOf(store)),
+    );
 
     // Check if methods exist
     console.log('store.increment exists:', typeof store.increment);
@@ -39,8 +49,14 @@ describe('Method Enumeration Debug', () => {
 
     // Check property descriptors
     const proto = Object.getPrototypeOf(store);
-    console.log('increment descriptor:', Object.getOwnPropertyDescriptor(proto, 'increment'));
-    console.log('decrement descriptor:', Object.getOwnPropertyDescriptor(proto, 'decrement'));
+    console.log(
+      'increment descriptor:',
+      Object.getOwnPropertyDescriptor(proto, 'increment'),
+    );
+    console.log(
+      'decrement descriptor:',
+      Object.getOwnPropertyDescriptor(proto, 'decrement'),
+    );
 */
     // This test will help us understand the enumeration issue
     expect(typeof store.increment).toBe('function');
@@ -137,35 +153,19 @@ describe('Store $ Binding', () => {
         customMethod() {
           return 'custom';
         }
-
-        // These should be excluded based on bindActions exclude list
-        next(val: any) {
-          super.next(val);
-        }
-
-        get value() {
-          return super.value;
-        }
-
-        complete() {
-          // Custom complete method
-        }
-
-        isActive() {
-          return true;
-        }
       }
 
       const store = new TestStore();
+      const bound = store.$ as Record<string, unknown>;
 
       // Should include custom methods
       expect(typeof store.$.customMethod).toBe('function');
 
       // Should exclude specific methods
-      expect(store.$.next).toBeUndefined();
-      expect(store.$.value).toBeUndefined();
-      expect(store.$.complete).toBeUndefined();
-      expect(store.$.isActive).toBeUndefined();
+      expect(bound.next).toBeUndefined();
+      expect(bound.value).toBeUndefined();
+      expect(bound.complete).toBeUndefined();
+      expect(bound.isActive).toBeUndefined();
     });
 
     it('should exclude non-function properties from $ binding', () => {
@@ -186,11 +186,12 @@ describe('Store $ Binding', () => {
       }
 
       const store = new TestStore();
+      const bound = store.$ as Record<string, unknown>;
 
       // Properties should not be in $
-      expect(store.$.someProperty).toBeUndefined();
-      expect(store.$.someNumber).toBeUndefined();
-      expect(store.$.someObject).toBeUndefined();
+      expect(bound.someProperty).toBeUndefined();
+      expect(bound.someNumber).toBeUndefined();
+      expect(bound.someObject).toBeUndefined();
 
       // Methods should be in $
       expect(typeof store.$.someMethod).toBe('function');
@@ -456,8 +457,9 @@ describe('Store $ Binding', () => {
 
         setPosition(x: number, y: number) {
           // Call other methods through $ binding
-          this.$.setX(x);
-          this.$.setY(y);
+          const bound = this.$ as BoundStoreMethods<ChainStore>;
+          bound.setX(x);
+          bound.setY(y);
           this.mutate((draft) => {
             draft.history.push(`Position set to (${x}, ${y})`);
           });
@@ -492,7 +494,8 @@ describe('Store $ Binding', () => {
       // Should contain inherited methods but no custom ones
       // Note: $ prefixed methods like $branch are excluded
       expect(boundMethods).toContain('set');
-      expect(boundMethods).not.toContain('$branch'); // $ prefixed methods are excluded
+      // $ prefixed methods are excluded.
+      expect(boundMethods).not.toContain('$branch');
     });
 
     it('should expose $bound as semantic alias for $', () => {
@@ -507,6 +510,43 @@ describe('Store $ Binding', () => {
       store.$bound.set('count', 3);
 
       expect(store.value.count).toBe(3);
+    });
+
+    it('should type $ and $bound as the concrete store method mirror', () => {
+      class TypedStore extends Forest<{ count: number }> {
+        constructor() {
+          super({ value: { count: 0 } });
+        }
+
+        incrementBy(amount: number): number {
+          this.mutate((draft) => {
+            draft.count += amount;
+          });
+          return this.value.count;
+        }
+
+        label(prefix: string, suffix?: string): string {
+          return `${prefix}${this.value.count}${suffix ?? ''}`;
+        }
+      }
+
+      const store = new TypedStore();
+
+      expectTypeOf(store.$.incrementBy).toEqualTypeOf<
+        (amount: number) => number
+      >();
+      expectTypeOf(store.$bound.label).toEqualTypeOf<
+        (prefix: string, suffix?: string) => string
+      >();
+
+      if (false) {
+        // @ts-expect-error bound methods preserve argument types.
+        store.$.incrementBy('bad');
+        // @ts-expect-error non-method properties are not exposed.
+        store.$.value;
+        // @ts-expect-error $-prefixed methods are not exposed.
+        store.$bound.$broadcast;
+      }
     });
 
     it('should handle methods with special characters in names', () => {
@@ -531,9 +571,11 @@ describe('Store $ Binding', () => {
       }
 
       const store = new SpecialStore();
+      const bound = store.$ as Record<string, unknown>;
 
       expect(typeof store.$.set_value).toBe('function');
-      expect(typeof store.$.$setValue).toBe('undefined'); // $ prefixed methods are excluded
+      // $ prefixed methods are excluded.
+      expect(typeof bound.$setValue).toBe('undefined');
 
       store.$.set_value(10);
       expect(store.value.value).toBe(10);

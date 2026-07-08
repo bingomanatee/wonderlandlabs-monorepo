@@ -55,5 +55,5 @@
 
 Patched minor validation issues - code cleanup
 - added filterPath to allow for better pathing to sub-states
-- added `$bound` alias for more semantic bindind 
+- added `$bound` alias for more semantic binding
 - fixed bound typing

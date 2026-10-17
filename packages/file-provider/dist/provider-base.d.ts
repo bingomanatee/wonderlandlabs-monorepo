@@ -1,0 +1,56 @@
+import { type BufferOptions } from './provider-buffer.js';
+import type { FileIoDeleteManyRequest, FileIoDeleteRequest, FileIoData, FileIoGetRequest, FileIoHasRequest, FileIoHasManyRequest, FileIoInputStream, FileIoMapRequest, FileIoMapsRequest, FileIoMoveRequest, FileIoPathInput, FileIoPutRequest, FileIoRequest, FileIoRequestOutput, FileIoResponse, FileIoResponseStream, FileIoSearchRequest, FileIoWriteInputList, FileIoWriteResult } from './types.js';
+export declare abstract class ProviderBase {
+    #private;
+    constructor({ bufferOptions, }?: {
+        bufferOptions?: BufferOptions;
+    });
+    complete(): void;
+    input<TOutput = FileIoRequestOutput>(input: FileIoRequest | FileIoRequest[]): FileIoResponseStream<TOutput>;
+    delete(path: string): FileIoResponseStream<void>;
+    deleteMany(globString: string): FileIoResponseStream<void>;
+    get(path: string): FileIoResponseStream<FileIoData>;
+    getMany(...paths: FileIoPathInput[]): FileIoResponseStream<FileIoData>;
+    has(path: string): FileIoResponseStream<boolean>;
+    hasMany(...paths: FileIoPathInput[]): FileIoResponseStream<Map<string, boolean>>;
+    hasAll(...paths: FileIoPathInput[]): Promise<boolean>;
+    inputStream(): FileIoInputStream;
+    map(path: string, updateFn: FileIoMapRequest['updateFn']): FileIoResponseStream<FileIoData[]>;
+    maps(globString: string, updateFn: FileIoMapsRequest['updateFn']): FileIoResponseStream<FileIoData[]>;
+    move(fromPath: string, toPath: string): FileIoResponseStream<FileIoData>;
+    put(path: string, data: FileIoPutRequest['data']): FileIoResponseStream<FileIoWriteResult>;
+    putMany(...inputs: FileIoWriteInputList[]): FileIoResponseStream<FileIoWriteResult>;
+    read(path: string): Promise<FileIoData>;
+    readMany(...paths: FileIoPathInput[]): Promise<Map<string, FileIoData>>;
+    search(globString: string): FileIoResponseStream<FileIoData[]>;
+    write(path: string, data: FileIoPutRequest['data']): Promise<FileIoWriteResult>;
+    writeMany(...inputs: FileIoWriteInputList[]): Promise<Map<string, FileIoWriteResult>>;
+    protected process(list: FileIoRequest[]): void;
+    get responseStream(): import("rxjs").Subject<FileIoResponse<FileIoRequestOutput>>;
+    protected abstract handleDelete(request: FileIoDeleteRequest): Promise<void>;
+    protected abstract handleDeleteMany(request: FileIoDeleteManyRequest): Promise<void>;
+    protected abstract handleGet(request: FileIoGetRequest): Promise<void>;
+    protected abstract handleSearch(request: FileIoSearchRequest): Promise<void>;
+    protected abstract handleHas(request: FileIoHasRequest): Promise<void>;
+    protected abstract handleHasMany(request: FileIoHasManyRequest): Promise<void>;
+    protected abstract handleMove(request: FileIoMoveRequest): Promise<void>;
+    protected abstract handleMap(request: FileIoMapRequest): Promise<void>;
+    protected abstract handleMaps(request: FileIoMapsRequest): Promise<void>;
+    protected abstract handlePut(request: FileIoPutRequest): Promise<void>;
+    protected fail(request: FileIoRequest, error: unknown): void;
+    private failOne;
+    protected respond(request: FileIoRequest, response: Omit<FileIoResponse, 'id' | 'input'>): void;
+    private respondOne;
+    private queueRead;
+    private queueWrite;
+    private addPendingReadRequest;
+    private drainWrites;
+    private drainReads;
+    private satisfyParkedReadsFromWrite;
+    private triggerRead;
+    private watchRead;
+    private clearReadTimer;
+    private failParkedReads;
+}
+export { ProviderBase as BaseFileIoInstance, ProviderBase as BaseFileIoProvider, };
+//# sourceMappingURL=provider-base.d.ts.map

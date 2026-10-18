@@ -16,6 +16,8 @@ import {
 import ItemDef from '@/components/ItemDef';
 import { Link } from 'react-router-dom';
 import Section from '@/components/Section.tsx';
+import { relatedModules } from './related/modules';
+import { moduleApiPath } from './related/api/shared';
 
 const APIReference: React.FC = () => {
   return (
@@ -95,6 +97,17 @@ const APIReference: React.FC = () => {
         {/* Main Content */}
         <Box layerStyle="mainContent">
           <Container maxW="container.lg">
+            <Section title="Related module APIs">
+              {relatedModules.map((module) => (
+                <LinkChakra
+                  key={module.slug}
+                  as={Link}
+                  to={moduleApiPath(module.slug)}
+                >
+                  {module.title} API
+                </LinkChakra>
+              ))}
+            </Section>
             <VStack spacing={12} align="stretch">
               {/* Header */}
               <Box>

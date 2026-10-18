@@ -1,0 +1,3 @@
+import type { BoundRecordUtilities, CollectionBase, CollectionKey, RecordUtilities } from './types.js';
+export declare function bindRecordUtilities<Item, Key extends CollectionKey, Utilities extends RecordUtilities<Item, Key>>(collection: CollectionBase<Item, Key>, utilities: Utilities, parseKey: (id: Key) => Key): BoundRecordUtilities<Item, Key, Utilities>;
+//# sourceMappingURL=record.helpers.d.ts.map

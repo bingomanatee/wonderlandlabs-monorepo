@@ -1,0 +1,38 @@
+{
+  "name": "@wonderlandlabs/forestry-data-core",
+  "version": "1.0.2",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./connections": {
+      "types": "./dist/adapters.d.ts",
+      "default": "./dist/adapters.js"
+    },
+    "./pending-indicator": {
+      "types": "./dist/pending-indicator.d.ts",
+      "default": "./dist/pending-indicator.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "lint": "tsc -p tsconfig.json --noEmit",
+    "test": "tsc -p tsconfig.test.json && vitest run"
+  },
+  "dependencies": {
+    "rxjs": "^7.8.2",
+    "zod": "^4.4.2"
+  },
+  "peerDependencies": {
+    "@wonderlandlabs/forestry4": ">=4.1.15 <5"
+  },
+  "devDependencies": {
+    "@wonderlandlabs/forestry4": "^4.1.17",
+    "typescript": "~6.0.2",
+    "vitest": "^4.1.5"
+  }
+}

@@ -1,0 +1,3 @@
+import type { BoundCollectionUtilities, CollectionBase, CollectionKey, CollectionUtilities } from './types.js';
+export declare function bindCollectionUtilities<Item, Key extends CollectionKey, Utilities extends CollectionUtilities<Item, Key>>(collection: CollectionBase<Item, Key>, utilities: Utilities): BoundCollectionUtilities<Item, Key, Utilities>;
+//# sourceMappingURL=collection.utilities.d.ts.map

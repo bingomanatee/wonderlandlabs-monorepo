@@ -1,0 +1,28 @@
+{
+  "name": "@wonderlandlabs/forestry4-hooks",
+  "version": "0.1.2",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "lint": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run --passWithNoTests"
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.14",
+    "typescript": "~6.0.2",
+    "vitest": "^4.1.5"
+  },
+  "peerDependencies": {
+    "@wonderlandlabs/forestry4": "^4.1.17",
+    "react": ">=18"
+  }
+}

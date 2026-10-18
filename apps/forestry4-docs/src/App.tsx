@@ -1,7 +1,8 @@
-import React from 'react';
 import { Route, Routes } from 'react-router-dom';
 import { Box } from '@chakra-ui/react';
 import Navigation from './components/Navigation';
+import NavigationLanding from './pages/NavigationLanding';
+import { navigationSections } from './navigation/sections';
 
 // Getting Started
 import Home from './pages/Home';
@@ -26,6 +27,21 @@ import AdvancedPatterns from './pages/AdvancedPatterns';
 import APIReference from './pages/APIReference';
 import Changelog from './pages/Changelog';
 import Examples from './pages/Examples';
+import ReadWriteArchitecture, {
+  readWritePath,
+} from './pages/related/ReadWriteArchitecture';
+import ModuleApiPage from './pages/related/ModuleApiPage';
+import { moduleApiPath } from './pages/related/api/shared';
+
+import {
+  RelatedModulePage,
+  RelatedModules,
+} from './pages/related/RelatedModules';
+import {
+  relatedModules,
+  relatedPath,
+  relatedRoot,
+} from './pages/related/modules';
 
 // Practical Examples
 import TodoApp from './pages/examples/TodoApp';
@@ -37,8 +53,15 @@ function App() {
   return (
     <Box minH="100vh">
       <Navigation />
-      <Box as="main" pt="120px">
+      <Box as="main" pt="80px">
         <Routes>
+          {navigationSections.map((section) => (
+            <Route
+              key={section.path}
+              path={section.path}
+              element={<NavigationLanding section={section} />}
+            />
+          ))}
           {/* Getting Started */}
           <Route path="/" element={<Home />} />
           <Route path="/why" element={<WhyForestry />} />
@@ -64,6 +87,27 @@ function App() {
           <Route path="/examples/shopping-cart" element={<ShoppingCart />} />
           <Route path="/examples/form-validation" element={<FormValidation />} />
           <Route path="/examples/transaction-demo" element={<TransactionDemo />} />
+
+          <Route
+            path={readWritePath}
+            element={<ReadWriteArchitecture />}
+          />
+          <Route path={relatedRoot} element={<RelatedModules />} />
+          {relatedModules.map((module) => (
+            <Route
+              key={module.slug}
+              path={relatedPath(module)}
+              element={<RelatedModulePage module={module} />}
+            />
+          ))}
+
+          {relatedModules.map((module) => (
+            <Route
+              key={moduleApiPath(module.slug)}
+              path={moduleApiPath(module.slug)}
+              element={<ModuleApiPage module={module} />}
+            />
+          ))}
 
           {/* Reference */}
           <Route path="/api" element={<APIReference />} />

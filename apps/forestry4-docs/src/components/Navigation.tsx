@@ -1,173 +1,141 @@
-import React, { useCallback } from 'react';
 import {
   Box,
   Button,
   Container,
   Flex,
   HStack,
+  IconButton,
   Image,
+  Link,
   Menu,
   MenuButton,
+  MenuDivider,
   MenuItem,
   MenuList,
   Text,
   useColorModeValue,
 } from '@chakra-ui/react';
 import { Link as RouterLink, useLocation } from 'react-router-dom';
-import { ChevronDownIcon } from '@chakra-ui/icons';
+import { ChevronDownIcon, HamburgerIcon } from '@chakra-ui/icons';
 import { FaGithub } from 'react-icons/fa';
-import useForestryLocal from '../hooks/useForestryLocal';
-import { NavigationState, navigationStoreFactory } from '../storeFactories/navigationStoreFactory';
+import {
+  navigationSections,
+  sourceUrl,
+  type NavigationSection,
+} from '../navigation/sections';
 
-const menuItems: Record<string, MenuItem[]> = {
-  'Getting Started': [
-    { label: 'Quick Start', path: '/' },
-    { label: 'Why Forestry?', path: '/why' },
-  ],
-  'Essential Features': [
-    { label: 'Basics', path: '/forest' },
-    { label: 'Value Change', path: '/change' },
-    { label: 'With React', path: '/react' },
-    { label: 'Other Frameworks', path: '/other-frameworks' },
-  ],
-  'Power Tools': [
-    { label: 'Branching', path: '/branching' },
-    { label: 'Validation', path: '/validation' },
-    { label: 'Schema', path: '/schemas' },
-    { label: 'Transactions', path: '/transactions' },
-    { label: 'Bound Methods', path: '/bound-methods' },
-    { label: 'RxJS / Immer', path: '/rxjs' },
-  ],
-  'Practical Examples': [
-    { label: 'Overview', path: '/examples' },
-    { label: 'Todo App', path: '/examples/todo-app' },
-    { label: 'Shopping Cart', path: '/examples/shopping-cart' },
-    { label: 'Form Validation', path: '/examples/form-validation' },
-    { label: 'Transaction Demo', path: '/examples/transaction-demo' },
-  ],
-  'API Reference': [
-    { label: 'Overview', path: '/api' },
-    { label: 'Changelog', path: '/changelog' },
-    { label: 'Forest Class', path: '/api#forest' },
-    { label: 'Constructor & Properties', path: '/api#forest-constructor' },
-    { label: 'Core Methods', path: '/api#forest-core' },
-    { label: 'Branching Methods', path: '/api#forest-branching' },
-    { label: 'Transactions', path: '/api#forest-transactions' },
-    { label: 'Validation', path: '/api#forest-validation' },
-    { label: 'Types', path: '/api#types-config' },
-  ],
-};
+function DesktopMenu({ section }: { section: NavigationSection }) {
+  const location = useLocation();
+  const currentPath = location.pathname + location.hash;
 
-interface MenuItem {
-  label: string;
-  path: string;
-  external?: boolean;
+  return (
+    <Box>
+      <Menu>
+        <MenuButton
+          as={Button}
+          variant="ghost"
+          color="green.300"
+          _hover={{ bg: 'green.700', color: 'white' }}
+          _active={{ bg: 'green.600', color: 'white' }}
+          rightIcon={<ChevronDownIcon />}
+          iconSpacing={1}
+        >
+          {section.label}
+        </MenuButton>
+        <MenuList color="gray.700">
+          <MenuItem as={RouterLink} to={section.path}>
+            {section.title}
+          </MenuItem>
+          <MenuDivider />
+          {section.items.map((item) => (
+            <MenuItem
+              key={item.path}
+              as={RouterLink}
+              to={item.path}
+              aria-current={currentPath === item.path ? 'page' : undefined}
+              bg={currentPath === item.path ? 'forest.50' : undefined}
+            >
+              {item.label}
+            </MenuItem>
+          ))}
+        </MenuList>
+      </Menu>
+    </Box>
+  );
 }
 
-const Navigation: React.FC = () => {
-  const location = useLocation();
+export default function Navigation() {
   const bg = useColorModeValue('black', 'gray.500');
   const fg = useColorModeValue('white', 'black');
 
-  // Navigation state management with Forestry
-  const [navState, navStore] = useForestryLocal<NavigationState>(navigationStoreFactory);
-  const { openMenu } = navState;
-
-  const isActive = (path: string) => location.pathname === path;
-
-  const goGithub = useCallback(() => {
-    window.open('https://github.com/bingomanatee/wonderlandlabs-monorepo/tree/main/packages/forestry4', '_blank');
-  }, []);
   return (
-    <Box position="fixed" top={0} left={0} right={0} zIndex={1000} bg={bg} shadow="sm">
+    <Box
+      as="nav"
+      aria-label="Documentation"
+      position="fixed"
+      top={0}
+      left={0}
+      right={0}
+      zIndex={1000}
+      bg={bg}
+      shadow="sm"
+    >
       <Container maxW="container.xl">
-        <Flex alignItems="center" justifyContent="space-between">
-          {/* Logo */}
-          <HStack as={RouterLink} spacing={2} to="/" mr={10}>
-            <Image w="32px" h="32px" src="/img/logo-dark.png" />
-
-            <Text fontSize="xl" fontWeight="bold" color={fg} whiteSpace="nowrap">
+        <Flex align="center" justify="space-between" h="64px" gap={2}>
+          <HStack as={RouterLink} spacing={2} to="/" flexShrink={0}>
+            <Image
+              w="32px"
+              h="32px"
+              src="/img/logo-dark.png"
+              alt=""
+            />
+            <Text fontSize="xl" fontWeight="bold" color={fg}>
               Forestry 4.0
             </Text>
           </HStack>
-
-          {/* Navigation Menu */}
-          <HStack spacing={6}>
-            {Object.entries(menuItems).map(([category, items]) => (
-              <Menu
-                key={category}
-                isOpen={openMenu === category}
-                onClose={() => navStore.$.closeMenu()}
-              >
+          <HStack spacing={0}>
+            <HStack display={{ base: 'none', lg: 'flex' }} spacing={0}>
+              {navigationSections.map((section) => (
+                <DesktopMenu key={section.path} section={section} />
+              ))}
+            </HStack>
+            <Box display={{ base: 'block', lg: 'none' }}>
+              <Menu>
                 <MenuButton
-                  as={Button}
+                  as={IconButton}
+                  icon={<HamburgerIcon />}
+                  aria-label="Open navigation"
                   variant="ghost"
-                  colorScheme="green"
                   color="green.300"
-                  _hover={{ bg: 'green.700', color: 'white' }}
-                  _active={{ bg: 'green.600', color: 'white' }}
-                  _focus={{ boxShadow: 'none', outline: 'none' }}
-                  _focusVisible={{ boxShadow: 'none', outline: 'none' }}
-                  rightIcon={<ChevronDownIcon />}
-                  onMouseEnter={() => navStore.handleMenuEnter(category)}
-                  onClick={() => {
-                    if (openMenu === category) {
-                      navStore.closeMenu();
-                    } else {
-                      navStore.openMenu(category);
-                    }
-                  }}
-                >
-                  {category}
-                </MenuButton>
-                <MenuList
-                  onMouseLeave={() => navStore.handleMenuLeave()}
-                  onMouseEnter={() => navStore.setHoveredMenu(category)}
-                  py={0}
-                  overflow="hidden"
-                >
-                  {items.map((item) => {
-                    const active = !item.external && isActive(item.path);
-                    const linkProps = item.external
-                      ? { as: LinkChakra, href: item.path, isExternal: true }
-                      : { as: RouterLink, to: item.path };
-
-                    return (
-                      <MenuItem
-                        key={item.path}
-                        {...linkProps}
-                        bg={active ? 'forest.50' : 'transparent'}
-                        color={active ? 'forest.600' : 'gray.700'}
-                        fontWeight={active ? 'semibold' : 'normal'}
-                        _hover={{
-                          bg: active ? 'forest.100' : 'gray.50',
-                        }}
-                        onClick={() => navStore.handleItemClick()}
-                      >
-                        {item.label}
-                      </MenuItem>
-                    );
-                  })}
+                  _hover={{ bg: 'green.700' }}
+                  _active={{ bg: 'green.600' }}
+                />
+                <MenuList color="gray.700">
+                  {navigationSections.map((section) => (
+                    <MenuItem
+                      key={section.path}
+                      as={RouterLink}
+                      to={section.path}
+                    >
+                      {section.label}
+                    </MenuItem>
+                  ))}
                 </MenuList>
               </Menu>
-            ))}
-
-            {/* GitHub Source Button */}
-            <Button
-              variant="ghost"
-              size="sm"
+            </Box>
+            <Link
+              href={sourceUrl}
+              isExternal
               aria-label="View source on GitHub"
-              onClick={goGithub}
+              color={fg}
+              p={3}
+              display="inline-flex"
             >
-              <Text color="white">
-                <FaGithub />
-              </Text>
-            </Button>
+              <FaGithub />
+            </Link>
           </HStack>
         </Flex>
       </Container>
     </Box>
   );
-};
-
-export default Navigation;
+}

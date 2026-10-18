@@ -1,0 +1,52 @@
+export declare const MEDIA_KEYS: {
+    readonly amd: "amd";
+    readonly docx: "docx";
+    readonly gif: "gif";
+    readonly jpeg: "jpeg";
+    readonly jpg: "jpg";
+    readonly json: "json";
+    readonly markdown: "markdown";
+    readonly md: "md";
+    readonly originalMarkdown: "originalMarkdown";
+    readonly pdf: "pdf";
+    readonly png: "png";
+    readonly txt: "txt";
+    readonly webp: "webp";
+    readonly yaml: "yaml";
+    readonly yml: "yml";
+    readonly zip: "zip";
+};
+export type MediaMapKey = (typeof MEDIA_KEYS)[keyof typeof MEDIA_KEYS];
+export declare const MEDIA_EXTENSIONS: {
+    readonly amd: "amd";
+    readonly docx: "docx";
+    readonly gif: "gif";
+    readonly jpeg: "jpeg";
+    readonly jpg: "jpg";
+    readonly json: "json";
+    readonly markdown: "markdown";
+    readonly md: "md";
+    readonly originalMarkdown: "original.md";
+    readonly pdf: "pdf";
+    readonly png: "png";
+    readonly txt: "txt";
+    readonly webp: "webp";
+    readonly yaml: "yaml";
+    readonly yml: "yml";
+    readonly zip: "zip";
+};
+export declare const BINARY_MEDIA_TYPE = "application/octet-stream";
+type MediaMapRecord = {
+    asciiPrefixes?: string[];
+    bytePrefix?: number[];
+    extension: string;
+    magic?: (value: Uint8Array) => boolean;
+    mediaType: string;
+};
+export declare const mediaMap: Map<MediaMapKey, MediaMapRecord>;
+export declare function mediaTypeFor(path: string, value: Uint8Array): string;
+export declare function mediaTypeFromPath(path: string): string;
+export declare function mediaTypeForExtension(extension: string): string | undefined;
+export declare function getExtension(path: string): string;
+export {};
+//# sourceMappingURL=media-type.d.ts.map

@@ -60,14 +60,18 @@ The documentation is organized into three main categories to help developers lea
 ## 🚀 Development
 
 ### Prerequisites
-- Node.js 18+
-- npm or yarn
+- Node.js 22+
+- Corepack (uses the Yarn release pinned in `package.json`)
 
 ### Installation
 ```bash
 cd apps/forestry4-docs
-npm install --legacy-peer-deps
+corepack yarn install --immutable
 ```
+
+Use Corepack rather than an unrelated global Yarn installation. Netlify
+uses the `packageManager` pin too; changing Yarn releases can change the
+TypeScript patch in `yarn.lock` and cause immutable CI installs to fail.
 
 ### Development Server
 ```bash

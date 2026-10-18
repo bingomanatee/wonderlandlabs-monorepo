@@ -6,6 +6,10 @@ export declare class CollectionPersistence<Item, Key extends CollectionKey> {
     private readonly parseKey;
     readonly work$: BehaviorSubject<Args<Item, Key>[]>;
     readonly retry$: BehaviorSubject<Args<Item, Key>[]>;
+    private readonly committed;
+    readonly committed$: import("rxjs").Observable<readonly Key[]>;
+    private readonly exhausted;
+    readonly exhausted$: import("rxjs").Observable<readonly Key[]>;
     private readonly tasks;
     private readonly timers;
     private readonly delayMs;

@@ -5,6 +5,6 @@ export function entry(signature: string, description: string) {
 }
 
 export const moduleApiPath = (slug: string) =>
-  `/related-modules/${slug}/api`;
+  slug === 'forestry4' ? '/api' : `/related-modules/${slug}/api`;
 
 export type ApiSections = ModuleSection[];

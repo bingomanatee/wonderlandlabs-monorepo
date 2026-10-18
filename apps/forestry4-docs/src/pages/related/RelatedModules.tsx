@@ -30,14 +30,15 @@ export function RelatedModules() {
     <Container maxW="container.xl" py={8}>
       <PageTitle
         title="Related Modules"
-        subtitle="Collections, connections, React bindings, and file storage."
+        subtitle="Forestry 4 and its companion modules."
       />
       <VStack layerStyle="section" spacing={8}>
         <Section title="Choose what your application needs">
           <Text>
-            DataCore and React Hooks extend Forestry 4. FileProvider is an
-            independent storage utility that can be used alongside them.
-            Install each package separately as needed.
+            Start with Forestry 4, the core state manager. DataCore and
+            React Hooks build on its stores and branches. Data Connections
+            and FileProvider can also be used independently. Install the
+            companion packages as your application needs them.
           </Text>
           {relatedModules.map((module) => (
             <Text key={module.slug}>

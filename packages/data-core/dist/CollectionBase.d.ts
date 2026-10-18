@@ -1,4 +1,4 @@
-import type { BehaviorSubject } from 'rxjs';
+import type { BehaviorSubject, Observable } from 'rxjs';
 import { Forest } from '@wonderlandlabs/forestry4';
 import type { CollectionBaseConfig, CollectionPersistArgs, CollectionPersistRequest, CollectionFindQuery, CollectionComparator, CollectionBaseValue, CollectionKey, ItemKey, RecordUtilities, BoundRecordUtilities, BoundCollectionUtilities, CollectionUtilities } from './types.js';
 export declare class CollectionBase<Item, Key extends CollectionKey = ItemKey<Item>, Utilities extends RecordUtilities<Item, Key> = {}, Collections extends CollectionUtilities<Item, Key> = {}> extends Forest<CollectionBaseValue<Item, Key>> {
@@ -11,6 +11,8 @@ export declare class CollectionBase<Item, Key extends CollectionKey = ItemKey<It
     constructor(params: unknown, config?: CollectionBaseConfig<Item, Key, Utilities, Collections>);
     get persistWork$(): BehaviorSubject<CollectionPersistRequest<Item, Key>[]>;
     get persistRetry$(): BehaviorSubject<CollectionPersistRequest<Item, Key>[]>;
+    get persistCommitted$(): Observable<readonly Key[]>;
+    get persistExhausted$(): Observable<readonly Key[]>;
     persist(args: CollectionPersistArgs<Item, Key>): Promise<boolean>;
     syncRecords(records: Map<Key, Item>, clearLocalEdits?: boolean): void;
     abortPending(ids?: readonly Key[]): void;

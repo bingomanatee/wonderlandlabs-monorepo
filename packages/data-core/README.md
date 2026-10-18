@@ -415,6 +415,51 @@ references do not share this ordering guarantee. Send operations should be
 idempotent because a lost acknowledgement can cause an already-successful
 write to be retried.
 
+`persistCommitted$: Observable<readonly Key[]>` emits **once per successful
+send**, with a frozen, deduplicated array of every ID in that transmitted
+batch. Compacted requests share one notification, regardless of record count.
+Emission follows tracking acknowledgement and removal of those requests from
+the work queue. Newer edits can remain pending for those IDs; this event means
+the submitted snapshot was committed, not that the current record is clean.
+Failures, retry attempts that fail, empty selections and aborted queued work
+emit nothing. A successful retry emits once. Separate successful sends emit
+separately, even when their IDs overlap. Events are not replayed; collection
+completion completes the stream and ignores late transport results.
+
+```ts
+const subscription = persistBooks.persistCommitted$.subscribe((ids) => {
+  // One UI notification or worker message for the whole successful batch.
+  console.log('Committed record IDs:', ids)
+})
+// When this subscriber is no longer needed:
+subscription.unsubscribe()
+```
+
+`persistExhausted$: Observable<readonly Key[]>` emits one frozen,
+deduplicated ID array when a failed batch has requests that exhaust their
+retry allowance. Intermediate failures remain silent. With `maxRetries: 0`,
+the initial failure is terminal and emits immediately. Tracking and records
+are retained, so the UI can keep its pending indicator visible and show one
+failure toast for the array. The exhausted requests resolve false and leave
+the queue before emission. Newer requests may still be retrying, including
+requests for the same IDs; the event describes the exhausted snapshots.
+Empty selections, queued cancellation, and disposal do not emit exhaustion.
+The stream does not replay and completes with the collection.
+
+```ts
+const failures = persistBooks.persistExhausted$.subscribe((ids) => {
+  console.error('Save retries exhausted for record IDs:', ids)
+})
+// When this subscriber is no longer needed:
+failures.unsubscribe()
+```
+
+Use these streams for terminal notifications instead of watching individual
+records or queue lifecycle transitions. Ordinary Forestry state subscriptions
+still report local edits; `putMany` and `syncRecords` each apply a batch in one
+mutation. This stream does not imply a server transaction: the sender must
+return true only after its entire payload has succeeded.
+
 `persistWork$` and `persistRetry$` are initially empty
 `BehaviorSubject<CollectionPersistRequest<Item, Key>[]>` inspection streams. Work
 contains active and pending requests; retry contains delayed requests. Their

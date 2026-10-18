@@ -1,4 +1,4 @@
-import { BehaviorSubject } from 'rxjs'
+import { BehaviorSubject, Subject } from 'rxjs'
 import type { Subscription } from 'rxjs'
 import type {
   CollectionBase,
@@ -29,6 +29,10 @@ interface PersistTask<Item, Key extends CollectionKey> {
 export class CollectionPersistence<Item, Key extends CollectionKey> {
   readonly work$ = new BehaviorSubject<Args<Item, Key>[]>([])
   readonly retry$ = new BehaviorSubject<Args<Item, Key>[]>([])
+  private readonly committed = new Subject<readonly Key[]>()
+  readonly committed$ = this.committed.asObservable()
+  private readonly exhausted = new Subject<readonly Key[]>()
+  readonly exhausted$ = this.exhausted.asObservable()
   private readonly tasks = new Map<Args<Item, Key>, PersistTask<Item, Key>>()
   private readonly timers = new Set<ReturnType<typeof setTimeout>>()
   private readonly delayMs: number
@@ -134,6 +138,8 @@ export class CollectionPersistence<Item, Key extends CollectionKey> {
     this.retry$.next([])
     this.work$.complete()
     this.retry$.complete()
+    this.committed.complete()
+    this.exhausted.complete()
   }
 
   private schedule() {
@@ -168,27 +174,34 @@ export class CollectionPersistence<Item, Key extends CollectionKey> {
         for (const task of batch) task.status.state = persistState.active
         this.work$.next([...this.work$.value])
         if (this.stopped) break
-        let success = false
+        let ids: readonly Key[] | false = false
         try {
-          success = await this._innerPersist(batch)
+          ids = await this._innerPersist(batch)
         } catch {
-          success = false
+          ids = false
         }
         if (this.stopped) break
-        if (success) {
+        let exhausted: readonly Key[] = []
+        if (ids) {
           for (const task of batch) this.finish(task, !task.aborted)
         } else {
-          this.retry(batch)
+          exhausted = this.retry(batch)
         }
         const handled = new Set(batch.map((task) => task.args))
         this.work$.next(this.work$.value.filter((args) => !handled.has(args)))
+        if (ids && !this.stopped) this.committed.next(ids)
+        if (exhausted.length && !this.stopped) {
+          this.exhausted.next(exhausted)
+        }
       }
     } finally {
       this.running = false
     }
   }
 
-  private async _innerPersist(batch: PersistTask<Item, Key>[]) {
+  private async _innerPersist(
+    batch: PersistTask<Item, Key>[],
+  ): Promise<readonly Key[] | false> {
     const snapshots = new Map<Key, Item>()
     const owners = new Map<Key, PersistTask<Item, Key>>()
     for (const task of batch) {
@@ -220,24 +233,27 @@ export class CollectionPersistence<Item, Key extends CollectionKey> {
         }
       }
     })
-    return true
+    return Object.freeze([...snapshots.keys()])
   }
 
-  private retry(batch: PersistTask<Item, Key>[]) {
+  private retry(batch: PersistTask<Item, Key>[]): readonly Key[] {
+    const exhausted = new Set<Key>()
     const retrying = batch.filter((task) => {
       if (!this.tasks.has(task.args)) return false
       task.status.state = persistState.failed
       if (task.retries >= this.maxRetries) {
+        for (const id of task.snapshot.keys()) exhausted.add(id)
         this.finish(task, false)
         return false
       }
       task.retries += 1
       return true
     })
-    if (!retrying.length) return
+    const ids = Object.freeze([...exhausted])
+    if (!retrying.length) return ids
     const args = retrying.map((task) => task.args)
     this.retry$.next([...this.retry$.value, ...args])
-    if (this.stopped) return
+    if (this.stopped) return ids
     const timer = setTimeout(() => {
       this.timers.delete(timer)
       if (this.stopped) return
@@ -248,6 +264,7 @@ export class CollectionPersistence<Item, Key extends CollectionKey> {
       this.work$.next([...live, ...this.work$.value])
     }, this.delayMs)
     this.timers.add(timer)
+    return ids
   }
 
   private finish(task: PersistTask<Item, Key>, success: boolean) {

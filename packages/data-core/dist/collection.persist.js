@@ -1,10 +1,14 @@
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
 import { dataCoreDefaults, dataCoreErrors, persistState } from './constants.js';
 export class CollectionPersistence {
     collection;
     parseKey;
     work$ = new BehaviorSubject([]);
     retry$ = new BehaviorSubject([]);
+    committed = new Subject();
+    committed$ = this.committed.asObservable();
+    exhausted = new Subject();
+    exhausted$ = this.exhausted.asObservable();
     tasks = new Map();
     timers = new Set();
     delayMs;
@@ -104,6 +108,8 @@ export class CollectionPersistence {
         this.retry$.next([]);
         this.work$.complete();
         this.retry$.complete();
+        this.committed.complete();
+        this.exhausted.complete();
     }
     schedule() {
         if (this.scheduled || this.running || this.stopped)
@@ -139,24 +145,30 @@ export class CollectionPersistence {
                 this.work$.next([...this.work$.value]);
                 if (this.stopped)
                     break;
-                let success = false;
+                let ids = false;
                 try {
-                    success = await this._innerPersist(batch);
+                    ids = await this._innerPersist(batch);
                 }
                 catch {
-                    success = false;
+                    ids = false;
                 }
                 if (this.stopped)
                     break;
-                if (success) {
+                let exhausted = [];
+                if (ids) {
                     for (const task of batch)
                         this.finish(task, !task.aborted);
                 }
                 else {
-                    this.retry(batch);
+                    exhausted = this.retry(batch);
                 }
                 const handled = new Set(batch.map((task) => task.args));
                 this.work$.next(this.work$.value.filter((args) => !handled.has(args)));
+                if (ids && !this.stopped)
+                    this.committed.next(ids);
+                if (exhausted.length && !this.stopped) {
+                    this.exhausted.next(exhausted);
+                }
             }
         }
         finally {
@@ -193,26 +205,30 @@ export class CollectionPersistence {
                 }
             }
         });
-        return true;
+        return Object.freeze([...snapshots.keys()]);
     }
     retry(batch) {
+        const exhausted = new Set();
         const retrying = batch.filter((task) => {
             if (!this.tasks.has(task.args))
                 return false;
             task.status.state = persistState.failed;
             if (task.retries >= this.maxRetries) {
+                for (const id of task.snapshot.keys())
+                    exhausted.add(id);
                 this.finish(task, false);
                 return false;
             }
             task.retries += 1;
             return true;
         });
+        const ids = Object.freeze([...exhausted]);
         if (!retrying.length)
-            return;
+            return ids;
         const args = retrying.map((task) => task.args);
         this.retry$.next([...this.retry$.value, ...args]);
         if (this.stopped)
-            return;
+            return ids;
         const timer = setTimeout(() => {
             this.timers.delete(timer);
             if (this.stopped)
@@ -225,6 +241,7 @@ export class CollectionPersistence {
             this.work$.next([...live, ...this.work$.value]);
         }, this.delayMs);
         this.timers.add(timer);
+        return ids;
     }
     finish(task, success) {
         task.status.state = success ? persistState.complete : persistState.failed;

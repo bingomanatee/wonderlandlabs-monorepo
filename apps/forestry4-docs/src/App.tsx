@@ -38,7 +38,7 @@ import {
   RelatedModules,
 } from './pages/related/RelatedModules';
 import {
-  relatedModules,
+  companionModules,
   relatedPath,
   relatedRoot,
 } from './pages/related/modules';
@@ -93,7 +93,7 @@ function App() {
             element={<ReadWriteArchitecture />}
           />
           <Route path={relatedRoot} element={<RelatedModules />} />
-          {relatedModules.map((module) => (
+          {companionModules.map((module) => (
             <Route
               key={module.slug}
               path={relatedPath(module)}
@@ -101,7 +101,7 @@ function App() {
             />
           ))}
 
-          {relatedModules.map((module) => (
+          {companionModules.map((module) => (
             <Route
               key={moduleApiPath(module.slug)}
               path={moduleApiPath(module.slug)}

@@ -142,6 +142,26 @@ export const collectionMethods: ModuleSection['methods'] = [
       'Already-started callback I/O cannot be aborted by the collection.',
   },
   {
+    signature: 'persistCommitted$: Observable<readonly Key[]>',
+    description: 'Emit once per successful send with a frozen, deduplicated ' +
+      'array of transmitted IDs, after tracking and queue cleanup. ' +
+      'Compacted requests produce one event; newer edits stay pending. ' +
+      'Failed attempts, empty selections and aborted queued requests emit ' +
+      'nothing. Successful retries emit once. No replay; completes on ' +
+      'collection disposal. Use for batch UI or worker notifications. ' +
+      'The sender must return true only after the entire batch succeeds.',
+  },
+  {
+    signature: 'persistExhausted$: Observable<readonly Key[]>',
+    description: 'Emit one frozen, deduplicated ID array for requests ' +
+      'exhausting retries in a failed batch, after queue cleanup. ' +
+      'Intermediate failures stay silent. With maxRetries zero the first ' +
+      'failure emits. Records and dirty tracking remain for recovery. ' +
+      'Newer requests for those IDs may still be retrying. Empty selections, ' +
+      'queued cancellation and disposal emit nothing. No replay; completes ' +
+      'on disposal. Use to show one terminal save-failure notification.',
+  },
+  {
     signature: 'persistWork$ / persistRetry$',
     description: 'BehaviorSubject<CollectionPersistRequest<Item, Key>[]> ' +
       'inspection streams, initially empty. work includes active and ' +

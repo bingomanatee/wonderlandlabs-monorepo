@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { Container, HStack, Link, Text, VStack } from '@chakra-ui/react';
+import { Container, HStack, Link, VStack } from '@chakra-ui/react';
 import { Link as RouterLink } from 'react-router-dom';
 import PageTitle from '../../components/PageTitle';
 import Section from '../../components/Section';
@@ -39,9 +39,6 @@ export default function ModuleApiPage({
         </Section>
         <ModuleSections sections={sections} />
         <Section title="Related API references">
-          <Text>
-            <Link as={RouterLink} to="/api">Forestry core API</Link>
-          </Text>
           {relatedModules
             .filter((other) => other.slug !== module.slug)
             .map((other) => (

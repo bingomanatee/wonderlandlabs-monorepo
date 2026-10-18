@@ -18,7 +18,7 @@ export interface RelatedModule {
   summary: string;
 }
 
-export const relatedModules: RelatedModule[] = [
+export const companionModules: RelatedModule[] = [
   {
     slug: 'data-core',
     title: 'DataCore',
@@ -45,5 +45,16 @@ export const relatedModules: RelatedModule[] = [
   },
 ];
 
+export const relatedModules: RelatedModule[] = [
+  {
+    slug: 'forestry4',
+    title: 'Forestry 4',
+    packageName: '@wonderlandlabs/forestry4',
+    summary: 'The core state manager behind DataCore and React Hooks, with '
+      + 'observable stores, branches, validation, and transactions.',
+  },
+  ...companionModules,
+];
+
 export const relatedPath = (module: RelatedModule) =>
-  `${relatedRoot}/${module.slug}`;
+  module.slug === 'forestry4' ? '/' : `${relatedRoot}/${module.slug}`;

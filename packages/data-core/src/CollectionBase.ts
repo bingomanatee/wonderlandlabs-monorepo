@@ -1,4 +1,4 @@
-import type { BehaviorSubject } from 'rxjs'
+import type { BehaviorSubject, Observable } from 'rxjs'
 import { Forest } from '@wonderlandlabs/forestry4'
 import type {
   CollectionBaseConfig,
@@ -76,6 +76,14 @@ export class CollectionBase<
 
   get persistRetry$(): BehaviorSubject<CollectionPersistRequest<Item, Key>[]> {
     return this.persistence.retry$
+  }
+
+  get persistCommitted$(): Observable<readonly Key[]> {
+    return this.persistence.committed$
+  }
+
+  get persistExhausted$(): Observable<readonly Key[]> {
+    return this.persistence.exhausted$
   }
 
   persist(args: CollectionPersistArgs<Item, Key>): Promise<boolean> {

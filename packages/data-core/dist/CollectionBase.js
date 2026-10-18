@@ -28,6 +28,12 @@ export class CollectionBase extends Forest {
     get persistRetry$() {
         return this.persistence.retry$;
     }
+    get persistCommitted$() {
+        return this.persistence.committed$;
+    }
+    get persistExhausted$() {
+        return this.persistence.exhausted$;
+    }
     persist(args) {
         return this.persistence.persist(args);
     }
